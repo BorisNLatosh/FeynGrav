@@ -36,19 +36,22 @@ Begin["Private`"];
 
 
 (* ITensor *)
-Clear[ITensor];
+(* In the function has no arguments it returns 1. This definition if used for the sake of simplicity. *)
 ITensor[]=1;
-Module[{tensorValence,generatingTerm,i},
-	For[tensorValence=1,tensorValence<=perturbationOrder+1,tensorValence++,
-		(*A singel term is generated*)
-		generatingTerm=Times@@MTD@@@Table[{ToExpression["m"<>ToString[Mod[i+1,tensorValence,1]]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}];
-		(*It is symmetrized with respect to each index pair*)
-		For[i=1,i<=tensorValence,i++,
-			generatingTerm=Calc[1/2 (generatingTerm+(generatingTerm/.{ToExpression["m"<>ToString[i]]->ToExpression["n"<>ToString[i]],ToExpression["n"<>ToString[i]]->ToExpression["m"<>ToString[i]]}))];
-		];
-	Evaluate[ITensor@@Evaluate[Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,tensorValence}]]]]=generatingTerm;
+(* SetDelayed is used so the function would be evaluated only when it is needed. The function takes a single sequence as an argument. *)
+ITensor[inputArray__]:=Module[{indexArray,generatingTerm},
+	(* The input sequence is transformed into an array *)
+	indexArray = List[inputArray];
+	(* If the input sequence has an odd number of terms then the fucntion returns "0". If the number of arguments is even, then the function proceeds. *)
+	If[Mod[Length[indexArray],2] != 0, Return[0]];
+	(* I shift the array of the arguments by one symbol and generate a single term. *)
+	generatingTerm=Times@@MTD@@@Partition[RotateLeft[indexArray,1],2];
+	(* This single term is symemtrized with respect to index pairs. *)
+	For[i=1,i<=Length[indexArray]/2,i++,
+		generatingTerm = 1/2 (generatingTerm+(generatingTerm/.{indexArray[[2i]]->indexArray[[2i-1]],indexArray[[2i-1]]->indexArray[[2i]]}));
 	];
-]
+	Return[Calc[generatingTerm]];
+];
 
 
 (* CTensor *)
@@ -194,6 +197,24 @@ Module[{TVertex,tensorValence},
 		Evaluate[GravitonFermionVertex@@Join[Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,tensorValence}]],{ToExpression["p_"],ToExpression["q_"]}]]=Calc[I \[Kappa]^tensorValence TVertex[m,n,p,q](CETensor@@Join[{m,n},Flatten[Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}]]])];
 	];
 ]
+
+
+(* OLD CODE
+(* ITensor *)
+Clear[ITensor];
+ITensor[]=1;
+Module[{tensorValence,generatingTerm,i},
+	For[tensorValence=1,tensorValence<=perturbationOrder+1,tensorValence++,
+		(*A singel term is generated*)
+		generatingTerm=Times@@MTD@@@Table[{ToExpression["m"<>ToString[Mod[i+1,tensorValence,1]]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}];
+		(*It is symmetrized with respect to each index pair*)
+		For[i=1,i<=tensorValence,i++,
+			generatingTerm=Calc[1/2 (generatingTerm+(generatingTerm/.{ToExpression["m"<>ToString[i]]->ToExpression["n"<>ToString[i]],ToExpression["n"<>ToString[i]]->ToExpression["m"<>ToString[i]]}))];
+		];
+	Evaluate[ITensor@@Evaluate[Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,tensorValence}]]]]=generatingTerm;
+	];
+]
+*)
 
 
 End[];
