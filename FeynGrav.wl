@@ -162,33 +162,51 @@ Module[{tensorValence,indexArray,indexArrayArguments,permutationArray,temporaryE
 
 
 (* CIIITensor *)
-Clear[CIIITensor];
-Module[{tensorValence,indexArray,indexArrayArguments,permutationArray,temporaryExpression},
-	For[tensorValence=0,tensorValence<=perturbationOrder,tensorValence++,
-		indexArray=Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}]];
-		indexArrayArguments=Join[{ToExpression["\[ScriptM]_"],ToExpression["\[ScriptN]_"],ToExpression["\[ScriptA]_"],ToExpression["\[ScriptB]_"],ToExpression["\[ScriptR]_"],ToExpression["\[ScriptS]_"]},Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]<>"_"],ToExpression["n"<>ToString[\[ScriptI]]<>"_"]},{\[ScriptI],1,tensorValence}]]];
-		permutationArray=Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}];
-		permutationArray=Permutations[permutationArray];
-		permutationArray=Table[Join[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB],\[ScriptR],\[ScriptS]},Flatten[permutationArray[[\[ScriptI]]]]],{\[ScriptI],1,tensorValence!}];
-		Evaluate[temporaryExpression@@indexArrayArguments]=Calc[Sum[If[\[ScriptN]0+\[ScriptN]1+\[ScriptN]2<=tensorValence,(-1)^(tensorValence-\[ScriptN]0) (CTensor@@indexArray[[;;2 \[ScriptN]0]])(ITensor@@Join[{\[ScriptM],\[ScriptN]},indexArray[[2 \[ScriptN]0+1;;2(\[ScriptN]0+\[ScriptN]1)]]])(ITensor@@Join[{\[ScriptA],\[ScriptB]},indexArray[[2(\[ScriptN]0+\[ScriptN]1)+1;;2(\[ScriptN]0+\[ScriptN]1+\[ScriptN]2)]]])(ITensor@@Join[{\[ScriptR],\[ScriptS]},indexArray[[2(\[ScriptN]0+\[ScriptN]1+\[ScriptN]2)+1;;]]]),0],{\[ScriptN]0,0,tensorValence},{\[ScriptN]1,0,tensorValence},{\[ScriptN]2,0,tensorValence}]];
-		Evaluate[CIIITensor@@indexArrayArguments]=1/tensorValence! Plus@@temporaryExpression@@@permutationArray//Calc;
-	];
-]
+CIIITensor[]=0;
+CIIITensor[inputArray__]:=Module[{indexArray,tensorValence,temporaryExpression1,indexArrayForSymmetrisation},
+	indexArray = List[inputArray];
+	(* Consistency checks *)
+	If[Length[indexArray]<6,Return[0]];
+	If[Mod[Length[indexArray],2]==1,Return[0]];
+	(* Last special case *)
+	If[Length[indexArray]-6==0, Return[MCIIITensorStructure@@Sequence[Join[{0,1,1,1},indexArray]]] ];
+	(* Calculations *)
+	tensorValence = Length[indexArray]/2-3;
+	indexArrayForSymmetrisation = indexArray[[7;;]];
+	Evaluate[temporaryExpression1@@Table[ ToExpression[ToString[indexArrayForSymmetrisation[[i]]]<>"_"],{i,1,Length[indexArrayForSymmetrisation]}] ] = Sum[KroneckerDelta[j0+j1+j2+j3,tensorValence] (-1)^(tensorValence-j0) (MCIIITensorStructure@@Sequence[Join[{j0,1+j1,1+j2,1+j3},indexArray]]) ,{j0,0,tensorValence},{j1,0,tensorValence},{j2,0,tensorValence},{j3,0,tensorValence}];
+	Return[Calc[1/Factorial[tensorValence] Sum[temporaryExpression1@@Flatten[Permutations[Partition[indexArrayForSymmetrisation,2]][[i]]],{i,1,tensorValence!}]]];
+];
+
+
+MCIIITensorStructure[inputArray__]:=Module[{inputData,indexArray,indexArrayExternal,indexArrayInternal,indexArray1,indexArray2,indexArray3,indexArray4},
+	inputData = List[inputArray];
+	If[2 Tr[ inputData[[1;;4]] ]!=Length[ inputData[[5;;]] ] , Return[0]];
+	If[Length[inputData[[5;;]] ]==6, Return[Times@@ITensor@@@Partition[inputData[[5;;]],2]] ];
+	indexArrayInternal = Partition[inputData[[5;;10]],2];
+	indexArrayExternal = inputData[[11;;]];
+	If[inputData[[1]]==0,indexArray1 = {}, indexArray1 = indexArrayExternal[[1;;2 inputData[[1]]]] ];
+	If[inputData[[2]]==1,indexArray2 = indexArrayInternal[[1]] , indexArray2 = Join[ indexArrayInternal[[1]] , indexArrayExternal[[ 2 inputData[[1]] + 1 ;; 2 (inputData[[1]]+inputData[[2]]-1)]]] ];
+	If[inputData[[3]]==1,indexArray3 = indexArrayInternal[[2]] , indexArray3 = Join[ indexArrayInternal[[2]] , indexArrayExternal[[ 2 (inputData[[1]]+inputData[[2]]-1)+1 ;; 2(inputData[[1]]+inputData[[2]]+inputData[[3]] - 2)]] ]  ];
+	If[inputData[[4]]==1,indexArray4 = indexArrayInternal[[3]] , indexArray4 = Join[ indexArrayInternal[[3]] , indexArrayExternal[[ 2 (inputData[[1]]+inputData[[2]]+inputData[[3]]-2)+1 ;;  ]] ] ];
+	Return[(CTensor@@indexArray1)(ITensor@@indexArray2)(ITensor@@indexArray3)(ITensor@@indexArray4)];
+];
 
 
 (* GravitonVertex *)
-Clear[GravitonVertex];
-Context[\[Kappa]]="Global`"
-Module[{tensorT,tensorValence,indexArray,indexArrayArgumets,indexArrayArgumetsVariables,temporaryExpression},
-	tensorT[i_,j_,a_,b_,r_,s_,\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,\[Rho]_,\[Sigma]_]=-MTD[\[Mu],i]MTD[\[Nu],j]ITensor[\[Alpha],\[Beta],a,b]ITensor[\[Rho],\[Sigma],r,s]+MTD[\[Mu],i]MTD[\[Nu],j]ITensor[\[Alpha],\[Rho],a,b]ITensor[\[Beta],\[Sigma],r,s]-2MTD[\[Mu],i]MTD[\[Alpha],j]ITensor[\[Beta],\[Rho],a,b]ITensor[\[Nu],\[Sigma],r,s]+2MTD[\[Mu],i]MTD[\[Beta],j]ITensor[\[Nu],\[Alpha],a,b]ITensor[\[Rho],\[Sigma],r,s]//Calc;
-	For[tensorValence=3,tensorValence<=perturbationOrder,tensorValence++,
-		indexArray=Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}]];
-		indexArrayArgumets=Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]],ToExpression["p"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}];
-		indexArrayArgumetsVariables=Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]<>"_"],ToExpression["n"<>ToString[\[ScriptI]]<>"_"],ToExpression["p"<>ToString[\[ScriptI]]<>"_"]},{\[ScriptI],1,tensorValence}]];
-		Evaluate[temporaryExpression@@indexArrayArgumetsVariables]=FVD[p1,\[Lambda]1]FVD[p2,\[Lambda]2](tensorT@@Join[{\[Lambda]1,\[Lambda]2},indexArray[[1;;4]],Flatten[Table[{ToExpression["\[Rho]"<>ToString[\[ScriptI]]],ToExpression["\[Sigma]"<>ToString[\[ScriptI]]]},{\[ScriptI],1,3}]]])(CIIITensor@@Join[Flatten[Table[{ToExpression["\[Rho]"<>ToString[\[ScriptI]]],ToExpression["\[Sigma]"<>ToString[\[ScriptI]]]},{\[ScriptI],1,3}]],indexArray[[5;;]]])//Calc;
-		Evaluate[GravitonVertex@@indexArrayArgumetsVariables]=(-I 2/\[Kappa]^2)(\[Kappa]^tensorValence/4)Plus@@temporaryExpression@@@Table[Flatten[Permutations[indexArrayArgumets][[\[ScriptI]]]],{\[ScriptI],1,tensorValence!}]//Calc;
-	];
-]
+GravitonVertex[]=0;
+GravitonVertex[inputArray__]:=Module[{inputData,tensorT,tensorValence,arrayMomenta,arrayIndices,nonsymmetricExpression,symmetricExpression,dummyArray},
+	inputData = List[inputArray];
+	If[Length[inputData]<9,Return[0]];
+	If[Mod[Length[inputData],3]!=0,Return[0]];
+	tensorValence = Length[ inputData ] /3;
+	dummyArray = Flatten[Table[ { ToExpression["\[ScriptM]"<>ToString[i]],ToExpression["\[ScriptN]"<>ToString[i]],ToExpression["\[ScriptP]"<>ToString[i]] } , {i,1,tensorValence}]];
+	tensorT[\[ScriptI]_,j_,a_,b_,r_,s_,\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,\[Rho]_,\[Sigma]_]=-MTD[\[Mu],\[ScriptI]]MTD[\[Nu],j]ITensor[\[Alpha],\[Beta],a,b]ITensor[\[Rho],\[Sigma],r,s]+MTD[\[Mu],\[ScriptI]]MTD[\[Nu],j]ITensor[\[Alpha],\[Rho],a,b]ITensor[\[Beta],\[Sigma],r,s]-2 MTD[\[Mu],\[ScriptI]]MTD[\[Alpha],j]ITensor[\[Beta],\[Rho],a,b]ITensor[\[Nu],\[Sigma],r,s]+2 MTD[\[Mu],\[ScriptI]]MTD[\[Beta],j]ITensor[\[Nu],\[Alpha],a,b]ITensor[\[Rho],\[Sigma],r,s]//Calc;
+	arrayMomenta = Table[ Partition[dummyArray,3][[i]][[3]] ,{i,1,tensorValence}];
+	arrayIndices = Table[ Partition[dummyArray,3][[i]][[1;;2]] ,{i,1,tensorValence}];
+	Evaluate[nonsymmetricExpression@@Table[ToExpression[ToString[dummyArray[[i]]]<>"_"],{i,1,Length[inputData]}]]= Calc[(FVD[ arrayMomenta[[1]] ,\[Lambda]1]   FVD[ arrayMomenta[[2]] ,\[Lambda]2]) ( tensorT@@Sequence[Flatten[Join[{\[Lambda]1,\[Lambda]2} , arrayIndices[[;;2]] , {\[Rho]1,\[Sigma]1,\[Rho]2,\[Sigma]2,\[Rho]3,\[Sigma]3} ]]] )  (CIIITensor@@Sequence[Flatten[Join[{\[Rho]1,\[Sigma]1,\[Rho]2,\[Sigma]2,\[Rho]3,\[Sigma]3} , arrayIndices[[3;;]]]]]) ];
+	Evaluate[symmetricExpression@@Table[ToExpression[ToString[dummyArray[[i]]]<>"_"],{i,1,Length[inputData]}]]= Calc[(-I 2/(Global`\[Kappa])^2)((Global`\[Kappa])^tensorValence/4)Plus@@nonsymmetricExpression@@@Table[ Flatten[ Permutations[Partition[dummyArray,3]][[i]] ] , {i,1,Factorial[tensorValence]}]] ;
+	Return[Calc[symmetricExpression@@inputData]];
+];
 
 
 (* Graviton propagators *)
@@ -265,6 +283,38 @@ Module[{tensorValence,temporaryExpression,indexArrayArgumets,indexArrayM,indexAr
 		];
 		Evaluate[temporaryCTensor@@indexArrayArgumets]=temporaryExpression;
 		Evaluate[CTensor@@indexArrayArgumets]=1/tensorValence! Sum[temporaryCTensor@@Flatten[Permutations[indexArrayFull][[i]]],{i,1,tensorValence!}]//Calc;
+	];
+]*)
+
+
+(* OLD CODE
+(* CIIITensor *)
+Clear[CIIITensor];
+Module[{tensorValence,indexArray,indexArrayArguments,permutationArray,temporaryExpression},
+	For[tensorValence=0,tensorValence<=perturbationOrder,tensorValence++,
+		indexArray=Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}]];
+		indexArrayArguments=Join[{ToExpression["\[ScriptM]_"],ToExpression["\[ScriptN]_"],ToExpression["\[ScriptA]_"],ToExpression["\[ScriptB]_"],ToExpression["\[ScriptR]_"],ToExpression["\[ScriptS]_"]},Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]<>"_"],ToExpression["n"<>ToString[\[ScriptI]]<>"_"]},{\[ScriptI],1,tensorValence}]]];
+		permutationArray=Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}];
+		permutationArray=Permutations[permutationArray];
+		permutationArray=Table[Join[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB],\[ScriptR],\[ScriptS]},Flatten[permutationArray[[\[ScriptI]]]]],{\[ScriptI],1,tensorValence!}];
+		Evaluate[temporaryExpression@@indexArrayArguments]=Calc[Sum[If[\[ScriptN]0+\[ScriptN]1+\[ScriptN]2<=tensorValence,(-1)^(tensorValence-\[ScriptN]0) (CTensor@@indexArray[[;;2 \[ScriptN]0]])(ITensor@@Join[{\[ScriptM],\[ScriptN]},indexArray[[2 \[ScriptN]0+1;;2(\[ScriptN]0+\[ScriptN]1)]]])(ITensor@@Join[{\[ScriptA],\[ScriptB]},indexArray[[2(\[ScriptN]0+\[ScriptN]1)+1;;2(\[ScriptN]0+\[ScriptN]1+\[ScriptN]2)]]])(ITensor@@Join[{\[ScriptR],\[ScriptS]},indexArray[[2(\[ScriptN]0+\[ScriptN]1+\[ScriptN]2)+1;;]]]),0],{\[ScriptN]0,0,tensorValence},{\[ScriptN]1,0,tensorValence},{\[ScriptN]2,0,tensorValence}]];
+		Evaluate[CIIITensor@@indexArrayArguments]=1/tensorValence! Plus@@temporaryExpression@@@permutationArray//Calc;
+	];
+]*)
+
+
+(* OLD CODE
+(* GravitonVertex *)
+Clear[GravitonVertex];
+Context[\[Kappa]]="Global`"
+Module[{tensorT,tensorValence,indexArray,indexArrayArgumets,indexArrayArgumetsVariables,temporaryExpression},
+	tensorT[i_,j_,a_,b_,r_,s_,\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,\[Rho]_,\[Sigma]_]=-MTD[\[Mu],i]MTD[\[Nu],j]ITensor[\[Alpha],\[Beta],a,b]ITensor[\[Rho],\[Sigma],r,s]+MTD[\[Mu],i]MTD[\[Nu],j]ITensor[\[Alpha],\[Rho],a,b]ITensor[\[Beta],\[Sigma],r,s]-2MTD[\[Mu],i]MTD[\[Alpha],j]ITensor[\[Beta],\[Rho],a,b]ITensor[\[Nu],\[Sigma],r,s]+2MTD[\[Mu],i]MTD[\[Beta],j]ITensor[\[Nu],\[Alpha],a,b]ITensor[\[Rho],\[Sigma],r,s]//Calc;
+	For[tensorValence=3,tensorValence<=perturbationOrder,tensorValence++,
+		indexArray=Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}]];
+		indexArrayArgumets=Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]],ToExpression["p"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}];
+		indexArrayArgumetsVariables=Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]<>"_"],ToExpression["n"<>ToString[\[ScriptI]]<>"_"],ToExpression["p"<>ToString[\[ScriptI]]<>"_"]},{\[ScriptI],1,tensorValence}]];
+		Evaluate[temporaryExpression@@indexArrayArgumetsVariables]=FVD[p1,\[Lambda]1]FVD[p2,\[Lambda]2](tensorT@@Join[{\[Lambda]1,\[Lambda]2},indexArray[[1;;4]],Flatten[Table[{ToExpression["\[Rho]"<>ToString[\[ScriptI]]],ToExpression["\[Sigma]"<>ToString[\[ScriptI]]]},{\[ScriptI],1,3}]]])(CIIITensor@@Join[Flatten[Table[{ToExpression["\[Rho]"<>ToString[\[ScriptI]]],ToExpression["\[Sigma]"<>ToString[\[ScriptI]]]},{\[ScriptI],1,3}]],indexArray[[5;;]]])//Calc;
+		Evaluate[GravitonVertex@@indexArrayArgumetsVariables]=(-I 2/\[Kappa]^2)(\[Kappa]^tensorValence/4)Plus@@temporaryExpression@@@Table[Flatten[Permutations[indexArrayArgumets][[\[ScriptI]]]],{\[ScriptI],1,tensorValence!}]//Calc;
 	];
 ]*)
 
