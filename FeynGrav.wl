@@ -55,26 +55,54 @@ ITensor[inputArray__]:=Module[{indexArray,generatingTerm},
 
 
 (* CTensor *)
-Clear[CTensor];
+(* If the function has no arguments it return 1. *)
 CTensor[]=1;
-Module[{tensorValence,temporaryExpression,indexArrayArgumets,indexArrayM,indexArrayN,indexArray,indexArrayFull,numberOfTerms,summationIndices,summationIndicesArguments,iterationList,temporaryFactor,temporaryCTensor,tensorPermutationArray,i},
-	For[tensorValence=1,tensorValence<=perturbationOrder,tensorValence++,
-		indexArray=Flatten[Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}]];
-		indexArrayFull=Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}];
-		indexArrayArgumets=Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,tensorValence}]];
-		temporaryExpression=0;
-		For[numberOfTerms=1,numberOfTerms<=tensorValence,numberOfTerms++,
-			summationIndices=Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}];
-			summationIndicesArguments=Table[ToExpression["j"<>ToString[i]<>"_"],{i,1,numberOfTerms}];
-			iterationList={#,1,tensorValence}&/@summationIndices;
-			Clear[temporaryFactor];
-			Evaluate[temporaryFactor@@summationIndicesArguments]=KroneckerDelta[Tr[summationIndices],tensorValence](Times@@summationIndices)^-1;
-			temporaryExpression=temporaryExpression+(-1)^(numberOfTerms+tensorValence)/(numberOfTerms! 2^numberOfTerms) Sum[temporaryFactor[Sequence@@summationIndices](Times@@If[Tr[summationIndices]==tensorValence,ITensor@@@TakeList[indexArray,2 summationIndices],0]),Evaluate[Sequence@@iterationList]]//Calc;
-		];
-		Evaluate[temporaryCTensor@@indexArrayArgumets]=temporaryExpression;
-		Evaluate[CTensor@@indexArrayArgumets]=1/tensorValence! Sum[temporaryCTensor@@Flatten[Permutations[indexArrayFull][[i]]],{i,1,tensorValence!}]//Calc;
+(* SetDelayed is used so the function would be evaluated only when it is needed. The function takes a single sequence as an argument. *)
+CTensor[inputArray__] := Module[{indexArray,tensorValence,temporaryExpression,numberOfTerms,summationIndices,symmetricExpression1,symmetricExpression2},
+	(* The input sequence is transformed into an array *)
+	indexArray = List[inputArray];
+	(* If the input sequence has an odd number of terms then the fucntion returns "0". If the number of arguments is even, then the function proceeds. *)
+	If[Mod[Length[indexArray],2] != 0, Return[0]];
+	tensorValence = Length[indexArray]/2;
+	temporaryExpression = 0;
+	(* The expression is generated, but it is not yet symmetric *)
+	For[numberOfTerms = 1, numberOfTerms <= tensorValence, numberOfTerms++,
+		summationIndices = {#,1,5}&/@ Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}];
+		temporaryExpression = temporaryExpression + (-1)^(tensorValence+numberOfTerms)/(Factorial[numberOfTerms] 2^numberOfTerms)Sum[MITensorStructure@@Join[{numberOfTerms},Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}],indexArray] ,Evaluate[Sequence@@summationIndices]];
 	];
-]
+	(* SYmmetrization *)
+	Evaluate[symmetricExpression1@@Table[ToExpression[ToString[indexArray[[i]]] <> "_"] ,{i,1,Length[indexArray]}]] = Calc[temporaryExpression];
+	Evaluate[symmetricExpression2@@Table[ToExpression[ToString[indexArray[[i]]] <> "_"] ,{i,1,Length[indexArray]}]] = 1/Factorial[tensorValence] Sum[symmetricExpression1@@Flatten[Permutations[Partition[indexArray,2]][[i]]],{i,1,tensorValence!}];
+	Return[Calc[symmetricExpression2@@indexArray]];
+];
+
+
+(* MITensorStructure *)
+(* This is a completely internal command used in CTensor *)
+MITensorStructure[inputArray__] := Module[{inputData,numberOfMultipliers,partialOrders,indexArray,splitIndexArray,tmpPosition,i},
+	inputData = List[inputArray];
+	(* The number of multipliers *)
+	numberOfMultipliers = inputData[[1]];
+	(* The array of length of subarrays *)
+	partialOrders = inputData[[2;;1+numberOfMultipliers]];
+	(* The array of indices to be splitted *)
+	indexArray = inputData[[numberOfMultipliers +2 ;;]];
+	(* Make sure that the function received the correct number of arguments *)
+	If[Mod[Length[indexArray],2]==1,Return[0]];
+	If[Tr[partialOrders]!=Length[indexArray]/2,Return[0]];
+	
+	(* This part split indexArray in a set of subarray *)
+	splitIndexArray = {};
+	(* The initial cursor position is set on the first element of index Array. It runs along the array and split it *)
+	tmpPosition = 1;
+	For[i=1,i<=numberOfMultipliers,i++,
+		AppendTo[ splitIndexArray , indexArray[[ tmpPosition ;; tmpPosition + 2 partialOrders[[i]] - 1 ]] ];
+		tmpPosition = tmpPosition + 2 partialOrders[[i]]  ;
+	];
+	(* splitIndexArray now contain indexArray splitted in subarray *)
+	(* Now I generay a multiplication of ITensors with the given indices *)
+	Return[Calc[1/Times@@partialOrders Times@@ITensor@@@splitIndexArray]];
+];
 
 
 (* Vierbein *)
@@ -215,6 +243,30 @@ Module[{tensorValence,generatingTerm,i},
 	];
 ]
 *)
+
+
+(* OLD CODE
+(* CTensor *)
+Clear[CTensor];
+CTensor[]=1;
+Module[{tensorValence,temporaryExpression,indexArrayArgumets,indexArrayM,indexArrayN,indexArray,indexArrayFull,numberOfTerms,summationIndices,summationIndicesArguments,iterationList,temporaryFactor,temporaryCTensor,tensorPermutationArray,i},
+	For[tensorValence=1,tensorValence<=perturbationOrder,tensorValence++,
+		indexArray=Flatten[Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}]];
+		indexArrayFull=Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}];
+		indexArrayArgumets=Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,tensorValence}]];
+		temporaryExpression=0;
+		For[numberOfTerms=1,numberOfTerms<=tensorValence,numberOfTerms++,
+			summationIndices=Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}];
+			summationIndicesArguments=Table[ToExpression["j"<>ToString[i]<>"_"],{i,1,numberOfTerms}];
+			iterationList={#,1,tensorValence}&/@summationIndices;
+			Clear[temporaryFactor];
+			Evaluate[temporaryFactor@@summationIndicesArguments]=KroneckerDelta[Tr[summationIndices],tensorValence](Times@@summationIndices)^-1;
+			temporaryExpression=temporaryExpression+(-1)^(numberOfTerms+tensorValence)/(numberOfTerms! 2^numberOfTerms) Sum[temporaryFactor[Sequence@@summationIndices](Times@@If[Tr[summationIndices]==tensorValence,ITensor@@@TakeList[indexArray,2 summationIndices],0]),Evaluate[Sequence@@iterationList]]//Calc;
+		];
+		Evaluate[temporaryCTensor@@indexArrayArgumets]=temporaryExpression;
+		Evaluate[CTensor@@indexArrayArgumets]=1/tensorValence! Sum[temporaryCTensor@@Flatten[Permutations[indexArrayFull][[i]]],{i,1,tensorValence!}]//Calc;
+	];
+]*)
 
 
 End[];
