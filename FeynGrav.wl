@@ -14,9 +14,10 @@ perturbationOrder=4
 CTensor::usage = "C-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) expansion. It takes either null or an even number of arguments which are Lorentz indices."
 Vierbein::usage = "Expansion of a vierbein \!\(\*SubscriptBox[SuperscriptBox[\(\[GothicE]\), \(\[Mu]\)], \(\[Nu]\)]\). It takes an even number of arguments."
 CITensor::usage = "CI-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. Take 2 or more arguments."
-CIITensor::usage = "CII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) expansion. Take 4 or more arguments."
+CIITensor::usage = "CII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) expansion. Take 4 or more arguments."*)
+METensorStructure::usage = ""
 CETensor::usage = "CE-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SubscriptBox[SuperscriptBox[\(\[GothicE]\), \(\[Mu]\)], \(\[Nu]\)]\) expansion. Take 2 or more arguments."
-CIIITensor::usage = "CIII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Rho]\[Sigma]\)]\) expansion. Take 6 or more arguments." *)
+(*CIIITensor::usage = "CIII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Rho]\[Sigma]\)]\) expansion. Take 6 or more arguments." *)
 GravitonVertex::usage = "Vertex for interaction of 3 or more gravitons. Its arguments are Lorentz indices and momenta of the corresponding gravitons. For instance GravitonVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\)]."
 GravitonPropagator::usage = "Propagator of a graviton in the harmonic gauge. Its denominator is given via FAD function."
 GravitonPropagatorTop::usage = "The nominator of a graviton propagator in the harmonic gauge."
@@ -113,16 +114,6 @@ Vierbein[inputArray__]:=Module[{inputData},
 ];
 
 
-(* OLD CODE 
-(* Vierbein *)
-Clear[Vierbein];
-Module[{tensorValence},
-	For[tensorValence=0,tensorValence<=perturbationOrder,tensorValence++,
-		Evaluate[Vierbein@@Join[{ToExpression["\[ScriptM]_"],ToExpression["\[ScriptN]_"]},Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,tensorValence}]]]]=Calc[Binomial[-1/2,tensorValence](ITensor@@Join[{\[ScriptM],\[ScriptN]},Flatten[Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}]]])];
-	];
-]*)
-
-
 (* CITensor *)
 Clear[CITensor];
 Module[{tensorValence,indexArray,indexArrayArgumets,tensorPermutationArray,temporaryExpression},
@@ -156,18 +147,31 @@ Module[{tensorValence,indexArray,indexArrayArguments,tensorPermutationArray,temp
 
 
 (* CETensor *)
-Clear[CETensor];
-Module[{tensorValence,indexArray,indexArrayArguments,permutationArray,temporaryExpression},
-	For[tensorValence=0,tensorValence<=perturbationOrder,tensorValence++,
-		indexArray=Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}]];
-		indexArrayArguments=Join[{ToExpression["\[ScriptM]_"],ToExpression["\[ScriptN]_"]},Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]<>"_"],ToExpression["n"<>ToString[\[ScriptI]]<>"_"]},{\[ScriptI],1,tensorValence}]]];
-		permutationArray=Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}];
-		permutationArray=Permutations[permutationArray];
-		permutationArray=Table[Join[{\[ScriptM],\[ScriptN]},Flatten[permutationArray[[\[ScriptI]]]]],{\[ScriptI],1,tensorValence!}];
-		Evaluate[temporaryExpression@@indexArrayArguments]=Sum[(-1)^(tensorValence-\[ScriptN]0) (CTensor@@indexArray[[1;;2 \[ScriptN]0]])(Vierbein@@Join[{\[ScriptM],\[ScriptN]},indexArray[[2\[ScriptN]0+1;;2 tensorValence]]]),{\[ScriptN]0,0,tensorValence}]//Calc;
-		Evaluate[CETensor@@indexArrayArguments]=1/tensorValence! Plus@@(temporaryExpression@@@permutationArray)//Calc;
-	];
-]
+CETensor[inputArray__]:=Module[{inputData,tensorValence,dummyArray},
+	inputData = List[inputArray];
+	If[Mod[Length[inputData],2]==1,Return[0]];
+	(* Calculations with a dummy array *)
+	tensorValence = Length[inputData]/2;
+	Return[  Calc[  Sum[ ( METensorStructure @@ Sequence[Join[{tensorValence},{j0},{j1},inputData]]) ,{j0,0,tensorValence},{j1,0,tensorValence}]  ]  ];
+];
+
+
+(* METensorStructure *)
+(* This is a completely internal command used in CETensor *)
+METensorStructure[inputArray__]:=Module[{inputData,indexArray,indicesCTensor,indicesITensor},
+	inputData = List[inputArray];
+	(* Consistency checks *)
+	If[ (inputData[[1]] == 0)||(inputData[[3]] == 0) , Return[0]];
+	If[ inputData[[1]] != inputData[[2]] + inputData[[3]] , Return[0]];
+	If[ Length[ inputData[[4;;]] ]/2 != inputData[[1]] , Return[0]];
+	If[ (inputData[[1]]==1)&&(inputData[[2]]!=0), Return[0] ];
+	(* Calculations *)
+	indexArray = inputData[[4;;]];
+	indicesITensor = indexArray[[1;;2]];
+	If[ inputData[[2]] == 0 , indicesCTensor = {} , indicesCTensor = indexArray[[3;;3 + 2 (inputData[[2]]) -1]]  ];
+	If[ inputData[[3]] != 1 , indicesITensor = Join[ indicesITensor , indexArray[[3 + 2 inputData[[2]];; ]] ] ];
+	Return[  Calc[(CTensor @@ indicesCTensor) (Vierbein @@ indicesITensor)]  ];
+];
 
 
 (* CIIITensor *)
@@ -324,6 +328,32 @@ Module[{tensorT,tensorValence,indexArray,indexArrayArgumets,indexArrayArgumetsVa
 		indexArrayArgumetsVariables=Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]<>"_"],ToExpression["n"<>ToString[\[ScriptI]]<>"_"],ToExpression["p"<>ToString[\[ScriptI]]<>"_"]},{\[ScriptI],1,tensorValence}]];
 		Evaluate[temporaryExpression@@indexArrayArgumetsVariables]=FVD[p1,\[Lambda]1]FVD[p2,\[Lambda]2](tensorT@@Join[{\[Lambda]1,\[Lambda]2},indexArray[[1;;4]],Flatten[Table[{ToExpression["\[Rho]"<>ToString[\[ScriptI]]],ToExpression["\[Sigma]"<>ToString[\[ScriptI]]]},{\[ScriptI],1,3}]]])(CIIITensor@@Join[Flatten[Table[{ToExpression["\[Rho]"<>ToString[\[ScriptI]]],ToExpression["\[Sigma]"<>ToString[\[ScriptI]]]},{\[ScriptI],1,3}]],indexArray[[5;;]]])//Calc;
 		Evaluate[GravitonVertex@@indexArrayArgumetsVariables]=(-I 2/\[Kappa]^2)(\[Kappa]^tensorValence/4)Plus@@temporaryExpression@@@Table[Flatten[Permutations[indexArrayArgumets][[\[ScriptI]]]],{\[ScriptI],1,tensorValence!}]//Calc;
+	];
+]*)
+
+
+(* OLD CODE 
+(* Vierbein *)
+Clear[Vierbein];
+Module[{tensorValence},
+	For[tensorValence=0,tensorValence<=perturbationOrder,tensorValence++,
+		Evaluate[Vierbein@@Join[{ToExpression["\[ScriptM]_"],ToExpression["\[ScriptN]_"]},Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,tensorValence}]]]]=Calc[Binomial[-1/2,tensorValence](ITensor@@Join[{\[ScriptM],\[ScriptN]},Flatten[Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}]]])];
+	];
+]*)
+
+
+(* OLD CODE
+(* CETensor *)
+Clear[CETensor];
+Module[{tensorValence,indexArray,indexArrayArguments,permutationArray,temporaryExpression},
+	For[tensorValence=0,tensorValence<=perturbationOrder,tensorValence++,
+		indexArray=Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}]];
+		indexArrayArguments=Join[{ToExpression["\[ScriptM]_"],ToExpression["\[ScriptN]_"]},Flatten[Table[{ToExpression["m"<>ToString[\[ScriptI]]<>"_"],ToExpression["n"<>ToString[\[ScriptI]]<>"_"]},{\[ScriptI],1,tensorValence}]]];
+		permutationArray=Table[{ToExpression["m"<>ToString[\[ScriptI]]],ToExpression["n"<>ToString[\[ScriptI]]]},{\[ScriptI],1,tensorValence}];
+		permutationArray=Permutations[permutationArray];
+		permutationArray=Table[Join[{\[ScriptM],\[ScriptN]},Flatten[permutationArray[[\[ScriptI]]]]],{\[ScriptI],1,tensorValence!}];
+		Evaluate[temporaryExpression@@indexArrayArguments]=Sum[(-1)^(tensorValence-\[ScriptN]0) (CTensor@@indexArray[[1;;2 \[ScriptN]0]])(Vierbein@@Join[{\[ScriptM],\[ScriptN]},indexArray[[2\[ScriptN]0+1;;2 tensorValence]]]),{\[ScriptN]0,0,tensorValence}]//Calc;
+		Evaluate[CETensor@@indexArrayArguments]=1/tensorValence! Plus@@(temporaryExpression@@@permutationArray)//Calc;
 	];
 ]*)
 
