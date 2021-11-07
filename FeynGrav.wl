@@ -3,8 +3,8 @@
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
-Print["FeynGrav: The default perturbation order is set to 4, so the package evaluate three- and four-graviton vertices."]
-Print["FeynGrav: Please, be patient. It takes quite some time to calcualate."]
+Print["FeynGrav: All expressions for itteraction veritce are evaluated on a call."]
+Print["FeynGrav: Please, be patient. Evaluation can take some time."]
 
 
 perturbationOrder=4
@@ -106,12 +106,21 @@ MITensorStructure[inputArray__] := Module[{inputData,numberOfMultipliers,partial
 
 
 (* Vierbein *)
+Vierbein[inputArray__]:=Module[{inputData},
+	inputData = List[inputArray];
+	If[Mod[Length[inputData],2]==1,Return[0]];
+	Return[  Calc[ Binomial[-1/2,Length[inputData]/2-1] ITensor@@inputData]   ];
+];
+
+
+(* OLD CODE 
+(* Vierbein *)
 Clear[Vierbein];
 Module[{tensorValence},
 	For[tensorValence=0,tensorValence<=perturbationOrder,tensorValence++,
 		Evaluate[Vierbein@@Join[{ToExpression["\[ScriptM]_"],ToExpression["\[ScriptN]_"]},Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,tensorValence}]]]]=Calc[Binomial[-1/2,tensorValence](ITensor@@Join[{\[ScriptM],\[ScriptN]},Flatten[Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}]]])];
 	];
-]
+]*)
 
 
 (* CITensor *)
