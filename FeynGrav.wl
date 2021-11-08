@@ -7,16 +7,13 @@ Print["FeynGrav: All expressions for itteraction veritce are evaluated on a call
 Print["FeynGrav: Please, be patient. Evaluation can take some time."]
 
 
-perturbationOrder=4
-
-
 (* ITensor::usage = "I-tensors which are responsible for \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. It takes wither null or an even number of arguments which are Lorentz indices."
 CTensor::usage = "C-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) expansion. It takes either null or an even number of arguments which are Lorentz indices."
 Vierbein::usage = "Expansion of a vierbein \!\(\*SubscriptBox[SuperscriptBox[\(\[GothicE]\), \(\[Mu]\)], \(\[Nu]\)]\). It takes an even number of arguments."
 CITensor::usage = "CI-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. Take 2 or more arguments."
-CIITensor::usage = "CII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) expansion. Take 4 or more arguments."
+CIITensor::usage = "CII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) expansion. Take 4 or more arguments." *)
 CETensor::usage = "CE-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SubscriptBox[SuperscriptBox[\(\[GothicE]\), \(\[Mu]\)], \(\[Nu]\)]\) expansion. Take 2 or more arguments."
-CIIITensor::usage = "CIII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Rho]\[Sigma]\)]\) expansion. Take 6 or more arguments." *)
+(* CIIITensor::usage = "CIII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Rho]\[Sigma]\)]\) expansion. Take 6 or more arguments." *)
 GravitonVertex::usage = "Vertex for interaction of 3 or more gravitons. Its arguments are Lorentz indices and momenta of the corresponding gravitons. For instance GravitonVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\)]."
 GravitonPropagator::usage = "Propagator of a graviton in the harmonic gauge. Its denominator is given via FAD function."
 GravitonPropagatorTop::usage = "The nominator of a graviton propagator in the harmonic gauge."
@@ -24,8 +21,8 @@ GravitonPropagatorAlternative::usage = "Propagator of a graviton in the harmonic
 (*
 GravitonScalarVertex::usage = "Vertex for interaction between a massless scalar kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of scalars."
 GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The next two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
-GravitonFermionVertex::usage = "Vertex for interaction between a massless Dirac fermion kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of fermions."
 *)
+GravitonFermionVertex::usage = "Vertex for interaction between a massless Dirac fermion kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of fermions."
 
 
 (* 
@@ -107,24 +104,6 @@ MITensorStructure[inputArray__] := Module[{inputData,numberOfMultipliers,partial
 ];
 
 
-(* Vierbein *)
-Vierbein[inputArray__]:=Module[{inputData},
-	inputData = List[inputArray];
-	If[Mod[Length[inputData],2]==1,Return[0]];
-	Return[  Calc[ Binomial[-1/2,Length[inputData]/2-1] ITensor@@inputData]   ];
-];
-
-
-(* CETensor *)
-CETensor[inputArray__]:=Module[{inputData,tensorValence,dummyArray},
-	inputData = List[inputArray];
-	If[Mod[Length[inputData],2]==1,Return[0]];
-	(* Calculations with a dummy array *)
-	tensorValence = Length[inputData]/2;
-	Return[  Calc[  Sum[ ( METensorStructure @@ Sequence[Join[{tensorValence},{j0},{j1},inputData]]) ,{j0,0,tensorValence},{j1,0,tensorValence}]  ]  ];
-];
-
-
 (* METensorStructure *)
 (* This is a completely internal command used in CETensor *)
 METensorStructure[inputArray__]:=Module[{inputData,indexArray,indicesCTensor,indicesITensor},
@@ -195,6 +174,39 @@ GravitonVertex[inputArray__]:=Module[{inputData,tensorT,tensorValence,arrayMomen
 GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I 1/2 (MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]])FAD[k];
 GravitonPropagatorTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_]=1/2(MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]]);
 GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I ((1/2 (MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]]))/SPD[k,k]);
+
+
+(* Vierbein *)
+Vierbein[inputArray__]:=Module[{inputData},
+	inputData = List[inputArray];
+	If[Mod[Length[inputData],2]==1,Return[0]];
+	Return[  Calc[ Binomial[-1/2,Length[inputData]/2-1] ITensor@@inputData]   ];
+];
+
+
+(* CETensor *)
+CETensor[inputArray__]:=Module[{inputData,tensorValence,dummyArray,nonSymmetricExpression,symmetricExpression},
+	inputData = List[inputArray];
+	If[Mod[Length[inputData],2]==1,Return[0]];
+	(* Calculations with a dummy array *)
+	tensorValence = Length[inputData]/2;
+	dummyArray = Flatten[  Table[ {ToExpression["\[ScriptM]"<>ToString[i]] , ToExpression["\[ScriptN]"<>ToString[i]]} ,{i,1,tensorValence}]  ];
+	Evaluate[nonSymmetricExpression @@ Flatten[  Table[ {ToExpression["\[ScriptM]"<>ToString[i]<>"_"] , ToExpression["\[ScriptN]"<>ToString[i]<>"_"]} ,{i,1,tensorValence}]  ] ]=  Calc[  Sum[ ( METensorStructure @@ Sequence[Join[{tensorValence},{j0},{j1},dummyArray]]) ,{j0,0,tensorValence},{j1,0,tensorValence}]  ]  ;
+	Evaluate[symmetricExpression @@ Flatten[  Table[ {ToExpression["\[ScriptM]"<>ToString[i]<>"_"] , ToExpression["\[ScriptN]"<>ToString[i]<>"_"]} ,{i,1,tensorValence}]  ] ] = 1/Factorial[tensorValence] Calc[  Plus@@nonSymmetricExpression@@@Table[ Flatten[ Permutations[Partition[dummyArray,2]][[i]] ] , {i,1,Factorial[tensorValence]}]  ];
+	Return[ Calc[ symmetricExpression @@ inputData ]];	
+];
+
+
+(* GravitonFermionVertex *)
+GravitonFermionVertex[inputArray__] := Module[{inputData,TVertex,indexArray1,indexArray2},
+	inputData = List[inputArray];
+	If[ Mod[ Length[inputData],2] == 1 , Return[0]];
+	If[ Length[inputData] < 3 , Return[0]];
+	TVertex[\[Mu]_,\[Nu]_,p_,q_] = Calc[  1/2 FVD[p-q,\[Nu]]GAD[\[Mu]]  ];
+	indexArray1 = Join[ {\[ScriptM],\[ScriptN]}, inputData[[ ;;Length[inputData]-2]] ];
+	indexArray2 = Join[ {\[ScriptM],\[ScriptN]}, inputData[[Length[inputData]-1;;]] ];
+	Return[  Calc[(CETensor @@ Sequence[indexArray1])(TVertex @@ Sequence[indexArray2])] ];
+];
 
 
 (* OLD CODE
@@ -273,6 +285,7 @@ Module[{tensorValence},
 ]
 
 (* CETensor *)
+(* WARNING! This function is actually does not work correctly. *)
 Clear[CETensor];
 Module[{tensorValence,indexArray,indexArrayArguments,permutationArray,temporaryExpression},
 	For[tensorValence=0,tensorValence<=perturbationOrder,tensorValence++,
