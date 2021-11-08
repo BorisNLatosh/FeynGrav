@@ -5,24 +5,28 @@ BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 Print["FeynGrav: All expressions for itteraction veritce are evaluated on a call."]
 Print["FeynGrav: Please, be patient. Evaluation can take some time."]
+Print["FeynGrav: FeynGravCommands print the list of all supported commands."]
+Print["FeynGrav: Use '?CommandName' to see a brief description."]
 
 
 (* ITensor::usage = "I-tensors which are responsible for \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. It takes wither null or an even number of arguments which are Lorentz indices."
 CTensor::usage = "C-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) expansion. It takes either null or an even number of arguments which are Lorentz indices."
 Vierbein::usage = "Expansion of a vierbein \!\(\*SubscriptBox[SuperscriptBox[\(\[GothicE]\), \(\[Mu]\)], \(\[Nu]\)]\). It takes an even number of arguments."
 CITensor::usage = "CI-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. Take 2 or more arguments."
-CIITensor::usage = "CII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) expansion. Take 4 or more arguments." *)
+CIITensor::usage = "CII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) expansion. Take 4 or more arguments." 
 CETensor::usage = "CE-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SubscriptBox[SuperscriptBox[\(\[GothicE]\), \(\[Mu]\)], \(\[Nu]\)]\) expansion. Take 2 or more arguments."
-(* CIIITensor::usage = "CIII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Rho]\[Sigma]\)]\) expansion. Take 6 or more arguments." *)
+CIIITensor::usage = "CIII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Rho]\[Sigma]\)]\) expansion. Take 6 or more arguments." *)
 GravitonVertex::usage = "Vertex for interaction of 3 or more gravitons. Its arguments are Lorentz indices and momenta of the corresponding gravitons. For instance GravitonVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\)]."
 GravitonPropagator::usage = "Propagator of a graviton in the harmonic gauge. Its denominator is given via FAD function."
 GravitonPropagatorTop::usage = "The nominator of a graviton propagator in the harmonic gauge."
 GravitonPropagatorAlternative::usage = "Propagator of a graviton in the harmonic gauge. Its denominator is given via SPD function."
-(*
 GravitonScalarVertex::usage = "Vertex for interaction between a massless scalar kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of scalars."
-GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The next two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
+(*GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The next two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
 *)
 GravitonFermionVertex::usage = "Vertex for interaction between a massless Dirac fermion kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of fermions."
+
+
+FeynGravCommands := Print[" 'GravitonVertex', 'GravitonPropagator', 'GravitonPropagatorTop', 'GravitonPropagatorAlternative', 'GravitonFermionVertex' "];
 
 
 (* 
@@ -67,7 +71,7 @@ CTensor[inputArray__] := Module[{indexArray,tensorValence,temporaryExpression,nu
 	(* The expression is generated, but it is not yet symmetric *)
 	For[numberOfTerms = 1, numberOfTerms <= tensorValence, numberOfTerms++,
 		summationIndices = {#,1,5}&/@ Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}];
-		temporaryExpression = temporaryExpression + (-1)^(tensorValence+numberOfTerms)/(Factorial[numberOfTerms] 2^numberOfTerms)Sum[MITensorStructure@@Join[{numberOfTerms},Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}],indexArray] ,Evaluate[Sequence@@summationIndices]];
+		temporaryExpression = temporaryExpression + (-1)^(tensorValence+numberOfTerms)/(Factorial[numberOfTerms] 2^numberOfTerms)Sum[MCTensorStructure@@Join[{numberOfTerms},Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}],indexArray] ,Evaluate[Sequence@@summationIndices]];
 	];
 	(* SYmmetrization *)
 	Evaluate[symmetricExpression1@@Table[ToExpression[ToString[indexArray[[i]]] <> "_"] ,{i,1,Length[indexArray]}]] = Calc[temporaryExpression];
@@ -76,9 +80,9 @@ CTensor[inputArray__] := Module[{indexArray,tensorValence,temporaryExpression,nu
 ];
 
 
-(* MITensorStructure *)
+(* MCTensorStructure *)
 (* This is a completely internal command used in CTensor *)
-MITensorStructure[inputArray__] := Module[{inputData,numberOfMultipliers,partialOrders,indexArray,splitIndexArray,tmpPosition,i},
+MCTensorStructure[inputArray__] := Module[{inputData,numberOfMultipliers,partialOrders,indexArray,splitIndexArray,tmpPosition,i},
 	inputData = List[inputArray];
 	(* The number of multipliers *)
 	numberOfMultipliers = inputData[[1]];
@@ -206,6 +210,46 @@ GravitonFermionVertex[inputArray__] := Module[{inputData,TVertex,indexArray1,ind
 	indexArray1 = Join[ {\[ScriptM],\[ScriptN]}, inputData[[ ;;Length[inputData]-2]] ];
 	indexArray2 = Join[ {\[ScriptM],\[ScriptN]}, inputData[[Length[inputData]-1;;]] ];
 	Return[  Calc[(CETensor @@ Sequence[indexArray1])(TVertex @@ Sequence[indexArray2])] ];
+];
+
+
+(* CITensor *)
+CITensor[inputArray__]:=Module[{indexArray,tensorValence,temporaryExpression1,indexArrayForSymmetrisation},
+	indexArray = List[inputArray];
+	(* Consistency checks *)
+	If[Length[indexArray]<2,Return[0]];
+	If[Mod[Length[indexArray],2]==1,Return[0]];
+	(* Last special case *)
+	If[Length[indexArray]==2, Return[MCITensorStructure@@Sequence[Join[{0,1},indexArray]]] ];
+	(* Calculations *)
+	tensorValence = Length[indexArray]/2-1;
+	indexArrayForSymmetrisation = indexArray[[3;;]];
+	Evaluate[temporaryExpression1@@Table[ ToExpression[ToString[indexArrayForSymmetrisation[[i]]]<>"_"],{i,1,Length[indexArrayForSymmetrisation]}] ] = Sum[KroneckerDelta[j0+j1,tensorValence] (-1)^(tensorValence-j0) (MCITensorStructure@@Sequence[Join[{j0,1+j1},indexArray]]) ,{j0,0,tensorValence},{j1,0,tensorValence}];
+	Return[Calc[1/Factorial[tensorValence] Sum[temporaryExpression1@@Flatten[Permutations[Partition[indexArrayForSymmetrisation,2]][[i]]],{i,1,tensorValence!}]]];
+];
+
+
+(* MCITensorStructure is an internal command used only in CITensor *)
+MCITensorStructure[inputArray__]:=Module[{inputData,indexArray,indexArrayExternal,indexArrayInternal,indexArray1,indexArray2},
+	inputData = List[inputArray];
+	If[inputData[[2]]==0,Return[0]];
+	If[2 Tr[ inputData[[1;;2]] ]!=Length[ inputData[[3;;]] ] , Return[0] ];
+	If[Length[inputData[[3;;]] ]==2, Return[ITensor@@inputData[[3;;]] ]];
+	indexArrayInternal = inputData[[3;;4]];
+	indexArrayExternal = inputData[[5;;]];
+	If[inputData[[1]]==0,indexArray1 = {}, indexArray1 = indexArrayExternal[[1;;2 inputData[[1]]]] ];
+	If[inputData[[2]]==1,indexArray2 = indexArrayInternal , indexArray2 = Join[ indexArrayInternal , indexArrayExternal[[ 2 inputData[[1]] + 1 ;; 2 (inputData[[1]]+inputData[[2]]-1)]]] ];
+	Return[(CTensor@@indexArray1)(ITensor@@indexArray2)];
+];
+
+
+(* GravitonScalarVertex *)
+GravitonScalarVertex[inputArray__]:=Module[{inputData,TVertex},
+	inputData = List[inputArray];
+	If[ Length[inputData] < 4 , Return[0]];
+	If[ Mod[Length[inputData],2] == 1,Return[0]];
+	TVertex[m_,n_,p_,q_]=-(1/2)ITensor[m,n,a,b]FVD[p,a]FVD[q,b]//Calc;
+	Return[ Calc[ I (Global`\[Kappa])^(Length[inputData]/2-1) ( TVertex @@Sequence[Join[ {\[ScriptM],\[ScriptN]} , inputData[[ Length[inputData]-1;;]] ]] ) (CITensor @@ Sequence[Join[ {\[ScriptM],\[ScriptN]} , inputData[[;;Length[inputData]-2]] ]])] ];
 ];
 
 
