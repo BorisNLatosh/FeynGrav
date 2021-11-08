@@ -21,8 +21,7 @@ GravitonPropagator::usage = "Propagator of a graviton in the harmonic gauge. Its
 GravitonPropagatorTop::usage = "The nominator of a graviton propagator in the harmonic gauge."
 GravitonPropagatorAlternative::usage = "Propagator of a graviton in the harmonic gauge. Its denominator is given via SPD function."
 GravitonScalarVertex::usage = "Vertex for interaction between a massless scalar kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of scalars."
-(*GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The next two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
-*)
+GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The next two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
 GravitonFermionVertex::usage = "Vertex for interaction between a massless Dirac fermion kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of fermions."
 
 
@@ -251,6 +250,47 @@ GravitonScalarVertex[inputArray__]:=Module[{inputData,TVertex},
 	TVertex[m_,n_,p_,q_]=-(1/2)ITensor[m,n,a,b]FVD[p,a]FVD[q,b]//Calc;
 	Return[ Calc[ I (Global`\[Kappa])^(Length[inputData]/2-1) ( TVertex @@Sequence[Join[ {\[ScriptM],\[ScriptN]} , inputData[[ Length[inputData]-1;;]] ]] ) (CITensor @@ Sequence[Join[ {\[ScriptM],\[ScriptN]} , inputData[[;;Length[inputData]-2]] ]])] ];
 ];
+
+
+(* CIITensor *)
+CIITensor[inputArray__]:=Module[{indexArray,tensorValence,temporaryExpression1,indexArrayForSymmetrisation},
+	indexArray = List[inputArray];
+	(* Consistency checks *)
+	If[Length[indexArray]<4,Return[0]];
+	If[Mod[Length[indexArray],2]==1,Return[0]];
+	(* Last special case *)
+	If[Length[indexArray]-4==0, Return[MCIITensorStructure@@Sequence[Join[{0,1,1},indexArray]]] ];
+	(* Calculations *)
+	tensorValence = Length[indexArray]/2-2;
+	indexArrayForSymmetrisation = indexArray[[5;;]];
+	Evaluate[temporaryExpression1@@Table[ ToExpression[ToString[indexArrayForSymmetrisation[[i]]]<>"_"],{i,1,Length[indexArrayForSymmetrisation]}] ] = Sum[KroneckerDelta[j0+j1+j2,tensorValence] (-1)^(tensorValence-j0) (MCIITensorStructure@@Sequence[Join[{j0,1+j1,1+j2},indexArray]]) ,{j0,0,tensorValence},{j1,0,tensorValence},{j2,0,tensorValence}];
+	Return[Calc[1/Factorial[tensorValence] Sum[temporaryExpression1@@Flatten[Permutations[Partition[indexArrayForSymmetrisation,2]][[i]]],{i,1,tensorValence!}]]];
+];
+
+
+(* MCIITensorStructure is an internal function used in CIITensor  *)
+MCIITensorStructure[inputArray__]:=Module[{inputData,indexArray,indexArrayExternal,indexArrayInternal,indexArray1,indexArray2,indexArray3},
+	inputData = List[inputArray];
+	If[ (inputData[[2]]==0)||(inputData[[3]]==0),Return[0]];
+	If[2 Tr[ inputData[[1;;3]] ]!=Length[ inputData[[4;;]] ] , Return[0]];
+	If[Length[inputData[[4;;]] ]==4, Return[Times@@ITensor@@@Partition[inputData[[4;;]],2]] ];
+	indexArrayInternal = Partition[inputData[[4;;7]],2];
+	indexArrayExternal = inputData[[8;;]];
+	If[inputData[[1]]==0,indexArray1 = {}, indexArray1 = indexArrayExternal[[1;;2 inputData[[1]]]] ];
+	If[inputData[[2]]==1,indexArray2 = indexArrayInternal[[1]] , indexArray2 = Join[ indexArrayInternal[[1]] , indexArrayExternal[[ 2 inputData[[1]] + 1 ;; 2 (inputData[[1]]+inputData[[2]]-1)]]] ];
+	If[inputData[[3]]==1,indexArray3 = indexArrayInternal[[2]] , indexArray3 = Join[ indexArrayInternal[[2]] , indexArrayExternal[[ 2 (inputData[[1]]+inputData[[2]]-1)+1 ;;]] ]  ];
+	Return[(CTensor@@indexArray1)(ITensor@@indexArray2)(ITensor@@indexArray3)];
+];
+
+
+(* GravitonVectorVertex *)
+GravitonVectorVertex[inputArray__] := Module[{inputData,TVertex},
+	inputData = List[inputArray];
+	If[Length[inputData]<6,Return[0]];
+	If[Mod[Length[inputData],2]==1,Return[0]];
+	TVertex[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,\[Rho]_,\[Sigma]_,p_,q_]=1/4 FVD[p,\[Lambda]]FVD[q,\[Tau]](ITensor[\[Mu],\[Nu],\[Rho],\[Sigma]]ITensor[\[Alpha],\[Beta],\[Lambda],\[Tau]]+ITensor[\[Mu],\[Nu],\[Lambda],\[Tau]]ITensor[\[Alpha],\[Beta],\[Rho],\[Sigma]]-ITensor[\[Mu],\[Nu],\[Rho],\[Tau]]ITensor[\[Alpha],\[Beta],\[Sigma],\[Lambda]]-ITensor[\[Mu],\[Nu],\[Sigma],\[Lambda]]ITensor[\[Alpha],\[Beta],\[Rho],\[Tau]])//Calc;
+	Return[  Calc[ I (Global`\[Kappa])^(Length[inputData]/2-2) ( TVertex @@ Sequence[Join[ {\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]} , inputData[[Length[inputData]-3;;]]  ]  ] ) (CIITensor @@ Sequence[  Join[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]} , inputData[[;;Length[inputData]-4]]  ]  ])]  ];
+]
 
 
 (* OLD CODE
