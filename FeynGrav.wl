@@ -208,7 +208,7 @@ GravitonFermionVertex[inputArray__] := Module[{inputData,TVertex,indexArray1,ind
 	TVertex[\[Mu]_,\[Nu]_,p_,q_] = Calc[  1/2 FVD[p-q,\[Nu]]GAD[\[Mu]]  ];
 	indexArray1 = Join[ {\[ScriptM],\[ScriptN]}, inputData[[ ;;Length[inputData]-2]] ];
 	indexArray2 = Join[ {\[ScriptM],\[ScriptN]}, inputData[[Length[inputData]-1;;]] ];
-	Return[  Calc[(CETensor @@ Sequence[indexArray1])(TVertex @@ Sequence[indexArray2])] ];
+	Return[  Calc[I Global`\[Kappa]^((Length[inputData]-2)/2) (CETensor @@ Sequence[indexArray1])(TVertex @@ Sequence[indexArray2])] ];
 ];
 
 
