@@ -23,6 +23,12 @@ GravitonPropagatorAlternative::usage = "Propagator of a graviton in the harmonic
 GravitonScalarVertex::usage = "Vertex for interaction between a massless scalar kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of scalars."
 GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The next two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
 GravitonFermionVertex::usage = "Vertex for interaction between a massless Dirac fermion kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of fermions."
+GaugeProjectors::usage = "The standard gauge projectors \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)(p) = \!\(\*SubscriptBox[\(\[Eta]\), \(\[Mu]\[Nu]\)]\)-\!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\!\(\*SuperscriptBox[\(p\), \(2\)]\)."
+NieuwenhuizenOperator1::usage = "Nieuwenhuizen operator \!\(\*SuperscriptBox[\(P\), \(1\)]\)."
+NieuwenhuizenOperator2::usage = "Nieuwenhuizen operator \!\(\*SuperscriptBox[\(P\), \(2\)]\)."
+NieuwenhuizenOperator0::usage = "Nieuwenhuizen operator \!\(\*SuperscriptBox[\(P\), \(0\)]\)."
+NieuwenhuizenOperator0Bar::usage = "Nieuwenhuizen operator \!\(\*OverscriptBox[SuperscriptBox[\(P\), \(0\)], \(_\)]\)."
+NieuwenhuizenOperator0BarBar::usage = "Nieuwenhuizen operator \!\(\*OverscriptBox[OverscriptBox[SuperscriptBox[\(P\), \(0\)], \(_\)], \(_\)]\)."
 
 
 FeynGravCommands := Print[" 'GravitonVertex', 'GravitonPropagator', 'GravitonPropagatorTop', 'GravitonPropagatorAlternative', 'GravitonFermionVertex' "];
@@ -291,6 +297,50 @@ GravitonVectorVertex[inputArray__] := Module[{inputData,TVertex},
 	TVertex[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,\[Rho]_,\[Sigma]_,p_,q_]=1/4 FVD[p,\[Lambda]]FVD[q,\[Tau]](ITensor[\[Mu],\[Nu],\[Rho],\[Sigma]]ITensor[\[Alpha],\[Beta],\[Lambda],\[Tau]]+ITensor[\[Mu],\[Nu],\[Lambda],\[Tau]]ITensor[\[Alpha],\[Beta],\[Rho],\[Sigma]]-ITensor[\[Mu],\[Nu],\[Rho],\[Tau]]ITensor[\[Alpha],\[Beta],\[Sigma],\[Lambda]]-ITensor[\[Mu],\[Nu],\[Sigma],\[Lambda]]ITensor[\[Alpha],\[Beta],\[Rho],\[Tau]])//Calc;
 	Return[  Calc[ I (Global`\[Kappa])^(Length[inputData]/2-2) ( TVertex @@ Sequence[Join[ {\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]} , inputData[[Length[inputData]-3;;]]  ]  ] ) (CIITensor @@ Sequence[  Join[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]} , inputData[[;;Length[inputData]-4]]  ]  ])]  ];
 ]
+
+
+(* GaugeProjectors *)
+GaugeProjectors[inputArray__]:=Module[{inputData},
+		inputData = List[inputArray];
+		Return[MTD@@inputData[[1;;2]] - (Pair[Momentum[inputData[[3]],D],LorentzIndex[inputData[[1]],D]]Pair[Momentum[inputData[[3]],D],LorentzIndex[inputData[[2]],D]])/Pair[Momentum[inputData[[3]],D],Momentum[inputData[[3]],D]]];
+];
+
+
+(* Nieuwenhuizen Operators *)
+NieuwenhuizenOperator1[inputArray__]:=Module[{inputData,indexArray,theMomentum},
+	inputData = List[inputArray];
+	indexArray = inputData[[1;;4]];
+	theMomentum = inputData[[5]];
+	Return[ 1/2 ( GaugeProjectors[indexArray[[1]],indexArray[[3]],theMomentum] (-GaugeProjectors[indexArray[[2]],indexArray[[4]],theMomentum] + MTD[indexArray[[2]],indexArray[[4]]]) + GaugeProjectors[indexArray[[1]],indexArray[[4]],theMomentum] (-GaugeProjectors[indexArray[[2]],indexArray[[3]],theMomentum] + MTD[indexArray[[2]],indexArray[[3]]]) + GaugeProjectors[indexArray[[2]],indexArray[[4]],theMomentum] (-GaugeProjectors[indexArray[[1]],indexArray[[3]],theMomentum] + MTD[indexArray[[1]],indexArray[[3]]]) + GaugeProjectors[indexArray[[2]],indexArray[[3]],theMomentum] (-GaugeProjectors[indexArray[[1]],indexArray[[4]],theMomentum] + MTD[indexArray[[1]],indexArray[[4]]]) )];
+];
+
+NieuwenhuizenOperator2[inputArray__]:=Module[{inputData,indexArray,theMomentum},
+	inputData = List[inputArray];
+	indexArray = inputData[[1;;4]];
+	theMomentum = inputData[[5]];
+	Return[ 1/2 (GaugeProjectors[indexArray[[1]],indexArray[[3]],theMomentum] GaugeProjectors[indexArray[[2]],indexArray[[4]],theMomentum] + GaugeProjectors[indexArray[[1]],indexArray[[4]],theMomentum] GaugeProjectors[indexArray[[2]],indexArray[[3]],theMomentum]) -1/3 (GaugeProjectors[indexArray[[1]],indexArray[[2]],theMomentum]GaugeProjectors[indexArray[[3]],indexArray[[4]],theMomentum]) ];
+];
+
+NieuwenhuizenOperator0[inputArray__]:=Module[{inputData,indexArray,theMomentum},
+	inputData = List[inputArray];
+	indexArray = inputData[[1;;4]];
+	theMomentum = inputData[[5]];
+	Return[ 1/3 (GaugeProjectors[indexArray[[1]],indexArray[[2]],theMomentum]GaugeProjectors[indexArray[[3]],indexArray[[4]],theMomentum]) ];
+];
+
+NieuwenhuizenOperator0Bar[inputArray__]:=Module[{inputData,indexArray,theMomentum},
+	inputData = List[inputArray];
+	indexArray = inputData[[1;;4]];
+	theMomentum = inputData[[5]];
+	Return[ (MTD[indexArray[[1]],indexArray[[2]]]-GaugeProjectors[indexArray[[1]],indexArray[[2]],theMomentum])(MTD[indexArray[[3]],indexArray[[4]]]-GaugeProjectors[indexArray[[3]],indexArray[[4]],theMomentum]) ];
+];
+
+NieuwenhuizenOperator0BarBar[inputArray__]:=Module[{inputData,indexArray,theMomentum},
+	inputData = List[inputArray];
+	indexArray = inputData[[1;;4]];
+	theMomentum = inputData[[5]];
+	Return[ GaugeProjectors[indexArray[[1]],indexArray[[2]],theMomentum](MTD[indexArray[[3]],indexArray[[4]]]-GaugeProjectors[indexArray[[3]],indexArray[[4]],theMomentum])+(MTD[indexArray[[1]],indexArray[[2]]]-GaugeProjectors[indexArray[[1]],indexArray[[2]],theMomentum])GaugeProjectors[indexArray[[3]],indexArray[[4]],theMomentum] ];
+];
 
 
 (* OLD CODE
