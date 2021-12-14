@@ -3,19 +3,23 @@
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
+Print["\!\(\*
+StyleBox[\"FeynGrav\",\nFontWeight->\"Bold\"]\)\!\(\*
+StyleBox[\" \",\nFontWeight->\"Bold\"]\)\!\(\*
+StyleBox[\"verion\",\nFontWeight->\"Bold\"]\)"]
 Print["FeynGrav: All expressions for itteraction veritce are evaluated on a call."]
 Print["FeynGrav: Please, be patient. Evaluation can take some time."]
 Print["FeynGrav: FeynGravCommands print the list of all supported commands."]
 Print["FeynGrav: Use '?CommandName' to see a brief description."]
 
 
-(* ITensor::usage = "I-tensors which are responsible for \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. It takes wither null or an even number of arguments which are Lorentz indices."
+ITensor::usage = "I-tensors which are responsible for \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. It takes wither null or an even number of arguments which are Lorentz indices."
 CTensor::usage = "C-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) expansion. It takes either null or an even number of arguments which are Lorentz indices."
 Vierbein::usage = "Expansion of a vierbein \!\(\*SubscriptBox[SuperscriptBox[\(\[GothicE]\), \(\[Mu]\)], \(\[Nu]\)]\). It takes an even number of arguments."
 CITensor::usage = "CI-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. Take 2 or more arguments."
 CIITensor::usage = "CII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) expansion. Take 4 or more arguments." 
 CETensor::usage = "CE-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SubscriptBox[SuperscriptBox[\(\[GothicE]\), \(\[Mu]\)], \(\[Nu]\)]\) expansion. Take 2 or more arguments."
-CIIITensor::usage = "CIII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Rho]\[Sigma]\)]\) expansion. Take 6 or more arguments." *)
+CIIITensor::usage = "CIII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Rho]\[Sigma]\)]\) expansion. Take 6 or more arguments."
 GravitonVertex::usage = "Vertex for interaction of 3 or more gravitons. Its arguments are Lorentz indices and momenta of the corresponding gravitons. For instance GravitonVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\)]."
 GravitonPropagator::usage = "Propagator of a graviton in the harmonic gauge. Its denominator is given via FAD function."
 GravitonPropagatorTop::usage = "The nominator of a graviton propagator in the harmonic gauge."
@@ -44,21 +48,24 @@ Begin["Private`"];
 
 
 (* ITensor *)
-(* In the function has no arguments it returns 1. This definition if used for the sake of simplicity. *)
+(* Consistency condition. *)
 ITensor[]=1;
-(* SetDelayed is used so the function would be evaluated only when it is needed. The function takes a single sequence as an argument. *)
-ITensor[inputArray__]:=Module[{indexArray,generatingTerm},
-	(* The input sequence is transformed into an array *)
+(* The main body.*)
+ITensor[inputArray__]:=Module[{indexArray,generatingTerm,generatingArrays,temporaryVariable},
+	(* The input sequence is transformed into an array. *)
 	indexArray = List[inputArray];
-	(* If the input sequence has an odd number of terms then the fucntion returns "0". If the number of arguments is even, then the function proceeds. *)
+	(* Consistency check. *)
 	If[Mod[Length[indexArray],2] != 0, Return[0]];
-	(* I shift the array of the arguments by one symbol and generate a single term. *)
-	generatingTerm=Times@@MTD@@@Partition[RotateLeft[indexArray,1],2];
-	(* This single term is symemtrized with respect to index pairs. *)
+	(* Generating arrays of indices. *)
+	generatingArrays = {indexArray};
 	For[i=1,i<=Length[indexArray]/2,i++,
-		generatingTerm = 1/2 (generatingTerm+(generatingTerm/.{indexArray[[2i]]->indexArray[[2i-1]],indexArray[[2i-1]]->indexArray[[2i]]}));
+		temporaryVariable = Length[generatingArrays];
+		For[j=1,j<=temporaryVariable,j++,
+			AppendTo[generatingArrays,generatingArrays[[j]]/.{  Partition[indexArray,2][[i]][[1]]->Partition[indexArray,2][[i]][[2]],Partition[indexArray,2][[i]][[2]]->Partition[indexArray,2][[i]][[1]]  }]
+		];
 	];
-	Return[Calc[generatingTerm]];
+	generatingArrays = Function[Partition[RotateLeft[#,1],2]]/@generatingArrays;
+	Return[Plus@@(1/2^(Length[indexArray]/2) Function[Times@@Apply[MTD,#,1]]/@generatingArrays)];
 ];
 
 
@@ -113,24 +120,6 @@ MCTensorStructure[inputArray__] := Module[{inputData,numberOfMultipliers,partial
 ];
 
 
-(* METensorStructure *)
-(* This is a completely internal command used in CETensor *)
-METensorStructure[inputArray__]:=Module[{inputData,indexArray,indicesCTensor,indicesITensor},
-	inputData = List[inputArray];
-	(* Consistency checks *)
-	If[ (inputData[[1]] == 0)||(inputData[[3]] == 0) , Return[0]];
-	If[ inputData[[1]] != inputData[[2]] + inputData[[3]] , Return[0]];
-	If[ Length[ inputData[[4;;]] ]/2 != inputData[[1]] , Return[0]];
-	If[ (inputData[[1]]==1)&&(inputData[[2]]!=0), Return[0] ];
-	(* Calculations *)
-	indexArray = inputData[[4;;]];
-	indicesITensor = indexArray[[1;;2]];
-	If[ inputData[[2]] == 0 , indicesCTensor = {} , indicesCTensor = indexArray[[3;;3 + 2 (inputData[[2]]) -1]]  ];
-	If[ inputData[[3]] != 1 , indicesITensor = Join[ indicesITensor , indexArray[[3 + 2 inputData[[2]];; ]] ] ];
-	Return[  Calc[(CTensor @@ indicesCTensor) (Vierbein @@ indicesITensor)]  ];
-];
-
-
 (* CIIITensor *)
 CIIITensor[]=0;
 CIIITensor[inputArray__]:=Module[{indexArray,tensorValence,temporaryExpression1,indexArrayForSymmetrisation},
@@ -170,13 +159,16 @@ GravitonVertex[inputArray__]:=Module[{inputData,tensorT,tensorValence,arrayMomen
 	If[Mod[Length[inputData],3]!=0,Return[0]];
 	tensorValence = Length[ inputData ] /3;
 	dummyArray = Flatten[Table[ { ToExpression["\[ScriptM]"<>ToString[i]],ToExpression["\[ScriptN]"<>ToString[i]],ToExpression["\[ScriptP]"<>ToString[i]] } , {i,1,tensorValence}]];
-	tensorT[\[ScriptI]_,j_,a_,b_,r_,s_,\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,\[Rho]_,\[Sigma]_]=-MTD[\[Mu],\[ScriptI]]MTD[\[Nu],j]ITensor[\[Alpha],\[Beta],a,b]ITensor[\[Rho],\[Sigma],r,s]+MTD[\[Mu],\[ScriptI]]MTD[\[Nu],j]ITensor[\[Alpha],\[Rho],a,b]ITensor[\[Beta],\[Sigma],r,s]-2 MTD[\[Mu],\[ScriptI]]MTD[\[Alpha],j]ITensor[\[Beta],\[Rho],a,b]ITensor[\[Nu],\[Sigma],r,s]+2 MTD[\[Mu],\[ScriptI]]MTD[\[Beta],j]ITensor[\[Nu],\[Alpha],a,b]ITensor[\[Rho],\[Sigma],r,s]//Calc;
 	arrayMomenta = Table[ Partition[dummyArray,3][[i]][[3]] ,{i,1,tensorValence}];
 	arrayIndices = Table[ Partition[dummyArray,3][[i]][[1;;2]] ,{i,1,tensorValence}];
-	Evaluate[nonsymmetricExpression@@Table[ToExpression[ToString[dummyArray[[i]]]<>"_"],{i,1,Length[inputData]}]]= Calc[(FVD[ arrayMomenta[[1]] ,\[Lambda]1]   FVD[ arrayMomenta[[2]] ,\[Lambda]2]) ( tensorT@@Sequence[Flatten[Join[{\[Lambda]1,\[Lambda]2} , arrayIndices[[;;2]] , {\[Rho]1,\[Sigma]1,\[Rho]2,\[Sigma]2,\[Rho]3,\[Sigma]3} ]]] )  (CIIITensor@@Sequence[Flatten[Join[{\[Rho]1,\[Sigma]1,\[Rho]2,\[Sigma]2,\[Rho]3,\[Sigma]3} , arrayIndices[[3;;]]]]]) ];
+	Evaluate[nonsymmetricExpression@@Table[ToExpression[ToString[dummyArray[[i]]]<>"_"],{i,1,Length[inputData]}]]= Calc[(FVD[ arrayMomenta[[1]] ,\[Lambda]1]   FVD[ arrayMomenta[[2]] ,\[Lambda]2]) ( TTensorGravity@@Sequence[Flatten[Join[{\[Lambda]1,\[Lambda]2} , arrayIndices[[;;2]] , {\[Rho]1,\[Sigma]1,\[Rho]2,\[Sigma]2,\[Rho]3,\[Sigma]3} ]]] )  (CIIITensor@@Sequence[Flatten[Join[{\[Rho]1,\[Sigma]1,\[Rho]2,\[Sigma]2,\[Rho]3,\[Sigma]3} , arrayIndices[[3;;]]]]]) ];
 	Evaluate[symmetricExpression@@Table[ToExpression[ToString[dummyArray[[i]]]<>"_"],{i,1,Length[inputData]}]]= Calc[(-I 2/(Global`\[Kappa])^2)((Global`\[Kappa])^tensorValence/4)Plus@@nonsymmetricExpression@@@Table[ Flatten[ Permutations[Partition[dummyArray,3]][[i]] ] , {i,1,Factorial[tensorValence]}]] ;
 	Return[Calc[symmetricExpression@@inputData]];
 ];
+
+TTensorGravity[i_,j_,a_,b_,r_,s_,\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,\[Rho]_,\[Sigma]_]:=Module[{},
+	Return[Expand[-MTD[\[Mu],i]MTD[\[Nu],j]ITensor[\[Alpha],\[Beta],a,b]ITensor[\[Rho],\[Sigma],r,s]+MTD[\[Mu],i]MTD[\[Nu],j]ITensor[\[Alpha],\[Rho],a,b]ITensor[\[Beta],\[Sigma],r,s]-2 MTD[\[Mu],i]MTD[\[Alpha],j]ITensor[\[Beta],\[Rho],a,b]ITensor[\[Nu],\[Sigma],r,s]+2 MTD[\[Mu],i]MTD[\[Beta],j]ITensor[\[Nu],\[Alpha],a,b]ITensor[\[Rho],\[Sigma],r,s]]];
+]
 
 
 (* Graviton propagators *)
@@ -203,6 +195,24 @@ CETensor[inputArray__]:=Module[{inputData,tensorValence,dummyArray,nonSymmetricE
 	Evaluate[nonSymmetricExpression @@ Flatten[  Table[ {ToExpression["\[ScriptM]"<>ToString[i]<>"_"] , ToExpression["\[ScriptN]"<>ToString[i]<>"_"]} ,{i,1,tensorValence}]  ] ]=  Calc[  Sum[ ( METensorStructure @@ Sequence[Join[{tensorValence},{j0},{j1},dummyArray]]) ,{j0,0,tensorValence},{j1,0,tensorValence}]  ]  ;
 	Evaluate[symmetricExpression @@ Flatten[  Table[ {ToExpression["\[ScriptM]"<>ToString[i]<>"_"] , ToExpression["\[ScriptN]"<>ToString[i]<>"_"]} ,{i,1,tensorValence}]  ] ] = 1/Factorial[tensorValence] Calc[  Plus@@nonSymmetricExpression@@@Table[ Flatten[ Permutations[Partition[dummyArray,2]][[i]] ] , {i,1,Factorial[tensorValence]}]  ];
 	Return[ Calc[ symmetricExpression @@ inputData ]];	
+];
+
+
+(* METensorStructure *)
+(* This is a completely internal command used in CETensor *)
+METensorStructure[inputArray__]:=Module[{inputData,indexArray,indicesCTensor,indicesITensor},
+	inputData = List[inputArray];
+	(* Consistency checks *)
+	If[ (inputData[[1]] == 0)||(inputData[[3]] == 0) , Return[0]];
+	If[ inputData[[1]] != inputData[[2]] + inputData[[3]] , Return[0]];
+	If[ Length[ inputData[[4;;]] ]/2 != inputData[[1]] , Return[0]];
+	If[ (inputData[[1]]==1)&&(inputData[[2]]!=0), Return[0] ];
+	(* Calculations *)
+	indexArray = inputData[[4;;]];
+	indicesITensor = indexArray[[1;;2]];
+	If[ inputData[[2]] == 0 , indicesCTensor = {} , indicesCTensor = indexArray[[3;;3 + 2 (inputData[[2]]) -1]]  ];
+	If[ inputData[[3]] != 1 , indicesITensor = Join[ indicesITensor , indexArray[[3 + 2 inputData[[2]];; ]] ] ];
+	Return[  Calc[(CTensor @@ indicesCTensor) (Vierbein @@ indicesITensor)]  ];
 ];
 
 
