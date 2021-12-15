@@ -15,6 +15,7 @@ Print["FeynGrav: Use '?CommandName' to see a brief description."]
 
 ITensor::usage = "I-tensors which are responsible for \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. It takes wither null or an even number of arguments which are Lorentz indices."
 CTensor::usage = "C-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) expansion. It takes either null or an even number of arguments which are Lorentz indices."
+CTensorStructure::usage = ""
 Vierbein::usage = "Expansion of a vierbein \!\(\*SubscriptBox[SuperscriptBox[\(\[GothicE]\), \(\[Mu]\)], \(\[Nu]\)]\). It takes an even number of arguments."
 CITensor::usage = "CI-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) expansion. Take 2 or more arguments."
 CIITensor::usage = "CII-tensors which are responsible for \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\) \!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\) expansion. Take 4 or more arguments." 
@@ -70,54 +71,43 @@ ITensor[inputArray__]:=Module[{indexArray,generatingTerm,generatingArrays,tempor
 
 
 (* CTensor *)
-(* If the function has no arguments it return 1. *)
+(* Consistency condition. *)
 CTensor[]=1;
-(* SetDelayed is used so the function would be evaluated only when it is needed. The function takes a single sequence as an argument. *)
-CTensor[inputArray__] := Module[{indexArray,tensorValence,temporaryExpression,numberOfTerms,summationIndices,symmetricExpression1,symmetricExpression2},
-	(* The input sequence is transformed into an array *)
+CTensor[inputArray__] := Module[{indexArray,tensorValence,dummyArray,temporaryExpression,numberOfTerms,summationIndices,symmetrizationFunction},
 	indexArray = List[inputArray];
-	(* If the input sequence has an odd number of terms then the fucntion returns "0". If the number of arguments is even, then the function proceeds. *)
+	(* Consistency check. *)
 	If[Mod[Length[indexArray],2] != 0, Return[0]];
-	tensorValence = Length[indexArray]/2;
+	tensorValence = Length[indexArray]/2;	
+	(* Creation of the generating term *)
+	dummyArray = Flatten[Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,tensorValence}]];
 	temporaryExpression = 0;
-	(* The expression is generated, but it is not yet symmetric *)
 	For[numberOfTerms = 1, numberOfTerms <= tensorValence, numberOfTerms++,
-		summationIndices = {#,1,5}&/@ Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}];
-		temporaryExpression = temporaryExpression + (-1)^(tensorValence+numberOfTerms)/(Factorial[numberOfTerms] 2^numberOfTerms)Sum[MCTensorStructure@@Join[{numberOfTerms},Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}],indexArray] ,Evaluate[Sequence@@summationIndices]];
+		summationIndices = {#,1,tensorValence}&/@ Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}];
+		temporaryExpression += (-1)^(tensorValence+numberOfTerms)/(Factorial[numberOfTerms] 2^numberOfTerms) Sum[ CTensorStructure@@Join[{tensorValence,numberOfTerms},Table[ToExpression["j"<>ToString[i]],{i,1,numberOfTerms}],dummyArray] ,Evaluate[Sequence@@summationIndices]];
 	];
-	(* SYmmetrization *)
-	Evaluate[symmetricExpression1@@Table[ToExpression[ToString[indexArray[[i]]] <> "_"] ,{i,1,Length[indexArray]}]] = Calc[temporaryExpression];
-	Evaluate[symmetricExpression2@@Table[ToExpression[ToString[indexArray[[i]]] <> "_"] ,{i,1,Length[indexArray]}]] = 1/Factorial[tensorValence] Sum[symmetricExpression1@@Flatten[Permutations[Partition[indexArray,2]][[i]]],{i,1,tensorValence!}];
-	Return[Calc[symmetricExpression2@@indexArray]];
+	symmetrizationFunction = Function[Evaluate[dummyArray],Evaluate[Expand[temporaryExpression]]];
+	Return[Expand[1/Factorial[tensorValence] Plus@@Apply[symmetrizationFunction,Flatten/@Permutations[Partition[indexArray,2]],1]]];
 ];
-
-
-(* MCTensorStructure *)
+(* CTensorStructure *)
 (* This is a completely internal command used in CTensor *)
-MCTensorStructure[inputArray__] := Module[{inputData,numberOfMultipliers,partialOrders,indexArray,splitIndexArray,tmpPosition,i},
-	inputData = List[inputArray];
-	(* The number of multipliers *)
-	numberOfMultipliers = inputData[[1]];
-	(* The array of length of subarrays *)
-	partialOrders = inputData[[2;;1+numberOfMultipliers]];
-	(* The array of indices to be splitted *)
-	indexArray = inputData[[numberOfMultipliers +2 ;;]];
-	(* Make sure that the function received the correct number of arguments *)
-	If[Mod[Length[indexArray],2]==1,Return[0]];
-	If[Tr[partialOrders]!=Length[indexArray]/2,Return[0]];
-	
-	(* This part split indexArray in a set of subarray *)
-	splitIndexArray = {};
-	(* The initial cursor position is set on the first element of index Array. It runs along the array and split it *)
-	tmpPosition = 1;
+CTensorStructure[inputArray__] := Module[{indexArray,perturbationOrder,numberOfMultipliers,partialOrders,partialArrays},
+	(* Preparations *)
+	indexArray = List[inputArray];
+	perturbationOrder = indexArray[[1]];
+	numberOfMultipliers = indexArray[[2]];
+	partialOrders = indexArray[[3;;3+numberOfMultipliers-1]];
+	indexArray = indexArray[[3+numberOfMultipliers;;]];
+	(* Consistency check *)
+	If[Total[partialOrders]!=perturbationOrder,Return[0]];
+	If[Length[indexArray]/2!=perturbationOrder,Return[0]];
+	(* Calculation *)
+	partialArrays = {};
 	For[i=1,i<=numberOfMultipliers,i++,
-		AppendTo[ splitIndexArray , indexArray[[ tmpPosition ;; tmpPosition + 2 partialOrders[[i]] - 1 ]] ];
-		tmpPosition = tmpPosition + 2 partialOrders[[i]]  ;
+		AppendTo[partialArrays,indexArray[[;;2 partialOrders[[i]]]]];
+		indexArray = indexArray[[2 partialOrders[[i]]+1;;]];
 	];
-	(* splitIndexArray now contain indexArray splitted in subarray *)
-	(* Now I generay a multiplication of ITensors with the given indices *)
-	Return[Calc[1/Times@@partialOrders Times@@ITensor@@@splitIndexArray]];
-];
+	Return[Expand[1/(Times@@partialOrders) Times@@Apply[ITensor,partialArrays,1]]];
+]
 
 
 (* CIIITensor *)
