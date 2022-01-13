@@ -3,14 +3,12 @@
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
-Print["\!\(\*
-StyleBox[\"FeynGrav\",\nFontWeight->\"Bold\"]\)\!\(\*
-StyleBox[\" \",\nFontWeight->\"Bold\"]\)\!\(\*
-StyleBox[\"version 1.0\",\nFontWeight->\"Bold\"]\)"]
-Print["FeynGrav: All expressions for itteraction veritce are evaluated on a call."]
-Print["FeynGrav: Please, be patient. Evaluation can take some time."]
+Print[Style["FeynGrav version 1.0",Bold]]
+Print["FeynGrav: All expressions for itteraction veritce are taken from Libs directory for the sake of performance."]
+Print["FeynGrav: 'FeynGrav_Libraries_Generator.wls' contains a script that generates expressions for the interaction vertices. "]
 Print["FeynGrav: FeynGravCommands print the list of all supported commands."]
 Print["FeynGrav: Use '?CommandName' to see a brief description."]
+Print["FeynGrav: Examples can be found in 'FeynGrav_Examples.nb'."]
 
 
 GravitonVertex::usage = "Vertex for interaction of 3 or more gravitons. Its arguments are Lorentz indices and momenta of the corresponding gravitons. For instance GravitonVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\)]."
@@ -35,14 +33,15 @@ NieuwenhuizenOperator0BarBar::usage = "Nieuwenhuizen operator (\!\(\*OverscriptB
 FeynGravCommands := Print[" 'GravitonVertex', 'GravitonPropagator', 'GravitonPropagatorTop', 'GravitonPropagatorAlternative', 'GravitonFermionVertex', 'GaugeProjector', 'NieuwenhuizenOperator1', 'NieuwenhuizenOperator2', 'NieuwenhuizenOperator0', 'NieuwenhuizenOperator0Bar', 'NieuwenhuizenOperator1BarBar' "];
 
 
+SetDirectory[DirectoryName[$InputFileName]];
 Module[{cursor,i},
 	cursor = 1;
 	Clear[GravitonVertex];
-	While[FileExistsQ["Libs/GravitonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVertex@@Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"],ToExpression["p"<>ToString[i]<>"_"]},{i,1,cursor}]]] = Get["Libs/GravitonVertex_"<>ToString[cursor]];
+	While[FileExistsQ["./Libs/GravitonVertex_"<>ToString[cursor]],
+		Evaluate[GravitonVertex@@Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"],ToExpression["p"<>ToString[i]<>"_"]},{i,1,cursor}]]] = Get["./Libs/GravitonVertex_"<>ToString[cursor]];
 		cursor++;
 	];
-	Print["Graviton vertices are imported up to order "<>ToString[cursor-1]<>"."];
+	If[cursor-1-2<0,Print["Graviton vertices are imported up to order 0"],Print["Graviton vertices are imported up to order "<>ToString[cursor-1-2]<>" in \[Kappa]."]];
 	Remove@@Function[ToExpression["m"<>ToString[#]]]/@Range[cursor];
 	Remove@@Function[ToExpression["n"<>ToString[#]]]/@Range[cursor];
 	Remove@@Function[ToExpression["p"<>ToString[#]]]/@Range[cursor];
@@ -50,11 +49,11 @@ Module[{cursor,i},
 Module[{cursor,p1,p2,i},
 	cursor = 1;
 	Clear[GravitonScalarVertex];
-	While[FileExistsQ["Libs/GravitonScalarVertex_"<>ToString[cursor]],
-		Evaluate[GravitonScalarVertex@@Flatten[{Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,cursor}],{ToExpression["p1_"],ToExpression["p2_"]}}]] = Get["Libs/GravitonScalarVertex_"<>ToString[cursor]];
+	While[FileExistsQ["./Libs/GravitonScalarVertex_"<>ToString[cursor]],
+		Evaluate[GravitonScalarVertex@@Flatten[{Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,cursor}],{ToExpression["p1_"],ToExpression["p2_"]}}]] = Get["./Libs/GravitonScalarVertex_"<>ToString[cursor]];
 		cursor++;
 	];
-	Print["Graviton-Scalar vertices are imported up to order "<>ToString[cursor-1]<>"."];
+	Print["Graviton-Scalar vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
 	Remove@@Function[ToExpression["m"<>ToString[#]]]/@Range[cursor];
 	Remove@@Function[ToExpression["n"<>ToString[#]]]/@Range[cursor];
 	Remove[p1,p2];
@@ -64,11 +63,11 @@ Module[{cursor,p1,p2,i},
 Module[{cursor,p1,p2,i},
 	cursor = 1;
 	Clear[GravitonFermionVertex];
-	While[FileExistsQ["Libs/GravitonFermionVertex_"<>ToString[cursor]],
-		Evaluate[GravitonFermionVertex@@Flatten[{Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,cursor}],{ToExpression["p1_"],ToExpression["p2_"]}}]] = Get["Libs/GravitonFermionVertex_"<>ToString[cursor]];
+	While[FileExistsQ["./Libs/GravitonFermionVertex_"<>ToString[cursor]],
+		Evaluate[GravitonFermionVertex@@Flatten[{Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,cursor}],{ToExpression["p1_"],ToExpression["p2_"]}}]] = Get["./Libs/GravitonFermionVertex_"<>ToString[cursor]];
 		cursor++;
 	];
-	Print["Graviton-Fermion vertices are imported up to order "<>ToString[cursor-1]<>"."];
+	Print["Graviton-Fermion vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
 	Remove@@Function[ToExpression["m"<>ToString[#]]]/@Range[cursor];
 	Remove@@Function[ToExpression["n"<>ToString[#]]]/@Range[cursor];
 	Remove[p1,p2];
@@ -78,17 +77,18 @@ Module[{cursor,p1,p2,i},
 Module[{cursor,p1,p2,\[Lambda]1,\[Lambda]2,i},
 	cursor = 1;
 	Clear[GravitonVectorVertex];
-	While[FileExistsQ["Libs/GravitonVectorVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVectorVertex@@Flatten[{Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,cursor}],{ToExpression["\[Lambda]1_"],ToExpression["\[Lambda]2_"],ToExpression["p1_"],ToExpression["p2_"]}}]] = Get["Libs/GravitonVectorVertex_"<>ToString[cursor]];
+	While[FileExistsQ["./Libs/GravitonVectorVertex_"<>ToString[cursor]],
+		Evaluate[GravitonVectorVertex@@Flatten[{Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,cursor}],{ToExpression["\[Lambda]1_"],ToExpression["\[Lambda]2_"],ToExpression["p1_"],ToExpression["p2_"]}}]] = Get["./Libs/GravitonVectorVertex_"<>ToString[cursor]];
 		cursor++;
 	];
-	Print["Graviton-Vector vertices are imported up to order "<>ToString[cursor-1]<>"."];
+	Print["Graviton-Vector vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
 	Remove@@Function[ToExpression["m"<>ToString[#]]]/@Range[cursor];
 	Remove@@Function[ToExpression["n"<>ToString[#]]]/@Range[cursor];
 	Remove[p1,p2,\[Lambda]1,\[Lambda]2];
 	
 	Remove[cursor,i];
 ]
+ResetDirectory[];
 
 
 Begin["Private`"];

@@ -367,7 +367,7 @@ exportGravitonFermionVertex[order_]:=Module[{cursor},
 ]
 
 (* Graviton-Fermion vertices import *)
-exportGravitonFermionVertex:=Module[{cursor,p1,p2},
+importGravitonFermionVertex:=Module[{cursor,p1,p2},
 	cursor = 1;
 	Clear[GravitonFermionVertex];
 	While[FileExistsQ["Libs/GravitonFermionVertex_"<>ToString[cursor]],
@@ -458,7 +458,7 @@ importGravitonVectorVertex:=Module[{cursor,\[Lambda]1,\[Lambda]2,p1,p2},
 ]
 
 
-Module[{perturbationOrder = 2},
+Module[{perturbationOrder = 3},
 	exportITensor[perturbationOrder+1];
 	importITensor;
 	exportCTensor[perturbationOrder];
@@ -473,14 +473,11 @@ Module[{perturbationOrder = 2},
 	importVierbein;
 	exportCETensor[perturbationOrder+1];
 	importCETensor;
-	exportGravitonScalarVertex[perturbationOrder];
+	exportGravitonFermionVertex[perturbationOrder];
 	exportCIITensor[perturbationOrder+2];
 	importCIITensor;
 	exportGravitonVectorVertex[perturbationOrder];
 ]
-
-
-
 
 
 
