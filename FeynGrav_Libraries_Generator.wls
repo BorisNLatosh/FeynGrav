@@ -84,7 +84,7 @@ CTensorStructure[inputArray__] := Module[{indexArray,perturbationOrder,numberOfM
 
 (* CTensor Export *)
 exportCTensor[order_]:=Module[{cursor},
-	Print["Export of I-tensors is initiated."];
+	Print["Export of C-tensors is initiated."];
 	For[cursor=1,cursor<=order,cursor++,
 		Evaluate[CTensorGenerator@@Flatten[Table[{ToExpression["m"<>ToString[i]],ToExpression["n"<>ToString[i]]},{i,1,cursor}]]]>>"Libs/CTensor_"<>ToString[cursor];
 		Print["Done for order "<>ToString[cursor]];
@@ -459,7 +459,7 @@ importGravitonVectorVertex:=Module[{cursor,\[Lambda]1,\[Lambda]2,p1,p2},
 
 
 Module[{perturbationOrder = 3},
-	exportITensor[perturbationOrder+1];
+	(*exportITensor[perturbationOrder+1];*)
 	importITensor;
 	exportCTensor[perturbationOrder];
 	importCTensor;
@@ -478,6 +478,9 @@ Module[{perturbationOrder = 3},
 	importCIITensor;
 	exportGravitonVectorVertex[perturbationOrder];
 ]
+
+
+
 
 
 
