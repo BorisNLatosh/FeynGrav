@@ -1,1 +1,16 @@
-(1/2)^(4)  (MTD[n1,m2]MTD[n2,m3]MTD[n3,m4]MTD[n4,m1]+MTD[m1,m2]MTD[n2,m3]MTD[n3,m4]MTD[n4,n1]+MTD[n1,n2]MTD[m2,m3]MTD[n3,m4]MTD[n4,m1]+MTD[m1,n2]MTD[m2,m3]MTD[n3,m4]MTD[n4,n1]+MTD[n1,m2]MTD[n2,n3]MTD[m3,m4]MTD[n4,m1]+MTD[m1,m2]MTD[n2,n3]MTD[m3,m4]MTD[n4,n1]+MTD[n1,n2]MTD[m2,n3]MTD[m3,m4]MTD[n4,m1]+MTD[m1,n2]MTD[m2,n3]MTD[m3,m4]MTD[n4,n1]+MTD[n1,m2]MTD[n2,m3]MTD[n3,n4]MTD[m4,m1]+MTD[m1,m2]MTD[n2,m3]MTD[n3,n4]MTD[m4,n1]+MTD[n1,n2]MTD[m2,m3]MTD[n3,n4]MTD[m4,m1]+MTD[m1,n2]MTD[m2,m3]MTD[n3,n4]MTD[m4,n1]+MTD[n1,m2]MTD[n2,n3]MTD[m3,n4]MTD[m4,m1]+MTD[m1,m2]MTD[n2,n3]MTD[m3,n4]MTD[m4,n1]+MTD[n1,n2]MTD[m2,n3]MTD[m3,n4]MTD[m4,m1]+MTD[m1,n2]MTD[m2,n3]MTD[m3,n4]MTD[m4,n1])
+(MTD[m1, n2]*MTD[m2, n3]*MTD[m3, n4]*MTD[m4, n1])/16 + 
+ (MTD[m1, n4]*MTD[m2, n1]*MTD[m3, n2]*MTD[m4, n3])/16 + 
+ (MTD[m1, n4]*MTD[m2, n3]*MTD[m3, m4]*MTD[n1, n2])/16 + 
+ (MTD[m1, m4]*MTD[m2, n3]*MTD[m3, n4]*MTD[n1, n2])/16 + 
+ (MTD[m1, n4]*MTD[m2, m3]*MTD[m4, n3]*MTD[n1, n2])/16 + 
+ (MTD[m1, n2]*MTD[m2, n3]*MTD[m3, m4]*MTD[n1, n4])/16 + 
+ (MTD[m1, n2]*MTD[m2, m3]*MTD[m4, n3]*MTD[n1, n4])/16 + 
+ (MTD[m1, m2]*MTD[m3, n2]*MTD[m4, n3]*MTD[n1, n4])/16 + 
+ (MTD[m1, n4]*MTD[m2, n1]*MTD[m3, m4]*MTD[n2, n3])/16 + 
+ (MTD[m1, m4]*MTD[m2, n1]*MTD[m3, n4]*MTD[n2, n3])/16 + 
+ (MTD[m1, m2]*MTD[m3, n4]*MTD[m4, n1]*MTD[n2, n3])/16 + 
+ (MTD[m1, m2]*MTD[m3, m4]*MTD[n1, n4]*MTD[n2, n3])/16 + 
+ (MTD[m1, m4]*MTD[m2, n1]*MTD[m3, n2]*MTD[n3, n4])/16 + 
+ (MTD[m1, n2]*MTD[m2, m3]*MTD[m4, n1]*MTD[n3, n4])/16 + 
+ (MTD[m1, m2]*MTD[m3, n2]*MTD[m4, n1]*MTD[n3, n4])/16 + 
+ (MTD[m1, m4]*MTD[m2, m3]*MTD[n1, n2]*MTD[n3, n4])/16

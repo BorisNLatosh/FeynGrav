@@ -459,7 +459,7 @@ importGravitonVectorVertex:=Module[{cursor,\[Lambda]1,\[Lambda]2,p1,p2},
 
 
 Module[{perturbationOrder = 3},
-	(*exportITensor[perturbationOrder+1];*)
+	exportITensor[perturbationOrder+1];
 	importITensor;
 	exportCTensor[perturbationOrder];
 	importCTensor;
@@ -478,9 +478,3 @@ Module[{perturbationOrder = 3},
 	importCIITensor;
 	exportGravitonVectorVertex[perturbationOrder];
 ]
-
-
-
-
-
-
