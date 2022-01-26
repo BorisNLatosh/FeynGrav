@@ -3,12 +3,10 @@
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
-Print[Style["FeynGrav version 1.0",Bold]]
-Print["FeynGrav: All expressions for itteraction veritce are taken from Libs directory for the sake of performance."]
-Print["FeynGrav: 'FeynGrav_Libraries_Generator.wls' contains a script that generates expressions for the interaction vertices. "]
+Print[Style["FeynGrav version 1.1",Bold]]
 Print["FeynGrav: FeynGravCommands print the list of all supported commands."]
 Print["FeynGrav: Use '?CommandName' to see a brief description."]
-Print["FeynGrav: Examples can be found in 'FeynGrav_Examples.nb'."]
+Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and ArXiV:2201.06812."]
 
 
 GravitonVertex::usage = "Vertex for interaction of 3 or more gravitons. Its arguments are Lorentz indices and momenta of the corresponding gravitons. For instance GravitonVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\)]."
@@ -34,60 +32,58 @@ FeynGravCommands := Print[" 'GravitonVertex', 'GravitonPropagator', 'GravitonPro
 
 
 SetDirectory[DirectoryName[$InputFileName]];
-Module[{cursor,i},
+
+dummyArrayP=n\[Function]Flatten[Function[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["p"<>ToString[#]]}]/@Range[n]];
+dummyArray=n\[Function]Flatten[Function[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]]}]/@Range[n]];
+
+Module[{cursor},
 	cursor = 1;
 	Clear[GravitonVertex];
 	While[FileExistsQ["./Libs/GravitonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVertex@@Flatten[Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"],ToExpression["p"<>ToString[i]<>"_"]},{i,1,cursor}]]] = Get["./Libs/GravitonVertex_"<>ToString[cursor]];
+		Evaluate[GravitonVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@dummyArrayP[cursor+2])]] = Get["./Libs/GravitonVertex_"<>ToString[cursor]];
 		cursor++;
 	];
-	If[cursor-1-2<0,Print["Graviton vertices are imported up to order 0"],Print["Graviton vertices are imported up to order "<>ToString[cursor-1-2]<>" in \[Kappa]."]];
-	Remove@@Function[ToExpression["m"<>ToString[#]]]/@Range[cursor];
-	Remove@@Function[ToExpression["n"<>ToString[#]]]/@Range[cursor];
-	Remove@@Function[ToExpression["p"<>ToString[#]]]/@Range[cursor];
-	];
-Module[{cursor,p1,p2,i},
+	If[cursor-1<=0,Print["Graviton vertices are imported up to order 0"],Print["Graviton vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."]];
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArrayP[cursor+2]);
+];
+
+Module[{cursor},
 	cursor = 1;
 	Clear[GravitonScalarVertex];
 	While[FileExistsQ["./Libs/GravitonScalarVertex_"<>ToString[cursor]],
-		Evaluate[GravitonScalarVertex@@Flatten[{Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,cursor}],{ToExpression["p1_"],ToExpression["p2_"]}}]] = Get["./Libs/GravitonScalarVertex_"<>ToString[cursor]];
+		Evaluate[GravitonScalarVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2}])]] = Get["./Libs/GravitonScalarVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	Print["Graviton-Scalar vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove@@Function[ToExpression["m"<>ToString[#]]]/@Range[cursor];
-	Remove@@Function[ToExpression["n"<>ToString[#]]]/@Range[cursor];
-	Remove[p1,p2];
-	
-	Remove[cursor,i];
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
 ]
-Module[{cursor,p1,p2,i},
+
+Module[{cursor},
 	cursor = 1;
 	Clear[GravitonFermionVertex];
 	While[FileExistsQ["./Libs/GravitonFermionVertex_"<>ToString[cursor]],
-		Evaluate[GravitonFermionVertex@@Flatten[{Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,cursor}],{ToExpression["p1_"],ToExpression["p2_"]}}]] = Get["./Libs/GravitonFermionVertex_"<>ToString[cursor]];
+		Evaluate[GravitonFermionVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2}])]] = Get["./Libs/GravitonFermionVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	Print["Graviton-Fermion vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove@@Function[ToExpression["m"<>ToString[#]]]/@Range[cursor];
-	Remove@@Function[ToExpression["n"<>ToString[#]]]/@Range[cursor];
-	Remove[p1,p2];
-	
-	Remove[cursor,i];
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
 ]
-Module[{cursor,p1,p2,\[Lambda]1,\[Lambda]2,i},
+
+Module[{cursor},
 	cursor = 1;
 	Clear[GravitonVectorVertex];
 	While[FileExistsQ["./Libs/GravitonVectorVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVectorVertex@@Flatten[{Table[{ToExpression["m"<>ToString[i]<>"_"],ToExpression["n"<>ToString[i]<>"_"]},{i,1,cursor}],{ToExpression["\[Lambda]1_"],ToExpression["\[Lambda]2_"],ToExpression["p1_"],ToExpression["p2_"]}}]] = Get["./Libs/GravitonVectorVertex_"<>ToString[cursor]];
+		Evaluate[GravitonVectorVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{\[Lambda]1,\[Lambda]2,p1,p2}])]] = Get["./Libs/GravitonVectorVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	Print["Graviton-Vector vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove@@Function[ToExpression["m"<>ToString[#]]]/@Range[cursor];
-	Remove@@Function[ToExpression["n"<>ToString[#]]]/@Range[cursor];
-	Remove[p1,p2,\[Lambda]1,\[Lambda]2];
-	
-	Remove[cursor,i];
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
 ]
+
+Remove[FeynGrav`dummyArrayP,FeynGrav`dummyArray];
+Remove[FeynGrav`n];
+Remove[FeynGrav`\[Lambda]1,FeynGrav`\[Lambda]2,FeynGrav`p1,FeynGrav`p2];
+Remove[cursor];
 ResetDirectory[];
 
 
@@ -101,53 +97,16 @@ GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I ((1/2 (MTD[
 
 
 (* GaugeProjector *)
-GaugeProjector[inputArray__]:=Module[{inputData},
-		inputData = List[inputArray];
-		If[Length[inputData]!=3,Return[0]];
-		Return[MTD@@inputData[[1;;2]] - (Pair[Momentum[inputData[[3]],D],LorentzIndex[inputData[[1]],D]]Pair[Momentum[inputData[[3]],D],LorentzIndex[inputData[[2]],D]])/Pair[Momentum[inputData[[3]],D],Momentum[inputData[[3]],D]]];
-];
+GaugeProjector = {\[Mu],\[Nu],k} \[Function] Pair[ LorentzIndex[\[Mu],D], LorentzIndex[\[Nu],D] ] - (Pair[Momentum[k,D], LorentzIndex[\[Mu],D]] Pair[Momentum[k,D],LorentzIndex[\[Nu],D]])/(Pair[ Momentum[k,D], Momentum[k,D]]);
 
 
 (* Nieuwenhuizen Operators *)
-NieuwenhuizenOperator1[inputArray__]:=Module[{inputData,indexArray,theMomentum},
-	inputData = List[inputArray];
-	If[Length[inputData]!=5,Return[0]];
-	indexArray = inputData[[1;;4]];
-	theMomentum = inputData[[5]];
-	Return[ 1/2 ( GaugeProjector[indexArray[[1]],indexArray[[3]],theMomentum] (-GaugeProjector[indexArray[[2]],indexArray[[4]],theMomentum] + MTD[indexArray[[2]],indexArray[[4]]]) + GaugeProjector[indexArray[[1]],indexArray[[4]],theMomentum] (-GaugeProjector[indexArray[[2]],indexArray[[3]],theMomentum] + MTD[indexArray[[2]],indexArray[[3]]]) + GaugeProjector[indexArray[[2]],indexArray[[4]],theMomentum] (-GaugeProjector[indexArray[[1]],indexArray[[3]],theMomentum] + MTD[indexArray[[1]],indexArray[[3]]]) + GaugeProjector[indexArray[[2]],indexArray[[3]],theMomentum] (-GaugeProjector[indexArray[[1]],indexArray[[4]],theMomentum] + MTD[indexArray[[1]],indexArray[[4]]]) )];
-];
 
-NieuwenhuizenOperator2[inputArray__]:=Module[{inputData,indexArray,theMomentum},
-	inputData = List[inputArray];
-	If[Length[inputData]!=5,Return[0]];
-	indexArray = inputData[[1;;4]];
-	theMomentum = inputData[[5]];
-	Return[ 1/2 (GaugeProjector[indexArray[[1]],indexArray[[3]],theMomentum] GaugeProjector[indexArray[[2]],indexArray[[4]],theMomentum] + GaugeProjector[indexArray[[1]],indexArray[[4]],theMomentum] GaugeProjector[indexArray[[2]],indexArray[[3]],theMomentum]) -1/3 (GaugeProjector[indexArray[[1]],indexArray[[2]],theMomentum]GaugeProjector[indexArray[[3]],indexArray[[4]],theMomentum]) ];
-];
-
-NieuwenhuizenOperator0[inputArray__]:=Module[{inputData,indexArray,theMomentum},
-	inputData = List[inputArray];
-	If[Length[inputData]!=5,Return[0]];
-	indexArray = inputData[[1;;4]];
-	theMomentum = inputData[[5]];
-	Return[ 1/3 (GaugeProjector[indexArray[[1]],indexArray[[2]],theMomentum]GaugeProjector[indexArray[[3]],indexArray[[4]],theMomentum]) ];
-];
-
-NieuwenhuizenOperator0Bar[inputArray__]:=Module[{inputData,indexArray,theMomentum},
-	inputData = List[inputArray];
-	If[Length[inputData]!=5,Return[0]];
-	indexArray = inputData[[1;;4]];
-	theMomentum = inputData[[5]];
-	Return[ (MTD[indexArray[[1]],indexArray[[2]]]-GaugeProjector[indexArray[[1]],indexArray[[2]],theMomentum])(MTD[indexArray[[3]],indexArray[[4]]]-GaugeProjector[indexArray[[3]],indexArray[[4]],theMomentum]) ];
-];
-
-NieuwenhuizenOperator0BarBar[inputArray__]:=Module[{inputData,indexArray,theMomentum},
-	inputData = List[inputArray];
-	If[Length[inputData]!=5,Return[0]];
-	indexArray = inputData[[1;;4]];
-	theMomentum = inputData[[5]];
-	Return[ GaugeProjector[indexArray[[1]],indexArray[[2]],theMomentum](MTD[indexArray[[3]],indexArray[[4]]]-GaugeProjector[indexArray[[3]],indexArray[[4]],theMomentum])+(MTD[indexArray[[1]],indexArray[[2]]]-GaugeProjector[indexArray[[1]],indexArray[[2]],theMomentum])GaugeProjector[indexArray[[3]],indexArray[[4]],theMomentum] ];
-];
+NieuwenhuizenOperator1= {\[Mu],\[Nu],\[Alpha],\[Beta],k}\[Function]1/2 (GaugeProjector[\[Mu],\[Alpha],k](Pair[LorentzIndex[\[Nu],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Nu],\[Beta],k])+GaugeProjector[\[Mu],\[Beta],k](Pair[LorentzIndex[\[Nu],D],LorentzIndex[\[Alpha],D]]-GaugeProjector[\[Nu],\[Alpha],k])+GaugeProjector[\[Nu],\[Alpha],k](Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Mu],\[Beta],k])+GaugeProjector[\[Nu],\[Beta],k](Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Alpha],D]]-GaugeProjector[\[Mu],\[Alpha],k]));
+NieuwenhuizenOperator2= {\[Mu],\[Nu],\[Alpha],\[Beta],k}\[Function]1/2 (GaugeProjector[\[Mu],\[Alpha],k]GaugeProjector[\[Nu],\[Beta],k]+GaugeProjector[\[Mu],\[Beta],k]GaugeProjector[\[Nu],\[Alpha],k])-1/3 GaugeProjector[\[Mu],\[Nu],k]GaugeProjector[\[Alpha],\[Beta],k];
+NieuwenhuizenOperator0= {\[Mu],\[Nu],\[Alpha],\[Beta],k}\[Function]1/3 GaugeProjector[\[Mu],\[Nu],k]GaugeProjector[\[Alpha],\[Beta],k];
+NieuwenhuizenOperator0Bar= {\[Mu],\[Nu],\[Alpha],\[Beta],k}\[Function](Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Nu],D]]-GaugeProjector[\[Mu],\[Nu],k])(Pair[LorentzIndex[\[Alpha],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Alpha],\[Beta],k]);
+NieuwenhuizenOperator0BarBar= {\[Mu],\[Nu],\[Alpha],\[Beta],k}\[Function]GaugeProjector[\[Mu],\[Nu],k](Pair[LorentzIndex[\[Alpha],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Alpha],\[Beta],k])+(Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Nu],D]]-GaugeProjector[\[Mu],\[Nu],k])GaugeProjector[\[Alpha],\[Beta],k];
 
 
 End[];

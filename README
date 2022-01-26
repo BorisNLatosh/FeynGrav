@@ -14,11 +14,8 @@ FeynCalc 9.3.1 or higher is required.
 "FeynGrav.wl"
 The main package file. It contains definitions of projector operators, Nieuwenhuizen operators, and propagators. The file does not contain expression for interaction vertices, they are taken from pre-generated libraries located in "Libs".
 
-"FeynGrav_Libraries_Generator.wls"
-The file contains a script that generates libraries required for calculations.
-The package is supplied with pre-generated libraries containing data sufficient to operate with perturbation theory up to O(\kappa^3) order.
-It is neither required nor adviced to run or change the file.
-It is planed to be replaced with a Python script for the sake of perhormance in future.
+"FeynGrav_Examples.nb"
+The file contains a few examples discussed in ArXiV:2201.06812.
 
 "FeynGrav_Examples.nb"
 The file contain examples of calculations performed with FeynGrav.
@@ -26,4 +23,9 @@ The calculations are explaind in details in the corresponding ArXiV publication.
 Within the file itself only brif comments are given.
 
 "Libs"
-The directory contains library files. The framework used in FeynGrav relies on certain families of tensors. These tesors together with expressions for interaction vertices were generated with "FeynGrav_Libraries_Generator.wls".
+The directory contains library files. The framework used in FeynGrav relies on certain families of tensors.
+
+"Libs/Libraries_Generator.nb"
+The file contains a script that generates libraries required for computations.
+The package is provided with a pre-generated libraries up to O(\kappa^3) order in perturbation theory.
+
