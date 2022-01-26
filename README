@@ -3,6 +3,7 @@
 Copy the whole "FeynGrav" directory to "UserBaseDirectory/Applications".
 The UserBaseDirectory location can be obtained from Mathematica via "$UserBaseDirectory" command.
 Command "<<FeynGrav`" will load the package in Mathematica.
+Command "FeynGravCommands" prints the complete list of FeynGrav commands.
 
 
 ***FILES DESCRIPTION***
@@ -10,13 +11,12 @@ Command "<<FeynGrav`" will load the package in Mathematica.
 "FeynGrav.wl"
 The main package.
 
-"FeynGrav_Libraries_Generator.wls"
-The file contains a script that generated all libraries required for calculations.
-N.B. The package is supplied with libraries containing data sufficient to operate with perturbation theory up to O(\kappa^3) order!
-It is not recommended to change/run file without a necessity.
+"FeynGrav_Examples.nb"
+The file contains a few examples discussed in ArXiV:2201.06812.
 
 "Libs"
 The directory contain libraries files which contain interaction vertices data.
 
-"Libs/ITensors_generator.py"
-Python script that generates I tensors up to a required order.
+"Libs/Libraries_Generator.nb"
+The file contains a script that generates libraries required for computations.
+The package is provided with a pre-generated libraries up to O(\kappa^3) order in perturbation theory.
