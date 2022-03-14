@@ -3,7 +3,7 @@
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
-Print[Style["FeynGrav version 1.1",Bold]]
+Print[Style["FeynGrav version 1.2",Bold]]
 Print["FeynGrav: FeynGravCommands print the list of all supported commands."]
 Print["FeynGrav: Use '?CommandName' to see a brief description."]
 Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and ArXiV:2201.06812."]
@@ -15,9 +15,11 @@ GravitonPropagatorTop::usage = "The nominator of a graviton propagator in the ha
 GravitonPropagatorAlternative::usage = "Propagator of a graviton in the harmonic gauge. Its denominator is given via SPD function."
 
 
-GravitonScalarVertex::usage = "Vertex for interaction between a massless scalar kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of scalars."
-GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The next two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
+GravitonScalarVertex::usage = "Vertex for interaction between a massless scalar field kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of scalars."
+GravitonMassiveScalarVertex::usage = "Vertex for interaction between a kinetic energy of a scalar field with a non-vanishing mass and gravitons. Takes 2n + 2 + 1 arguments. First 2n arguments are Lorentz indices of gravitons. Two other arguments are ingoint momenta of scalars. The last argument is the scalar field mass."
+GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The other two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
 GravitonFermionVertex::usage = "Vertex for interaction between a massless Dirac fermion kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of fermions."
+GravitonMassiveFermionVertex::usage = "Vertex for interaction between a kinetic energy of a Dirac fermion with a non-vanishing mass and gravitons. Takes 2n + 2 + 1 arguments. First 2n arguments are Lorentz indices of gravitons. The oher two arguments are ingoint momenta of fermions. The last argument is the fermion mass."
 
 
 GaugeProjector::usage = "The standard gauge projectors \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)(p) = \!\(\*SubscriptBox[\(\[Eta]\), \(\[Mu]\[Nu]\)]\)-\!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\!\(\*SuperscriptBox[\(p\), \(2\)]\)."
@@ -28,7 +30,7 @@ NieuwenhuizenOperator0Bar::usage = "Nieuwenhuizen operator (\!\(\*OverscriptBox[
 NieuwenhuizenOperator0BarBar::usage = "Nieuwenhuizen operator (\!\(\*OverscriptBox[OverscriptBox[SuperscriptBox[\(P\), \(0\)], \(_\)], \(_\)]\)\!\(\*SubscriptBox[\()\), \(\[Mu]\[Nu]\[Alpha]\[Beta]\)]\) = \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)\!\(\*SubscriptBox[\(\[Omega]\), \(\[Alpha]\[Beta]\)]\)+\!\(\*SubscriptBox[\(\[Theta]\), \(\[Alpha]\[Beta]\)]\)\!\(\*SubscriptBox[\(\[Omega]\), \(\[Mu]\[Nu]\)]\). Here \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)=\!\(\*SubscriptBox[\(\[Eta]\), \(\[Mu]\[Nu]\)]\) - \!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\!\(\*SuperscriptBox[\(p\), \(2\)]\) are the standard gauge projectors and \!\(\*SubscriptBox[\(\[Omega]\), \(\[Mu]\[Nu]\)]\) = \!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\!\(\*SuperscriptBox[\(p\), \(2\)]\) are projectors orthogonal to \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)."
 
 
-FeynGravCommands := Print[" 'GravitonVertex', 'GravitonPropagator', 'GravitonPropagatorTop', 'GravitonPropagatorAlternative', 'GravitonFermionVertex', 'GaugeProjector', 'NieuwenhuizenOperator1', 'NieuwenhuizenOperator2', 'NieuwenhuizenOperator0', 'NieuwenhuizenOperator0Bar', 'NieuwenhuizenOperator1BarBar' "];
+FeynGravCommands := Print[" 'GravitonVertex','GravitonScalarVertex','GravitonMassiveScalarVertex','GravitonVectorVertex','GravitonFermionVertex','GravitonMassiveFermionVertex', 'GravitonPropagator', 'GravitonPropagatorTop', 'GravitonPropagatorAlternative', 'GaugeProjector', 'NieuwenhuizenOperator1', 'NieuwenhuizenOperator2', 'NieuwenhuizenOperator0', 'NieuwenhuizenOperator0Bar', 'NieuwenhuizenOperator1BarBar' "];
 
 
 SetDirectory[DirectoryName[$InputFileName]];
@@ -60,12 +62,35 @@ Module[{cursor},
 
 Module[{cursor},
 	cursor = 1;
+	Clear[GravitonMassiveScalarVertex];
+	While[FileExistsQ["./Libs/GravitonMassiveScalarVertex_"<>ToString[cursor]],
+		Evaluate[GravitonMassiveScalarVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2,m}])]] = Get["./Libs/GravitonMassiveScalarVertex_"<>ToString[cursor]];
+		cursor++;
+	];
+	Print["Graviton-Massive Scalar vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
+	Remove[m];
+]
+
+Module[{cursor},
+	cursor = 1;
 	Clear[GravitonFermionVertex];
 	While[FileExistsQ["./Libs/GravitonFermionVertex_"<>ToString[cursor]],
 		Evaluate[GravitonFermionVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2}])]] = Get["./Libs/GravitonFermionVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	Print["Graviton-Fermion vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
+]
+
+Module[{cursor},
+	cursor = 1;
+	Clear[GravitonMassiveFermionVertex];
+	While[FileExistsQ["./Libs/GravitonMassiveFermionVertex_"<>ToString[cursor]],
+		Evaluate[GravitonMassiveFermionVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2,m}])]] = Get["./Libs/GravitonMassiveFermionVertex_"<>ToString[cursor]];
+		cursor++;
+	];
+	Print["Graviton-Massive Fermion vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
 	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
 ]
 
