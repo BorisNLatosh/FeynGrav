@@ -3,7 +3,7 @@
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
-Print[Style["FeynGrav version 1.1",Bold]]
+Print[Style["FeynGrav version 1.2",Bold]]
 Print["FeynGrav: FeynGravCommands print the list of all supported commands."]
 Print["FeynGrav: Use '?CommandName' to see a brief description."]
 Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and ArXiV:2201.06812."]
