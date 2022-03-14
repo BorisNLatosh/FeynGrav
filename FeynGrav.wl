@@ -16,10 +16,10 @@ GravitonPropagatorAlternative::usage = "Propagator of a graviton in the harmonic
 
 
 GravitonScalarVertex::usage = "Vertex for interaction between a massless scalar field kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of scalars."
-GravitonMassiveScalarVertex::usage = "Vertex for interaction between a kinetic energy of a scalar field with a non-vanishing mass and gravitons. Takes two argument. The first ragument is an array of 2n + 2 elements. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of scalars. The second argument is the sacalar field mass."
-GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The next two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
+GravitonMassiveScalarVertex::usage = "Vertex for interaction between a kinetic energy of a scalar field with a non-vanishing mass and gravitons. Takes 2n + 2 + 1 arguments. First 2n arguments are Lorentz indices of gravitons. Two other arguments are ingoint momenta of scalars. The last argument is the scalar field mass."
+GravitonVectorVertex::usage = "Vertex for interaction between a massless vector field kinetic energy and gravitons. Takes 2n + 4 arguments. First 2n arguments are Lotentz indices of gravitons. The other two arguments are Lorentz indices of vectors. The last two arguments are vectors momenta."
 GravitonFermionVertex::usage = "Vertex for interaction between a massless Dirac fermion kinetic energy and gravitons. Takes 2n + 2 arguments. First 2n arguments are Lorentz indices of gravitons. The last two arguments are ingoint momenta of fermions."
-GravitonMassiveFermionVertex::usage = "Vertex for interaction between a kinetic energy of a Dirac fermion with a non-vanishing mass and gravitons. Takes two arguiments. The first argument is an array of 2n + 2 elements. First 2n elements are Lorentz indices of gravitons. The last two elements are ingoint momenta of fermions. The second argument is the Diracl field mass."
+GravitonMassiveFermionVertex::usage = "Vertex for interaction between a kinetic energy of a Dirac fermion with a non-vanishing mass and gravitons. Takes 2n + 2 + 1 arguments. First 2n arguments are Lorentz indices of gravitons. The oher two arguments are ingoint momenta of fermions. The last argument is the fermion mass."
 
 
 GaugeProjector::usage = "The standard gauge projectors \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)(p) = \!\(\*SubscriptBox[\(\[Eta]\), \(\[Mu]\[Nu]\)]\)-\!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\!\(\*SuperscriptBox[\(p\), \(2\)]\)."
@@ -64,11 +64,12 @@ Module[{cursor},
 	cursor = 1;
 	Clear[GravitonMassiveScalarVertex];
 	While[FileExistsQ["./Libs/GravitonMassiveScalarVertex_"<>ToString[cursor]],
-		Evaluate[GravitonMassiveScalarVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2}])]] = Get["./Libs/GravitonMassiveScalarVertex_"<>ToString[cursor]];
+		Evaluate[GravitonMassiveScalarVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2,m}])]] = Get["./Libs/GravitonMassiveScalarVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	Print["Graviton-Massive Scalar vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
 	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
+	Remove[m];
 ]
 
 Module[{cursor},
@@ -86,7 +87,7 @@ Module[{cursor},
 	cursor = 1;
 	Clear[GravitonMassiveFermionVertex];
 	While[FileExistsQ["./Libs/GravitonMassiveFermionVertex_"<>ToString[cursor]],
-		Evaluate[GravitonMassiveFermionVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2}])]] = Get["./Libs/GravitonMassiveFermionVertex_"<>ToString[cursor]];
+		Evaluate[GravitonMassiveFermionVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2,m}])]] = Get["./Libs/GravitonMassiveFermionVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	Print["Graviton-Massive Fermion vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
