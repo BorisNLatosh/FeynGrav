@@ -1,15 +1,15 @@
--1/2*(Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]3, D]]*
+(Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]2, D]]*
    Pair[LorentzIndex[\[Mu]1, D], Momentum[p2, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]]) - 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]2, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[\[Mu]1, D], Momentum[p2, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]2, D]]*
    Pair[LorentzIndex[\[Mu]1, D], Momentum[p3, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]2, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[\[Mu]1, D], Momentum[p3, D]]*SMP["g_s"]*
@@ -21,11 +21,11 @@
  (Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
    Pair[LorentzIndex[\[Mu]1, D], Momentum[p3, D]]*
    Pair[LorentzIndex[\[Mu]2, D], LorentzIndex[\[Mu]3, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]1, D]]*
    Pair[LorentzIndex[\[Mu]2, D], Momentum[p1, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]1, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[\[Mu]2, D], Momentum[p1, D]]*SMP["g_s"]*
@@ -33,11 +33,11 @@
  (Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
    Pair[LorentzIndex[\[Mu]1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[\[Mu]2, D], Momentum[p1, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]1, D]]*
    Pair[LorentzIndex[\[Mu]2, D], Momentum[p3, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]1, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[\[Mu]2, D], Momentum[p3, D]]*SMP["g_s"]*
@@ -45,11 +45,11 @@
  (Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
    Pair[LorentzIndex[\[Mu]1, D], LorentzIndex[\[Mu]3, D]]*
    Pair[LorentzIndex[\[Mu]2, D], Momentum[p3, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]2, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]1, D]]*
    Pair[LorentzIndex[\[Mu]3, D], Momentum[p1, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]1, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]2, D]]*
    Pair[LorentzIndex[\[Mu]3, D], Momentum[p1, D]]*SMP["g_s"]*
@@ -57,11 +57,11 @@
  (Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
    Pair[LorentzIndex[\[Mu]1, D], LorentzIndex[\[Mu]2, D]]*
    Pair[LorentzIndex[\[Mu]3, D], Momentum[p1, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]2, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]1, D]]*
    Pair[LorentzIndex[\[Mu]3, D], Momentum[p2, D]]*SMP["g_s"]*
-   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 + 
+   SUNF[SUNIndex[a1], SUNIndex[a2], SUNIndex[a3]])/2 - 
  (Pair[LorentzIndex[m1, D], LorentzIndex[\[Mu]1, D]]*
    Pair[LorentzIndex[n1, D], LorentzIndex[\[Mu]2, D]]*
    Pair[LorentzIndex[\[Mu]3, D], Momentum[p2, D]]*SMP["g_s"]*
