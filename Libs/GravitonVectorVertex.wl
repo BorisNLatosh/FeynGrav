@@ -2,20 +2,29 @@
 
 SetDirectory[DirectoryName[$InputFileName]];
 
-BeginPackage["GravitonVectorVertex`",{"FeynCalc`","ITensor`","CTensor`","CITensor`","CIITensor`"}];
+BeginPackage["GravitonVectorVertex`",{"FeynCalc`","ITensor`","CTensor`","CITensor`","CIITensor`","CIIITensor`","CIIIITensor`"}];
 
-GravitonVectorVertex::usage = "GravitonVectorVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)}]. Vertex for gravitational interacation of a massless vector field kinetic enery. \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are graviton Lorentz indices. \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) are vectors Lorentz indices. \!\(\*SubscriptBox[\(p\), \(i\)]\) are vector field momenta. All momenta are in-going.";
+GravitonMassiveVectorVertex::usage = "GravitonMassiveVectorVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis]},\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Vertex for gravitational interacation of a vector field kinetic enery. It takes an array of graviton indices, Loretz indices and momenta of in-going vectors, and the vector field mass.";
 
-GravitonMassiveVectorVertex::usage = "GravitonMassiveVectorVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)},m]. Vertex for gravitational interacation of a vector field kinetic enery with a non-vanishing mass. \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are graviton Lorentz indices. \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) are vectors Lorentz indices. \!\(\*SubscriptBox[\(p\), \(i\)]\) are vector field momenta. m is the vector field mass. All momenta are in-going.";
+GravitonVectorVertex::usage = "GravitonVectorVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis]},\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]";
+
+GravitonVectorGhostVertex::usage = "";
+
+GravitonMaxwellGhostPropagator::usage = "";
 
 Begin["Private`"];
 
-TTensorGravityVector [\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,\[Rho]_,\[Sigma]_,p_,q_]=Calc[1/4 (FVD[p,\[Mu]]MTD[\[Alpha],\[Rho]]-FVD[p,\[Alpha]]MTD[\[Mu],\[Rho]])(FVD[q,\[Nu]]MTD[\[Beta],\[Sigma]]-FVD[q,\[Beta]]MTD[\[Nu],\[Sigma]])];
+GVV = {indexArray,l1,p1,l2,p2,m} |-> Calc[ (I Global`\[Kappa]^(Length[indexArray]/2))(1/2 CIITensor[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]},indexArray] (FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]]MTD[\[ScriptA],l1]MTD[\[ScriptB],l2]-FVD[p1,\[ScriptM]]FVD[p2,\[ScriptB]]MTD[\[ScriptA],l1]MTD[\[ScriptN],l2])-m^2 CITensor[{\[ScriptM],\[ScriptN]},indexArray]MTD[\[ScriptM],l1]MTD[\[ScriptN],l2] ) ];
 
-GravitonVectorVertex=indexArray|->Calc[(I Global`\[Kappa]^(Length[indexArray]/2-2))2TTensorGravityVector[Sequence@@Join[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]},indexArray[[Length[indexArray]-3;;]]]]CIITensor[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]},indexArray[[;;Length[indexArray]-4]]]];
+GVV1 = {indexArray,l1,p1,l2,p2,\[CurlyEpsilon]} |-> Calc[ (I Global`\[Kappa]^(Length[indexArray]/2)) 1/2 CIITensor[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]},indexArray] (FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]]MTD[\[ScriptA],l1]MTD[\[ScriptB],l2]-FVD[p1,\[ScriptM]]FVD[p2,\[ScriptB]]MTD[\[ScriptA],l1]MTD[\[ScriptN],l2]-\[CurlyEpsilon] FVD[p1,\[ScriptM]]FVD[p2,\[ScriptA]]MTD[\[ScriptN],l1]MTD[\[ScriptB],l2])  ] ;
 
-GravitonMassiveVectorVertex=Function[{indexArray,m},Calc[(I Global`\[Kappa]^(Length[indexArray]/2-2))2(TTensorGravityVector[Sequence@@Join[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]},indexArray[[Length[indexArray]-3;;]]]]CIITensor[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]},indexArray[[;;Length[indexArray]-4]]]-m^2/2 CITensor[indexArray[[Length[indexArray]-3;;Length[indexArray]-2]],indexArray[[;;Length[indexArray]-4]]])]];
+GVV2 = {indexArray,l1,p1,l2,p2,\[CurlyEpsilon]} |-> Calc[ (I Global`\[Kappa]^(Length[indexArray]/2)) (-(\[CurlyEpsilon]/2)) CIIITensor[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB],\[ScriptR],\[ScriptS]},indexArray[[3;;]]] (MTD[\[ScriptM],\[ScriptT]]ITensor[Join[{\[ScriptN],\[ScriptR]},indexArray[[;;2]]]]+MTD[\[ScriptN],\[ScriptT]]ITensor[Join[{\[ScriptM],\[ScriptR]},indexArray[[;;2]]]]-MTD[\[ScriptR],\[ScriptT]]ITensor[Join[{\[ScriptM],\[ScriptN]},indexArray[[;;2]]]] ) (FVD[p1+p2,\[ScriptT]](FVD[p2,\[ScriptA]] MTD[\[ScriptS],l1]MTD[\[ScriptB],l2]+FVD[p1,\[ScriptA]] MTD[\[ScriptS],l2]MTD[\[ScriptB],l1]))/2 ];
 
+GVV3 = {indexArray,l1,p1,l2,p2,\[CurlyEpsilon]} |->Calc[ (I Global`\[Kappa]^(Length[indexArray]/2)) (-(\[CurlyEpsilon]/8)) CIIIITensor[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB],\[ScriptR],\[ScriptS],\[ScriptL],\[ScriptT]},indexArray[[5;;]]]FVD[p1+p2,\[Tau]1]FVD[p1+p2,\[Tau]2] (MTD[\[ScriptM],\[Tau]1]ITensor[Join[{\[ScriptN],\[ScriptR]},indexArray[[1;;2]]]]+MTD[\[ScriptN],\[Tau]1]ITensor[Join[{\[ScriptM],\[ScriptR]},indexArray[[1;;2]]]]-MTD[\[ScriptR],\[Tau]1]ITensor[Join[{\[ScriptM],\[ScriptN]},indexArray[[1;;2]]]]) (MTD[\[ScriptA],\[Tau]2]ITensor[Join[{\[ScriptB],\[ScriptT]},indexArray[[3;;4]]]]+MTD[\[ScriptB],\[Tau]2]ITensor[Join[{\[ScriptA],\[ScriptT]},indexArray[[3;;4]]]]-MTD[\[ScriptT],\[Tau]2]ITensor[Join[{\[ScriptA],\[ScriptB]},indexArray[[3;;4]]]]) MTD[\[ScriptS],l1]MTD[\[ScriptL],l2] ];
+
+GravitonVectorVertex = {indexArray,l1,p1,l2,p2} |-> If[Length[indexArray]/2 <=2 , Calc[Total[ (GVV1[#,l1,p1,l2,p2,1]+GVV2[#,l1,p1,l2,p2,1])&/@(Flatten/@Permutations[Partition[indexArray,2]]) ]] , Calc[Total[ (GVV1[#,l1,p1,l2,p2,1]+GVV2[#,l1,p1,l2,p2,1]+GVV3[#,l1,p1,l2,p2,1])&/@(Flatten/@Permutations[Partition[indexArray,2]]) ]]];
+
+GravitonMassiveVectorVertex = {indexArray,l1,p1,l2,p2,m}|->GVV[indexArray,l1,p1,l2,p2,m];
 
 End[];
 
