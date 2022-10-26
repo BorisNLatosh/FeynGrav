@@ -6,11 +6,11 @@ BeginPackage["GravitonVectorVertex`",{"FeynCalc`","ITensor`","CTensor`","CITenso
 
 GravitonMassiveVectorVertex::usage = "GravitonMassiveVectorVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis]},\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Vertex for gravitational interacation of a vector field kinetic enery. It takes an array of graviton indices, Loretz indices and momenta of in-going vectors, and the vector field mass.";
 
-GravitonVectorVertex::usage = "GravitonVectorVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis]},\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]";
+GravitonVectorVertex::usage = "GravitonVectorVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis]},\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]. Vertex for gravitational interacation of a massless vector field kinetic enery. It takes an array of graviton indices, Loretz indices and momenta of in-going vectors. The vertex is evaluated in the Lorentz gauge.";
 
-GravitonVectorGhostVertex::usage = "";
+GravitonVectorGhostVertex::usage = "GravitonVectorGhostVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis]},\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]. Vertex for gravitational interacation of the Faddeev-Popov ghosts for a single massless vector field in the Lorentz gauge. It takes an array of graviton indices and momenta of in-going ghosts.";
 
-GravitonMaxwellGhostPropagator::usage = "";
+GravitonVectorGhostPropagator::usage = "GravitonVectorGhostPropagator[p]. Propagator for the Faddeev-Popov ghost for a massless vector field.";
 
 Begin["Private`"];
 
@@ -25,6 +25,10 @@ GVV3 = {indexArray,l1,p1,l2,p2,\[CurlyEpsilon]} |->Calc[ (I Global`\[Kappa]^(Len
 GravitonVectorVertex = {indexArray,l1,p1,l2,p2} |-> If[Length[indexArray]/2 <=2 , Calc[Total[ (GVV1[#,l1,p1,l2,p2,1]+GVV2[#,l1,p1,l2,p2,1])&/@(Flatten/@Permutations[Partition[indexArray,2]]) ]] , Calc[Total[ (GVV1[#,l1,p1,l2,p2,1]+GVV2[#,l1,p1,l2,p2,1]+GVV3[#,l1,p1,l2,p2,1])&/@(Flatten/@Permutations[Partition[indexArray,2]]) ]]];
 
 GravitonMassiveVectorVertex = {indexArray,l1,p1,l2,p2,m}|->GVV[indexArray,l1,p1,l2,p2,m];
+
+GravitonVectorGhostVertex = {indexArray,p1,p2} |-> Calc[- FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]] CITensor[{\[ScriptM],\[ScriptN]},indexArray]];
+
+GravitonVectorGhostPropagator = p |-> - I FAD[p];
 
 End[];
 
