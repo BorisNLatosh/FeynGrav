@@ -4,7 +4,7 @@ SetDirectory[DirectoryName[$InputFileName]];
 
 BeginPackage["ITensor`",{"FeynCalc`","MTDWrapper`"}];
 
-ITensor::usage = "ITensor[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)}]. The function describes the perturbative expansion of \!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\). It takes an array of 2n elements and returns the I tensor of n-th order.";
+ITensor::usage = "ITensor[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)}]. The function returns \!\(\*SuperscriptBox[\(I\), \(\*SubscriptBox[\(\[Rho]\), \(1\)] \*SubscriptBox[\(\[Sigma]\), \(1\)] \*SubscriptBox[\(\[Ellipsis]\[Rho]\), \(n\)] \*SubscriptBox[\(\[Sigma]\), \(n\)]\)]\).";
 
 Begin["Private`"];
 
