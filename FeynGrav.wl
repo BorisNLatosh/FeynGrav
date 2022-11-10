@@ -5,14 +5,17 @@ Needs["Nieuwenhuizen`","./Rules/Nieuwenhuizen.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
 
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
-Print[Style["FeynGrav version 1.4 experimental",Bold]]
-Print["FeynGrav: FeynGravCommands print the list of all supported commands."]
-Print["FeynGrav: Use '?CommandName' to see a brief description."]
-Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and ArXiV:2201.06812."]
+Print[Style["FeynGrav version 1.4 experimental",Bold]];
+Print["FeynGrav: FeynGravCommands print the list of all supported commands."];
+Print["FeynGrav: Use '?CommandName' to see a brief description."];
+Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and ArXiV:2201.06812."];
 
 
 GravitonScalarVertex::usage = "GravitonScalarVertex[\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Expression for gravitational interaction of a scalar field kinetic energy. {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are graviton indices, \!\(\*SubscriptBox[\(p\), \(i\)]\) are scalar field momenta, m is the scalar field mass.";
 GravitonScalarPotentialVertex::usage = "GravitonScalarPotentialVertex[\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(p\)]\)]. Expression for gravitational interaction of a scalar field potential energy. {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are gravitational indices, \!\(\*SubscriptBox[\(\[Lambda]\), \(l\)]\) is the scalar field self-coupling constant.";
+
+
+GravitonFermionVertex::usage = "GravitonFermionVertex[\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Expression for gravitational interaction of a Dirac field kinetic energy. {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are graviton indices, \!\(\*SubscriptBox[\(p\), \(i\)]\) are fermion momenta, m is the fermion mass.";
 
 
 GravitonVertex::usage = "GravitonVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\),\[Ellipsis]]. \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are Lorentz indices of gravitons. \!\(\*SubscriptBox[\(p\), \(i\)]\) are momenta of gravitons."
@@ -23,11 +26,9 @@ GravitonPropagatorAlternative::usage = "GravitonPropagatorAlternative[\[Mu],\[Nu
 
 GravitonVectorVertex::usage = "GravitonVectorVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]. Vertex for gravitational interacation of a massless vector field kinetic enery. \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are graviton Lorentz indices. \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) are vectors Lorentz indices. \!\(\*SubscriptBox[\(p\), \(i\)]\) are vector field momenta. All momenta are in-going."
 GravitonMassiveVectorVertex::usage = "GravitonVectorVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Vertex for gravitational interacation of a vector field kinetic enery with a non-vanishing mass. \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are graviton Lorentz indices. \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) are vectors Lorentz indices. \!\(\*SubscriptBox[\(p\), \(i\)]\) are vector field momenta. m is the vector field mass. All momenta are in-going."
-GravitonFermionVertex::usage = "GravitonFermionVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]. Vertex for gravitational interacation of a massless Dirac fermion kinetic enery. \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are graviton Lorentz indices. \!\(\*SubscriptBox[\(p\), \(i\)]\) are fermion momenta. All momenta are in-going."
-GravitonMassiveFermionVertex::usage = "GravitonMassiveFermionVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Vertex for gravitational interacation of a Dirac fermion kinetic enery with a non-vanishing mass. \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are graviton Lorentz indices. \!\(\*SubscriptBox[\(p\), \(i\)]\) are fermion momenta. m is the fermion mass. All momenta are in-going."
 
 
-FeynGravCommands := Print[" 'GravitonVertex','GravitonScalarVertex','GravitonMassiveScalarVertex','GravitonVectorVertex','GravitonFermionVertex','GravitonMassiveFermionVertex', 'GravitonPropagator', 'GravitonPropagatorTop', 'GravitonPropagatorAlternative', 'GaugeProjector', 'NieuwenhuizenOperator1', 'NieuwenhuizenOperator2', 'NieuwenhuizenOperator0', 'NieuwenhuizenOperator0Bar', 'NieuwenhuizenOperator1BarBar' "];
+FeynGravCommands := Print[" 'GravitonVertex','GravitonScalarVertex','GravitonVectorVertex','GravitonFermionVertex', 'GravitonPropagator', 'GravitonPropagatorTop', 'GravitonPropagatorAlternative', 'GaugeProjector', 'NieuwenhuizenOperator1', 'NieuwenhuizenOperator2', 'NieuwenhuizenOperator0', 'NieuwenhuizenOperator0Bar', 'NieuwenhuizenOperator1BarBar' "];
 
 
 SetDirectory[DirectoryName[$InputFileName]];
@@ -68,22 +69,12 @@ Module[{cursor},
 	cursor = 1;
 	Clear[GravitonFermionVertex];
 	While[FileExistsQ["./Libs/GravitonFermionVertex_"<>ToString[cursor]],
-		Evaluate[GravitonFermionVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2}])]] = Get["./Libs/GravitonFermionVertex_"<>ToString[cursor]];
+		Evaluate[GravitonFermionVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2,m}])]] = Get["./Libs/GravitonFermionVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	Print["Graviton-Fermion vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
 	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
-]
-
-Module[{cursor},
-	cursor = 1;
-	Clear[GravitonMassiveFermionVertex];
-	While[FileExistsQ["./Libs/GravitonMassiveFermionVertex_"<>ToString[cursor]],
-		Evaluate[GravitonMassiveFermionVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,p2,m}])]] = Get["./Libs/GravitonMassiveFermionVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	Print["Graviton-Massive Fermion vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
+	Remove[p1,p2,m];
 ]
 
 Module[{cursor},
@@ -108,39 +99,6 @@ Module[{cursor},
 	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
 ]
 
-(*Module[{cursor},
-	cursor = 1;
-	Clear[GravitonQuarkGluonVertex];
-	While[FileExistsQ["./Libs/GravitonQuarkGluonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonQuarkGluonVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{\[Mu],a}])]] = Get["./Libs/GravitonQuarkGluonVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	Print["Graviton-Quark-Gluon vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
-]
-
-Module[{cursor},
-	cursor = 1;
-	Clear[GravitonThreeGluonVertex];
-	While[FileExistsQ["./Libs/GravitonThreeGluonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonThreeGluonVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,\[Mu]1,a1,p2,\[Mu]2,a2,p3,\[Mu]3,a3}])]] = Get["./Libs/GravitonThreeGluonVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	Print["Graviton-Three-Quark vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
-]
-
-Module[{cursor},
-	cursor = 1;
-	Clear[GravitonFourGluonVertex];
-	While[FileExistsQ["./Libs/GravitonFourGluonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonFourGluonVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArray[cursor],{p1,\[Mu]1,a1,p2,\[Mu]2,a2,p3,\[Mu]3,a3,p4,\[Mu]4,a4}])]] = Get["./Libs/GravitonFourGluonVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	Print["Graviton-Four-Quark vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
-]*)
-
 Remove[FeynGrav`dummyArrayP,FeynGrav`dummyArray];
 Remove[FeynGrav`n];
 Remove[FeynGrav`\[Lambda]1,FeynGrav`\[Lambda]2,FeynGrav`p1,FeynGrav`p2];
@@ -153,17 +111,9 @@ ResetDirectory[];
 Begin["Private`"];
 
 
-(* Graviton propagators *)
 GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I 1/2 (MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]])FAD[k];
 GravitonPropagatorTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_]=1/2(MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]]);
 GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I ((1/2 (MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]]))/SPD[k,k]);
-
-
-(*GravitonScalarVertexInternal[indexArray_,p1_,p2_,m_] := Module[{},
-	(ToExpression[Get["./Libs/GravitonScalarVertex_"<>ToString[Length[indexArray]/2]]])[Sequence@@Join[indexArray,{p1,p2,m}]]//Return;
-];
-
-GravitonScalarVertex[indexArray_,p1_,p2_,m_] := GravitonScalarVertexInternal[indexArray,p1,p2,m]/;(0<Length[indexArray])&&(Mod[Length[indexArray],2]==0);*)
 
 
 End[];
