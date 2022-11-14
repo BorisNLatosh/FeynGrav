@@ -7,15 +7,18 @@ Needs["DummyArray`","./../Rules/DummyArray.wl"];
 Needs["GravitonScalarVertex`","./../Rules/GravitonScalarVertex.wl"];
 Needs["GravitonFermionVertex`","./../Rules/GravitonFermionVertex.wl"];
 Needs["GravitonVectorVertex`","./../Rules/GravitonVectorVertex.wl"];
+Needs["GravitonSUNYM`","./../Rules/GravitonSUNYM.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
 
 CheckGravitonScalars::usage = "CheckGravitonScalars. This procedure checks what libraries for graviton-scalar interaction are present.";
 CheckGravitonFermions::usage = "CheckGravitonFermions. This procedure checks what libraries for graviton-fermion interaction are present.";
 CheckGravitonVectors::usage = "CheckGravitonFermions. This procedure checks what libraries for graviton-fermion interaction are present.";
+CheckGravitonSUNYM::usage = "CheckGravitonSUNYM. This procedure checks what libraries for gravitational interaction for SU(N)YM model are present.";
 
 GenerateGravitonScalars::usage = "GenerateGravitonScalars[n]. This procedure generates libraries for graviton-scalar interactions up to the order n. Pre-existing libraries will be removed!";
 GenerateGravitonFermions::usage = "GenerateGravitonFermions[n]. This procedure generates libraries for graviton-fermion interactions up to the order n. Pre-existing libraries will be removed!";
 GenerateGravitonVectors::usage = "GenerateGravitonVectors[n]. This procedure generates libraries for graviton-vector interactions up to the order n. Pre-existing libraries will be removed!";
+GenerateGravitonSUNYM::usage = "GenerateGravitonSUNYM[n]. This procedure generates libraries for gravitational interaction for SU(N)YM models up to the order n. Pre-existing libraries will be removed!";
 
 
 Begin["Private`"];
@@ -48,6 +51,28 @@ CheckGravitonVectors := Module[{i},
 	i = 1;
 	While[FileExistsQ["GravitonVectorGhostVertex_"<>ToString[i]], i += 1];
 	Print["Libraries for gravitational interaction of a scalar Faddeev-Popov ghost kinetic energy exist up to the order "<>ToString[i-1]];
+];
+
+
+CheckGravitonSUNYM := Module[{i},
+	i = 1;
+	While[FileExistsQ["GravitonQuarkGluonVertex_"<>ToString[i]], i += 1];
+	Print["Libraries for gravitational interaction of quark-gluon interction energy exist up to the order "<>ToString[i-1]];
+	i = 1;
+	While[FileExistsQ["GravitonThreeGluonVertex_"<>ToString[i]], i += 1];
+	Print["Libraries for gravitational interaction of three quarks interaction energy exist up to the order "<>ToString[i-1]];
+	i = 1;
+	While[FileExistsQ["GravitonFourGluonVertex_"<>ToString[i]], i += 1];
+	Print["Libraries for gravitational interaction of four quarks interaction energy exist up to the order "<>ToString[i-1]];
+	i = 1;
+	While[FileExistsQ["GravitonGluonVertex_"<>ToString[i]], i += 1];
+	Print["Libraries for gravitational interaction of a gluon kinetic energy exist up to the order "<>ToString[i-1]];
+	i = 1;
+	While[FileExistsQ["GravitonYMGhostVertex_"<>ToString[i]], i += 1];
+	Print["Libraries for gravitational interaction of a scalar Faddeev-Popov SU(N)YM ghost kinetic energy exist up to the order "<>ToString[i-1]];
+	i = 1;
+	While[FileExistsQ["GravitonGluonGhostVertex_"<>ToString[i]], i += 1];
+	Print["Libraries for gravitational interaction of gluon-ghost interaction energy exist up to the order "<>ToString[i-1]];
 ];
 
 
@@ -106,6 +131,50 @@ GenerateGravitonVectors[n_] := Module[{i,\[Rho],\[Sigma],p1,p2,m},
 		Put[ Evaluate[GravitonVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2]] , "GravitonVectorVertex_"<>ToString[i] ];
 		Put[ Evaluate[GravitonMassiveVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`m]] , "GravitonMassiveVectorVertex_"<>ToString[i] ];
 		Put[ Evaluate[GravitonVectorGhostVertex[DummyArray[i],Global`p1,Global`p2]] , "GravitonVectorGhostVertex_"<>ToString[i] ];
+		Print["Done for order "<>ToString[i] ];
+	];
+];
+
+
+GenerateGravitonSUNYM[n_] := Module[{i,\[Rho],\[Sigma],p1,p2,m},
+	i = 1;
+	While[FileExistsQ["GravitonQuarkGluonVertex_"<>ToString[i]], 
+		DeleteFile["GravitonQuarkGluonVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	While[FileExistsQ["GravitonThreeGluonVertex_"<>ToString[i]], 
+		DeleteFile["GravitonThreeGluonVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	While[FileExistsQ["GravitonFourGluonVertex_"<>ToString[i]], 
+		DeleteFile["GravitonFourGluonVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	While[FileExistsQ["GravitonGluonVertex_"<>ToString[i]], 
+		DeleteFile["GravitonGluonVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	While[FileExistsQ["GravitonYMGhostVertex_"<>ToString[i]], 
+		DeleteFile["GravitonYMGhostVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	While[FileExistsQ["GravitonGluonGhostVertex_"<>ToString[i]], 
+		DeleteFile["GravitonGluonGhostVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	For[i=1,i<=n,i++,
+		Put[ Evaluate[GravitonQuarkGluonVertex[DummyArray[i],{Global`\[Lambda],Global`a}]] , "GravitonQuarkGluonVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonThreeGluonVertex[DummyArray[i],{Global`\[Lambda]1,Global`a1,Global`p1,Global`\[Lambda]2,Global`a2,Global`p2,Global`\[Lambda]3,Global`a3,Global`p3}]] , "GravitonThreeGluonVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonFourGluonVertex[DummyArray[i],{Global`\[Lambda]1,Global`a1,Global`p1,Global`\[Lambda]2,Global`a2,Global`p2,Global`\[Lambda]3,Global`a3,Global`p3,Global`\[Lambda]4,Global`a4,Global`p4}]] , "GravitonFourGluonVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonGluonVertex[DummyArray[i],Global`\[Lambda]1,Global`a1,Global`p1,Global`\[Lambda]2,Global`a2,Global`p2]] , "GravitonGluonVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonYMGhostVertex[DummyArray[i],Global`p1,Global`a1,Global`p2,Global`a2]] , "GravitonYMGhostVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonGluonGhostVertex[DummyArray[i],{Global`\[Lambda]1,Global`a1,Global`p1},{Global`\[Lambda]2,Global`a2,Global`p2},{Global`\[Lambda]3,Global`a3,Global`p3}]] , "GravitonGluonGhostVertex_"<>ToString[i] ];
 		Print["Done for order "<>ToString[i] ];
 	];
 ];
