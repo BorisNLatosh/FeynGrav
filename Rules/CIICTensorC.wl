@@ -12,7 +12,7 @@ CIICTensorCInternalIndices=Function[indexArray,FoldPairList[TakeDrop,indexArray,
 
 CIICTensorCIndices=Function[{indexArrayExternal,indexArrayInternal},Function[MapThread[Join,{Join[{{}},Partition[indexArrayExternal,2]],#}]]/@CIICTensorCInternalIndices[indexArrayInternal]];
 
-CIICTensorCCore = Function[{indexArrayExternal,indexArrayInternal},Total[  (indexArray|->CTensor[indexArray[[1]]](Times@@ITensor/@indexArray[[2;;]]) )/@CIICTensorCIndices[indexArrayExternal,indexArrayInternal]  ]];
+CIICTensorCCore = Function[{indexArrayExternal,indexArrayInternal},Total[  (indexArray|->(-1)^(Length[indexArray[[2]]]/2-1) CTensor[indexArray[[1]]](Times@@ITensor/@indexArray[[2;;]]) )/@CIICTensorCIndices[indexArrayExternal,indexArrayInternal]  ]];
 
 CIICTensorC=Function[{indexArrayExternal,indexArrayInternal},Expand[Total[1/Factorial[Length[indexArrayInternal]/2] (Function[CIICTensorCCore[indexArrayExternal,#]]/@Flatten/@Permutations[Partition[indexArrayInternal,2]])]]];
 
