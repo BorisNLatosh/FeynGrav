@@ -6,8 +6,6 @@ BeginPackage["GravitonVertex`",{"FeynCalc`","ITensor`","CTensor`","CITensor`","C
 
 GravitonVertex::usage = "GravitonVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\),\[Ellipsis]},\[CurlyEpsilon]].";
 
-GhostPropagator::usage = "GhostPropagator[\[Mu],\[Nu],p].";
-
 GravitonGhostVertex::usage = "GravitonGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis]},\[Mu],p1,\[Nu],p2].";
 
 
@@ -29,9 +27,6 @@ GravitonVertex2 = indexArray |->I(-(1/8))(Global`\[Kappa])^(Length[indexArray]/3
 indexSymmetrization = indexArray |-> Flatten/@Permutations[Partition[indexArray,3]];
 
 GravitonVertex = {indexArray,\[CurlyEpsilon]} |-> Total[(GravitonVertex1[#]+\[CurlyEpsilon] GravitonVertex2[#])&/@indexSymmetrization[indexArray]]//Calc;
-
-
-GhostPropagator = {\[Mu],\[Nu],p} |-> I (-MTD[\[Mu],\[Nu]])FAD[p];
 
 
 GravitonGhostVertex1 = {indexArray,\[Mu],p1,\[Nu],p2}|->I (Global`\[Kappa])^(Length[indexArray]/3) CIICTensorC[{\[Alpha],\[Beta],\[Mu],\[Nu]},TakeLorenzIndices[indexArray]]FVD[p1,\[Alpha]]FVD[p2,\[Beta]]//Calc;

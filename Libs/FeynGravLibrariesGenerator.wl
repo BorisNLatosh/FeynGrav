@@ -8,17 +8,20 @@ Needs["GravitonScalarVertex`","./../Rules/GravitonScalarVertex.wl"];
 Needs["GravitonFermionVertex`","./../Rules/GravitonFermionVertex.wl"];
 Needs["GravitonVectorVertex`","./../Rules/GravitonVectorVertex.wl"];
 Needs["GravitonSUNYM`","./../Rules/GravitonSUNYM.wl"];
+Needs["GravitonVertex`","./../Rules/GravitonVertex.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
 
 CheckGravitonScalars::usage = "CheckGravitonScalars. This procedure checks what libraries for graviton-scalar interaction are present.";
 CheckGravitonFermions::usage = "CheckGravitonFermions. This procedure checks what libraries for graviton-fermion interaction are present.";
 CheckGravitonVectors::usage = "CheckGravitonFermions. This procedure checks what libraries for graviton-fermion interaction are present.";
 CheckGravitonSUNYM::usage = "CheckGravitonSUNYM. This procedure checks what libraries for gravitational interaction for SU(N)YM model are present.";
+CheckGravitonVertex::usage = "CheckGravitonVertex. This procedure checks what libraries for graviton vertices are present.";
 
 GenerateGravitonScalars::usage = "GenerateGravitonScalars[n]. This procedure generates libraries for graviton-scalar interactions up to the order n. Pre-existing libraries will be removed!";
 GenerateGravitonFermions::usage = "GenerateGravitonFermions[n]. This procedure generates libraries for graviton-fermion interactions up to the order n. Pre-existing libraries will be removed!";
 GenerateGravitonVectors::usage = "GenerateGravitonVectors[n]. This procedure generates libraries for graviton-vector interactions up to the order n. Pre-existing libraries will be removed!";
 GenerateGravitonSUNYM::usage = "GenerateGravitonSUNYM[n]. This procedure generates libraries for gravitational interaction for SU(N)YM models up to the order n. Pre-existing libraries will be removed!";
+GenerateGravitonVertex::usage = "GenerateGravitonVertex[n]. This procedure generates libraries for the gravity sector up to the order n. Pre-existing libraries will be removed!";
 
 
 Begin["Private`"];
@@ -73,6 +76,16 @@ CheckGravitonSUNYM := Module[{i},
 	i = 1;
 	While[FileExistsQ["GravitonGluonGhostVertex_"<>ToString[i]], i += 1];
 	Print["Libraries for gravitational interaction of gluon-ghost interaction energy exist up to the order "<>ToString[i-1]];
+];
+
+
+CheckGravitonVertex := Module[{i},
+	i = 1;
+	While[FileExistsQ["GravitonVertex_"<>ToString[i]], i += 1];
+	Print["Libraries for graviton vertices exist up to the order "<>ToString[i-1]];
+	i = 1;
+	While[FileExistsQ["GravitonGhostVertex_"<>ToString[i]] , i += 1];
+	Print["Libraries for graviton-ghost interaction exist up to the order "<>ToString[i-1]];
 ];
 
 
@@ -175,6 +188,28 @@ GenerateGravitonSUNYM[n_] := Module[{i,\[Rho],\[Sigma],p1,p2,m},
 		Put[ Evaluate[GravitonGluonVertex[DummyArray[i],Global`\[Lambda]1,Global`a1,Global`p1,Global`\[Lambda]2,Global`a2,Global`p2]] , "GravitonGluonVertex_"<>ToString[i] ];
 		Put[ Evaluate[GravitonYMGhostVertex[DummyArray[i],Global`p1,Global`a1,Global`p2,Global`a2]] , "GravitonYMGhostVertex_"<>ToString[i] ];
 		Put[ Evaluate[GravitonGluonGhostVertex[DummyArray[i],{Global`\[Lambda]1,Global`a1,Global`p1},{Global`\[Lambda]2,Global`a2,Global`p2},{Global`\[Lambda]3,Global`a3,Global`p3}]] , "GravitonGluonGhostVertex_"<>ToString[i] ];
+		Print["Done for order "<>ToString[i] ];
+	];
+];
+
+
+DummyArrayMomenta = n |-> ToExpression/@Flatten[Function[{"m"<>ToString[#],"n"<>ToString[#],"p"<>ToString[#]}]/@Range[n]];
+
+GenerateGravitonVertex[n_] := Module[{i,k1,k2,\[Lambda]1,\[Lambda]2},
+	i = 1;
+	While[FileExistsQ["GravitonVertex_"<>ToString[i]], 
+		DeleteFile["GravitonVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	While[FileExistsQ["GravitonGhostVertex_"<>ToString[i]], 
+		DeleteFile["GravitonGhostVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	For[i=1,i<=n,i++,
+		Put[ Evaluate[GravitonVertex[DummyArrayMomenta[2+i],1]] , "GravitonVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonGhostVertex[DummyArrayMomenta[i],Global`\[Lambda]1,Global`k1,Global`\[Lambda]2,Global`k2]] , "GravitonGhostVertex_"<>ToString[i] ];
 		Print["Done for order "<>ToString[i] ];
 	];
 ];

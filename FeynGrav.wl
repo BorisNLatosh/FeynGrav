@@ -30,6 +30,7 @@ GravitonGluonGhostVertex::usage = "GravitonGluonGhostVertex[\!\(\*SubscriptBox[\
 
 
 GravitonVertex::usage = "GravitonVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\),\[Ellipsis]]. \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are Lorentz indices of gravitons. \!\(\*SubscriptBox[\(p\), \(i\)]\) are momenta of gravitons."
+GravitonGhostVertex::usage = "GravitonGhostVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]. \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are Lorentz indices of gravitons. \!\(\*SubscriptBox[\(p\), \(i\)]\) are momenta of gravitons, {\!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\),\!\(\*SubscriptBox[\(p\), \(i\)]\)} are ghosts indices and momenta."
 GravitonPropagator::usage = "GravitonPropagator[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Graviton propagator in the harmonic gauge. \[Mu],\[Nu] are indices of the first vertex. \[Alpha],\[Beta] are indices of the second vertex. p is the graviton momentum. "
 GravitonPropagatorTop::usage = "GravitonPropagatorTop[\[Mu],\[Nu],\[Alpha],\[Beta]]. Nominator of the graviton propagator in the harmonic gauge."
 GravitonPropagatorAlternative::usage = "GravitonPropagatorAlternative[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Graviton propagator in the harmonic gauge realized without FAD.\[Mu],\[Nu] are indices of the first vertex. \[Alpha],\[Beta] are indices of the second vertex. p is the graviton momentum."
@@ -43,18 +44,6 @@ SetDirectory[DirectoryName[$InputFileName]];
 
 dummyArrayP=n|->Flatten[Function[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["p"<>ToString[#]]}]/@Range[n]];
 dummyArray=n|->Flatten[Function[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]]}]/@Range[n]];
-
-
-Module[{cursor},
-	cursor = 1;
-	Clear[GravitonVertex];
-	While[FileExistsQ["./Libs/GravitonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@dummyArrayP[cursor+2])]] = Get["./Libs/GravitonVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	If[cursor-1<=0,Print["Graviton vertices are imported up to order 0"],Print["Graviton vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."]];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArrayP[cursor+2]);
-];
 
 
 Module[{cursor},
@@ -194,6 +183,25 @@ Module[{cursor},
 	Print["Graviton-Gluon-Ghost vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
 	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArray[cursor]);
 	Remove[\[Lambda]1,a1,p1,\[Lambda]2,a2,p2,\[Lambda]3,a3,p3];
+]
+
+
+Module[{cursor},
+	cursor = 1;
+	Clear[GravitonVertex];
+	While[FileExistsQ["./Libs/GravitonVertex_"<>ToString[cursor]],
+		Evaluate[GravitonVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@dummyArrayP[cursor+2])]] = Get["./Libs/GravitonVertex_"<>ToString[cursor]];
+		cursor++;
+	];
+	cursor = 1;
+	Clear[GravitonGhostVertex];
+	While[FileExistsQ["./Libs/GravitonGhostVertex_"<>ToString[cursor]],
+		Evaluate[GravitonGhostVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@Join[dummyArrayP[cursor],{\[Lambda]1,k1,\[Lambda]2,k2}])]] = Get["./Libs/GravitonGhostVertex_"<>ToString[cursor]];
+		cursor++;
+	];
+	Print["Graviton vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArrayP[cursor]);
+	Remove[\[Lambda]1,\[Lambda]2,k1,k2];
 ]
 
 
