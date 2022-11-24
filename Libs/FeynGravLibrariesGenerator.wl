@@ -141,7 +141,7 @@ GenerateGravitonVectors[n_] := Module[{i,\[Rho],\[Sigma],p1,p2,m},
 	];
 	i = 1;
 	For[i=1,i<=n,i++,
-		Put[ Evaluate[GravitonVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2]] , "GravitonVectorVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonVectorVertex[DummyArrayK[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2]] , "GravitonVectorVertex_"<>ToString[i] ];
 		Put[ Evaluate[GravitonMassiveVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`m]] , "GravitonMassiveVectorVertex_"<>ToString[i] ];
 		Put[ Evaluate[GravitonVectorGhostVertex[DummyArray[i],Global`p1,Global`p2]] , "GravitonVectorGhostVertex_"<>ToString[i] ];
 		Print["Done for order "<>ToString[i] ];
