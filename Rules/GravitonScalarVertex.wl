@@ -12,7 +12,7 @@ Begin["Private`"];
 
 GravitonScalarVertex = {indexArray,p1,p2,m}|->Calc[ I (Global`\[Kappa])^(Length[indexArray]/2) ( - CITensor[{\[ScriptM],\[ScriptN]},indexArray] ITensor[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB]}] FVD[p1,\[ScriptA]]FVD[p2,\[ScriptB]] - m^2 CTensor[indexArray]) ];
 
-GravitonScalarPotentialVertex = {indexArray,\[Lambda]}|->Calc[ I (Global`\[Kappa])^(Length[indexArray/2]) \[Lambda] CTensor[indexArray] ];
+GravitonScalarPotentialVertex = {indexArray,\[Lambda]}|->Calc[ I (Global`\[Kappa])^(Length[indexArray]/2) \[Lambda] CTensor[indexArray] ];
 
 End[];
 

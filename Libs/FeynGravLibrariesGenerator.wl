@@ -182,10 +182,10 @@ GenerateGravitonSUNYM[n_] := Module[{i,\[Rho],\[Sigma],p1,p2,m},
 	];
 	i = 1;
 	For[i=1,i<=n,i++,
+		Put[ Evaluate[GravitonGluonVertex[DummyArrayK[i],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2]] , "GravitonGluonVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonThreeGluonVertex[DummyArray[i],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2,Global`p3,Global`\[Lambda]3,Global`a3]] , "GravitonThreeGluonVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonFourGluonVertex[DummyArray[i],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2,Global`p3,Global`\[Lambda]3,Global`a3,Global`p4,Global`\[Lambda]4,Global`a4]] , "GravitonFourGluonVertex_"<>ToString[i] ];
 		Put[ Evaluate[GravitonQuarkGluonVertex[DummyArray[i],{Global`\[Lambda],Global`a}]] , "GravitonQuarkGluonVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonThreeGluonVertex[DummyArray[i],{Global`\[Lambda]1,Global`a1,Global`p1,Global`\[Lambda]2,Global`a2,Global`p2,Global`\[Lambda]3,Global`a3,Global`p3}]] , "GravitonThreeGluonVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonFourGluonVertex[DummyArray[i],{Global`\[Lambda]1,Global`a1,Global`p1,Global`\[Lambda]2,Global`a2,Global`p2,Global`\[Lambda]3,Global`a3,Global`p3,Global`\[Lambda]4,Global`a4,Global`p4}]] , "GravitonFourGluonVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonGluonVertex[DummyArray[i],Global`\[Lambda]1,Global`a1,Global`p1,Global`\[Lambda]2,Global`a2,Global`p2]] , "GravitonGluonVertex_"<>ToString[i] ];
 		Put[ Evaluate[GravitonYMGhostVertex[DummyArray[i],Global`p1,Global`a1,Global`p2,Global`a2]] , "GravitonYMGhostVertex_"<>ToString[i] ];
 		Put[ Evaluate[GravitonGluonGhostVertex[DummyArray[i],{Global`\[Lambda]1,Global`a1,Global`p1},{Global`\[Lambda]2,Global`a2,Global`p2},{Global`\[Lambda]3,Global`a3,Global`p3}]] , "GravitonGluonGhostVertex_"<>ToString[i] ];
 		Print["Done for order "<>ToString[i] ];

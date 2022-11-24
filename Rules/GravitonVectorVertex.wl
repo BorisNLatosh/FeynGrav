@@ -36,7 +36,7 @@ GravitonVectorVertexIII = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2} |-> GravitonV
 GravitonVectorVertex ={indexArray,\[Lambda]1,p1,\[Lambda]2,p2} |->Piecewise[{{GravitonVectorVertexI[indexArray,\[Lambda]1,p1,\[Lambda]2,p2],Length[indexArray]/3==0},{GravitonVectorVertexII[indexArray,\[Lambda]1,p1,\[Lambda]2,p2],Length[indexArray]/3==1},{GravitonVectorVertexIII[indexArray,\[Lambda]1,p1,\[Lambda]2,p2],Length[indexArray]/3>=2}}];
 
 
-GravitonVectorGhostVertex = {indexArray,p1,p2} |-> Calc[- FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]] CITensor[{\[ScriptM],\[ScriptN]},indexArray]];
+GravitonVectorGhostVertex = {indexArray,p1,p2} |-> I (Global`\[Kappa])^(Length[indexArray]/2) Calc[- FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]] CITensor[{\[ScriptM],\[ScriptN]},indexArray]]//Calc;
 
 End[];
 
