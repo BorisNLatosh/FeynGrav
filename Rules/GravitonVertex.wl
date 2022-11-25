@@ -12,18 +12,16 @@ GravitonGhostVertex::usage = "GravitonGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\)
 Begin["Private`"];
 
 
-TTensor = {\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2}|->FVD[p1,\[Mu]]FVD[p2,\[Nu]]ITensor[{\[Alpha],\[Beta],\[Mu]1,\[Nu]1}]ITensor[{\[Rho],\[Sigma],\[Mu]2,\[Nu]2}]-FVD[p1,\[Mu]]FVD[p2,\[Nu]]ITensor[{\[Alpha],\[Rho],\[Mu]1,\[Nu]1}]ITensor[{\[Beta],\[Sigma],\[Mu]2,\[Nu]2}]+2FVD[p1,\[Mu]]FVD[p2,\[Alpha]]ITensor[{\[Beta],\[Rho],\[Mu]1,\[Nu]1}]ITensor[{\[Nu],\[Sigma],\[Mu]2,\[Nu]2}]-2FVD[p1,\[Mu]]FVD[p2,\[Beta]]ITensor[{\[Nu],\[Alpha],\[Mu]1,\[Nu]1}]ITensor[{\[Rho],\[Sigma],\[Mu]2,\[Nu]2}] // Calc;
-
 TakeLorenzIndices = indexArray |-> Flatten[(#[[;;2]]&)/@Partition[indexArray,3]];
-
-GravitonVertex1 = indexArray |-> I(1/2)(Global`\[Kappa])^(Length[indexArray]/3-2) (TTensor@@Join[{\[ScriptM]1,\[ScriptN]1,\[ScriptM]2,\[ScriptN]2,\[ScriptM]3,\[ScriptN]3},indexArray[[;;6]]]) CIIITensor[{\[ScriptM]1,\[ScriptN]1,\[ScriptM]2,\[ScriptN]2,\[ScriptM]3,\[ScriptN]3},TakeLorenzIndices[indexArray[[7;;]]]] //Calc;
-
-
 ReducedGamma = {\[Mu],\[Alpha],\[Beta],\[Lambda],\[Rho],\[Sigma]} |->  MTD[\[Lambda],\[Alpha]]ITensor[{\[Beta],\[Mu],\[Rho],\[Sigma]}]+MTD[\[Lambda],\[Beta]]ITensor[{\[Alpha],\[Mu],\[Rho],\[Sigma]}]-MTD[\[Lambda],\[Mu]]ITensor[{\[Alpha],\[Beta],\[Rho],\[Sigma]}] //Calc;
 
+
+TTensor = {\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2}|->FVD[p1,\[Mu]]FVD[p2,\[Nu]]ITensor[{\[Alpha],\[Beta],\[Mu]1,\[Nu]1}]ITensor[{\[Rho],\[Sigma],\[Mu]2,\[Nu]2}]-FVD[p1,\[Mu]]FVD[p2,\[Nu]]ITensor[{\[Alpha],\[Rho],\[Mu]1,\[Nu]1}]ITensor[{\[Beta],\[Sigma],\[Mu]2,\[Nu]2}]+2FVD[p1,\[Mu]]FVD[p2,\[Alpha]]ITensor[{\[Beta],\[Rho],\[Mu]1,\[Nu]1}]ITensor[{\[Nu],\[Sigma],\[Mu]2,\[Nu]2}]-2FVD[p1,\[Mu]]FVD[p2,\[Beta]]ITensor[{\[Nu],\[Alpha],\[Mu]1,\[Nu]1}]ITensor[{\[Rho],\[Sigma],\[Mu]2,\[Nu]2}] // Calc;
+GravitonVertex1Alternative = indexArray |-> I(1/2)(Global`\[Kappa])^(Length[indexArray]/3-2) (TTensor@@Join[{\[ScriptM]1,\[ScriptN]1,\[ScriptM]2,\[ScriptN]2,\[ScriptM]3,\[ScriptN]3},indexArray[[;;6]]]) CIIITensor[{\[ScriptM]1,\[ScriptN]1,\[ScriptM]2,\[ScriptN]2,\[ScriptM]3,\[ScriptN]3},TakeLorenzIndices[indexArray[[7;;]]]] //Calc;
+
+
+GravitonVertex1 = indexArray|->I(1/2)(Global`\[Kappa])^(Length[indexArray]/3-2) CIIITensor[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[indexArray[[7;;]]]]FVD[indexArray[[3]],\[Lambda]1]FVD[indexArray[[6]],\[Lambda]2] (ReducedGamma[\[Beta],\[Mu],\[Rho],\[Lambda]1,indexArray[[1]],indexArray[[2]]]ReducedGamma[\[Sigma],\[Nu],\[Alpha],\[Lambda]2,indexArray[[4]],indexArray[[5]]]-ReducedGamma[\[Beta],\[Mu],\[Nu],\[Lambda]1,indexArray[[1]],indexArray[[2]]]ReducedGamma[\[Sigma],\[Alpha],\[Rho],\[Lambda]2,indexArray[[4]],indexArray[[5]]])//Calc;
 GravitonVertex2 = indexArray |->I(-(1/8))(Global`\[Kappa])^(Length[indexArray]/3-2) FVD[indexArray[[3]],\[Lambda]1]FVD[indexArray[[6]],\[Lambda]2]ReducedGamma[\[Mu],\[Alpha],\[Beta],\[Lambda]1,indexArray[[1]],indexArray[[2]]]ReducedGamma[\[Nu],\[Rho],\[Sigma],\[Lambda]2,indexArray[[4]],indexArray[[5]]] CIIITensor[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[indexArray[[7;;]]]]//Calc;
-
-
 indexSymmetrization = indexArray |-> Flatten/@Permutations[Partition[indexArray,3]];
 
 GravitonVertex = {indexArray,\[CurlyEpsilon]} |-> Total[(GravitonVertex1[#]+\[CurlyEpsilon] GravitonVertex2[#])&/@indexSymmetrization[indexArray]]//Calc;
