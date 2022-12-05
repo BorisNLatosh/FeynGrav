@@ -5,7 +5,7 @@ Needs["Nieuwenhuizen`","./Rules/Nieuwenhuizen.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
 
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
-Print[Style["FeynGrav version 1.4 experimental",Bold]];
+Print[Style["FeynGrav version 2.0",Bold]];
 Print["FeynGrav: FeynGravCommands print the list of all supported commands."];
 Print["FeynGrav: Use '?CommandName' to see a brief description."];
 Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and ArXiV:2201.06812."];
@@ -221,6 +221,9 @@ Begin["Private`"];
 GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I 1/2 (MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]])FAD[k];
 GravitonPropagatorTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_]=1/2(MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]]);
 GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I ((1/2 (MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]]))/SPD[k,k]);
+
+
+FeynGrav`GaugeFixingEpsilon =1;
 
 
 End[];

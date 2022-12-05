@@ -6,7 +6,7 @@ FeynCalc 9.3.1 or higher is required.
 
 *) Run "$UserBaseDirectory" in Wolfram Mathematica and locate the User Base Directory.
 *) Copy the whole "FeynGrav" folder to "UserBaseDirectory/Applications".
-*) Command "<<FeynGrav`" will load FeynGrav alongside FeynCalc in Mathematica.
+*) Command "<<FeynGrav`" loads FeynGrav alongside FeynCalc in Mathematica.
 
 
 ***FILES DESCRIPTION***
@@ -17,15 +17,13 @@ The main package file. It contains definitions of projector operators, Nieuwenhu
 "FeynGrav_Examples.nb"
 The file contains a few examples discussed in ArXiV:2201.06812.
 
-"FeynGrav_Examples.nb"
-The file contain examples of calculations performed with FeynGrav.
-The calculations are explaind in details in the corresponding ArXiV publication.
-Within the file itself only brif comments are given.
+"Rules"
+The directory contains files with Feynman rules for gravity and auxiliary functions.
 
 "Libs"
-The directory contains library files. The framework used in FeynGrav relies on certain families of tensors.
-
-"Libs/Libraries_Generator.nb"
-The file contains a script that generates libraries required for computations.
+The directory contains library files and the libraries generator.
 The package is provided with a pre-generated libraries up to O(\kappa^3) order in perturbation theory.
+
+"Libs/FeynGravLibrariesGenerator.wl"
+The package file that provides a tool to generate libraries.
 
