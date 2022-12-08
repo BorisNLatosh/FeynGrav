@@ -12,7 +12,7 @@ FeynCalc 9.3.1 or higher is required.
 ***FILES DESCRIPTION***
 
 "FeynGrav.wl"
-The main package file. It contains definitions of projector operators, Nieuwenhuizen operators, and propagators. The file does not contain expression for interaction vertices, they are taken from pre-generated libraries located in "Libs".
+The main package file. It contains definitions of projector operators, Nieuwenhuizen operators, and propagators. The file does not contain expressions for interaction vertices, they are taken from pre-generated libraries located in "Libs".
 
 "FeynGrav_Examples.nb"
 The file contains a few examples discussed in ArXiV:2201.06812.
@@ -22,8 +22,7 @@ The directory contains files with Feynman rules for gravity and auxiliary functi
 
 "Libs"
 The directory contains library files and the libraries generator.
-The package is provided with a pre-generated libraries up to O(\kappa^3) order in perturbation theory.
+The package is provided with pre-generated libraries up to O(\kappa^3) order in perturbation theory.
 
 "Libs/FeynGravLibrariesGenerator.wl"
-The package file that provides a tool to generate libraries.
-
+The package file provides a tool to generate libraries.

@@ -19,7 +19,7 @@ TakeLorenzIndices = indexArray |-> Flatten[(#[[;;2]]&)/@Partition[indexArray,3]]
 
 
 GravitonVectorVertex1 = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2} |-> I (Global`\[Kappa])^(Length[indexArray]/2) CIITensor[{\[Mu],\[Alpha],\[Nu],\[Beta]},indexArray] 1/2 FVD[p1,\[Sigma]1]FVD[p2,\[Sigma]2]FReduced[\[Mu],\[Nu],\[Sigma]1,\[Lambda]1]FReduced[\[Alpha],\[Beta],\[Sigma]2,\[Lambda]2]//Calc;
-GravitonVectorVertex2 = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2} |-> (-I) (Global`\[Kappa])^(Length[indexArray]/2) CITensorC[{\[Lambda]1,\[Lambda]2},indexArray]//Calc;
+GravitonVectorVertex2 = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2} |-> I (Global`\[Kappa])^(Length[indexArray]/2) CITensorC[{\[Lambda]1,\[Lambda]2},indexArray]//Calc;
 GravitonMassiveVectorVertex = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2,m} |-> GravitonVectorVertex1[indexArray,\[Lambda]1,p1,\[Lambda]2,p2] + m^2 GravitonVectorVertex2[indexArray,\[Lambda]1,p1,\[Lambda]2,p2]//Calc;
 
 
