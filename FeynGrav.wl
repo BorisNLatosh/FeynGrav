@@ -233,6 +233,8 @@ GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I ((1/2 (MTD[
 
 FeynGrav`GaugeFixingEpsilon =0;
 Print["The Gauge fixing parameter \[CurlyEpsilon] is set to zero."];
+FeynGrav`GaugeFixingEpsilonVector = Subscript[Global`\[CurlyEpsilon], V];
+Print["The Gauge fixing parameter for the single vector field noted as \!\(\*SubscriptBox[\(\[CurlyEpsilon]\), \(V\)]\)."];
 
 
 End[];
