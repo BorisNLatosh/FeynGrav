@@ -44,6 +44,12 @@ FeynGravCommands := Print[" 'GravitonVertex','GravitonScalarVertex','GravitonVec
 SetDirectory[DirectoryName[$InputFileName]];
 
 
+FormatValues[FeynGrav`GaugeFixingEpsilon] = {HoldPattern[MakeBoxes[FeynGrav`GaugeFixingEpsilon,TraditionalForm]]:>SubscriptBox["\[CurlyEpsilon]","Gravity"]} ;
+(*Print["The Gauge fixing parameter \[CurlyEpsilon] is set to zero."];*)
+FormatValues[FeynGrav`GaugeFixingEpsilonVector] = {HoldPattern[MakeBoxes[FeynGrav`GaugeFixingEpsilonVector,TraditionalForm]]:>SubscriptBox["\[CurlyEpsilon]","Vector"]} ;
+(*Print["The Gauge fixing parameter for the single vector field noted as \!\(\*SubscriptBox[\(\[CurlyEpsilon]\), \(V\)]\)."];*)
+
+
 DummyArray = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]]} )& /@ Range[#] ]&;
 DummyArrayK = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]], ToExpression["k"<>ToString[#]]} )& /@ Range[#] ]&;
 dummyArrayP=n|->Flatten[Function[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["p"<>ToString[#]]}]/@Range[n]];
@@ -229,12 +235,6 @@ ProcaPropagator[\[Mu]_,\[Nu]_,p_,m_]=(-I)(MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[N
 GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I 1/2 (MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]])FAD[k];
 GravitonPropagatorTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_]=1/2(MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]]);
 GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]=I ((1/2 (MTD[\[Mu],\[Alpha]]MTD[\[Nu],\[Beta]]+MTD[\[Mu],\[Beta]]MTD[\[Nu],\[Alpha]]-MTD[\[Mu],\[Nu]]MTD[\[Alpha],\[Beta]]))/SPD[k,k]);
-
-
-FeynGrav`GaugeFixingEpsilon =0;
-Print["The Gauge fixing parameter \[CurlyEpsilon] is set to zero."];
-FeynGrav`GaugeFixingEpsilonVector = Subscript[Global`\[CurlyEpsilon], V];
-Print["The Gauge fixing parameter for the single vector field noted as \!\(\*SubscriptBox[\(\[CurlyEpsilon]\), \(V\)]\)."];
 
 
 End[];
