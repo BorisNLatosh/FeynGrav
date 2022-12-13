@@ -232,7 +232,7 @@ ProcaPropagator[\[Mu]_,\[Nu]_,p_,m_]=(-I)(MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[N
 
 
 GravitonPropagatorTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_]:=(-(1/2) Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p] + Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] -((3 FeynGrav`GaugeFixingEpsilon - 8)/(2 FeynGrav`GaugeFixingEpsilon))Nieuwenhuizen`NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p]-1/2 Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p])//Calc;
-GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]:=I GravitonPropagatorTop[\[Mu],\[Nu],\[Alpha],\[Beta],k] FAD[k];
+GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]:=Calc[I (GravitonPropagatorTop[\[Mu],\[Nu],\[Alpha],\[Beta],k]/.Pair[Momentum[k,D],Momentum[k,D]]->1/FAD[k]) FAD[k]];
 GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]:=I (GravitonPropagatorTop[\[Mu],\[Nu],\[Alpha],\[Beta],k])/SPD[k,k];
 
 
