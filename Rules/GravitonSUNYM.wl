@@ -24,7 +24,7 @@ GravitonThreeGluonVertex={indexArray,p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lamb
 
 GravitonFourGluonVertex={indexArray,p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4}|->GluonVertex[p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4,Explicit->True] /. Pair[LorentzIndex[\[ScriptX]_, D], LorentzIndex[\[ScriptY]_, D]] Pair[LorentzIndex[\[ScriptA]_, D], LorentzIndex[\[ScriptB]_, D]] -> CIITensorC[{\[ScriptX], \[ScriptY], \[ScriptA], \[ScriptB]}, indexArray]//Calc  ;
 
-GravitonGluonVertex = {indexArray,p1,\[Lambda]1,a1,p2,\[Lambda]2,a2}|-> SUNDelta[SUNIndex[a1],SUNIndex[a2]] GravitonVectorVertex[indexArray,\[Lambda]1,p1,\[Lambda]2,p2];
+GravitonGluonVertex = {indexArray,p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,\[CurlyEpsilon]}|-> SUNDelta[SUNIndex[a1],SUNIndex[a2]] GravitonVectorVertex[indexArray,\[Lambda]1,p1,\[Lambda]2,p2,\[CurlyEpsilon]];
 
 GravitonYMGhostVertex = {indexArray,p1,a,p2,b}|->SUNDelta[SUNIndex[a],SUNIndex[b]]GravitonVectorGhostVertex[indexArray,p1,p2];
 
