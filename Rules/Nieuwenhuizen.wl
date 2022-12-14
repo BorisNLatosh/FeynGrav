@@ -14,11 +14,11 @@ NieuwenhuizenOperator0BarBar::usage = "NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],
 Begin["Private`"];
 
 GaugeProjector = {\[Mu],\[Nu],k} |-> Pair[ LorentzIndex[\[Mu],D], LorentzIndex[\[Nu],D] ] - (Pair[Momentum[k,D], LorentzIndex[\[Mu],D]] Pair[Momentum[k,D],LorentzIndex[\[Nu],D]])/(Pair[ Momentum[k,D], Momentum[k,D]]);
-NieuwenhuizenOperator1= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->1/2 (GaugeProjector[\[Mu],\[Alpha],k](Pair[LorentzIndex[\[Nu],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Nu],\[Beta],k])+GaugeProjector[\[Mu],\[Beta],k](Pair[LorentzIndex[\[Nu],D],LorentzIndex[\[Alpha],D]]-GaugeProjector[\[Nu],\[Alpha],k])+GaugeProjector[\[Nu],\[Alpha],k](Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Mu],\[Beta],k])+GaugeProjector[\[Nu],\[Beta],k](Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Alpha],D]]-GaugeProjector[\[Mu],\[Alpha],k]));
-NieuwenhuizenOperator2= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->1/2 (GaugeProjector[\[Mu],\[Alpha],k]GaugeProjector[\[Nu],\[Beta],k]+GaugeProjector[\[Mu],\[Beta],k]GaugeProjector[\[Nu],\[Alpha],k])-1/3 GaugeProjector[\[Mu],\[Nu],k]GaugeProjector[\[Alpha],\[Beta],k];
-NieuwenhuizenOperator0= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->1/3 GaugeProjector[\[Mu],\[Nu],k]GaugeProjector[\[Alpha],\[Beta],k];
-NieuwenhuizenOperator0Bar= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->(Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Nu],D]]-GaugeProjector[\[Mu],\[Nu],k])(Pair[LorentzIndex[\[Alpha],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Alpha],\[Beta],k]);
-NieuwenhuizenOperator0BarBar= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->GaugeProjector[\[Mu],\[Nu],k](Pair[LorentzIndex[\[Alpha],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Alpha],\[Beta],k])+(Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Nu],D]]-GaugeProjector[\[Mu],\[Nu],k])GaugeProjector[\[Alpha],\[Beta],k];
+NieuwenhuizenOperator1= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->1/2 (GaugeProjector[\[Mu],\[Alpha],k](Pair[LorentzIndex[\[Nu],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Nu],\[Beta],k])+GaugeProjector[\[Mu],\[Beta],k](Pair[LorentzIndex[\[Nu],D],LorentzIndex[\[Alpha],D]]-GaugeProjector[\[Nu],\[Alpha],k])+GaugeProjector[\[Nu],\[Alpha],k](Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Mu],\[Beta],k])+GaugeProjector[\[Nu],\[Beta],k](Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Alpha],D]]-GaugeProjector[\[Mu],\[Alpha],k]))//Calc;
+NieuwenhuizenOperator2= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->1/2 (GaugeProjector[\[Mu],\[Alpha],k]GaugeProjector[\[Nu],\[Beta],k]+GaugeProjector[\[Mu],\[Beta],k]GaugeProjector[\[Nu],\[Alpha],k])-1/3 GaugeProjector[\[Mu],\[Nu],k]GaugeProjector[\[Alpha],\[Beta],k]//Calc;
+NieuwenhuizenOperator0= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->1/3 GaugeProjector[\[Mu],\[Nu],k]GaugeProjector[\[Alpha],\[Beta],k]//Calc;
+NieuwenhuizenOperator0Bar= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->(Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Nu],D]]-GaugeProjector[\[Mu],\[Nu],k])(Pair[LorentzIndex[\[Alpha],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Alpha],\[Beta],k])//Calc;
+NieuwenhuizenOperator0BarBar= {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->GaugeProjector[\[Mu],\[Nu],k](Pair[LorentzIndex[\[Alpha],D],LorentzIndex[\[Beta],D]]-GaugeProjector[\[Alpha],\[Beta],k])+(Pair[LorentzIndex[\[Mu],D],LorentzIndex[\[Nu],D]]-GaugeProjector[\[Mu],\[Nu],k])GaugeProjector[\[Alpha],\[Beta],k]//Calc;
 
 End[];
 
