@@ -212,7 +212,7 @@ Module[{cursor},
 		cursor++;
 	];
 	Print["Graviton vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArrayP[cursor]);
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArrayP[cursor+2]);
 	Remove[\[Lambda]1,\[Lambda]2,k1,k2];
 ]
 
