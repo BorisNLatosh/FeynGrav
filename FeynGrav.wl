@@ -38,6 +38,10 @@ GravitonPropagatorTop::usage = "GravitonPropagatorTop[\[Mu],\[Nu],\[Alpha],\[Bet
 GravitonPropagatorAlternative::usage = "GravitonPropagatorAlternative[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Graviton propagator in the harmonic gauge realized without FAD.\[Mu],\[Nu] are indices of the first vertex. \[Alpha],\[Beta] are indices of the second vertex. p is the graviton momentum."
 
 
+PolarizationTensor::usage = "PolarizationTensor[\[Mu],\[Nu],p]. Polarization tensor for the graviton in D dimensions. The tensor is constructed from the standard polarization vectors. This definition is neither traceless nor transverse."
+SetPolarizationTensor::usage = "The command makes the graviton polarization tensor being traceless and transverse."
+
+
 FeynGravCommands := Print[" 'GravitonVertex','GravitonScalarVertex','GravitonVectorVertex','GravitonFermionVertex', 'GravitonPropagator', 'GravitonPropagatorTop', 'GravitonPropagatorAlternative', 'GaugeProjector', 'NieuwenhuizenOperator1', 'NieuwenhuizenOperator2', 'NieuwenhuizenOperator0', 'NieuwenhuizenOperator0Bar', 'NieuwenhuizenOperator1BarBar' "];
 
 
@@ -238,6 +242,15 @@ ProcaPropagator[\[Mu]_,\[Nu]_,p_,m_]=(-I)(MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[N
 GravitonPropagatorTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_]:=(-(1/2) Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p] + Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] -((3 FeynGrav`GaugeFixingEpsilon - 8)/(2 FeynGrav`GaugeFixingEpsilon))Nieuwenhuizen`NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p]-1/2 Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p])//Calc;
 GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]:=Calc[I (GravitonPropagatorTop[\[Mu],\[Nu],\[Alpha],\[Beta],k]/.Pair[Momentum[k,D],Momentum[k,D]]->1/FAD[k]) FAD[k]];
 GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]:=I (GravitonPropagatorTop[\[Mu],\[Nu],\[Alpha],\[Beta],k])/SPD[k,k];
+
+
+PolarizationTensor={\[Mu],\[Nu],p}|->Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Mu],D]]Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Nu],D]];
+SetPolarizationTensor := Module[{},
+	Pair[Momentum[Polarization[x_,I],D],Momentum[Polarization[x_,I],D]]=0;
+	Pair[Momentum[Polarization[x_,I]],Momentum[Polarization[x_,I]]]=0;
+	Pair[Momentum[Polarization[x_,I],D],Momentum[x_,D]]=0;
+	Pair[Momentum[Polarization[x_,I]],Momentum[x_]]=0;
+];
 
 
 End[];
