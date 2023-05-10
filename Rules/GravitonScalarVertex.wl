@@ -10,9 +10,9 @@ GravitonScalarPotentialVertex::usage = "GravitonScalarPotentialVertex[{\!\(\*Sub
 
 Begin["Private`"];
 (* Vertex for the scalar field kinetic energy. *)
-GravitonScalarVertex = {indexArray,p1,p2,m}|->I (Global`\[Kappa])^(Length[indexArray]/2) 1/Power[2,Length[indexArray]/2] 1/Factorial[Length[indexArray]/2] Total[(- (1/2)(FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]]+FVD[p1,\[ScriptN]]FVD[p2,\[ScriptM]])CITensorPlain[{\[ScriptM],\[ScriptN]},#] - m^2 CTensorPlain[#])&/@indexArraySymmetrization[indexArray]]//Expand//Contract;
+GravitonScalarVertex = {indexArray,p1,p2,m}|->I (FeynGrav`\[Kappa])^(Length[indexArray]/2) 1/Power[2,Length[indexArray]/2] 1/Factorial[Length[indexArray]/2] Total[(- (1/2)(FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]]+FVD[p1,\[ScriptN]]FVD[p2,\[ScriptM]])CITensorPlain[{\[ScriptM],\[ScriptN]},#] - m^2 CTensorPlain[#])&/@indexArraySymmetrization[indexArray]]//Expand//Contract;
 (* Vertex for the scalar field potential energy. *)
-GravitonScalarPotentialVertex = {indexArray,\[Lambda]}|-> I (Global`\[Kappa])^(Length[indexArray]/2) \[Lambda] 1/Power[2,Length[indexArray]/2] 1/Factorial[Length[indexArray]/2] Total[CTensorPlain/@indexArraySymmetrization[indexArray]]//Expand//Contract;
+GravitonScalarPotentialVertex = {indexArray,\[Lambda]}|-> I (FeynGrav`\[Kappa])^(Length[indexArray]/2) \[Lambda] 1/Power[2,Length[indexArray]/2] 1/Factorial[Length[indexArray]/2] Total[CTensorPlain/@indexArraySymmetrization[indexArray]]//Expand//Contract;
 (* This command prepares an array of indices that respect all symmetries. First, it prepares an array with is symmetric with respect to the graviton line permutations. Then it symmetrizes is with respect to each index pair. *)
 indexArraySymmetrization = indexArray |-> Partition[Flatten[ Fold[Join[#1,#1/.{#2[[1]]->#2[[2]],#2[[2]]->#2[[1]]}]&,#,Partition[#,2]]&/@(Flatten/@Permutations[Partition[indexArray,2]]) ],Length[indexArray]];
 

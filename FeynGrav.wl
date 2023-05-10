@@ -3,6 +3,8 @@
 SetDirectory[DirectoryName[$InputFileName]];
 Needs["Nieuwenhuizen`","./Rules/Nieuwenhuizen.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
+Needs["GravitonScalarVertex`","./Rules/GravitonScalarVertex.wl"];
+SetDirectory[DirectoryName[$InputFileName]];
 
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 Print[Style["FeynGrav version 2.0",Bold]];
@@ -11,8 +13,6 @@ Print["FeynGrav: Use '?CommandName' to see a brief description."];
 Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and ArXiV:2201.06812."];
 
 
-GravitonScalarVertex::usage = "GravitonScalarVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Expression for gravitational interaction of a scalar field kinetic energy. {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are graviton indices, \!\(\*SubscriptBox[\(p\), \(i\)]\) are scalar field momenta, m is the scalar field mass.";
-GravitonScalarPotentialVertex::usage = "GravitonScalarPotentialVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(\[Lambda]\), \(p\)]\)]. Expression for gravitational interaction of a scalar field potential energy. {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are gravitational indices, \!\(\*SubscriptBox[\(\[Lambda]\), \(l\)]\) is the scalar field self-coupling constant.";
 ScalarPropagator::usage = "ScalarPropagator[p,m]. Propagator of a scalar field with mass m.";
 
 
@@ -59,25 +59,6 @@ FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 DummyArray = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]]} )& /@ Range[#] ]&;
 DummyArrayK = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]], ToExpression["k"<>ToString[#]]} )& /@ Range[#] ]&;
 dummyArrayP=n|->Flatten[Function[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["p"<>ToString[#]]}]/@Range[n]];
-
-
-Module[{cursor},
-	cursor = 1;
-	Clear[GravitonScalarVertex];
-	While[FileExistsQ["./Libs/GravitonScalarVertex_"<>ToString[cursor]],
-		Evaluate[GravitonScalarVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,p2,m}  ]  ] = Get["./Libs/GravitonScalarVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	cursor = 1;
-	Clear[GravitonScalarPotentialVertex];
-	While[FileExistsQ["./Libs/GravitonScalarPotentialVertex_"<>ToString[cursor]],
-		Evaluate[GravitonScalarPotentialVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]}  ]] = Get["./Libs/GravitonScalarPotentialVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	Print["Graviton-Scalar vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@DummyArray[cursor]);
-	Remove[p1,p2,m,\[Lambda]];
-]
 
 
 Module[{cursor},
