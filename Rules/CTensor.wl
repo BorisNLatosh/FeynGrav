@@ -6,6 +6,8 @@ BeginPackage["CTensor`",{"FeynCalc`","ITensor`"}];
 
 CTensor::usage = "CTensor[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)}]. The function returns (\!\(\*SqrtBox[\(-g\)]\)\!\(\*SuperscriptBox[\()\), \(\*SubscriptBox[\(\[Rho]\), \(1\)] \*SubscriptBox[\(\[Sigma]\), \(1\)] \*SubscriptBox[\(\[Ellipsis]\[Rho]\), \(n\)] \*SubscriptBox[\(\[Sigma]\), \(n\)]\)]\) symmetric with respect to index permutations in each pair and parmutations of index pairs.";
 
+CTensorPlain::usage = "CTensorPlain[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)]. The tensor uses the recursive definition. The definition does not admit symmetries.";
+
 Begin["Private`"];
 
 IndexDistribution = {n,m}|->Select[ Tuples[Range[n],m] , Total[#]==n & ];
@@ -20,6 +22,8 @@ ITensorIndices = x|-> Partition[ Fold[ ( Join[ #1 , (#1/.{#2[[1]]->#2[[2]],#2[[2
 CTensorIndices = x |-> Partition[ Flatten[ ITensorIndices /@ (Flatten /@ Permutations[Partition[x,2]]) ] , Length[x]];
 
 CTensor = x |-> Piecewise[ {{1,Length[x]==0}}, Calc[ Total[ 1/(Power[2,Length[x]/2] Factorial[Length[x]/2]) (CTensorCore /@ CTensorIndices[x]) ]] ];
+
+CTensorPlain = If[Length[#]==0,1,1/Length[#] Sum[(-1)^(k-1) ITensorPlain[#[[;;2k]]]CTensorPlain[#[[2k+1;;]]],{k,1,Length[#]/2}]]&;
 
 End[];
 
