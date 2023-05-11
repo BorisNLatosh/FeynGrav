@@ -2,7 +2,7 @@
 
 SetDirectory[DirectoryName[$InputFileName]];
 
-BeginPackage["GravitonVectorVertex`",{"FeynCalc`","ITensor`","CTensor`","CITensor`","CIITensor`","CIIITensor`","CIIIITensor`","GammaTensor`"}];
+BeginPackage["GravitonVectorVertex`",{"FeynCalc`","ITensor`","CTensor`","CITensor`","CIITensor`","CIIITensor`","CIIIITensor`","GammaTensor`","ITensorPlain`","CTensorPlain`","CITensorPlain`","CIITensorPlain`","CIIITensorPlain`","CIIIITensorPlain`"}];
 
 GravitonMassiveVectorVertex::usage = "GravitonMassiveVectorVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. The function returns an expression for the gravitational vertex of a massive vector field kinetic energy. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are gravitons Lorentz indices, \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) are vectors Lorentz indices, \!\(\*SubscriptBox[\(p\), \(i\)]\) are vectors momenta, and m is the vector field mass.";
 
@@ -10,17 +10,25 @@ GravitonVectorVertex::usage = "GravitonVectorVertex[{\!\(\*SubscriptBox[\(\[Rho]
 
 GravitonVectorGhostVertex::usage = "GravitonVectorGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]. The function returns an expression for the graviton vertex of the Faddeev-Popov ghost kinetic energy. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are gravitons Lorentz indices, \!\(\*SubscriptBox[\(p\), \(i\)]\) are ghosts momenta.";
 
+GravitonMassiveVectorVertex2::usage = "";
+indexArraySymmetrizationParallel::usage = "";
+indexArraySymmetrization::usage = "";
 Begin["Private`"];
 
 
 FReduced = {\[Mu],\[Nu],\[Sigma],\[Lambda]} |-> MTD[\[Mu],\[Sigma]]MTD[\[Nu],\[Lambda]]-MTD[\[Nu],\[Sigma]]MTD[\[Mu],\[Lambda]];
-(*GammaReduced = {\[Mu],\[Alpha],\[Beta],\[Lambda],\[Rho],\[Sigma]}|->MTD[\[Alpha],\[Lambda]]ITensor[{\[Beta],\[Mu],\[Rho],\[Sigma]}]+MTD[\[Beta],\[Lambda]]ITensor[{\[Alpha],\[Mu],\[Rho],\[Sigma]}]-MTD[\[Mu],\[Lambda]]ITensor[{\[Alpha],\[Beta],\[Rho],\[Sigma]}]//Calc;*)
 TakeLorenzIndices = indexArray |-> Flatten[(#[[;;2]]&)/@Partition[indexArray,3]];
+
+
+indexArraySymmetrization = indexArray |-> Partition[Flatten[ Fold[Join[#1,#1/.{#2[[1]]->#2[[2]],#2[[2]]->#2[[1]]}]&,#,Partition[#,2]]&/@(Flatten/@Permutations[Partition[indexArray,2]]) ],Length[indexArray]];
 
 
 GravitonVectorVertex1 = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2} |-> I (Global`\[Kappa])^(Length[indexArray]/2) CIITensor[{\[Mu],\[Alpha],\[Nu],\[Beta]},indexArray] 1/2 FVD[p1,\[Sigma]1]FVD[p2,\[Sigma]2]FReduced[\[Mu],\[Nu],\[Sigma]1,\[Lambda]1]FReduced[\[Alpha],\[Beta],\[Sigma]2,\[Lambda]2]//Calc;
 GravitonVectorVertex2 = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2} |-> I (Global`\[Kappa])^(Length[indexArray]/2) CITensor[{\[Lambda]1,\[Lambda]2},indexArray]//Calc;
 GravitonMassiveVectorVertex = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2,m} |-> GravitonVectorVertex1[indexArray,\[Lambda]1,p1,\[Lambda]2,p2] + m^2 GravitonVectorVertex2[indexArray,\[Lambda]1,p1,\[Lambda]2,p2]//Calc;
+
+
+GravitonMassiveVectorVertex2 = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2,m} |-> 1/Power[2,Length[indexArray]/2] 1/Factorial[Length[indexArray]/2] I (Global`\[Kappa])^(Length[indexArray]/2) Total[ ( (1/2)( CIITensorPlain[{\[Mu],\[Alpha],\[Nu],\[Beta]},#] FVD[p1,\[Sigma]1]FVD[p2,\[Sigma]2]FReduced[\[Mu],\[Nu],\[Sigma]1,\[Lambda]1]FReduced[\[Alpha],\[Beta],\[Sigma]2,\[Lambda]2]) + m^2 CITensorPlain[{\[Lambda]1,\[Lambda]2},#] )& /@ indexArraySymmetrization[indexArray]  ]//Contract;
 
 
 GravitonVectorVertex3 = {indexArray,\[Lambda]1,p1,\[Lambda]2,p2} |->  I (Global`\[Kappa])^(Length[indexArray]/3) CIITensor[{\[Sigma]1,\[Lambda]1,\[Sigma]2,\[Lambda]2},TakeLorenzIndices[indexArray]] (-1)FVD[p1,\[Sigma]1]FVD[p2,\[Sigma]2] //Calc;
