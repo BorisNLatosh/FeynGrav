@@ -2,19 +2,17 @@
 
 SetDirectory[DirectoryName[$InputFileName]];
 
-BeginPackage["CIITensor`",{"FeynCalc`","ITensor`","CTensor`"}];
+BeginPackage["CIITensor`",{"FeynCalc`","ITensor`","CTensor`","MTDWrapper`","indexArraySymmetrization`"}];
 
 CIITensor::usage = "CIITensor[{\[Mu],\[Nu],\[Alpha],\[Beta]},{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)}]. The function returns (\!\(\*SqrtBox[\(-g\)]\)\!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\)\!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\)\!\(\*SuperscriptBox[\()\), \(\*SubscriptBox[\(\[Rho]\), \(1\)] \*SubscriptBox[\(\[Sigma]\), \(1\)] \*SubscriptBox[\(\[Ellipsis]\[Rho]\), \(n\)] \*SubscriptBox[\(\[Sigma]\), \(n\)]\)]\). The tensor is symmetric with respect to the permutation of the indices in each index pair and with respect to the permutations of the index pairs.";
 
+CIITensorPlain::usage = "CIITensor[{\[Mu],\[Nu],\[Alpha],\[Beta]},{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)}]. The function returns (\!\(\*SqrtBox[\(-g\)]\)\!\(\*SuperscriptBox[\(g\), \(\[Mu]\[Nu]\)]\)\!\(\*SuperscriptBox[\(g\), \(\[Alpha]\[Beta]\)]\)\!\(\*SuperscriptBox[\()\), \(\*SubscriptBox[\(\[Rho]\), \(1\)] \*SubscriptBox[\(\[Sigma]\), \(1\)] \*SubscriptBox[\(\[Ellipsis]\[Rho]\), \(n\)] \*SubscriptBox[\(\[Sigma]\), \(n\)]\)]\). The definition does not allow index symmetries.";
+
 Begin["Private`"];
 
-CIITensorInternalIndices=Function[indexArray , Function[FoldPairList[TakeDrop,indexArray,2#]]/@(Function[n,Select[Tuples[Range[0,n],3],Total[#]==n&]])[Length[indexArray]/2] ];
+CIITensorPlain = {indexArrayExternal,indexArrayInternal} |-> (Power[-1,Length[#[[2]]]/2+Length[#[[3]]]/2 -2  ]CTensorPlain[#[[1]]] ITensorPlain[#[[2]]]ITensorPlain[#[[3]]] )&/@( MapThread[Join,{Join[{{}},Partition[indexArrayExternal,2]],#}]&/@( FoldPairList[TakeDrop,indexArrayInternal,2#]& /@ Select[Tuples[Range[0,Length[indexArrayInternal]/2],3],Total[#]==Length[indexArrayInternal]/2&] ) ) //Total//Expand;
 
-CIITensorIndices=Function[{indexArrayExternal,indexArrayInternal},  Function[MapThread[Join,{Join[{{}},Partition[indexArrayExternal,2]],#}]]/@CIITensorInternalIndices[indexArrayInternal]  ];
-
-CIITensorCore =Function[ {indexArrayExternal,indexArrayInternal},Total[  Function[(-1)^(Length[indexArrayInternal]/2) (-1)^(-Length[#[[1]]]/2) CTensor[#[[1]]](Times@@ITensor/@#[[2;;]]) ]/@CIITensorIndices[indexArrayExternal,indexArrayInternal]  ]  ];
-
-CIITensor=Function[{indexArrayExternal,indexArrayInternal},Expand[Total[1/Factorial[Length[indexArrayInternal]/2] (Function[CIITensorCore[indexArrayExternal,#]]/@Flatten/@Permutations[Partition[indexArrayInternal,2]])]]  ];
+CIITensor = {indexArrayExternal,indexArrayInternal} |-> If[ Length[indexArrayInternal]==0, MTDWrapper[indexArrayExternal] , 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[CIITensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]]//Expand ];
 
 End[];
 
