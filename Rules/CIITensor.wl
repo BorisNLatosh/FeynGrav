@@ -12,7 +12,7 @@ Begin["Private`"];
 
 CIITensorPlain = {indexArrayExternal,indexArrayInternal} |-> (Power[-1,Length[#[[2]]]/2+Length[#[[3]]]/2 -2  ]CTensorPlain[#[[1]]] ITensorPlain[#[[2]]]ITensorPlain[#[[3]]] )&/@( MapThread[Join,{Join[{{}},Partition[indexArrayExternal,2]],#}]&/@( FoldPairList[TakeDrop,indexArrayInternal,2#]& /@ Select[Tuples[Range[0,Length[indexArrayInternal]/2],3],Total[#]==Length[indexArrayInternal]/2&] ) ) //Total//Expand;
 
-CIITensor = {indexArrayExternal,indexArrayInternal} |-> If[ Length[indexArrayInternal]==0, MTDWrapper[indexArrayExternal] , 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[CIITensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]]//Expand ];
+CIITensor = {indexArrayExternal,indexArrayInternal} |-> Expand[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[CIITensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ];
 
 End[];
 

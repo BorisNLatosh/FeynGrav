@@ -9,7 +9,7 @@ indexArraySymmetrization::usage = "indexArraySymmetrization[indexArray]. Returns
 Begin["Private`"];
 
 
-indexArraySymmetrization = indexArray |-> If[ Length[indexArray]==0 , {} , Partition[Flatten[ Fold[Join[#1,#1/.{#2[[1]]->#2[[2]],#2[[2]]->#2[[1]]}]&,#,Partition[#,2]]&/@(Flatten/@Permutations[Partition[indexArray,2]]) ],Length[indexArray]] ];
+indexArraySymmetrization = indexArray |-> If[ Length[indexArray]==0 , {{}} , Partition[Flatten[ Fold[Join[#1,#1/.{#2[[1]]->#2[[2]],#2[[2]]->#2[[1]]}]&,#,Partition[#,2]]&/@(Flatten/@Permutations[Partition[indexArray,2]]) ],Length[indexArray]] ];
 
 
 End[];
