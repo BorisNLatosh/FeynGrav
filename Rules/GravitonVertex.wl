@@ -7,8 +7,6 @@ BeginPackage["GravitonVertex`",{"FeynCalc`","ITensor`","CTensor`","CITensor`","C
 
 
 GravitonVertex::usage = "GravitonVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\),\[Ellipsis]},\[CurlyEpsilon]].";
-GravitonVertexb::usage = "";
-GravitonVertexPrime::usage = "";
 GravitonGhostVertex::usage = "GravitonGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis]},\[Mu],p1,\[Nu],p2].";
 
 
@@ -24,10 +22,10 @@ TTensor = {\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,
 GravitonVertex1 = indexArray|->I 2(Global`\[Kappa])^(Length[indexArray]/3-2) CIIITensor[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[indexArray[[7;;]]]]FVD[indexArray[[3]],\[Lambda]1]FVD[indexArray[[6]],\[Lambda]2] (GammaTensor[\[Alpha],\[Mu],\[Rho],\[Lambda]1,indexArray[[1]],indexArray[[2]]]GammaTensor[\[Sigma],\[Nu],\[Beta],\[Lambda]2,indexArray[[4]],indexArray[[5]]]-GammaTensor[\[Alpha],\[Mu],\[Nu],\[Lambda]1,indexArray[[1]],indexArray[[2]]]GammaTensor[\[Rho],\[Beta],\[Sigma],\[Lambda]2,indexArray[[4]],indexArray[[5]]]) //Contract;
 GravitonVertex2 = indexArray |->I (-(1/2)) (Global`\[Kappa])^(Length[indexArray]/3-2)  CIIITensor[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[indexArray[[7;;]]]] FVD[indexArray[[3]],\[Lambda]1]FVD[indexArray[[6]],\[Lambda]2]GammaTensor[\[Mu],\[Alpha],\[Beta],\[Lambda]1,indexArray[[1]],indexArray[[2]]]GammaTensor[\[Nu],\[Rho],\[Sigma],\[Lambda]2,indexArray[[4]],indexArray[[5]]] //Contract;
 indexSymmetrization = indexArray |-> Flatten/@Permutations[Partition[indexArray,3]];
+(*GravitonVertex = {indexArray,\[CurlyEpsilon]} |-> Total[(GravitonVertex1[#] + \[CurlyEpsilon] GravitonVertex2[#])&/@indexSymmetrization[indexArray]]//Expand;*)
 
-GravitonVertex = {indexArray,\[CurlyEpsilon]} |-> Total[(GravitonVertex1[#] + \[CurlyEpsilon] GravitonVertex2[#])&/@indexSymmetrization[indexArray]]//Expand;
-GravitonVertexb = {indexArray,\[CurlyEpsilon]} |-> Contract[ Total[ ( I (Global`\[Kappa])^(Length[#]/3-2) CIIITensor[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[#[[7;;]]]]FVD[#[[3]],\[Lambda]1]FVD[#[[6]],\[Lambda]2] (2 GammaTensor[\[Alpha],\[Mu],\[Rho],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Sigma],\[Nu],\[Beta],\[Lambda]2,#[[4]],#[[5]]] - 2 GammaTensor[\[Alpha],\[Mu],\[Nu],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Rho],\[Beta],\[Sigma],\[Lambda]2,#[[4]],#[[5]]] - (1/2) \[CurlyEpsilon] GammaTensor[\[Mu],\[Alpha],\[Beta],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Nu],\[Rho],\[Sigma],\[Lambda]2,#[[4]],#[[5]]]) )&/@indexSymmetrization[indexArray] ] ];
-GravitonVertexPrime = {indexArray,\[CurlyEpsilon]} |->  Total[ ( I (Global`\[Kappa])^(Length[#]/3-2) CIIITensor[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[#[[7;;]]]]FVD[#[[3]],\[Lambda]1]FVD[#[[6]],\[Lambda]2] (2 GammaTensor[\[Alpha],\[Mu],\[Rho],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Sigma],\[Nu],\[Beta],\[Lambda]2,#[[4]],#[[5]]] - 2 GammaTensor[\[Alpha],\[Mu],\[Nu],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Rho],\[Beta],\[Sigma],\[Lambda]2,#[[4]],#[[5]]] - (1/2) \[CurlyEpsilon] GammaTensor[\[Mu],\[Alpha],\[Beta],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Nu],\[Rho],\[Sigma],\[Lambda]2,#[[4]],#[[5]]]) )&/@indexSymmetrization[indexArray] ] ;
+
+GravitonVertex = {indexArray,\[CurlyEpsilon]} |-> Contract[ Total[ ( I (Global`\[Kappa])^(Length[#]/3-2) CIIITensor[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[#[[7;;]]]]FVD[#[[3]],\[Lambda]1]FVD[#[[6]],\[Lambda]2] (2 GammaTensor[\[Alpha],\[Mu],\[Rho],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Sigma],\[Nu],\[Beta],\[Lambda]2,#[[4]],#[[5]]] - 2 GammaTensor[\[Alpha],\[Mu],\[Nu],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Rho],\[Beta],\[Sigma],\[Lambda]2,#[[4]],#[[5]]] - (1/2) \[CurlyEpsilon] GammaTensor[\[Mu],\[Alpha],\[Beta],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Nu],\[Rho],\[Sigma],\[Lambda]2,#[[4]],#[[5]]]) )&/@indexSymmetrization[indexArray] ] ];
 
 
 GravitonGhostVertex1 = {indexArray,\[Mu],p1,\[Nu],p2}|->I (Global`\[Kappa])^(Length[indexArray]/3) CIITensor[{\[Alpha],\[Beta],\[Mu],\[Nu]},TakeLorenzIndices[indexArray]]FVD[p1,\[Alpha]]FVD[p2,\[Beta]] //Contract;
