@@ -1,11 +1,7 @@
 (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n1, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[n3, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[n2, D]]*
-  Pair[LorentzIndex[m3, D], LorentzIndex[n1, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n1, D]] + 
@@ -18,11 +14,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n1, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[n2, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[n3, D]]*
-  Pair[LorentzIndex[m3, D], LorentzIndex[n1, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n1, D]] - 
@@ -48,11 +40,7 @@
    LorentzIndex[n1, D]] - (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], 
    LorentzIndex[n3, D]]*Pair[LorentzIndex[m2, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n2, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[n3, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[n1, D]]*
-  Pair[LorentzIndex[m3, D], LorentzIndex[n2, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n2, D]] - 
@@ -65,11 +53,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n2, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[n3, D]]*
-  Pair[LorentzIndex[m3, D], LorentzIndex[n2, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n2, D]] + 
@@ -96,11 +80,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n3, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[n2, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[n1, D]]*
-  Pair[LorentzIndex[m3, D], LorentzIndex[n3, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n3, D]] + 
@@ -113,11 +93,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n3, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[n2, D]]*
-  Pair[LorentzIndex[m3, D], LorentzIndex[n3, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n3, D]] - 
@@ -190,11 +166,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n2, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[n3, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[m3, D]]*
-  Pair[LorentzIndex[n1, D], LorentzIndex[n2, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n2, D]] - 
@@ -207,11 +179,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n2, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[m3, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[n3, D]]*
-  Pair[LorentzIndex[n1, D], LorentzIndex[n2, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n2, D]] - 
@@ -238,11 +206,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[m2, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n2, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[m2, D]]*
-  Pair[LorentzIndex[m3, D], LorentzIndex[n3, D]]*
-  Pair[LorentzIndex[n1, D], LorentzIndex[n2, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[m2, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n3, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n2, D]] + 
@@ -281,11 +245,7 @@
    LorentzIndex[n2, D]] - (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], 
    LorentzIndex[n2, D]]*Pair[LorentzIndex[m2, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n3, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[n2, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[m3, D]]*
-  Pair[LorentzIndex[n1, D], LorentzIndex[n3, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n3, D]] - 
@@ -298,11 +258,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n3, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[m3, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[n2, D]]*
-  Pair[LorentzIndex[n1, D], LorentzIndex[n3, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n3, D]] + 
@@ -329,11 +285,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[m2, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n3, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[m2, D]]*
-  Pair[LorentzIndex[m3, D], LorentzIndex[n2, D]]*
-  Pair[LorentzIndex[n1, D], LorentzIndex[n3, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[m2, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n2, D]]*
   Pair[LorentzIndex[n1, D], LorentzIndex[n3, D]] - 
@@ -468,11 +420,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[n2, D], LorentzIndex[n3, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[m3, D]]*
-  Pair[LorentzIndex[n2, D], LorentzIndex[n3, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[n2, D], LorentzIndex[n3, D]] + 
@@ -485,11 +433,7 @@
  (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[n2, D], LorentzIndex[n3, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[m3, D]]*
-  Pair[LorentzIndex[m2, D], LorentzIndex[n1, D]]*
-  Pair[LorentzIndex[n2, D], LorentzIndex[n3, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[m3, D]]*
   Pair[LorentzIndex[m2, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[n2, D], LorentzIndex[n3, D]] - 
@@ -515,11 +459,7 @@
    LorentzIndex[n3, D]] - (I/48)*m*\[Kappa]^3*Pair[LorentzIndex[m1, D], 
    LorentzIndex[m2, D]]*Pair[LorentzIndex[m3, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[n2, D], LorentzIndex[n3, D]] + 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1, D], D]*
-  Pair[LorentzIndex[m1, D], LorentzIndex[m2, D]]*
-  Pair[LorentzIndex[m3, D], LorentzIndex[n1, D]]*
-  Pair[LorentzIndex[n2, D], LorentzIndex[n3, D]] - 
- (I/96)*\[Kappa]^3*DiracGamma[Momentum[p2, D], D]*
+ (I/96)*\[Kappa]^3*DiracGamma[Momentum[p1 - p2, D], D]*
   Pair[LorentzIndex[m1, D], LorentzIndex[m2, D]]*
   Pair[LorentzIndex[m3, D], LorentzIndex[n1, D]]*
   Pair[LorentzIndex[n2, D], LorentzIndex[n3, D]] - 

@@ -8,7 +8,7 @@ GravitonFermionVertex::usage = "GravitonFermionVertex[{\!\(\*SubscriptBox[\(\[Rh
 
 Begin["Private`"];
 
-GravitonFermionVertex = {indexArray,p1,p2,m} |-> Expand[ (I Global`\[Kappa]^(Length[indexArray]/2)) ( (1/2) Contract[ CETensor[{\[ScriptM],\[ScriptN]},indexArray] GAD[\[ScriptM]]FVD[p1-p2,\[ScriptN]] ] - CTensor[indexArray] m )  ]//FeynCalcInternal ;
+GravitonFermionVertex = {indexArray,p1,p2,m} |-> Expand[ (I Global`\[Kappa]^(Length[indexArray]/2)) ( (1/2) ExpandScalarProduct[Contract[ CETensor[{\[ScriptM],\[ScriptN]},indexArray] GAD[\[ScriptM]]FVD[p1-p2,\[ScriptN]] ]] - CTensor[indexArray] m )  ]//FeynCalcInternal ;
 
 End[];
 
