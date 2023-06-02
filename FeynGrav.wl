@@ -9,7 +9,7 @@ Needs["GravitonVectorVertex`","./Rules/GravitonVectorVertex.wl"];
 SetDirectory[DirectoryName[$InputFileName]];*)
 
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
-Print[Style["FeynGrav version 2.0",Bold]];
+Print[Style["FeynGrav version 2.1",Bold]];
 Print["FeynGrav: FeynGravCommands print the list of all supported commands."];
 Print["FeynGrav: Use '?CommandName' to see a brief description."];
 Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and ArXiV:2201.06812."];
@@ -60,6 +60,7 @@ FormatValues[FeynGrav`GaugeFixingEpsilonVector] = {HoldPattern[MakeBoxes[FeynGra
 FormatValues[FeynGrav`GaugeFixingEpsilonSUNYM] = {HoldPattern[MakeBoxes[FeynGrav`GaugeFixingEpsilonSUNYM,TraditionalForm]]:>SubscriptBox["\[CurlyEpsilon]","SU(N)YM"]} ;
 
 
+FeynGrav`GaugeFixingEpsilon = 2;
 FeynGrav`GaugeFixingEpsilonVector = -1;
 FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 
