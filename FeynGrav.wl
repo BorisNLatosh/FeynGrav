@@ -50,7 +50,10 @@ PolarizationTensor::usage = "PolarizationTensor[\[Mu],\[Nu],p]. Polarization ten
 SetPolarizationTensor::usage = "The command makes the graviton polarization tensor being traceless and transverse."
 
 
-FeynGravCommands := Print["'ScalarPropagator', 'ProcaPropagator', 'GravitonPropagator', 'GravitonPropagatorAlternative', 'GravitonPropagatorTop', 'GravitonPropagatorTopFAD', 'GravitonVertex', 'GravitonGhostVertex', 'GravitonScalarVertex',  'GravitonScalarPotentialVertex', 'GravitonFermionVertex', 'GravitonMassiveVectorVertex', 'GravitonVectorVertex', 'GravitonVectorGhostVertex', 'GravitonGluonVertex', 'GravitonGluonGhostVertex', 'GravitonQuarkGluonVertex', 'GravitonYMGhostVertex', 'PolarizationTensor', 'SetPolarizationTensor'"];
+GravitonAxionVectorVertex::usage = "GravitonAxionVectorVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(q\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(q\), \(2\)]\),\[Theta]]. The function returns the gravitational vertex for coupling of scalar axions to the U(1) field. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are Lorentz indices of gravitons, \!\(\*SubscriptBox[\(q\), \(i\)]\) are momenta of vectors, \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) are vector Lorentz indices, and \[Theta] is the coupling.";
+
+
+FeynGravCommands := Print["'ScalarPropagator', 'ProcaPropagator', 'GravitonPropagator', 'GravitonPropagatorAlternative', 'GravitonPropagatorTop', 'GravitonPropagatorTopFAD', 'GravitonVertex', 'GravitonGhostVertex', 'GravitonScalarVertex',  'GravitonScalarPotentialVertex', 'GravitonFermionVertex', 'GravitonMassiveVectorVertex', 'GravitonVectorVertex', 'GravitonVectorGhostVertex', 'GravitonGluonVertex', 'GravitonGluonGhostVertex', 'GravitonQuarkGluonVertex', 'GravitonYMGhostVertex', 'GravitonAxionVectorVertex', 'PolarizationTensor', 'SetPolarizationTensor'"];
 
 
 SetDirectory[DirectoryName[$InputFileName]];
@@ -188,6 +191,24 @@ Module[{cursor},
 	Print["Graviton-SU(N) Yang-Mills vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
 	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@DummyArray[cursor]);
 	Remove[\[Lambda]1,a1,p1,\[Lambda]2,a2,p2,\[Lambda]3,a3,p3,\[Lambda]4,a4,p4,\[Lambda],a];
+]
+
+
+(*Graviton-Scalar Axion-Single Vector Sector*)
+
+
+Module[{cursor},
+
+	cursor = 1;
+	Clear[GravitonAxionVectorVertex];
+	While[FileExistsQ["./Libs/GravitonAxionVectorVertex_"<>ToString[cursor]],
+		Evaluate[GravitonAxionVectorVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]1,p1,\[Lambda]2,p2,\[CapitalTheta]}  ]  ] = Get["./Libs/GravitonAxionVectorVertex_"<>ToString[cursor]];
+		cursor++;
+	];
+	
+	Print["Graviton-Scalar Axion-Single Vector vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@DummyArray[cursor]);
+	Remove[p1,p2,\[Lambda]1,\[Lambda]2,\[CapitalTheta]];
 ]
 
 
