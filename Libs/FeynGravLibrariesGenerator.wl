@@ -9,29 +9,38 @@ Needs["GravitonFermionVertex`","./../Rules/GravitonFermionVertex.wl"];
 Needs["GravitonVectorVertex`","./../Rules/GravitonVectorVertex.wl"];
 Needs["GravitonSUNYM`","./../Rules/GravitonSUNYM.wl"];
 Needs["GravitonVertex`","./../Rules/GravitonVertex.wl"];
+Needs["HorndeskiG2`","./../Rules/HorndeskiG2.wl"];
 Needs["GravitonAxionVectorVertex`","./../Rules/GravitonAxionVectorVertex.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
 
 CheckGravitonScalars::usage = "CheckGravitonScalars. This procedure checks what libraries for graviton-scalar interaction are present.";
 CheckGravitonFermions::usage = "CheckGravitonFermions. This procedure checks what libraries for graviton-fermion interaction are present.";
 CheckGravitonVectors::usage = "CheckGravitonFermions. This procedure checks what libraries for graviton-fermion interaction are present.";
-CheckGravitonSUNYM::usage = "CheckGravitonSUNYM. This procedure checks what libraries for gravitational interaction for SU(N)YM model are present.";
 CheckGravitonVertex::usage = "CheckGravitonVertex. This procedure checks what libraries for graviton vertices are present.";
+
+CheckGravitonSUNYM::usage = "CheckGravitonSUNYM. This procedure checks what libraries for gravitational interaction for SU(N)YM model are present.";
+
+CheckGravitonAxionVector::usage = "CheckGravitonAxionVector. This procedure checks what libraries for graviton-scalar axion-single vector interaction are present.";
+
+CheckHorndeskiG2::usage = "CheckHorndeskiG2. This procedure checks what libraries for Horndeski G2 interactions are present.";
 
 GenerateGravitonScalars::usage = "GenerateGravitonScalars[n]. This procedure generates libraries for graviton-scalar interactions up to the order n. Pre-existing libraries will be removed!";
 GenerateGravitonFermions::usage = "GenerateGravitonFermions[n]. This procedure generates libraries for graviton-fermion interactions up to the order n. Pre-existing libraries will be removed!";
 GenerateGravitonVectors::usage = "GenerateGravitonVectors[n]. This procedure generates libraries for graviton-vector interactions up to the order n. Pre-existing libraries will be removed!";
-GenerateGravitonSUNYM::usage = "GenerateGravitonSUNYM[n]. This procedure generates libraries for gravitational interaction for SU(N)YM model up to the order n. Pre-existing libraries will be removed!";
 GenerateGravitonVertex::usage = "GenerateGravitonVertex[n]. This procedure generates libraries for the gravity sector up to the order n. Pre-existing libraries will be removed!";
+
+GenerateGravitonSUNYM::usage = "GenerateGravitonSUNYM[n]. This procedure generates libraries for gravitational interaction for SU(N)YM model up to the order n. Pre-existing libraries will be removed!";
+
+GenerateGravitonAxionVector::usage = "GenerateGravitonAxionVector[n]. This procedure generates libraries for graviton-scalar axion-single vector interactions up to the order n. Pre-existing libraries will be removed!"
+
+GenerateHorndeskiG2::usage = "GenerateHorndeskiG2[n]. This procedure generates libraries for Horndeski G2 interaction up to the order n. Pre-existing libraries will be removed!";
 
 GenerateGravitonScalarsSpecific::usage = "GenerateGravitonScalarsSpecific[n]. This procedure generates libraries for graviton-scalar interactions specifically for the order n. Pre-existing libraries will be removed!";
 GenerateGravitonFermionsSpecific::usage = "GenerateGravitonFermionsSpecific[n]. This procedure generates libraries for graviton-fermion interactions specifically for the order n. Pre-existing libraries will be removed!";
 GenerateGravitonVectorsSpecific::usage = "GenerateGravitonVectorsSpecific[n]. This procedure generates libraries for graviton-vector interactions specifically for the order n. Pre-existing libraries will be removed!";
-GenerateGravitonSUNYMSpecific::usage = "GenerateGravitonSUNYMSpecific[n]. This procedure generates libraries for SU(N)YM model interactions specifically for the order n. Pre-existing libraries will be removed!";
 GenerateGravitonVertexSpecific::usage = "GenerateGravitonVertexSpecific[n]. This procedure generates libraries for the gravity sector specifically for the order n. Pre-existing libraries will be removed!";
 
-CheckGravitonAxionVector::usage = "CheckGravitonAxionVector. This procedure checks what libraries for graviton-scalar axion-single vector interaction are present.";
-GenerateGravitonAxionVector::usage = "GenerateGravitonAxionVector[n]. This procedure generates libraries for graviton-scalar axion-single vector interactions up to the order n. Pre-existing libraries will be removed!"
+GenerateGravitonSUNYMSpecific::usage = "GenerateGravitonSUNYMSpecific[n]. This procedure generates libraries for SU(N)YM model interactions specifically for the order n. Pre-existing libraries will be removed!";
 
 
 Begin["Private`"];
@@ -102,6 +111,20 @@ CheckGravitonSUNYM := Module[{i},
 	i = 1;
 	While[FileExistsQ["GravitonGluonGhostVertex_"<>ToString[i]], i += 1];
 	Print["Libraries for gravitational interaction of gluon-ghost interaction energy exist up to the order "<>ToString[i-1]];
+];
+
+
+(* Procedures that check if libraries for simple Horndeski G2 interaction exist. *)
+
+
+CheckHorndeskiG2 := Module[{a,b,i},
+	For[ a = 1, a <= 2, a++,
+		For[ b = 1, b <= 2, b++,
+			i = 1;
+			While[FileExistsQ["HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[i]], i += 1];
+			Print["Libraries for Horndeski G2 interaction with a="<>ToString[a]<>", b="<>ToString[b]<>" exist up to the order "<>ToString[i-1]];
+		];
+	];
 ];
 
 
@@ -247,6 +270,32 @@ GenerateGravitonSUNYM[n_] := Module[{i},
 ];
 
 
+(* Procedures that generates rules for Horndeski G2 interaction. *)
+
+
+DummyMomenta = n |-> ToExpression["p"<>ToString[#]]&/@Range[n];
+
+GenerateHorndeskiG2[n_] := Module[{a,b,i},
+	For[a=1,a<=2,a++,
+		For[b=1,b<=2,b++,
+			i = 1;
+			While[FileExistsQ["HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[i]], 
+				DeleteFile["HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[i]];
+				i += 1;
+			];	
+		];
+	];
+	For[a=1,a<=2,a++,
+		For[b=1,b<=2,b++,
+			For[i=1,i<=n,i++,
+				Put[ HorndeskiG2[DummyArray[i],DummyMomenta[a+2b],b,Global`\[Lambda]] , "HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[i] ];
+				Print["Done for a="<>ToString[a]<>", b="<>ToString[b]<>" for order "<>ToString[i]];
+			];
+		];
+	];
+];
+
+
 (* Procedures that generates rules for the simplest axion-like interaction. *)
 
 
@@ -293,8 +342,6 @@ GenerateGravitonVectorsSpecific[n_] := Module[{},
 	Print["Done for order "<>ToString[n] ];
 ];
 
-
-DummyArrayMomenta = n |-> ToExpression/@Flatten[Function[{"m"<>ToString[#],"n"<>ToString[#],"p"<>ToString[#]}]/@Range[n]];
 
 GenerateGravitonVertexSpecific[n_] := Module[{},
 	If[FileExistsQ["GravitonVertex_"<>ToString[n]],DeleteFile["GravitonVertex_"<>ToString[n]]];
