@@ -37,7 +37,7 @@ GenerateGravitonAxionVector::usage = "GenerateGravitonAxionVector[n]. This proce
 Begin["Private`"];
 
 
-(*Check Simple Rules*)
+(* Procedures that check if libraries for simple models exist. *)
 
 
 CheckGravitonScalars := Module[{i},
@@ -70,6 +70,19 @@ CheckGravitonVectors := Module[{i},
 ];
 
 
+CheckGravitonVertex := Module[{i},
+	i = 1;
+	While[FileExistsQ["GravitonVertex_"<>ToString[i]], i += 1];
+	Print["Libraries for graviton vertices exist up to the order "<>ToString[i-1]];
+	i = 1;
+	While[FileExistsQ["GravitonGhostVertex_"<>ToString[i]] , i += 1];
+	Print["Libraries for graviton-ghost interaction exist up to the order "<>ToString[i-1]];
+];
+
+
+(* Procedures that check if libraries for SU(N) Yang0Mills model exist. *)
+
+
 CheckGravitonSUNYM := Module[{i},
 	i = 1;
 	While[FileExistsQ["GravitonQuarkGluonVertex_"<>ToString[i]], i += 1];
@@ -92,17 +105,17 @@ CheckGravitonSUNYM := Module[{i},
 ];
 
 
-CheckGravitonVertex := Module[{i},
+(* Procedures that check if libraries for simple axion-like interaction exist. *)
+
+
+CheckGravitonAxionVector := Module[{i},
 	i = 1;
-	While[FileExistsQ["GravitonVertex_"<>ToString[i]], i += 1];
-	Print["Libraries for graviton vertices exist up to the order "<>ToString[i-1]];
-	i = 1;
-	While[FileExistsQ["GravitonGhostVertex_"<>ToString[i]] , i += 1];
-	Print["Libraries for graviton-ghost interaction exist up to the order "<>ToString[i-1]];
+	While[FileExistsQ["GravitonAxionVectorVertex_"<>ToString[i]], i += 1];
+	Print["Libraries for gravitational interaction of a scalar axion coupled to a single vector field exist up to the order "<>ToString[i-1]];
 ];
 
 
-(*Generate Simple Rules*)
+(* Procedures that generates rules for simple models. *)
 
 
 GenerateGravitonScalars[n_] := Module[{i},
@@ -165,6 +178,31 @@ GenerateGravitonVectors[n_] := Module[{i},
 ];
 
 
+DummyArrayMomenta = n |-> ToExpression/@Flatten[Function[{"m"<>ToString[#],"n"<>ToString[#],"p"<>ToString[#]}]/@Range[n]];
+
+GenerateGravitonVertex[n_] := Module[{i},
+	i = 1;
+	While[FileExistsQ["GravitonVertex_"<>ToString[i]], 
+		DeleteFile["GravitonVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	While[FileExistsQ["GravitonGhostVertex_"<>ToString[i]], 
+		DeleteFile["GravitonGhostVertex_"<>ToString[i]];
+		i += 1;
+	];
+	i = 1;
+	For[i=1,i<=n,i++,
+		Put[ Evaluate[GravitonVertex[DummyArrayMomenta[2+i],Global`GaugeFixingEpsilon]] , "GravitonVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonGhostVertex[DummyArrayMomenta[i],Global`\[Lambda]1,Global`k1,Global`\[Lambda]2,Global`k2]] , "GravitonGhostVertex_"<>ToString[i] ];
+		Print["Done for order "<>ToString[i] ];
+	];
+];
+
+
+(* Procedures that generates rules for SU(N) Yang-Mills model. *)
+
+
 GenerateGravitonSUNYM[n_] := Module[{i},
 	i = 1;
 	While[FileExistsQ["GravitonQuarkGluonVertex_"<>ToString[i]], 
@@ -209,26 +247,24 @@ GenerateGravitonSUNYM[n_] := Module[{i},
 ];
 
 
-DummyArrayMomenta = n |-> ToExpression/@Flatten[Function[{"m"<>ToString[#],"n"<>ToString[#],"p"<>ToString[#]}]/@Range[n]];
+(* Procedures that generates rules for the simplest axion-like interaction. *)
 
-GenerateGravitonVertex[n_] := Module[{i},
+
+GenerateGravitonAxionVector[n_] := Module[{i},
 	i = 1;
-	While[FileExistsQ["GravitonVertex_"<>ToString[i]], 
-		DeleteFile["GravitonVertex_"<>ToString[i]];
-		i += 1;
-	];
-	i = 1;
-	While[FileExistsQ["GravitonGhostVertex_"<>ToString[i]], 
-		DeleteFile["GravitonGhostVertex_"<>ToString[i]];
+	While[FileExistsQ["GravitonAxionVectorVertex_"<>ToString[i]], 
+		DeleteFile["GravitonAxionVectorVertex_"<>ToString[i]];
 		i += 1;
 	];
 	i = 1;
 	For[i=1,i<=n,i++,
-		Put[ Evaluate[GravitonVertex[DummyArrayMomenta[2+i],Global`GaugeFixingEpsilon]] , "GravitonVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonGhostVertex[DummyArrayMomenta[i],Global`\[Lambda]1,Global`k1,Global`\[Lambda]2,Global`k2]] , "GravitonGhostVertex_"<>ToString[i] ];
+		Put[ Evaluate[GravitonAxionVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`\[CapitalTheta]]] , "GravitonAxionVectorVertex_"<>ToString[i] ];
 		Print["Done for order "<>ToString[i] ];
 	];
 ];
+
+
+(* Procedures that generates specific rules for simple models. *)
 
 
 GenerateGravitonScalarsSpecific[n_] := Module[{},
@@ -258,6 +294,20 @@ GenerateGravitonVectorsSpecific[n_] := Module[{},
 ];
 
 
+DummyArrayMomenta = n |-> ToExpression/@Flatten[Function[{"m"<>ToString[#],"n"<>ToString[#],"p"<>ToString[#]}]/@Range[n]];
+
+GenerateGravitonVertexSpecific[n_] := Module[{},
+	If[FileExistsQ["GravitonVertex_"<>ToString[n]],DeleteFile["GravitonVertex_"<>ToString[n]]];
+	If[FileExistsQ["GravitonGhostVertex_"<>ToString[n]],DeleteFile["GravitonGhostVertex_"<>ToString[n]]];
+	Put[ Evaluate[GravitonVertex[DummyArrayMomenta[2+n],Global`GaugeFixingEpsilon]] , "GravitonVertex_"<>ToString[n] ];
+	Put[ Evaluate[GravitonGhostVertex[DummyArrayMomenta[n],Global`\[Lambda]1,Global`k1,Global`\[Lambda]2,Global`k2]] , "GravitonGhostVertex_"<>ToString[n] ];
+	Print["Done for order "<>ToString[n] ];
+];
+
+
+(* Procedures that generates specific rules for SU(N) Yang-Mills model. *)
+
+
 GenerateGravitonSUNYMSpecific[n_] := Module[{},
 	If[FileExistsQ["GravitonQuarkGluonVertex_"<>ToString[n]], DeleteFile["GravitonQuarkGluonVertex_"<>ToString[n]]];
 	If[FileExistsQ["GravitonThreeGluonVertex_"<>ToString[n]], DeleteFile["GravitonThreeGluonVertex_"<>ToString[n]]];
@@ -272,41 +322,6 @@ GenerateGravitonSUNYMSpecific[n_] := Module[{},
 	Put[ Evaluate[GravitonYMGhostVertex[DummyArray[n],Global`p1,Global`a1,Global`p2,Global`a2]] , "GravitonYMGhostVertex_"<>ToString[n] ];
 	Put[ Evaluate[GravitonGluonGhostVertex[DummyArray[n],{Global`\[Lambda]1,Global`a1,Global`p1},{Global`\[Lambda]2,Global`a2,Global`p2},{Global`\[Lambda]3,Global`a3,Global`p3}]] , "GravitonGluonGhostVertex_"<>ToString[n] ];
 	Print["Done for order "<>ToString[n] ];
-];
-
-
-DummyArrayMomenta = n |-> ToExpression/@Flatten[Function[{"m"<>ToString[#],"n"<>ToString[#],"p"<>ToString[#]}]/@Range[n]];
-
-GenerateGravitonVertexSpecific[n_] := Module[{},
-	If[FileExistsQ["GravitonVertex_"<>ToString[n]],DeleteFile["GravitonVertex_"<>ToString[n]]];
-	If[FileExistsQ["GravitonGhostVertex_"<>ToString[n]],DeleteFile["GravitonGhostVertex_"<>ToString[n]]];
-	Put[ Evaluate[GravitonVertex[DummyArrayMomenta[2+n],Global`GaugeFixingEpsilon]] , "GravitonVertex_"<>ToString[n] ];
-	Put[ Evaluate[GravitonGhostVertex[DummyArrayMomenta[n],Global`\[Lambda]1,Global`k1,Global`\[Lambda]2,Global`k2]] , "GravitonGhostVertex_"<>ToString[n] ];
-	Print["Done for order "<>ToString[n] ];
-];
-
-
-(*Axion-Single Vector Sectir*)
-
-
-CheckGravitonAxionVector := Module[{i},
-	i = 1;
-	While[FileExistsQ["GravitonAxionVectorVertex_"<>ToString[i]], i += 1];
-	Print["Libraries for gravitational interaction of a scalar axion coupled to a single vector field exist up to the order "<>ToString[i-1]];
-];
-
-
-GenerateGravitonAxionVector[n_] := Module[{i},
-	i = 1;
-	While[FileExistsQ["GravitonAxionVectorVertex_"<>ToString[i]], 
-		DeleteFile["GravitonAxionVectorVertex_"<>ToString[i]];
-		i += 1;
-	];
-	i = 1;
-	For[i=1,i<=n,i++,
-		Put[ Evaluate[GravitonAxionVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`\[CapitalTheta]]] , "GravitonAxionVectorVertex_"<>ToString[i] ];
-		Print["Done for order "<>ToString[i] ];
-	];
 ];
 
 
