@@ -108,91 +108,125 @@ FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 (* Dummy array. *)
 
 
-DummyArray = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]]} )& /@ Range[#] ]&;
 DummyArrayK = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]], ToExpression["k"<>ToString[#]]} )& /@ Range[#] ]&;
 dummyArrayP = n |-> Flatten[Function[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["p"<>ToString[#]]}]/@Range[n]];
 
 
+DummyArray = n |->Flatten[ {ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]]}&/@Range[n] ];
 DummyArrayVariables = n |->Flatten[ {ToExpression["m"<>ToString[#]<>"_"],ToExpression["n"<>ToString[#]<>"_"]}&/@Range[n] ];
 DummyMomenta = n |-> ToExpression["p"<>ToString[#]]&/@Range[n];
 DummyMomentaVariables = n |-> ToExpression["p"<>ToString[#]<>"_"]&/@Range[n];
+DummyArrayMomenta = n |-> Flatten[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["p"<>ToString[#]]}&/@Range[n]];
+DummyArrayMomentaVariables = n |-> Flatten[{ToExpression["m"<>ToString[#]<>"_"],ToExpression["n"<>ToString[#]<>"_"],ToExpression["p"<>ToString[#]<>"_"]}&/@Range[n]];
+DummyArrayMomentaK = n |-> Flatten[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["k"<>ToString[#]]}&/@Range[n]];
+DummyArrayMomentaKVariables = n |-> Flatten[{ToExpression["m"<>ToString[#]<>"_"],ToExpression["n"<>ToString[#]<>"_"],ToExpression["k"<>ToString[#]<>"_"]}&/@Range[n]];
 
 
 (* Graviton sector. *)
 
 
-Module[{cursor},
+Block[{cursor,\[Lambda]1,k1,\[Lambda]2,k2},
 
 	cursor = 1;
+	
 	Clear[GravitonVertex];
+	
 	While[FileExistsQ["./Libs/GravitonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVertex[Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@dummyArrayP[cursor+2])]] = Get["./Libs/GravitonVertex_"<>ToString[cursor]];
+		Evaluate[GravitonVertex[Sequence@@DummyArrayMomentaVariables[cursor+2]]] = Get["./Libs/GravitonVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	cursor = 1;
+	
 	Clear[GravitonGhostVertex];
+	
 	While[FileExistsQ["./Libs/GravitonGhostVertex_"<>ToString[cursor]],
-		Evaluate[GravitonGhostVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@dummyArrayP[cursor]} , Sequence@@(Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]1,k1,\[Lambda]2,k2}) ]] = Get["./Libs/GravitonGhostVertex_"<>ToString[cursor]];
+		Evaluate[GravitonGhostVertex[DummyArrayMomentaVariables[cursor],\[Lambda]1_,k1_,\[Lambda]2_,k2_]] = Get["./Libs/GravitonGhostVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	Print["Graviton vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@dummyArrayP[cursor+2]);
-	Remove[\[Lambda]1,\[Lambda]2,k1,k2];
 ]
 
 
-(* Simple models. *)
+(* Scalar sector. *)
 
 
-Module[{cursor},
+Block[{cursor,m,p1,p2},
 
 	cursor = 1;
+
 	Clear[GravitonScalarVertex];
-	While[FileExistsQ["./Libs/GravitonScalarVertex_"<>ToString[cursor]],
-		Evaluate[GravitonScalarVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,p2,m}  ]  ] = Get["./Libs/GravitonScalarVertex_"<>ToString[cursor]];
-		cursor++;
-	];
 	
-	cursor = 1;
-	Clear[GravitonScalarPotentialVertex];
-	While[FileExistsQ["./Libs/GravitonScalarPotentialVertex_"<>ToString[cursor]],
-		Evaluate[GravitonScalarPotentialVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]}  ]] = Get["./Libs/GravitonScalarPotentialVertex_"<>ToString[cursor]];
+	While[FileExistsQ["./Libs/GravitonScalarVertex_"<>ToString[cursor]],
+		Evaluate[ GravitonScalarVertex[DummyArrayVariables[cursor],p1_,p2_,m_ ]] = Get["./Libs/GravitonScalarVertex_"<>ToString[cursor]];
 		cursor++;
 	];
+]
+
+
+Block[{cursor,\[Lambda]},
 
 	cursor = 1;
+	
+	Clear[GravitonScalarPotentialVertex];
+	
+	While[FileExistsQ["./Libs/GravitonScalarPotentialVertex_"<>ToString[cursor]],
+		Evaluate[GravitonScalarPotentialVertex[DummyArrayVariables[cursor],\[Lambda]_]] = Get["./Libs/GravitonScalarPotentialVertex_"<>ToString[cursor]];
+		cursor++;
+	];
+]
+
+
+(* Fermion sector. *)
+
+
+Block[{cursor,p1,p2,m},
+
+	cursor = 1;
+
 	Clear[GravitonFermionVertex];
+	
 	While[FileExistsQ["./Libs/GravitonFermionVertex_"<>ToString[cursor]],
-		Evaluate[GravitonFermionVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,p2,m} ]] = Get["./Libs/GravitonFermionVertex_"<>ToString[cursor]];
+		Evaluate[GravitonFermionVertex[DummyArrayVariables[cursor],p1_,p2_,m_]] = Get["./Libs/GravitonFermionVertex_"<>ToString[cursor]];
 		cursor++;
 	];
-	
+]
+
+
+(* Vector sector*)
+
+
+Block[{cursor,p1,p2,\[Lambda]1,\[Lambda]2,m},	
+
 	cursor = 1;
+	
 	Clear[GravitonMassiveVectorVertex];
+	
 	While[FileExistsQ["./Libs/GravitonMassiveVectorVertex_"<>ToString[cursor]],
-		Evaluate[GravitonMassiveVectorVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]1,p1,\[Lambda]2,p2,m} ]] = Get["./Libs/GravitonMassiveVectorVertex_"<>ToString[cursor]];
+		Evaluate[GravitonMassiveVectorVertex[DummyArrayVariables[cursor],\[Lambda]1_,p1_,\[Lambda]2_,p2_,m_]] = Get["./Libs/GravitonMassiveVectorVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	cursor = 1;
+	
 	Clear[GravitonVectorVertex];
+	
 	While[FileExistsQ["./Libs/GravitonVectorVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVectorVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArrayK[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]1,p1,\[Lambda]2,p2} ]] = Get["./Libs/GravitonVectorVertex_"<>ToString[cursor]];
+		Evaluate[GravitonVectorVertex[DummyArrayMomentaKVariables[cursor],\[Lambda]1_,p1_,\[Lambda]2_,p2_]] = Get["./Libs/GravitonVectorVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	cursor = 1;
+	
 	Clear[GravitonVectorGhostVertex];
+	
 	While[FileExistsQ["./Libs/GravitonVectorGhostVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVectorGhostVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,p2} ]] = Get["./Libs/GravitonVectorGhostVertex_"<>ToString[cursor]];
+		Evaluate[GravitonVectorGhostVertex[DummyArrayVariables[cursor],p1_,p2_]] = Get["./Libs/GravitonVectorGhostVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 		
 	Print["Graviton-Matter vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@DummyArray[cursor]);
-	Remove[p1,p2,\[Lambda]1,\[Lambda]2,m,\[Lambda]];
 ]
 
 
@@ -268,7 +302,7 @@ Module[{cursor},
 (* Horndeski G2 *)
 
 
-Module[{cursor,a,b},
+Block[{cursor,a,b},
 
 	Clear[HorndeskiG2];
 	
@@ -291,7 +325,6 @@ Module[{cursor,a,b},
 	];
 	
 	Print["Horndeski G2 vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove[a,b];
 ]
 
 
@@ -334,7 +367,7 @@ SetPolarizationTensor := Module[{},
 ];
 
 
-Remove[DummyArray,DummyArrayK];
+Remove[DummyArray,DummyArrayVariables,DummyMomenta,DummyMomentaVariables,DummyArrayMomenta,DummyArrayMomentaVariables,DummyArrayMomentaK,DummyArrayMomentaKVariables];
 
 
 End[];
