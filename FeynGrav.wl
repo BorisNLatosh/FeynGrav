@@ -71,10 +71,16 @@ PolarizationTensor::usage = "PolarizationTensor[\[Mu],\[Nu],p]. Polarization ten
 SetPolarizationTensor::usage = "The command makes the graviton polarization tensor being traceless and transverse."
 
 
-(* Axion vector. *)
+(* Axion sector. *)
 
 
 GravitonAxionVectorVertex::usage = "GravitonAxionVectorVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(q\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(q\), \(2\)]\),\[Theta]]. The function returns the gravitational vertex for coupling of scalar axions to the U(1) field. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are Lorentz indices of gravitons, \!\(\*SubscriptBox[\(q\), \(i\)]\) are momenta of vectors, \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) are vector Lorentz indices, and \[Theta] is the coupling.";
+
+
+(* Horndeski G2 *)
+
+
+HorndeskiG2::usage = "HorndeskiG2";
 
 
 FeynGravCommands := Print["'ScalarPropagator', 'ProcaPropagator', 'GravitonPropagator', 'GravitonPropagatorAlternative', 'GravitonPropagatorTop', 'GravitonPropagatorTopFAD', 'GravitonVertex', 'GravitonGhostVertex', 'GravitonScalarVertex',  'GravitonScalarPotentialVertex', 'GravitonFermionVertex', 'GravitonMassiveVectorVertex', 'GravitonVectorVertex', 'GravitonVectorGhostVertex', 'GravitonGluonVertex', 'GravitonGluonGhostVertex', 'GravitonQuarkGluonVertex', 'GravitonYMGhostVertex', 'GravitonAxionVectorVertex', 'PolarizationTensor', 'SetPolarizationTensor'"];
@@ -104,7 +110,12 @@ FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 
 DummyArray = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]]} )& /@ Range[#] ]&;
 DummyArrayK = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]], ToExpression["k"<>ToString[#]]} )& /@ Range[#] ]&;
-dummyArrayP=n|->Flatten[Function[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["p"<>ToString[#]]}]/@Range[n]];
+dummyArrayP = n |-> Flatten[Function[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["p"<>ToString[#]]}]/@Range[n]];
+
+
+DummyArrayVariables = n |->Flatten[ {ToExpression["m"<>ToString[#]<>"_"],ToExpression["n"<>ToString[#]<>"_"]}&/@Range[n] ];
+DummyMomenta = n |-> ToExpression["p"<>ToString[#]]&/@Range[n];
+DummyMomentaVariables = n |-> ToExpression["p"<>ToString[#]<>"_"]&/@Range[n];
 
 
 (* Graviton sector. *)
@@ -236,7 +247,7 @@ Module[{cursor},
 ]
 
 
-(*Graviton-Scalar Axion-Single Vector Sector*)
+(* Graviton-Scalar Axion-Single Vector Sector *)
 
 
 Module[{cursor},
@@ -254,7 +265,32 @@ Module[{cursor},
 ]
 
 
+(* Horndeski G2 *)
+
+
+Module[{cursor,a,b},
+
+	Clear[HorndeskiG2];
+	
+	For[a=1,a<=2,a++,
+		For[b=1,b<=2,b++,
+			cursor = 1;
+			While[FileExistsQ["./Libs/HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[cursor]],
+				Evaluate[ HorndeskiG2[ DummyArrayVariables[cursor],DummyMomentaVariables[a+2b],b,\[Lambda]_] ] = \[Lambda] Get["./Libs/HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[cursor]] ;
+				cursor++;
+			];
+		];
+	];
+	
+	Print["Horndeski G2 vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@DummyMomenta[2+2*2]);
+	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@DummyArray[cursor]);
+	Remove[a,b];
+]
+
+
 Remove[FeynGrav`dummyArrayP];
+Remove[FeynGrav`DummyArrayVariables,FeynGrav`DummyMomenta,FeynGrav`DummyMomentaVariables];
 Remove[FeynGrav`n];
 Remove[FeynGrav`\[Lambda]1,FeynGrav`\[Lambda]2,FeynGrav`p1,FeynGrav`p2];
 Remove[FeynGrav`a,FeynGrav`\[Mu]];
