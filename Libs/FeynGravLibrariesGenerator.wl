@@ -89,7 +89,7 @@ CheckGravitonVertex := Module[{i},
 ];
 
 
-(* Procedures that check if libraries for SU(N) Yang0Mills model exist. *)
+(* Procedures that check if libraries for SU(N) Yang-Mills model exist. *)
 
 
 CheckGravitonSUNYM := Module[{i},
@@ -276,8 +276,8 @@ GenerateGravitonSUNYM[n_] := Module[{i},
 DummyMomenta = n |-> ToExpression["p"<>ToString[#]]&/@Range[n];
 
 GenerateHorndeskiG2[n_] := Module[{a,b,i},
-	For[a=1,a<=2,a++,
-		For[b=1,b<=2,b++,
+	For[a=0,a<=4,a++,
+		For[b=0,b<=2,b++,
 			i = 1;
 			While[FileExistsQ["HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[i]], 
 				DeleteFile["HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[i]];
@@ -285,12 +285,20 @@ GenerateHorndeskiG2[n_] := Module[{a,b,i},
 			];	
 		];
 	];
-	For[a=1,a<=2,a++,
-		For[b=1,b<=2,b++,
-			For[i=1,i<=n,i++,
-				Put[ HorndeskiG2[DummyArray[i],DummyMomenta[a+2b],b,Global`\[Lambda]] , "HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[i] ];
-				Print["Done for a="<>ToString[a]<>", b="<>ToString[b]<>" for order "<>ToString[i]];
-			];
+	(* b=1 family *)
+	b=1;
+	For[a=1,a<=4,a++,
+		For[i=1,i<=n,i++,
+			Put[ HorndeskiG2[DummyArray[i],DummyMomenta[a+2b],b] , "HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[i] ];
+			Print["Done for a="<>ToString[a]<>", b="<>ToString[b]<>" for order "<>ToString[i]];
+		];
+	];
+	(* b=2 family *)
+	b=2;
+	For[a=0,a<=2,a++,
+		For[i=1,i<=n,i++,
+			Put[ HorndeskiG2[DummyArray[i],DummyMomenta[a+2b],b] , "HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[i] ];
+			Print["Done for a="<>ToString[a]<>", b="<>ToString[b]<>" for order "<>ToString[i]];
 		];
 	];
 ];

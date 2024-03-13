@@ -272,19 +272,25 @@ Module[{cursor,a,b},
 
 	Clear[HorndeskiG2];
 	
-	For[a=1,a<=2,a++,
-		For[b=1,b<=2,b++,
-			cursor = 1;
-			While[FileExistsQ["./Libs/HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[cursor]],
-				Evaluate[ HorndeskiG2[ DummyArrayVariables[cursor],DummyMomentaVariables[a+2b],b,\[Lambda]_] ] = \[Lambda] Get["./Libs/HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[cursor]] ;
-				cursor++;
-			];
+	(* b=1 family *)
+	For[a=1,a<=4,a++,
+		cursor = 1;
+		While[FileExistsQ[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_1_"<>ToString[cursor] ],
+			HorndeskiG2[DummyArrayVariables[cursor],DummyMomentaVariables[a+2],1,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_1_"<>ToString[cursor] ];
+			cursor++;
+		];
+	];
+	
+	(* b=2 family *)
+	For[a=0,a<=2,a++,
+		cursor = 1;
+		While[FileExistsQ[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_2_"<>ToString[cursor] ],
+			HorndeskiG2[DummyArrayVariables[cursor],DummyMomentaVariables[a+2],2,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_2_"<>ToString[cursor] ];
+			cursor++;
 		];
 	];
 	
 	Print["Horndeski G2 vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@DummyMomenta[2+2*2]);
-	Remove/@(Function[ToExpression["FeynGrav`"<>ToString[#]]]/@DummyArray[cursor]);
 	Remove[a,b];
 ]
 
