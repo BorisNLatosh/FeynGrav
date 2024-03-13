@@ -80,7 +80,7 @@ GravitonAxionVectorVertex::usage = "GravitonAxionVectorVertex[{\!\(\*SubscriptBo
 (* Horndeski G2 *)
 
 
-HorndeskiG2::usage = "HorndeskiG2";
+HorndeskiG2::usage = "HorndeskiG2[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},{\!\(\*SubscriptBox[\(p\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(p\), \(a + 2  b\)]\)},b,\[Lambda]]. The function returns the Horndeski \!\(\*SubscriptBox[\(G\), \(2\)]\) interaction vertex. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are Lorentz indices of gravitons, \!\(\*SubscriptBox[\(p\), \(i\)]\) are momenta of scalars, b is the number of kinetic terms, and \[Lambda] is the coupling.";
 
 
 FeynGravCommands := Print["'ScalarPropagator', 'ProcaPropagator', 'GravitonPropagator', 'GravitonPropagatorAlternative', 'GravitonPropagatorTop', 'GravitonPropagatorTopFAD', 'GravitonVertex', 'GravitonGhostVertex', 'GravitonScalarVertex',  'GravitonScalarPotentialVertex', 'GravitonFermionVertex', 'GravitonMassiveVectorVertex', 'GravitonVectorVertex', 'GravitonVectorGhostVertex', 'GravitonGluonVertex', 'GravitonGluonGhostVertex', 'GravitonQuarkGluonVertex', 'GravitonYMGhostVertex', 'GravitonAxionVectorVertex', 'PolarizationTensor', 'SetPolarizationTensor'"];
