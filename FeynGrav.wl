@@ -319,7 +319,7 @@ Block[{cursor,a,b},
 	For[a=0,a<=2,a++,
 		cursor = 1;
 		While[FileExistsQ[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_2_"<>ToString[cursor] ],
-			HorndeskiG2[DummyArrayVariables[cursor],DummyMomentaVariables[a+2],2,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_2_"<>ToString[cursor] ];
+			HorndeskiG2[DummyArrayVariables[cursor],DummyMomentaVariables[a+4],2,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_2_"<>ToString[cursor] ];
 			cursor++;
 		];
 	];
