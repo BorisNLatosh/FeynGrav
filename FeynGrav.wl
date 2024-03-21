@@ -236,40 +236,50 @@ Block[{cursor,p1,p2,\[Lambda]1,\[Lambda]2,m},
 Block[{cursor,a1,a2,a3,a4,\[Lambda]1,\[Lambda]2,\[Lambda]3,\[Lambda]4,p1,p2,p3,p4},
 
 	cursor = 1;
+	
 	Clear[GravitonGluonVertex];
+	
 	While[FileExistsQ["./Libs/GravitonGluonVertex_"<>ToString[cursor]],
 		Evaluate[GravitonGluonVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArrayMomentaK[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,\[Lambda]1,a1,p2,\[Lambda]2,a2}]] = Get["./Libs/GravitonGluonVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	cursor = 1;
+	
 	While[FileExistsQ["./Libs/GravitonThreeGluonVertex_"<>ToString[cursor]],
 		Evaluate[GravitonGluonVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArrayMomentaK[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3}]] = Get["./Libs/GravitonThreeGluonVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	cursor = 1;
+	
 	While[FileExistsQ["./Libs/GravitonFourGluonVertex_"<>ToString[cursor]],
 		Evaluate[GravitonGluonVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArrayMomentaK[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4}]] = Get["./Libs/GravitonFourGluonVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	cursor = 1;
+	
 	Clear[GravitonQuarkGluonVertex];
+	
 	While[FileExistsQ["./Libs/GravitonQuarkGluonVertex_"<>ToString[cursor]],
 		Evaluate[GravitonQuarkGluonVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda],a} ]] = Get["./Libs/GravitonQuarkGluonVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	cursor = 1;
+	
 	Clear[GravitonYMGhostVertex];
+	
 	While[FileExistsQ["./Libs/GravitonYMGhostVertex_"<>ToString[cursor]],
 		Evaluate[GravitonYMGhostVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,a1,p2,a2} ]] = Get["./Libs/GravitonYMGhostVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	cursor = 1;
+	
 	Clear[GravitonGluonGhostVertex];
+	
 	While[FileExistsQ["./Libs/GravitonGluonGhostVertex_"<>ToString[cursor]],
 		Evaluate[GravitonGluonGhostVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]1,a1,p1,\[Lambda]2,a2,p2,\[Lambda]3,a3,p3}  ]] = Get["./Libs/GravitonGluonGhostVertex_"<>ToString[cursor]];
 		cursor++;
@@ -285,7 +295,9 @@ Block[{cursor,a1,a2,a3,a4,\[Lambda]1,\[Lambda]2,\[Lambda]3,\[Lambda]4,p1,p2,p3,p
 Block[{cursor,\[Lambda]1,p1,\[Lambda]2,p2,\[CapitalTheta]},
 
 	cursor = 1;
+	
 	Clear[GravitonAxionVectorVertex];
+	
 	While[FileExistsQ["./Libs/GravitonAxionVectorVertex_"<>ToString[cursor]],
 		Evaluate[GravitonAxionVectorVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]1,p1,\[Lambda]2,p2,\[CapitalTheta]}  ]  ] = Get["./Libs/GravitonAxionVectorVertex_"<>ToString[cursor]];
 		cursor++;
@@ -298,12 +310,12 @@ Block[{cursor,\[Lambda]1,p1,\[Lambda]2,p2,\[CapitalTheta]},
 (* Horndeski G2 *)
 
 
-Block[{cursor,a,b},
+Block[{cursor,a},
 
 	Clear[HorndeskiG2];
 	
 	(* b=1 family *)
-	For[a=1,a<=4,a++,
+	For[ a = 1, a <= 4, a++,
 		cursor = 1;
 		While[FileExistsQ[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_1_"<>ToString[cursor] ],
 			HorndeskiG2[DummyArrayVariables[cursor],DummyMomentaVariables[a+2],1,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_1_"<>ToString[cursor] ];
@@ -312,7 +324,7 @@ Block[{cursor,a,b},
 	];
 	
 	(* b=2 family *)
-	For[a=0,a<=2,a++,
+	For[ a = 0, a <= 2, a++,
 		cursor = 1;
 		While[FileExistsQ[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_2_"<>ToString[cursor] ],
 			HorndeskiG2[DummyArrayVariables[cursor],DummyMomentaVariables[a+4],2,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_2_"<>ToString[cursor] ];

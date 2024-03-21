@@ -4,10 +4,10 @@ BeginPackage["DummyArray`"];
 
 SetDirectory[DirectoryName[$InputFileName]];
 
-DummyArray::usage = "DummyArray[k]. In returns the following array of variables {m1,n1,\[Ellipsis],mk,nk}.";
+DummyArray::usage = "DummyArray[k]. The function returns an array of indices {m1,n1,\[Ellipsis],mk,nk}.";
 
-DummyArray = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]]} )& /@ Range[#] ]&;
+DummyArray = n |-> {ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]]}&/@Range[n] //Flatten;
 
-DummyArrayK = Flatten[ ( { ToExpression["m"<>ToString[#]], ToExpression["n"<>ToString[#]], ToExpression["k"<>ToString[#]]} )& /@ Range[#] ]&;
+DummyArrayK = n |-> {ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["k"<>ToString[#]]}&/@Range[n] //Flatten;
 
 EndPackage[];
