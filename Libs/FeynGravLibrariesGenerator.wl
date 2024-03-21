@@ -387,14 +387,14 @@ GenerateHorndeskiG3[n_] := Module[{a,i},
 (* b = 1 *)
 	For[ a = 0, a <= 3, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG3[DummyArrayMomenta[i],DummyMomenta[a+2+1],0] , "HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[i] ];
+			Put[ HorndeskiG3[DummyArrayMomenta[i],DummyMomenta[a+2+1],1] , "HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[i] ];
 			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]];
 		];
 	];
 (* b = 2 *)
 	For[ a = 0, a <= 1, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG3[DummyArrayMomenta[i],DummyMomenta[a+4+1],0] , "HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[i] ];
+			Put[ HorndeskiG3[DummyArrayMomenta[i],DummyMomenta[a+4+1],2] , "HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[i] ];
 			Print["Done for a="<>ToString[a]<>", b=2 for order "<>ToString[i]];
 		];
 	];

@@ -84,6 +84,9 @@ GravitonAxionVectorVertex::usage = "GravitonAxionVectorVertex[{\!\(\*SubscriptBo
 HorndeskiG2::usage = "HorndeskiG2[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},{\!\(\*SubscriptBox[\(p\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(p\), \(a + 2  b\)]\)},b,\[Lambda]]. The function returns the Horndeski \!\(\*SubscriptBox[\(G\), \(2\)]\) interaction vertex. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are Lorentz indices of gravitons, \!\(\*SubscriptBox[\(p\), \(i\)]\) are momenta of scalars, b is the number of kinetic terms, and \[Lambda] is the coupling.";
 
 
+HorndeskiG3::usage = "HorndeskiG3[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\),\!\(\*SubscriptBox[\(k\), \(n\)]\)},{\!\(\*SubscriptBox[\(p\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(p\), \(a + 2  b + 1\)]\)},b,\[Lambda]]. The function returns the Horndeski \!\(\*SubscriptBox[\(G\), \(3\)]\) interaction vertex. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are Lorentz indices of gravitons, \!\(\*SubscriptBox[\(k\), \(i\)]\) are graviton momenta, \!\(\*SubscriptBox[\(p\), \(i\)]\) are momenta of scalars, b is the number of kinetic terms, and \[Lambda] is the coupling.";
+
+
 FeynGravCommands := Print["GravitonPropagator","GravitonPropagatorTop","GravitonPropagatorTopFAD","GravitonPropagatorAlternative","GravitonPropagatorMassive","GravitonPropagatorMassiveTop","GravitonPropagatorMassiveAlternative","GravitonVertex","GravitonGhostVertex","PolarizationTensor","SetPolarizationTensor","ScalarPropagator","GravitonScalarVertex","GravitonScalarPotentialVertex","HorndeskiG2","ProcaPropagator","GravitonVectorVertex","GravitonVectorGhostVertex","GravitonMassiveVectorVertex","GravitonAxionVectorVertex","GravitonFermionVertex","GravitonQuarkGluonVertex","GravitonGluonVertex","GravitonGluonGhostVertex","GravitonYMGhostVertex"];
 
 
@@ -318,6 +321,44 @@ Block[{cursor,a,b},
 	];
 	
 	Print["Horndeski G2 vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
+]
+
+
+(* Horndeski G3 *)
+
+
+Block[{cursor,a},
+
+	Clear[HorndeskiG3];
+	
+	(* b = 0 *)
+	For[ a = 2, a <= 5, a++,
+		cursor = 1;
+		While[FileExistsQ[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_0_"<>ToString[cursor] ],
+			HorndeskiG3[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a+1],0,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_0_"<>ToString[cursor] ];
+			cursor++;
+		];
+	];
+	
+	(* b = 1 *)
+	For[ a = 0, a <= 3, a++,
+		cursor = 1;
+		While[FileExistsQ[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[cursor] ],
+			HorndeskiG3[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a+2+1],1,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[cursor] ];
+			cursor++;
+		];
+	];
+	
+	(* b = 2 *)
+	For[ a = 0, a <= 1, a++,
+		cursor = 1;
+		While[FileExistsQ[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[cursor] ],
+			HorndeskiG3[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a+2*2+1],2,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[cursor] ];
+			cursor++;
+		];
+	];
+	
+	Print["Horndeski G3 vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
 ]
 
 
