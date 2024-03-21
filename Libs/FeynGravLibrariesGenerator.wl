@@ -2,7 +2,10 @@
 
 SetDirectory[DirectoryName[$InputFileName]];
 
+
 BeginPackage["FeynGravLibrariesGenerator`",{"FeynCalc`"}];
+
+
 Needs["GravitonScalarVertex`","./../Rules/GravitonScalarVertex.wl"];
 Needs["GravitonFermionVertex`","./../Rules/GravitonFermionVertex.wl"];
 Needs["GravitonVectorVertex`","./../Rules/GravitonVectorVertex.wl"];
@@ -53,6 +56,10 @@ GenerateGravitonVertexSpecific::usage = "GenerateGravitonVertexSpecific[n]. This
 
 
 GenerateGravitonSUNYMSpecific::usage = "GenerateGravitonSUNYMSpecific[n]. This procedure generates libraries for SU(N)YM model interactions specifically for the order n. Pre-existing libraries will be removed!";
+
+
+GenerateHorndeskiG2Specific::usage = "GenerateHorndeskiG2Specific[a,b,n]. This procedure generates libraries for Horndeski G2 for given number of scalar field a, number of scalar field kinetic terms b, and the preturbation order n. Pre-existing libraries will be removed!";
+GenerateHorndeskiG3Specific::usage = "GenerateHorndeskiG3Specific[a,b,n]. This procedure generates libraries for Horndeski G3 for given number of scalar field a, number of scalar field kinetic terms b, and the preturbation order n. Pre-existing libraries will be removed!";
 
 
 Begin["Private`"];
@@ -446,6 +453,9 @@ GenerateHorndeskiG2[n_] := Module[{a,i},
 ];
 
 
+(* Procedures that generates rules for Horndeski G3 interaction. *)
+
+
 GenerateHorndeskiG3[n_] := Module[{a,i},
 (* b = 0 *)
 	For[ a = 2, a <= 5, a++,
@@ -477,7 +487,7 @@ GenerateHorndeskiG3[n_] := Module[{a,i},
 (* b = 0 *)
 	For[ a = 2, a <= 5, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG3[DummyArrayMomenta[i],DummyMomenta[a+1],0] , "HorndeskiG3_"<>ToString[a]<>"_0_"<>ToString[i] ];
+			Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+1],0] , "HorndeskiG3_"<>ToString[a]<>"_0_"<>ToString[i] ];
 			Print["Done for a="<>ToString[a]<>", b=0 for order "<>ToString[i]];
 		];
 	];
@@ -485,7 +495,7 @@ GenerateHorndeskiG3[n_] := Module[{a,i},
 (* b = 1 *)
 	For[ a = 0, a <= 3, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG3[DummyArrayMomenta[i],DummyMomenta[a+2+1],1] , "HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[i] ];
+			Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+2+1],1] , "HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[i] ];
 			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]];
 		];
 	];
@@ -493,7 +503,7 @@ GenerateHorndeskiG3[n_] := Module[{a,i},
 (* b = 2 *)
 	For[ a = 0, a <= 1, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG3[DummyArrayMomenta[i],DummyMomenta[a+4+1],2] , "HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[i] ];
+			Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+4+1],2] , "HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[i] ];
 			Print["Done for a="<>ToString[a]<>", b=2 for order "<>ToString[i]];
 		];
 	];
@@ -576,10 +586,31 @@ GenerateGravitonSUNYMSpecific[n_] := Module[{},
 	Put[ Evaluate[GravitonQuarkGluonVertex[DummyArray[n],{Global`\[Lambda],Global`a}]] , "GravitonQuarkGluonVertex_"<>ToString[n] ];
 	Put[ Evaluate[GravitonYMGhostVertex[DummyArray[n],Global`p1,Global`a1,Global`p2,Global`a2]] , "GravitonYMGhostVertex_"<>ToString[n] ];
 	Put[ Evaluate[GravitonGluonGhostVertex[DummyArray[n],{Global`\[Lambda]1,Global`a1,Global`p1},{Global`\[Lambda]2,Global`a2,Global`p2},{Global`\[Lambda]3,Global`a3,Global`p3}]] , "GravitonGluonGhostVertex_"<>ToString[n] ];
-	Print["Done for order "<>ToString[n] ];
+	Print["Done" ];
+];
+
+
+(* Procedures that generates specific rules for Horndeski G2. *)
+
+
+GenerateHorndeskiG2Specific[a_,b_,n_] := Module[{},
+	If[FileExistsQ["HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]],DeleteFile["HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]]];
+	Put[ HorndeskiG2[DummyArray[n],DummyMomenta[a+2b],b] , "HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n] ];
+	Print["Done."]
+];
+
+
+(* Procedures that generates specific rules for Horndeski G3. *)
+
+
+GenerateHorndeskiG3Specific[a_,b_,n_] := Module[{},
+	If[ FileExistsQ["HorndeskiG3_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]], DeleteFile["HorndeskiG3_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]] ];
+	Put[ HorndeskiG3[DummyArrayMomentaK[n],DummyMomenta[a+2b+1],b] , "HorndeskiG3_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n] ];
+	Print["Done"];
 ];
 
 
 End[];
+
 
 EndPackage[];
