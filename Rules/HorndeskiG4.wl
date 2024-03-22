@@ -6,13 +6,7 @@ SetDirectory[DirectoryName[$InputFileName]];
 BeginPackage["HorndeskiG4`",{"FeynCalc`","CTensorGeneral`","GammaTensor`","indexArraySymmetrization`"}];
 
 
-T1::usage = "";
-T2::usage = "";
-T3::usage = "";
-T4::usage = "";
-T5::usage = "";
-HorndeskiG4Core::usage = "";
-HorndeskiG4::usage = "";
+HorndeskiG4::usage = "HorndeskiG4[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\),\!\(\*SubscriptBox[\(k\), \(n\)]\)},{\!\(\*SubscriptBox[\(p\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(p\), \(a + 2  b\)]\)},b].";
 
 
 Begin["Private`"];
@@ -42,13 +36,13 @@ T4 = {gravitonParameters,scalarMomenta,b} |-> If[ (b!=0)&&(Length[gravitonParame
 T5 = {gravitonParameters,scalarMomenta,b} |-> If[ (b!=0)&&(Length[gravitonParameters]>=9), b I Power[Global`\[Kappa], Length[gravitonParameters]/3] Power[-1,b+1] MomentaWrapper[scalarMomenta[[;;2 (b-1)]]] ( CTensorGeneral[ Join[{\[ScriptM],\[ScriptN],\[ScriptA],\[ScriptB],\[ScriptR],\[ScriptS],\[ScriptL],\[ScriptT]}, DummyArray2[b-1] ], takeIndices[gravitonParameters[[;;-3 2-1]]] ] - CTensorGeneral[ Join[{\[ScriptM],\[ScriptA],\[ScriptN],\[ScriptB],\[ScriptR],\[ScriptS],\[ScriptL],\[ScriptT]}, DummyArray2[b-1] ], takeIndices[gravitonParameters[[;;-3 2-1]]] ] ) FVD[gravitonParameters[[-4]],\[ScriptL]1]FVD[gravitonParameters[[-1]],\[ScriptL]2] GammaTensor[\[ScriptR],\[ScriptM],\[ScriptN],\[ScriptL]1,gravitonParameters[[-6]],gravitonParameters[[-5]]]GammaTensor[\[ScriptL],\[ScriptA],\[ScriptB],\[ScriptL]2,gravitonParameters[[-3]],gravitonParameters[[-2]]] FVD[scalarMomenta[[2b-1]],\[ScriptS]]FVD[scalarMomenta[[2b]],\[ScriptT]] //Expand//Contract,0];
 
 
-HorndeskiG4Core = {gravitonParameters,scalarMomenta,b} |-> T1[gravitonParameters,scalarMomenta,b]+T2[gravitonParameters,scalarMomenta,b];
+HorndeskiG4Core = {gravitonParameters,scalarMomenta,b} |-> T1[gravitonParameters,scalarMomenta,b]+T2[gravitonParameters,scalarMomenta,b]+T3[gravitonParameters,scalarMomenta,b]+T4[gravitonParameters,scalarMomenta,b]+T5[gravitonParameters,scalarMomenta,b];
 
 
 HorndeskiG4Core1 = {gravitonParameters,scalarMomenta,b} |-> Plus @@ ( HorndeskiG4Core[#,scalarMomenta,b]& /@ ( Flatten /@ Permutations[Partition[gravitonParameters,3]] ) );
 
 
-HorndeskiG4 = {gravitonParameters,scalarMomenta,b} |-> Plus @@ ( HorndeskiG4Core[gravitonParameters,#,b]& /@  Permutations[scalarMomenta] );
+HorndeskiG4 = {gravitonParameters,scalarMomenta,b} |-> If[ b==0, HorndeskiG4Core[gravitonParameters,scalarMomenta,b] , Plus @@ ( HorndeskiG4Core[gravitonParameters,#,b]& /@  Permutations[scalarMomenta] )];
 
 
 End[];
