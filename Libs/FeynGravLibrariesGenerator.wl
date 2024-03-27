@@ -13,6 +13,7 @@ Needs["GravitonSUNYM`","./../Rules/GravitonSUNYM.wl"];
 Needs["GravitonVertex`","./../Rules/GravitonVertex.wl"];
 Needs["HorndeskiG2`","./../Rules/HorndeskiG2.wl"];
 Needs["HorndeskiG3`","./../Rules/HorndeskiG3.wl"];
+Needs["HorndeskiG4`","./../Rules/HorndeskiG4.wl"];
 Needs["GravitonAxionVectorVertex`","./../Rules/GravitonAxionVectorVertex.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
 
@@ -31,6 +32,7 @@ CheckGravitonAxionVector::usage = "CheckGravitonAxionVector. This procedure chec
 
 CheckHorndeskiG2::usage = "CheckHorndeskiG2. This procedure checks what libraries for Horndeski G2 interactions are present.";
 CheckHorndeskiG3::usage = "CheckHorndeskiG3. This procedure checks what libraries for Horndeski G3 interactions are present.";
+CheckHorndeskiG4::usage = "CheckHorndeskiG4. This procedure checks what libraries for Horndeski G3 interactions are present.";
 
 
 GenerateGravitonScalars::usage = "GenerateGravitonScalars[n]. This procedure generates libraries for graviton-scalar interactions up to the order n. Pre-existing libraries will be removed!";
@@ -47,6 +49,7 @@ GenerateGravitonAxionVector::usage = "GenerateGravitonAxionVector[n]. This proce
 
 GenerateHorndeskiG2::usage = "GenerateHorndeskiG2[n]. This procedure generates libraries for Horndeski G2 interaction up to the order n. Pre-existing libraries will be removed!";
 GenerateHorndeskiG3::usage = "GenerateHorndeskiG3[n]. This procedure generates libraries for Horndeski G3 interaction up to the order n. Pre-existing libraries will be removed!";
+GenerateHorndeskiG4::usage = "GenerateHorndeskiG4[n]. This procedure generates libraries for Horndeski G3 interaction up to the order n. Pre-existing libraries will be removed!";
 
 
 GenerateGravitonScalarsSpecific::usage = "GenerateGravitonScalarsSpecific[n]. This procedure generates libraries for graviton-scalar interactions specifically for the order n. Pre-existing libraries will be removed!";
@@ -228,6 +231,27 @@ CheckHorndeskiG3 := Module[{a,i},
 		While[FileExistsQ["HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[i]], i += 1];
 		Print["Libraries for Horndeski G3 interaction with a="<>ToString[a]<>", b=2 exist up to the order "<>ToString[i-1]];
 	];
+];
+
+
+CheckHorndeskiG4 := Module[{a,i},
+
+(* b = 0 *)
+	i = 1;
+	While[FileExistsQ["HorndeskiG4_1_0_"<>ToString[i]], i += 1];
+	Print["Libraries for Horndeski G4 interactions with b=0 exist up to the order "<>ToString[i-1]];
+	
+(* b = 1 *)
+	For[ a = 0 , a <= 2, a++,
+		i = 1;
+		While[FileExistsQ["HorndeskiG4_"<>ToString[a]<>"_1_"<>ToString[i]], i += 1];
+		Print["Libraries for Horndeski G4 interaction with a="<>ToString[a]<>", b=1 exist up to the order "<>ToString[i-1]];
+	];
+	
+(* b = 2 *)
+	i = 1;
+	While[FileExistsQ["HorndeskiG4_0_2_"<>ToString[i]], i += 1];
+	Print["Libraries for Horndeski G4 interaction with a=0, b=2 exist up to the order "<>ToString[i-1]];
 ];
 
 
@@ -506,6 +530,52 @@ GenerateHorndeskiG3[n_] := Module[{a,i},
 			Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+4+1],2] , "HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[i] ];
 			Print["Done for a="<>ToString[a]<>", b=2 for order "<>ToString[i]];
 		];
+	];
+];
+
+
+GenerateHorndeskiG4[n_] := Module[{a,i},
+(* b = 0 *)
+	i = 1;
+	While[FileExistsQ["HorndeskiG4_1_0_"<>ToString[i]], 
+		DeleteFile["HorndeskiG4_1_0_"<>ToString[i]];
+		i += 1;
+	];
+	
+(* b = 1 *)
+	For[ a = 0, a <= 2, a++,
+		i = 1;
+		While[FileExistsQ["HorndeskiG4_"<>ToString[a]<>"_1_"<>ToString[i]], 
+			DeleteFile["HorndeskiG4_"<>ToString[a]<>"_1_"<>ToString[i]];
+			i += 1;
+		];
+	];
+	
+(* b = 2 *)
+	i = 1;
+	While[FileExistsQ["HorndeskiG4_0_2_"<>ToString[i]], 
+		DeleteFile["HorndeskiG4_0_2_"<>ToString[i]];
+		i += 1;
+	];
+	
+(* b = 0 *)
+	For[ i = 1, i <= n, i++,
+		Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[1],0] , "HorndeskiG4_1_0_"<>ToString[i] ];
+		Print["Done for a=1, b=0 for order "<>ToString[i]];
+	];
+	
+(* b = 1 *)
+	For[ a = 0, a <= 2, a++,
+		For[ i = 1, i <= n, i++,
+			Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[a+2],1] , "HorndeskiG4_"<>ToString[a]<>"_1_"<>ToString[i] ];
+			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]];
+		];
+	];
+	
+(* b = 2 *)
+	For[ i = 1, i <= n, i++,
+		Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[0+4],2] , "HorndeskiG4_0_2_"<>ToString[i] ];
+		Print["Done for a=0, b=2 for order "<>ToString[i]];
 	];
 ];
 
