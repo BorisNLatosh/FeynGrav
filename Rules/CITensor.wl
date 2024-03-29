@@ -15,8 +15,9 @@ CITensorPlain::usage = "CITensor[{\[Mu],\[Nu]},{\!\(\*SubscriptBox[\(\[Rho]\), \
 Begin["Private`"];
 
 
-(* The old code.*)
 (* CITensorPlain = If[ Length[#1]==0 , 0 , Expand[ Sum[ Power[-1,p] ITensorPlain[Join[#1,#2[[;;2p]]]] CTensorPlain[#2[[2p+1;;]]] ,{p,0,Length[#2]/2}] ] ]&; *)
+
+
 (* CITensor = {indexArrayExternal,indexArrayInternal} |-> Expand[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[CITensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ]; *)
 
 
