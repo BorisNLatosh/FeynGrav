@@ -138,10 +138,30 @@ C7Tensor[indexArrayExternal_,indexArrayInternal_] := C7Tensor[indexArrayExternal
 (* C Tensor General *)
 
 
-CTensorPlainGeneral = {indexArrayExternal,indexArrayInternal} |-> Piecewise[{{ CTensorPlain[indexArrayInternal], Length[indexArrayExternal]==0}, {C1TensorPlain[indexArrayExternal,indexArrayInternal], Length[indexArrayExternal]==2 1}, {C2TensorPlain[indexArrayExternal,indexArrayInternal], Length[indexArrayExternal]==2 2}, {C3TensorPlain[indexArrayExternal,indexArrayInternal], Length[indexArrayExternal]==2 3}, {C4TensorPlain[indexArrayExternal,indexArrayInternal], Length[indexArrayExternal]==2 4}}];
+ClearAll[CTensorPlainGeneral];
+
+CTensorPlainGeneral[indexArrayExternal_,indexArrayInternal_] := CTensorPlainGeneral[indexArrayExternal,indexArrayInternal] = Switch[Length[indexArrayExternal]/2,
+	0,CTensorPlain[indexArrayInternal],
+	1,C1TensorPlain[indexArrayExternal,indexArrayInternal],
+	2,C2TensorPlain[indexArrayExternal,indexArrayInternal],
+	3,C3TensorPlain[indexArrayExternal,indexArrayInternal],
+	4,C4TensorPlain[indexArrayExternal,indexArrayInternal],
+	5,C5TensorPlain[indexArrayExternal,indexArrayInternal],
+	6,C6TensorPlain[indexArrayExternal,indexArrayInternal],
+	7,C7TensorPlain[indexArrayExternal,indexArrayInternal]];
 
 
-CTensorGeneral = {indexArrayExternal,indexArrayInternal} |-> Piecewise[{{ CTensor[indexArrayInternal], Length[indexArrayExternal]==0}, {C1Tensor[indexArrayExternal,indexArrayInternal], Length[indexArrayExternal]==2 1}, {C2Tensor[indexArrayExternal,indexArrayInternal], Length[indexArrayExternal]==2 2}, {C3Tensor[indexArrayExternal,indexArrayInternal], Length[indexArrayExternal]==2 3}, {C4Tensor[indexArrayExternal,indexArrayInternal], Length[indexArrayExternal]==2 4} }];
+ClearAll[CTensorGeneral];
+
+CTensorGeneral[indexArrayExternal_,indexArrayInternal_] := CTensorGeneral[indexArrayExternal,indexArrayInternal] = Switch[Length[indexArrayExternal]/2,
+	0,CTensor[indexArrayInternal],
+	1,C1Tensor[indexArrayExternal,indexArrayInternal],
+	2,C2Tensor[indexArrayExternal,indexArrayInternal],
+	3,C3Tensor[indexArrayExternal,indexArrayInternal],
+	4,C4Tensor[indexArrayExternal,indexArrayInternal],
+	5,C5Tensor[indexArrayExternal,indexArrayInternal],
+	6,C6Tensor[indexArrayExternal,indexArrayInternal],
+	7,C7Tensor[indexArrayExternal,indexArrayInternal]];
 
 
 End[];
