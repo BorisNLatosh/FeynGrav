@@ -3,7 +3,7 @@
 SetDirectory[DirectoryName[$InputFileName]];
 
 
-BeginPackage["GravitonVertex`",{"FeynCalc`","ITensor`","CTensor`","CITensor`","CIITensor`","CIIITensor`","CIIIITensor`","CTensorGeneral`","GammaTensor`","indexArraySymmetrization`"}];
+BeginPackage["GravitonVertex`",{"FeynCalc`","CTensorGeneral`","GammaTensor`","indexArraySymmetrization`"}];
 
 
 GravitonVertex::usage = "GravitonVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\),\[Ellipsis]},\[CurlyEpsilon]].";
@@ -43,25 +43,25 @@ GravitonGhostVertexIII = {indexArray,\[Mu],p1,\[Nu],p2}|->GravitonGhostVertex1[i
 
 ClearAll[GravitonGhostVertex1];
 
-GravitonGhostVertex1[indexArray_,\[Mu]_,p1_,\[Nu]_,p2_] := GravitonGhostVertex1[indexArray,\[Mu],p1,\[Nu],p2] = I (Global`\[Kappa])^(Length[indexArray]/3) CTensorGeneral[{\[Alpha],\[Beta],\[Mu],\[Nu]},TakeLorenzIndices[indexArray]]FVD[p1,\[Alpha]]FVD[p2,\[Beta]] ;
+GravitonGhostVertex1[indexArray_,\[Mu]_,p1_,\[Nu]_,p2_] := GravitonGhostVertex1[indexArray,\[Mu],p1,\[Nu],p2] = CTensorGeneral[{\[Alpha],\[Beta],\[Mu],\[Nu]},TakeLorenzIndices[indexArray]]FVD[p1,\[Alpha]]FVD[p2,\[Beta]] ;
 
 
 ClearAll[GravitonGhostVertex2];
 
-GravitonGhostVertex2[indexArray_,\[Mu]_,p1_,\[Nu]_,p2_] := GravitonGhostVertex2[indexArray,\[Mu],p1,\[Nu],p2] = I (Global`\[Kappa])^(Length[indexArray]/3) (CTensorGeneral[{\[Mu],\[Alpha],\[Nu],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[#[[4;;]]]](-1) FVD[#[[3]],\[Lambda]]( FVD[p1,\[Sigma]]GammaTensor[\[Beta],\[Rho],\[Alpha],\[Lambda],#[[1]],#[[2]]]- FVD[p2,\[Sigma]]GammaTensor[\[Alpha],\[Rho],\[Beta],\[Lambda],#[[1]],#[[2]]]+FVD[#[[3]],\[Rho]]GammaTensor[\[Sigma],\[Alpha],\[Beta],\[Lambda],#[[1]],#[[2]]]- FVD[#[[3]],\[Alpha]]GammaTensor[\[Rho],\[Beta],\[Sigma],\[Lambda],#[[1]],#[[2]]] ) )&/@(Flatten/@Permutations[Partition[indexArray,3]]) //Total;
+GravitonGhostVertex2[indexArray_,\[Mu]_,p1_,\[Nu]_,p2_] := GravitonGhostVertex2[indexArray,\[Mu],p1,\[Nu],p2] = Map[ (CTensorGeneral[{\[Mu],\[Alpha],\[Nu],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[#[[4;;]]]](-1) FVD[#[[3]],\[Lambda]]( FVD[p1,\[Sigma]]GammaTensor[\[Beta],\[Rho],\[Alpha],\[Lambda],#[[1]],#[[2]]]- FVD[p2,\[Sigma]]GammaTensor[\[Alpha],\[Rho],\[Beta],\[Lambda],#[[1]],#[[2]]]+FVD[#[[3]],\[Rho]]GammaTensor[\[Sigma],\[Alpha],\[Beta],\[Lambda],#[[1]],#[[2]]]- FVD[#[[3]],\[Alpha]]GammaTensor[\[Rho],\[Beta],\[Sigma],\[Lambda],#[[1]],#[[2]]] ) )& , Flatten/@Permutations[Partition[indexArray,3]] ]//Total;
 
 
 ClearAll[GravitonGhostVertex3];
 
-GravitonGhostVertex3[indexArray_,\[Mu]_,p1_,\[Nu]_,p2_] := GravitonGhostVertex3[indexArray,\[Mu],p1,\[Nu],p2] = I (Global`\[Kappa])^(Length[indexArray]/3) (CTensorGeneral[{\[Mu],\[Alpha],\[Nu],\[Beta],\[Rho],\[Sigma],\[Lambda],\[Tau]},TakeLorenzIndices[#[[7;;]]]] (-1)FVD[#[[3]],\[Lambda]1]FVD[#[[6]],\[Lambda]2]( GammaTensor[\[Rho],\[Alpha],\[Lambda],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Sigma],\[Beta],\[Tau],\[Lambda]2,#[[4]],#[[5]]] - GammaTensor[\[Rho],\[Alpha],\[Beta],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Sigma],\[Lambda],\[Tau],\[Lambda]2,#[[4]],#[[5]]] + GammaTensor[\[Alpha],\[Rho],\[Lambda],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Beta],\[Sigma],\[Tau],\[Lambda]2,#[[4]],#[[5]]]) )&/@(Flatten/@Permutations[Partition[indexArray,3]]) //Total;
+GravitonGhostVertex3[indexArray_,\[Mu]_,p1_,\[Nu]_,p2_] := GravitonGhostVertex3[indexArray,\[Mu],p1,\[Nu],p2] = Map[ (CTensorGeneral[{\[Mu],\[Alpha],\[Nu],\[Beta],\[Rho],\[Sigma],\[Lambda],\[Tau]},TakeLorenzIndices[#[[7;;]]]] (-1)FVD[#[[3]],\[Lambda]1]FVD[#[[6]],\[Lambda]2]( GammaTensor[\[Rho],\[Alpha],\[Lambda],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Sigma],\[Beta],\[Tau],\[Lambda]2,#[[4]],#[[5]]] - GammaTensor[\[Rho],\[Alpha],\[Beta],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Sigma],\[Lambda],\[Tau],\[Lambda]2,#[[4]],#[[5]]] + GammaTensor[\[Alpha],\[Rho],\[Lambda],\[Lambda]1,#[[1]],#[[2]]]GammaTensor[\[Beta],\[Sigma],\[Tau],\[Lambda]2,#[[4]],#[[5]]]) )& , Flatten/@Permutations[Partition[indexArray,3]] ] //Total;
 
 
 ClearAll[GravitonGhostVertex];
 
 GravitonGhostVertex[indexArray_,\[Mu]_,p1_,\[Nu]_,p2_] := GravitonGhostVertex[indexArray,\[Mu],p1,\[Nu],p2] = Switch[Length[indexArray]/3,
-	0, GravitonGhostVertex1[indexArray,\[Mu],p1,\[Nu],p2] //Contract ,
-	1, GravitonGhostVertex1[indexArray,\[Mu],p1,\[Nu],p2] + GravitonGhostVertex2[indexArray,\[Mu],p1,\[Nu],p2] //Contract,
-	_, GravitonGhostVertex1[indexArray,\[Mu],p1,\[Nu],p2] + GravitonGhostVertex2[indexArray,\[Mu],p1,\[Nu],p2] + GravitonGhostVertex3[indexArray,\[Mu],p1,\[Nu],p2] //Contract
+	0, I (Global`\[Kappa])^(Length[indexArray]/3) GravitonGhostVertex1[indexArray,\[Mu],p1,\[Nu],p2] //Contract ,
+	1, I (Global`\[Kappa])^(Length[indexArray]/3) ( GravitonGhostVertex1[indexArray,\[Mu],p1,\[Nu],p2] + GravitonGhostVertex2[indexArray,\[Mu],p1,\[Nu],p2] ) //Contract,
+	_, I (Global`\[Kappa])^(Length[indexArray]/3) ( GravitonGhostVertex1[indexArray,\[Mu],p1,\[Nu],p2] + GravitonGhostVertex2[indexArray,\[Mu],p1,\[Nu],p2] + GravitonGhostVertex3[indexArray,\[Mu],p1,\[Nu],p2] ) //Contract
 ];
 
 
