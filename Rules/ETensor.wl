@@ -15,7 +15,8 @@ ETensor::usage = "ETensor[{\[Mu],\[Nu]},{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\)
 Begin["Private`"];
 
 
-(* ETensorPlain = Expand[ Binomial[-1/2,Length[#2]/2] ITensorPlain[Join[#1,#2]] ]&; *0
+(* ETensorPlain = Expand[ Binomial[-1/2,Length[#2]/2] ITensorPlain[Join[#1,#2]] ]&; *)
+
 
 
 (* ETensor = {indexArrayExternal,indexArrayInternal} |-> 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] ETensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal] //Total//Expand; *)
@@ -23,12 +24,12 @@ Begin["Private`"];
 
 Clear[ETensorPlain];
 
-ETensorPlain[indexArrayExternal_,indexArrayInternal_] := ETensorPlain[indexArrayExternal,indexArrayInternal] = Expand[ Binomial[-1/2,Length[indexArrayInternal]/2] ITensorPlain[Join[indexArrayExternal,indexArrayInternal]] ]&;
+ETensorPlain[indexArrayExternal_,indexArrayInternal_] := ETensorPlain[indexArrayExternal,indexArrayInternal] = Binomial[-1/2,Length[indexArrayInternal]/2] ITensorPlain[Join[indexArrayExternal,indexArrayInternal]];
 
 
 Clear[ETensor];
 
-ETensor[indexArrayExternal_,indexArrayInternal_] := ETensor[indexArrayExternal,indexArrayInternal] = 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] ETensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal] //Total//Expand;
+ETensor[indexArrayExternal_,indexArrayInternal_] := ETensor[indexArrayExternal,indexArrayInternal] =  1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[ Map[ ETensorPlain[indexArrayExternal,#]& , indexArraySymmetrization[indexArrayInternal] ] ]//Expand;
 
 
 End[];

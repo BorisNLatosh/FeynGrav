@@ -23,7 +23,7 @@ Begin["Private`"];
 
 Clear[CETensorPlain];
 
-CETensorPlain[indexArrayExternal_,indexArrayInternal_] := CETensorPlain[indexArrayExternal,indexArrayInternal] = Sum[ ETensorPlain[indexArrayExternal,indexArrayInternal[[;;2k]]] CTensorPlainGeneral[indexArrayInternal[[2k+1;;]]] ,{k,0,Length[indexArrayInternal]/2}] ;
+CETensorPlain[indexArrayExternal_,indexArrayInternal_] := CETensorPlain[indexArrayExternal,indexArrayInternal] = Sum[ ETensorPlain[indexArrayExternal,indexArrayInternal[[;;2k]]] CTensorPlainGeneral[{},indexArrayInternal[[2k+1;;]]] ,{k,0,Length[indexArrayInternal]/2}] ;
 
 
 Clear[CETensor];

@@ -91,7 +91,7 @@ GravitonVectorVertex[indexArray_,\[Lambda]1_,p1_,\[Lambda]2_,p2_,\[CurlyEpsilon]
 
 Clear[GravitonVectorGhostVertex];
 
-GravitonVectorGhostVertex[indexArray_,p1_,p2_] := GravitonVectorGhostVertex[indexArray,p1,p2] = - (Global`\[Kappa])^(Length[indexArray]/2) FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]] CTensorGeneral[{\[ScriptM],\[ScriptN]},indexArray] //Contract;
+GravitonVectorGhostVertex[indexArray_,p1_,p2_] := GravitonVectorGhostVertex[indexArray,p1,p2] = - I (Global`\[Kappa])^(Length[indexArray]/2) FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]] CTensorGeneral[{\[ScriptM],\[ScriptN]},indexArray] //Contract;
 
 
 End[];

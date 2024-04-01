@@ -16,7 +16,7 @@ Begin["Private`"];
 HorndeskiG21 = {indexArray,momentumIndexArray} |-> Plus@@(HorndeskiG21Core[indexArray,#]&/@Permutations[momentumIndexArray])//Calc; *)
 
 
-(*HorndeskiG22Core = {indexArray,momentumIndexArray} |-> I (Global`\[Kappa])^(Length[indexArray]/2) Power[-1,2] CITensor[{\[ScriptM]1,\[ScriptN]1,\[ScriptM]2,\[ScriptN]2},indexArray] FVD[momentumIndexArray[[1]],\[ScriptM]1]FVD[momentumIndexArray[[2]],\[ScriptN]1] FVD[momentumIndexArray[[3]],\[ScriptM]2]FVD[momentumIndexArray[[4]],\[ScriptN]2] //Contract ;
+(*HorndeskiG22Core = {indexArray,momentumIndexArray} |-> I (Global`\[Kappa])^(Length[indexArray]/2) Power[-1,2] CIITensor[{\[ScriptM]1,\[ScriptN]1,\[ScriptM]2,\[ScriptN]2},indexArray] FVD[momentumIndexArray[[1]],\[ScriptM]1]FVD[momentumIndexArray[[2]],\[ScriptN]1] FVD[momentumIndexArray[[3]],\[ScriptM]2]FVD[momentumIndexArray[[4]],\[ScriptN]2] //Contract ;
 HorndeskiG22 = {indexArray,momentumIndexArray} |-> Plus@@(HorndeskiG22Core[indexArray,#]&/@Permutations[momentumIndexArray])//Calc; *)
 
 
