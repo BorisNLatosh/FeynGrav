@@ -25,7 +25,7 @@ Begin["Private`"];
 (* The code only uses memoization *)
 
 
-ClearAll[GravitonScalarVertex];
+Clear[GravitonScalarVertex];
 
 GravitonScalarVertex[indexArray_,p1_,p2_,m_] := GravitonScalarVertex[indexArray,p1,p2,m] = I (Global`\[Kappa])^(Length[indexArray]/2) ( - (1/2) Contract[(FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]]+FVD[p1,\[ScriptN]]FVD[p2,\[ScriptM]])CTensorGeneral[{\[ScriptM],\[ScriptN]},indexArray]] - m^2 FeynCalcInternal[CTensorGeneral[{},indexArray]] ) //Expand;
 

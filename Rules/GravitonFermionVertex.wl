@@ -19,7 +19,7 @@ Begin["Private`"];
 (* The code only uses memoization *)
 
 
-ClearAll[GravitonFermionVertex];
+Clear[GravitonFermionVertex];
 
 GravitonFermionVertex[indexArray_,p1_,p2_,m_] := GravitonFermionVertex[indexArray,p1,p2,m] =  (I Global`\[Kappa]^(Length[indexArray]/2)) ( (1/2) ExpandScalarProduct[Contract[ CETensor[{\[ScriptM],\[ScriptN]},indexArray] GAD[\[ScriptM]]FVD[p1-p2,\[ScriptN]] ]] - CTensorGeneral[{},indexArray] m ) //Expand//FeynCalcInternal ;
 

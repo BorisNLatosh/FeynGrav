@@ -21,12 +21,12 @@ Begin["Private`"];
 (* ITensor = Expand[ 1/Power[2,Length[#]/2] 1/Factorial[Length[#]/2] Total[ITensorPlain/@indexArraySymmetrization[#]] ]&; *)
 
 
-ClearAll[ITensorPlain];
+Clear[ITensorPlain];
 
 ITensorPlain[args_List] := ITensorPlain[args] = MTDWrapper[RotateLeft[args, 1]];
 
 
-ClearAll[ITensor];
+Clear[ITensor];
 
 ITensor[args_List] := ITensor[args] = Expand[ 1/Power[2,Length[args]/2] 1/Factorial[Length[args]/2] Total[ITensorPlain/@indexArraySymmetrization[args]] ];
 

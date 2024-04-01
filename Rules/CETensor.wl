@@ -3,7 +3,7 @@
 SetDirectory[DirectoryName[$InputFileName]];
 
 
-BeginPackage["CETensor`",{"FeynCalc`","ETensor`","CTensor`","indexArraySymmetrization`"}];
+BeginPackage["CETensor`",{"FeynCalc`","ETensor`","CTensorGeneral`","indexArraySymmetrization`"}];
 
 
 CETensor::usage = "CETensor[{\[Mu],\[Nu]},{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)}]. The function returns (\!\(\*SqrtBox[\(-g\)]\)\!\(\*SuperscriptBox[SubscriptBox[\(\[GothicE]\), \(m\)], \(\[Mu]\)]\)\!\(\*SuperscriptBox[\()\), \(\*SubscriptBox[\(\[Rho]\), \(1\)] \*SubscriptBox[\(\[Sigma]\), \(1\)] \*SubscriptBox[\(\[Ellipsis]\[Rho]\), \(n\)] \*SubscriptBox[\(\[Sigma]\), \(n\)]\)]\).";
@@ -21,12 +21,12 @@ Begin["Private`"];
 (* CETensor = {indexArrayExternal,indexArrayInternal} |-> Expand[Total[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] CETensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal] ]]; *)
 
 
-ClearAll[CETensorPlain];
+Clear[CETensorPlain];
 
-CETensorPlain[indexArrayExternal_,indexArrayInternal_] := CETensorPlain[indexArrayExternal,indexArrayInternal] = Sum[ ETensorPlain[indexArrayExternal,indexArrayInternal[[;;2k]]] CTensorPlain[indexArrayInternal[[2k+1;;]]] ,{k,0,Length[indexArrayInternal]/2}] ;
+CETensorPlain[indexArrayExternal_,indexArrayInternal_] := CETensorPlain[indexArrayExternal,indexArrayInternal] = Sum[ ETensorPlain[indexArrayExternal,indexArrayInternal[[;;2k]]] CTensorPlainGeneral[indexArrayInternal[[2k+1;;]]] ,{k,0,Length[indexArrayInternal]/2}] ;
 
 
-ClearAll[CETensor];
+Clear[CETensor];
 
 CETensor[indexArrayExternal_,indexArrayInternal_] := CETensor[indexArrayExternal,indexArrayInternal] = Expand[Total[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] CETensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal] ]];
 
