@@ -533,24 +533,24 @@ GenerateHorndeskiG3[n_] := Module[{a,i},
 (* b = 0 *)
 	For[ a = 2, a <= 5, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+1],0] , "HorndeskiG3_"<>ToString[a]<>"_0_"<>ToString[i] ];
-			Print["Done for a="<>ToString[a]<>", b=0 for order "<>ToString[i]];
+			timeTaken = First[Timing[ Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+1],0] , "HorndeskiG3_"<>ToString[a]<>"_0_"<>ToString[i] ] ]];
+			Print["Done for a="<>ToString[a]<>", b=0 for order "<>ToString[i]". Time taken: " <> ToString[timeTaken] <> " seconds."];
 		];
 	];
 	
 (* b = 1 *)
 	For[ a = 0, a <= 3, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+2+1],1] , "HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[i] ];
-			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]];
+			timeTaken = First[Timing[ Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+2+1],1] , "HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[i] ] ]];
+			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]". Time taken: " <> ToString[timeTaken] <> " seconds."];
 		];
 	];
 	
 (* b = 2 *)
 	For[ a = 0, a <= 1, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+4+1],2] , "HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[i] ];
-			Print["Done for a="<>ToString[a]<>", b=2 for order "<>ToString[i]];
+			timeTaken = First[Timing[ Put[ HorndeskiG3[DummyArrayMomentaK[i],DummyMomenta[a+4+1],2] , "HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[i] ] ]];
+			Print["Done for a="<>ToString[a]<>", b=2 for order "<>ToString[i]". Time taken: " <> ToString[timeTaken] <> " seconds."];
 		];
 	];
 ];
@@ -582,22 +582,22 @@ GenerateHorndeskiG4[n_] := Module[{a,i},
 	
 (* b = 0 *)
 	For[ i = 1, i <= n, i++,
-		Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[1],0] , "HorndeskiG4_1_0_"<>ToString[i] ];
-		Print["Done for a=1, b=0 for order "<>ToString[i]];
+		timeTaken = First[Timing[ Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[1],0] , "HorndeskiG4_1_0_"<>ToString[i] ] ]];
+		Print["Done for a=1, b=0 for order "<>ToString[i]<>". Time taken: " <> ToString[timeTaken] <> " seconds."];
 	];
 	
 (* b = 1 *)
 	For[ a = 0, a <= 2, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[a+2],1] , "HorndeskiG4_"<>ToString[a]<>"_1_"<>ToString[i] ];
-			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]];
+			timeTaken = First[Timing[ Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[a+2],1] , "HorndeskiG4_"<>ToString[a]<>"_1_"<>ToString[i] ] ]];
+			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]<>". Time taken: " <> ToString[timeTaken] <> " seconds."];
 		];
 	];
 	
 (* b = 2 *)
 	For[ i = 1, i <= n, i++,
-		Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[0+4],2] , "HorndeskiG4_0_2_"<>ToString[i] ];
-		Print["Done for a=0, b=2 for order "<>ToString[i]];
+		timeTaken = First[Timing[ Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[0+4],2] , "HorndeskiG4_0_2_"<>ToString[i] ] ]];
+		Print["Done for a=0, b=2 for order "<>ToString[i]<>". Time taken: " <> ToString[timeTaken] <> " seconds."];
 	];
 ];
 
@@ -655,9 +655,9 @@ GenerateGravitonAxionVector[n_] := Module[{i},
 	
 	i = 1;
 	
-	For[i=1,i<=n,i++,
-		Put[ Evaluate[GravitonAxionVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`\[CapitalTheta]]] , "GravitonAxionVectorVertex_"<>ToString[i] ];
-		Print["Done for order "<>ToString[i] ];
+	For[ i = 1, i <= n, i++,
+		timeTaken = First[Timing[ Put[ Evaluate[GravitonAxionVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`\[CapitalTheta]]] , "GravitonAxionVectorVertex_"<>ToString[i] ] ]];
+		Print["Done for order "<>ToString[i]<>". Time taken: " <> ToString[timeTaken] <> " seconds." ];
 	];
 ];
 
