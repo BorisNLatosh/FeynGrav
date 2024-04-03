@@ -14,7 +14,7 @@ Needs["GravitonVertex`","./../Rules/GravitonVertex.wl"];
 Needs["HorndeskiG2`","./../Rules/HorndeskiG2.wl"];
 Needs["HorndeskiG3`","./../Rules/HorndeskiG3.wl"];
 Needs["HorndeskiG4`","./../Rules/HorndeskiG4.wl"];
-Needs["HorndeskiG4`","./../Rules/HorndeskiG5.wl"];
+Needs["HorndeskiG5`","./../Rules/HorndeskiG5.wl"];
 Needs["GravitonAxionVectorVertex`","./../Rules/GravitonAxionVectorVertex.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
 
@@ -625,16 +625,16 @@ GenerateHorndeskiG5[n_] := Module[{a,i},
 (* b = 0 *)
 	For[ a = 1, a <= 4, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG5[DummyArrayMomentaK[i],DummyMomenta[a],1] , "HorndeskiG5_"<>ToString[a]<>"_0_"<>ToString[i] ];
-			Print["Done for a="<>ToString[a]<>", b=0 for order "<>ToString[i]];
+			timeTaken = First[Timing[ Put[ HorndeskiG5[DummyArrayMomentaK[i],DummyMomenta[a],0] , "HorndeskiG5_"<>ToString[a]<>"_0_"<>ToString[i] ] ]];
+			Print["Done for a="<>ToString[a]<>", b=0 for order "<>ToString[i]<>". Time taken: " <> ToString[timeTaken] <> " seconds."];
 		];
 	];
 	
 (* b = 1 *)
 	For[ a = 1, a <= 2, a++,
 		For[ i = 1, i <= n, i++,
-			Put[ HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[2+a],1] , "HorndeskiG5_"<>ToString[a]<>"_1_"<>ToString[i] ];
-			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]];
+			timeTaken = First[Timing[ Put[ HorndeskiG5[DummyArrayMomentaK[i],DummyMomenta[2+a],1] , "HorndeskiG5_"<>ToString[a]<>"_1_"<>ToString[i] ] ] ];
+			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]<>". Time taken: " <> ToString[timeTaken] <> " seconds."];
 		];
 	];
 
