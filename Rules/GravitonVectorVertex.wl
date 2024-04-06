@@ -21,6 +21,9 @@ GravitonVectorVertexUncontracted::usage = "GravitonVectorVertex[{\!\(\*Subscript
 GravitonVectorGhostVertex::usage = "GravitonVectorGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]. The function returns an expression for the graviton vertex of the Faddeev-Popov ghost kinetic energy. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are gravitons Lorentz indices, \!\(\*SubscriptBox[\(p\), \(i\)]\) are ghosts momenta.";
 
 
+GravitonVectorGhostVertexUncontracted::usage = "GravitonVectorGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]. The function returns an expression for the graviton vertex of the Faddeev-Popov ghost kinetic energy. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are gravitons Lorentz indices, \!\(\*SubscriptBox[\(p\), \(i\)]\) are ghosts momenta.";
+
+
 Begin["Private`"];
 
 
@@ -85,6 +88,11 @@ GravitonVectorVertexUncontracted[indexArray_,\[Lambda]1_,p1_,\[Lambda]2_,p2_,\[C
 Clear[GravitonVectorGhostVertex];
 
 GravitonVectorGhostVertex[indexArray_,p1_,p2_] := GravitonVectorGhostVertex[indexArray,p1,p2] = - I (Global`\[Kappa])^(Length[indexArray]/2) FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]] CTensorGeneral[{\[ScriptM],\[ScriptN]},indexArray] //Contract;
+
+
+Clear[GravitonVectorGhostVertexUncontracted];
+
+GravitonVectorGhostVertexUncontracted[indexArray_,p1_,p2_] := GravitonVectorGhostVertexUncontracted[indexArray,p1,p2] = - I (Global`\[Kappa])^(Length[indexArray]/2) FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]] CTensorGeneral[{\[ScriptM],\[ScriptN]},indexArray] ;
 
 
 End[];

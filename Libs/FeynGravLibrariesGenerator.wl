@@ -563,6 +563,56 @@ GenerateGravitonVectors[n_] := Module[
 		
 		Print["Done for the Maxwell field for order n="<>ToString[i]<>"."];
 	];
+	
+	For[ i = 1, i <= n, i++,
+		filePath = "GravitonVectorGhostVertex_"<>ToString[i]<>".frm";
+		
+		(*Check if the FROM code file is exists and empty.*)
+		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		
+		(*Check if the corresponding library exists and delete it if it does*)
+		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+
+		
+		(*Writing the expression of the FORM file*)
+		FeynCalc2FORM[filePath,GravitonVectorGhostVertex[DummyArray[i],Global`p1,Global`p2]];
+		
+		(*FeynGrav uses many variables with the Private` context. I remove it.*)
+		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
+	
+		(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
+		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
+		
+		(*Apply replacements according to theDictionary*)
+		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
+		
+		(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
+		theFileIndicesArray =Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]]//DeleteDuplicates;
+		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors p1,p2,"<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
+	
+		(*Place the expresison in a local variable L*)
+		Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
+	
+		(* Finise the code*)
+		Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+		
+		(*Run the FORM*)
+		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+		DeleteFile[filePath];
+		filePath = StringDrop[filePath, -4];
+		
+		(*Clean the output*)
+		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
+	
+		(* Bringing the output to the FeynCalc form*)
+		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]"}], "Text"];
+		
+		Print["Done for the Maxwell-ghost for order n="<>ToString[i]<>"."];
+	];
 ];
 
 
