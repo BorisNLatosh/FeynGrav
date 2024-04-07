@@ -3,7 +3,7 @@
 SetDirectory[DirectoryName[$InputFileName]];
 
 
-BeginPackage["CTensorGeneral`",{"FeynCalc`","MTDWrapper`","indexArraySymmetrization`"}];
+BeginPackage["CTensorGeneral`",{"FeynCalc`","ITensor`","indexArraySymmetrization`"}];
 
 
 CTensorPlainGeneral::usage = "CTensorPlainGeneral[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(p\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(p\)]\)},{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)}]. The function returns (\!\(\*SqrtBox[\(-g\)]\)\!\(\*SuperscriptBox[\(g\), \(\*SubscriptBox[\(\[Mu]\), \(1\)] \*SubscriptBox[\(\[Nu]\), \(1\)]\)]\)\[Ellipsis] \!\(\*SuperscriptBox[\(g\), \(\*SubscriptBox[\(\[Mu]\), \(p\)] \*SubscriptBox[\(\[Nu]\), \(p\)]\)]\)\!\(\*SuperscriptBox[\()\), \(\*SubscriptBox[\(\[Rho]\), \(1\)] \*SubscriptBox[\(\[Sigma]\), \(1\)] \*SubscriptBox[\(\[Ellipsis]\[Rho]\), \(n\)] \*SubscriptBox[\(\[Sigma]\), \(n\)]\)]\). The number of the inverse metrics in the bracets is p = 0,\[Ellipsis],7. The definition does not allow for any symmetry.";
@@ -15,33 +15,15 @@ CTensorGeneral::usage = "CTensorGeneral[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),
 Begin["Private`"];
 
 
-(* I and C tensors functions. I place them here to reduce the external dependence. *)
-
-
-(* I Tensor *)
-
-
-Clear[ITensorPlain];
-
-ITensorPlain[args_List] := ITensorPlain[args] = MTDWrapper[RotateLeft[args, 1]];
-
-
-Clear[ITensor];
-
-ITensor[args_List] := ITensor[args] = Expand[ 1/Power[2,Length[args]/2] 1/Factorial[Length[args]/2] Total[ITensorPlain/@indexArraySymmetrization[args]] ];
-
-
 (* C Tensor *)
 
 
 Clear[CTensorPlain];
-
-CTensorPlain[args_List] := CTensorPlain[args] = If[Length[args] == 0, 1,   1/Length[args] Sum[(-1)^(k - 1) ITensorPlain[args[[;; 2 k]]] CTensorPlain[args[[2 k + 1 ;;]]], {k, 1, Length[args]/2}]// Expand ];
+CTensorPlain[indexArray_List] := CTensorPlain[indexArray] = If[Length[indexArray] == 0, 1,   1/Length[indexArray] Total[ Map[ (-1)^(# - 1) ITensorPlain[indexArray[[;; 2 #]]] CTensorPlain[indexArray[[2 # + 1 ;;]]] & , Range[Length[indexArray]/2] ] ] ];
 
 
 Clear[CTensor];
-
-CTensor[args_List] := CTensor[args] = Expand[1/Power[2, Length[args]/2] 1/Factorial[Length[args]/2] Total[CTensorPlain /@ indexArraySymmetrization[args]]];
+CTensor[indexArray_List] := CTensor[indexArray] = 1/Power[2, Length[indexArray]/2] 1/Factorial[Length[indexArray]/2] Total[ Map[ CTensorPlain , indexArraySymmetrization[indexArray] ] ] ;
 
 
 (* C1 Tensor *)
@@ -49,12 +31,12 @@ CTensor[args_List] := CTensor[args] = Expand[1/Power[2, Length[args]/2] 1/Factor
 
 Clear[C1TensorPlain];
 
-C1TensorPlain[args1_, args2_] := C1TensorPlain[args1, args2] =  If[ Length[args1] == 0, 0, Sum[Power[-1, p] ITensorPlain[Join[args1, args2[[;; 2 p]]]] CTensorPlain[args2[[2 p + 1 ;;]]], {p, 0, Length[args2]/2}]//Expand ];
+C1TensorPlain[args1_, args2_] := C1TensorPlain[args1, args2] =  If[ Length[args1] == 0, 0, Sum[Power[-1, p] ITensorPlain[Join[args1, args2[[;; 2 p]]]] CTensorPlain[args2[[2 p + 1 ;;]]], {p, 0, Length[args2]/2}] ];
 
 
 Clear[C1Tensor];
 
-C1Tensor[indexArrayExternal_, indexArrayInternal_] := C1Tensor[indexArrayExternal, indexArrayInternal] =  Expand[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C1TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ];
+C1Tensor[indexArrayExternal_, indexArrayInternal_] := C1Tensor[indexArrayExternal, indexArrayInternal] = 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C1TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ;
 
 
 (* C2 Tensor *)
@@ -62,12 +44,12 @@ C1Tensor[indexArrayExternal_, indexArrayInternal_] := C1Tensor[indexArrayExterna
 
 Clear[C2TensorPlain];
 
-C2TensorPlain[indexArrayExternal_,indexArrayInternal_] := C2TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=4, 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C1TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}]//Expand ];
+C2TensorPlain[indexArrayExternal_,indexArrayInternal_] := C2TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=4, 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C1TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}] ];
 
 
 Clear[C2Tensor];
 
-C2Tensor[indexArrayExternal_,indexArrayInternal_] := C2Tensor[indexArrayExternal,indexArrayInternal] = Expand[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C2TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ];
+C2Tensor[indexArrayExternal_,indexArrayInternal_] := C2Tensor[indexArrayExternal,indexArrayInternal] = 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C2TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ;
 
 
 (* C3 Tensor *)
@@ -75,12 +57,12 @@ C2Tensor[indexArrayExternal_,indexArrayInternal_] := C2Tensor[indexArrayExternal
 
 Clear[C3TensorPlain];
 
-C3TensorPlain[indexArrayExternal_,indexArrayInternal_] := C3TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=6 , 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C2TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}]//Expand ];
+C3TensorPlain[indexArrayExternal_,indexArrayInternal_] := C3TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=6 , 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C2TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}] ];
 
 
 Clear[C3Tensor];
 
-C3Tensor[indexArrayExternal_,indexArrayInternal_] := C3Tensor[indexArrayExternal,indexArrayInternal] = Expand[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C3TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ];
+C3Tensor[indexArrayExternal_,indexArrayInternal_] := C3Tensor[indexArrayExternal,indexArrayInternal] = 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C3TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ;
 
 
 (* C4 Tensor *)
@@ -88,12 +70,12 @@ C3Tensor[indexArrayExternal_,indexArrayInternal_] := C3Tensor[indexArrayExternal
 
 Clear[C4TensorPlain];
 
-C4TensorPlain[indexArrayExternal_,indexArrayInternal_] := C4TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=8, 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C3TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}]//Expand ];
+C4TensorPlain[indexArrayExternal_,indexArrayInternal_] := C4TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=8, 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C3TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}] ];
 
 
 Clear[C4Tensor];
 
-C4Tensor[indexArrayExternal_,indexArrayInternal_] := C4Tensor[indexArrayExternal,indexArrayInternal] = Expand[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C4TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ];
+C4Tensor[indexArrayExternal_,indexArrayInternal_] := C4Tensor[indexArrayExternal,indexArrayInternal] = 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C4TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ;
 
 
 (* C5 Tensor *)
@@ -101,12 +83,12 @@ C4Tensor[indexArrayExternal_,indexArrayInternal_] := C4Tensor[indexArrayExternal
 
 Clear[C5TensorPlain];
 
-C5TensorPlain[indexArrayExternal_,indexArrayInternal_] := C5TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=2*5, 0 , Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C4TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}]//Expand ];
+C5TensorPlain[indexArrayExternal_,indexArrayInternal_] := C5TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=2*5, 0 , Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C4TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}] ];
 
 
 Clear[C5Tensor];
 
-C5Tensor[indexArrayExternal_,indexArrayInternal_] := C5Tensor[indexArrayExternal,indexArrayInternal] = Expand[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C5TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ];
+C5Tensor[indexArrayExternal_,indexArrayInternal_] := C5Tensor[indexArrayExternal,indexArrayInternal] = 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C5TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ;
 
 
 (* C6 Tensor *)
@@ -114,12 +96,12 @@ C5Tensor[indexArrayExternal_,indexArrayInternal_] := C5Tensor[indexArrayExternal
 
 Clear[C6TensorPlain];
 
-C6TensorPlain[indexArrayExternal_,indexArrayInternal_] := C6TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=2*6, 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C5TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}]//Expand ];
+C6TensorPlain[indexArrayExternal_,indexArrayInternal_] := C6TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=2*6, 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C5TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}] ];
 
 
 Clear[C6Tensor];
 
-C6Tensor[indexArrayExternal_,indexArrayInternal_] := C6Tensor[indexArrayExternal,indexArrayInternal] = Expand[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C6TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ];
+C6Tensor[indexArrayExternal_,indexArrayInternal_] := C6Tensor[indexArrayExternal,indexArrayInternal] = 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C6TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ;
 
 
 (* C7 Tensor *)
@@ -127,12 +109,12 @@ C6Tensor[indexArrayExternal_,indexArrayInternal_] := C6Tensor[indexArrayExternal
 
 Clear[C7TensorPlain];
 
-C7TensorPlain[indexArrayExternal_,indexArrayInternal_] := C7TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=2*6, 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C6TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}]//Expand ];
+C7TensorPlain[indexArrayExternal_,indexArrayInternal_] := C7TensorPlain[indexArrayExternal,indexArrayInternal] = If[ Length[indexArrayExternal]!=2*7, 0, Sum[ Power[-1,p1] ITensorPlain[ Join[indexArrayExternal[[;;2]],indexArrayInternal[[;;2p1]]] ] C6TensorPlain[indexArrayExternal[[3;;]],indexArrayInternal[[2p1+1;;]]] ,{p1,0,Length[indexArrayInternal]/2}] ];
 
 
 Clear[C7Tensor];
 
-C7Tensor[indexArrayExternal_,indexArrayInternal_] := C7Tensor[indexArrayExternal,indexArrayInternal] = Expand[ 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C7TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ];
+C7Tensor[indexArrayExternal_,indexArrayInternal_] := C7Tensor[indexArrayExternal,indexArrayInternal] = 1/Power[2,Length[indexArrayInternal]/2] 1/Factorial[Length[indexArrayInternal]/2] Total[C7TensorPlain[indexArrayExternal,#]&/@indexArraySymmetrization[indexArrayInternal]] ;
 
 
 (* C Tensor General *)

@@ -588,7 +588,7 @@ GenerateGravitonVertex[n_] := Module[
 	];
 	
 	For[ i = 1, i <= n, i++,
-		filePath = "GravitonVectorVertex_"<>ToString[i]<>".frm";
+		filePath = "GravitonGhostVertex_"<>ToString[i]<>".frm";
 		
 		(*Check if the FROM code file is exists and empty.*)
 		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
