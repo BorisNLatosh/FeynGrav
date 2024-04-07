@@ -15,12 +15,6 @@ ITensorPlain::usage = "ITensorPlain[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\
 Begin["Private`"];
 
 
-(* ITensorPlain = MTDWrapper[RotateLeft[#,1]]&; *)
-
-
-(* ITensor = Expand[ 1/Power[2,Length[#]/2] 1/Factorial[Length[#]/2] Total[ITensorPlain/@indexArraySymmetrization[#]] ]&; *)
-
-
 Clear[ITensorPlain];
 
 ITensorPlain[args_List] := ITensorPlain[args] = MTDWrapper[RotateLeft[args, 1]];
