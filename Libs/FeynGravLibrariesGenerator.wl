@@ -336,40 +336,6 @@ GenerateGravitonFermions[n_] := Module[{i},
 ];
 
 
-(*GenerateGravitonVectors[n_] := Module[{i},
-
-	i = 1;
-	
-	While[FileExistsQ["GravitonVectorVertex_"<>ToString[i]], 
-		DeleteFile["GravitonVectorVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
-	
-	While[FileExistsQ["GravitonMassiveVectorVertex_"<>ToString[i]], 
-		DeleteFile["GravitonMassiveVectorVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
-	
-	While[FileExistsQ["GravitonVectorGhostVertex_"<>ToString[i]], 
-		DeleteFile["GravitonVectorGhostVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
-	
-	For[ i = 1, i <= n, i++,
-		Put[ Evaluate[GravitonVectorVertex[DummyArrayMomentaK[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`GaugeFixingEpsilonVector]] , "GravitonVectorVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonMassiveVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`m]] , "GravitonMassiveVectorVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonVectorGhostVertex[DummyArray[i],Global`p1,Global`p2]] , "GravitonVectorGhostVertex_"<>ToString[i] ];
-		Print["Done for order "<>ToString[i] ];
-	];
-];*)
-
-
 GenerateGravitonVectors[n_] := Module[
 	{
 		i,
