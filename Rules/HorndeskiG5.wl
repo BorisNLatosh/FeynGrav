@@ -9,6 +9,9 @@ BeginPackage["HorndeskiG5`",{"FeynCalc`","CTensorGeneral`","GammaTensor`","index
 HorndeskiG5::usage = "";
 
 
+HorndeskiG5Uncontracted::usage = "";
+
+
 Begin["Private`"];
 
 
@@ -85,6 +88,14 @@ Clear[HorndeskiG5];
 HorndeskiG5[gravitonParameters_,scalarMomenta_,b_] := HorndeskiG5[gravitonParameters,scalarMomenta,b] = Switch[b,
 	0, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[ TI@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ] //Expand//Contract,
 	_, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[ TI@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ] + I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] b Total[ TII@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ]//Expand//Contract
+];
+
+
+Clear[HorndeskiG5Uncontracted];
+
+HorndeskiG5Uncontracted[gravitonParameters_,scalarMomenta_,b_] := HorndeskiG5[gravitonParameters,scalarMomenta,b] = Switch[b,
+	0, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[ TI@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ],
+	_, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[ TI@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ] + I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] b Total[ TII@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ]
 ];
 
 
