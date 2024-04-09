@@ -21,14 +21,14 @@ MomentaWrapper = scalarMomenta |-> Times @@ MapThread[ FVD, { scalarMomenta, Dum
 DummyArray2 = n |-> Flatten[ {ToExpression["\[ScriptA]"<>ToString[#]], ToExpression["\[ScriptB]"<>ToString[#]]}& /@ Range[n]];
 
 
-Clear[HorndeskiG22];
+Clear[HorndeskiG2];
 
-HorndeskiG22[indexArray_,momentumIndexArray_,b_] := HorndeskiG22[indexArray,momentumIndexArray,b] = Total[Map[ I (Global`\[Kappa])^(Length[indexArray]/2) Power[-1,b] CTensorGeneral[DummyArray2[b],indexArray] MomentaWrapper[#[[;;2b]]] & ,Permutations[momentumIndexArray] ]] //Contract;
+HorndeskiG2[gravitonParameters_,scalarMomenta_,b_] := HorndeskiG2[gravitonParameters,scalarMomenta,b] = Total[Map[ I (Global`\[Kappa])^(Length[gravitonParameters]/2) Power[-1,b] CTensorGeneral[DummyArray2[b],gravitonParameters] MomentaWrapper[#[[;;2b]]] & ,Permutations[scalarMomenta] ]] //Contract;
 
 
 Clear[HorndeskiG2Uncontracted];
 
-HorndeskiG2Uncontracted[indexArray_,momentumIndexArray_,b_] := HorndeskiG2Uncontracted[indexArray,momentumIndexArray,b] = Total[Map[ I (Global`\[Kappa])^(Length[indexArray]/2) Power[-1,b] CTensorGeneral[DummyArray2[b],indexArray] MomentaWrapper[#[[;;2b]]] & ,Permutations[momentumIndexArray] ]];
+HorndeskiG2Uncontracted[gravitonParameters_,scalarMomenta_,b_] := HorndeskiG2Uncontracted[gravitonParameters,scalarMomenta,b] = Total[Map[ I (Global`\[Kappa])^(Length[gravitonParameters]/2) Power[-1,b] CTensorGeneral[DummyArray2[b],gravitonParameters] MomentaWrapper[#[[;;2b]]] & ,Permutations[scalarMomenta] ]];
 
 
 End[];

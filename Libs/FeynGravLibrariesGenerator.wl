@@ -956,7 +956,7 @@ GenerateHorndeskiG4[n_] := Module[
 		a,i,
 		filePath,
 		theFileIndicesArray,
-		theDictionary = {"\\[Kappa]"->"Kappa","(Lambda)"->"lbd","(Tau)"->"tau"}
+		theDictionary = {"\\[Kappa]"->"Kappa","(Lambda)"->"lbd","(Tau)"->"tau","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct"}
 	},
 	
 	(* b = 0 *)
@@ -972,7 +972,7 @@ GenerateHorndeskiG4[n_] := Module[
 			If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 
 			(*Writing the expression of the FORM file*)
-			FeynCalc2FORM[filePath, HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[a],0] ];
+			FeynCalc2FORM[filePath, HorndeskiG4Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a],0] ];
 		
 			(*FeynGrav uses many variables with the Private` context. I remove it.*)
 			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
@@ -994,12 +994,12 @@ GenerateHorndeskiG4[n_] := Module[
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-			(*DeleteFile[filePath];*)
+			DeleteFile[filePath];
 			filePath = StringDrop[filePath, -4];
 		
 			(*Clean the output*)
 			Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-			Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"]
+			Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
 	
 			(* Bringing the output to the FeynCalc form*)
 			Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]"}], "Text"];
@@ -1024,7 +1024,7 @@ GenerateHorndeskiG4[n_] := Module[
 			If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 
 			(*Writing the expression of the FORM file*)
-			FeynCalc2FORM[filePath, HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[a+2],1] ];
+			FeynCalc2FORM[filePath, HorndeskiG4Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a+2],1] ];
 		
 			(*FeynGrav uses many variables with the Private` context. I remove it.*)
 			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
@@ -1046,12 +1046,12 @@ GenerateHorndeskiG4[n_] := Module[
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-			(*DeleteFile[filePath];*)
+			DeleteFile[filePath];
 			filePath = StringDrop[filePath, -4];
 		
 			(*Clean the output*)
 			Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-			Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"]
+			Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
 	
 			(* Bringing the output to the FeynCalc form*)
 			Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]"}], "Text"];
@@ -1062,6 +1062,7 @@ GenerateHorndeskiG4[n_] := Module[
 			Print["Done for the Horndeski G4 vertex with a=",a,", b=1 for order n="<>ToString[i]<>"."];
 		]
 	];
+	
 	
 	(* b = 2 *)
 	
@@ -1076,7 +1077,7 @@ GenerateHorndeskiG4[n_] := Module[
 			If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 
 			(*Writing the expression of the FORM file*)
-			FeynCalc2FORM[filePath, HorndeskiG4[DummyArrayMomentaK[i],DummyMomenta[a+4],2] ];
+			FeynCalc2FORM[filePath, HorndeskiG4Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a+4],2] ];
 		
 			(*FeynGrav uses many variables with the Private` context. I remove it.*)
 			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
