@@ -81,26 +81,24 @@ DummyArrayMomentaK = n |-> Flatten[{ToExpression["m"<>ToString[#]],ToExpression[
 
 
 CheckGravitonScalars := (
-	Print["Libraries for the scalar field kinetic term vertices exist up to the order ", Length[FileNames["GravitonScalarVertex_*"]] ];
-	Print["Libraries for the scalar field potential term vertices exist up to the order ", Length[FileNames["GravitonScalarPotentialVertex_*"]] ];
+	Scan[ Print["Libraries for the scalar field kinetic term vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonScalarVertex_*"] ];
+	Scan[ Print["Libraries for the scalar field potential term vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonScalarVertex_*"] ];
 );
 
 
-CheckGravitonFermions := (
-	Print["Libraries for Dirac fermion vertices exist up to the order ", Length[FileNames["GravitonFermionVertex_*"]] ];
-);
+CheckGravitonFermions := Scan[ Print["Libraries for Dirac fermion vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonFermionVertex_*"] ];
 
 
 CheckGravitonVectors := (
-	Print["Libraries for Proca field vertices exist up to the order ", Length[FileNames["GravitonMassiveVectorVertex_*"]] ];
-	Print["Libraries for a vector field vertices exist up to the order ", Length[FileNames["GravitonVectorVertex_*"]] ];
-	Print["Libraries for a vector-ghost vertices exist up to the order ", Length[FileNames["GravitonVectorGhostVertex_*"]] ];
+	Scan[ Print["Libraries for Proca field vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonMassiveVectorVertex_*"] ];
+	Scan[ Print["Libraries for a vector field vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonVectorVertex_*"] ];
+	Scan[ Print["Libraries for a vector-ghost vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonVectorGhostVertex_*"] ];
 );
 
 
 CheckGravitonVertex := (
-	Print["Libraries for graviton vertices exist up to the order ", Length[FileNames["GravitonVertex_*"]] ];
-	Print["Libraries for graviton-ghost vertices exist up to the order ", Length[FileNames["GravitonGhostVertex_*"]] ];
+	Scan[ Print["Libraries for graviton vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonVertex_*"] ];
+	Scan[ Print["Libraries for graviton-ghost vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonGhostVertex_*"] ];
 );
 
 
@@ -108,100 +106,34 @@ CheckGravitonVertex := (
 
 
 CheckGravitonSUNYM := (
-	Print["Libraries for graviton-quark-gluon vertices exist up to the order ", Length[FileNames["GravitonQuarkGluonVertex_*"]] ];
-	Print["Libraries for graviton-gluon vertices exist up to the order ", Length[FileNames["GravitonGluonVertex_*"]] ];
-	Print["Libraries for graviton-gluon-gluon-gluon vertices exist up to the order ", Length[FileNames["GravitonThreeGluonVertex_*"]] ];
-	Print["Libraries for graviton-gluon-gluon-gluon-gluon vertices exist up to the order ", Length[FileNames["GravitonFourGluonVertex_*"]] ];
-	Print["Libraries for graviton-(Yang-Mills )ghost vertices exist up to the order ", Length[FileNames["GravitonYMGhostVertex_*"]] ];
-	Print["Libraries for graviton-gluon-(Yang-Mills )ghost vertices exist up to the order ", Length[FileNames["GravitonGluonGhostVertex_*"]] ];
+	Scan[ Print["Libraries for graviton-quark-gluon vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonQuarkGluonVertex_*"] ];
+	Scan[ Print["Libraries for graviton-gluon vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonGluonVertex_*"] ];
+	Scan[ Print["Libraries for graviton-gluon-gluon-gluon vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonThreeGluonVertex_*"] ];
+	Scan[ Print["Libraries for graviton-gluon-gluon-gluon-gluon vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonFourGluonVertex_*"] ];
+	Scan[ Print["Libraries for graviton-(Yang-Mills) ghost vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonYMGhostVertex_*"] ];
+	Scan[ Print["Libraries for graviton-gluon-(Yang-Mills) ghost vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonGluonGhostVertex_*"] ];
 );
 
 
 (* Procedures that check if libraries for simple Horndeski G2 interaction exist. *)
 
 
-CheckHorndeskiG2 := (
-	Print["Libraries for Hornedski G2 vertices with a=",ToString[#]," , b=1 exist up to the order ", Length[FileNames["HorndeskiG2_"<>ToString[#]<>"_1_*"]] ]&/@Range[1,4];
-	Print["Libraries for Hornedski G2 vertices with a=",ToString[#]," , b=2 exist up to the order ", Length[FileNames["HorndeskiG2_"<>ToString[#]<>"_2_*"]] ]&/@Range[0,2];
-);
+CheckHorndeskiG2 := Scan[ ( Print["Horndeski G2 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG2_*"] ];
 
 
-CheckHorndeskiG3 := Module[{a,i},
-
-(* b = 0 *)
-	For[ a = 2, a <= 5, a++,
-		i = 1;
-		While[FileExistsQ["HorndeskiG3_"<>ToString[a]<>"_0_"<>ToString[i]], i += 1];
-		Print["Libraries for Horndeski G3 interaction with a="<>ToString[a]<>", b=0 exist up to the order "<>ToString[i-1]];
-	];
-	
-(* b = 1 *)
-	For[ a = 0 , a <= 3, a++,
-		i = 1;
-		While[FileExistsQ["HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[i]], i += 1];
-		Print["Libraries for Horndeski G3 interaction with a="<>ToString[a]<>", b=1 exist up to the order "<>ToString[i-1]];
-	];
-	
-(* b = 2 *)
-	For[ a = 0 , a <= 1, a++,
-		i = 1;
-		While[FileExistsQ["HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[i]], i += 1];
-		Print["Libraries for Horndeski G3 interaction with a="<>ToString[a]<>", b=2 exist up to the order "<>ToString[i-1]];
-	];
-];
+CheckHorndeskiG3 := Scan[ ( Print["Horndeski G3 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG3_*"] ];
 
 
-CheckHorndeskiG4 := Module[{a,i},
-
-(* b = 0 *)
-	i = 1;
-	While[FileExistsQ["HorndeskiG4_1_0_"<>ToString[i]], i += 1];
-	Print["Libraries for Horndeski G4 interactions with b=0 exist up to the order "<>ToString[i-1]];
-	
-(* b = 1 *)
-	For[ a = 0 , a <= 2, a++,
-		i = 1;
-		While[FileExistsQ["HorndeskiG4_"<>ToString[a]<>"_1_"<>ToString[i]], i += 1];
-		Print["Libraries for Horndeski G4 interaction with a="<>ToString[a]<>", b=1 exist up to the order "<>ToString[i-1]];
-	];
-	
-(* b = 2 *)
-	i = 1;
-	While[FileExistsQ["HorndeskiG4_0_2_"<>ToString[i]], i += 1];
-	Print["Libraries for Horndeski G4 interaction with a=0, b=2 exist up to the order "<>ToString[i-1]];
-];
+CheckHorndeskiG4 := Scan[ ( Print["Horndeski G4 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG4_*"] ];
 
 
-CheckHorndeskiG5 := Module[{a,i},
-
-(* b = 0 *)
-	For[ a = 1 , a <= 4, a++,
-		i = 1;
-		While[FileExistsQ["HorndeskiG5_"<>ToString[a]<>"_0_"<>ToString[i]], i += 1];
-		Print["Libraries for Horndeski G5 interaction with a="<>ToString[a]<>", b=0 exist up to the order "<>ToString[i-1]];
-	];
-	
-(* b = 1 *)
-	For[ a = 1 , a <= 2, a++,
-		i = 1;
-		While[FileExistsQ["HorndeskiG5_"<>ToString[a]<>"_1_"<>ToString[i]], i += 1];
-		Print["Libraries for Horndeski G5 interaction with a="<>ToString[a]<>", b=1 exist up to the order "<>ToString[i-1]];
-	];
-	
-];
+CheckHorndeskiG5 := Scan[ ( Print["Horndeski G5 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG5_*"] ];
 
 
 (* Procedures that check if libraries for simple axion-like interaction exist. *)
 
 
-CheckGravitonAxionVector := Module[{i},
-
-	i = 1;
-	
-	While[FileExistsQ["GravitonAxionVectorVertex_"<>ToString[i]], i += 1];
-	
-	Print["Libraries for gravitational interaction of a scalar axion coupled to a single vector field exist up to the order "<>ToString[i-1]];
-];
+CheckGravitonAxionVector := Scan[ Print["Libraries for gravitational interaction of a scalar axion coupled to a single vector field exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonAxionVectorVertex_*"] ];
 
 
 (* Procedures that generates rules for simple models. *)
@@ -1116,45 +1048,6 @@ GenerateHorndeskiG4[n_] := Module[
 		]
 	];
 ];
-
-
-(*GenerateHorndeskiG5[n_] := Module[{a,i},
-(* b = 0 *)
-	For[ a = 1, a <= 4, a++,
-		i = 1;
-		While[FileExistsQ["HorndeskiG5_"<>ToString[a]<>"_0_"<>ToString[i]], 
-			DeleteFile["HorndeskiG5_"<>ToString[a]<>"_0_"<>ToString[i]];
-			i += 1;
-		];
-	];
-	
-(* b = 1 *)
-	For[ a = 1, a <= 2, a++,
-		i = 1;
-		While[FileExistsQ["HorndeskiG5_"<>ToString[a]<>"_1_"<>ToString[i]], 
-			DeleteFile["HorndeskiG5_"<>ToString[a]<>"_1_"<>ToString[i]];
-			i += 1;
-		];
-	];
-
-	
-(* b = 0 *)
-	For[ a = 1, a <= 4, a++,
-		For[ i = 1, i <= n, i++,
-			timeTaken = First[Timing[ Put[ HorndeskiG5[DummyArrayMomentaK[i],DummyMomenta[a],0] , "HorndeskiG5_"<>ToString[a]<>"_0_"<>ToString[i] ] ]];
-			Print["Done for a="<>ToString[a]<>", b=0 for order "<>ToString[i]<>". Time taken: " <> ToString[timeTaken] <> " seconds."];
-		];
-	];
-	
-(* b = 1 *)
-	For[ a = 1, a <= 2, a++,
-		For[ i = 1, i <= n, i++,
-			timeTaken = First[Timing[ Put[ HorndeskiG5[DummyArrayMomentaK[i],DummyMomenta[2+a],1] , "HorndeskiG5_"<>ToString[a]<>"_1_"<>ToString[i] ] ] ];
-			Print["Done for a="<>ToString[a]<>", b=1 for order "<>ToString[i]<>". Time taken: " <> ToString[timeTaken] <> " seconds."];
-		];
-	];
-
-];*)
 
 
 GenerateHorndeskiG5[n_] := Module[
