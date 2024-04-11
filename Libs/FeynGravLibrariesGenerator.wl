@@ -183,6 +183,20 @@ FORMCodeCleanUp[filePath_,np_,nk_] :=
 	];
 
 
+FORMOutputCleanUp[filePath_] :=
+	Module[{},
+		(* Clean the output *)
+		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["theResult =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
+	
+		(* Bringing the output to the FeynCalc form*)
+		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]"}], "Text"];
+	];
+
+
 GenerateGravitonScalars[n_] := Module[{i,filePath},
 	
 	For[ i = 1, i <= n, i++,
@@ -206,15 +220,8 @@ GenerateGravitonScalars[n_] := Module[{i,filePath},
 		filePath = StringDrop[filePath, -4];
 		
 		(*Clean the output*)
-		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["theResult =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
-	
-		(* Bringing the output to the FeynCalc form*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
-		
+		FORMOutputCleanUp[filePath];
+
 		Print["Scalar field kinetic term vertices is generated for n="<>ToString[i]<>"."];
 	];
 	
@@ -240,14 +247,7 @@ GenerateGravitonScalars[n_] := Module[{i,filePath},
 		filePath = StringDrop[filePath, -4];
 		
 		(*Clean the output*)
-		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
-	
-		(* Bringing the output to the FeynCalc form*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]", "lbd"->"\\[Lambda]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
+		FORMOutputCleanUp[filePath];
 		
 		Print["Done for the kinetic term for order n="<>ToString[i]<>"."];
 	];
@@ -297,14 +297,7 @@ GenerateGravitonVectors[n_] := Module[{i,filePath},
 		filePath = StringDrop[filePath, -4];
 		
 		(*Clean the output*)
-		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
-	
-		(* Bringing the output to the FeynCalc form*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]"}], "Text"];
+		FORMOutputCleanUp[filePath];
 		
 		Print["Done for the Proca field for order n="<>ToString[i]<>"."];
 	];
@@ -331,14 +324,7 @@ GenerateGravitonVectors[n_] := Module[{i,filePath},
 		filePath = StringDrop[filePath, -4];
 		
 		(*Clean the output*)
-		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
-	
-		(* Bringing the output to the FeynCalc form*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]"}], "Text"];
+		FORMOutputCleanUp[filePath];
 		
 		Print["Done for the Maxwell field for order n="<>ToString[i]<>"."];
 	];
@@ -365,14 +351,7 @@ GenerateGravitonVectors[n_] := Module[{i,filePath},
 		filePath = StringDrop[filePath, -4];
 		
 		(*Clean the output*)
-		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
-	
-		(* Bringing the output to the FeynCalc form*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]"}], "Text"];
+		FORMOutputCleanUp[filePath];
 		
 		Print["Done for the Maxwell-ghost for order n="<>ToString[i]<>"."];
 	];
@@ -403,15 +382,8 @@ GenerateGravitonVertex[n_] := Module[{i,filePath},
 		filePath = StringDrop[filePath, -4];
 		
 		(*Clean the output*)
-		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"]
-	
-		(* Bringing the output to the FeynCalc form*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
-		
+		FORMOutputCleanUp[filePath];
+				
 		Print["Done for the graviton vertex for order n="<>ToString[i]<>"."];
 	];
 	
@@ -437,14 +409,7 @@ GenerateGravitonVertex[n_] := Module[{i,filePath},
 		filePath = StringDrop[filePath, -4];
 		
 		(*Clean the output*)
-		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"]
-	
-		(* Bringing the output to the FeynCalc form*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]"}], "Text"];
+		FORMOutputCleanUp[filePath];
 		
 		Print["Done for the graviton-ghost vertex for order n="<>ToString[i]<>"."];
 	];
