@@ -19,6 +19,9 @@ Needs["GravitonAxionVectorVertex`","./../Rules/GravitonAxionVectorVertex.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
 
 
+(* Procedures that verify whether libraries exist. *)
+
+
 CheckGravitonScalars::usage = "CheckGravitonScalars. This procedure checks what libraries for graviton-scalar interaction are present.";
 CheckGravitonFermions::usage = "CheckGravitonFermions. This procedure checks what libraries for graviton-fermion interaction are present.";
 CheckGravitonVectors::usage = "CheckGravitonFermions. This procedure checks what libraries for graviton-fermion interaction are present.";
@@ -35,6 +38,9 @@ CheckHorndeskiG2::usage = "CheckHorndeskiG2. This procedure checks what librarie
 CheckHorndeskiG3::usage = "CheckHorndeskiG3. This procedure checks what libraries for Horndeski G3 interactions are present.";
 CheckHorndeskiG4::usage = "CheckHorndeskiG4. This procedure checks what libraries for Horndeski G4 interactions are present.";
 CheckHorndeskiG5::usage = "CheckHorndeskiG5. This procedure checks what libraries for Horndeski G5 interactions are present.";
+
+
+(* Procedures that generate libraries. *)
 
 
 GenerateGravitonScalars::usage = "GenerateGravitonScalars[n]. This procedure generates libraries for graviton-scalar interactions up to the order n. Pre-existing libraries will be removed!";
@@ -77,7 +83,10 @@ DummyArrayMomenta = n |-> Flatten[{ToExpression["m"<>ToString[#]],ToExpression["
 DummyArrayMomentaK = n |-> Flatten[{ToExpression["m"<>ToString[#]],ToExpression["n"<>ToString[#]],ToExpression["k"<>ToString[#]]}&/@Range[n]];
 
 
-(* Procedures that check if libraries for simple models exist. *)
+(* Procedures that verify whether libraries exist. *)
+
+
+(* Scalars. *)
 
 
 CheckGravitonScalars := (
@@ -86,7 +95,13 @@ CheckGravitonScalars := (
 );
 
 
+(* Fermions. *)
+
+
 CheckGravitonFermions := Scan[ Print["Libraries for Dirac fermion vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonFermionVertex_*"] ];
+
+
+(* Vectors. *)
 
 
 CheckGravitonVectors := (
@@ -96,13 +111,16 @@ CheckGravitonVectors := (
 );
 
 
+(* Gravitons. *)
+
+
 CheckGravitonVertex := (
 	Scan[ Print["Libraries for graviton vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonVertex_*"] ];
 	Scan[ Print["Libraries for graviton-ghost vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonGhostVertex_*"] ];
 );
 
 
-(* Procedures that check if libraries for SU(N) Yang-Mills model exist. *)
+(* SU(N) Yang-Mills. *)
 
 
 CheckGravitonSUNYM := (
@@ -115,7 +133,7 @@ CheckGravitonSUNYM := (
 );
 
 
-(* Procedures that check if libraries for simple Horndeski G2 interaction exist. *)
+(* Horndeski. *)
 
 
 CheckHorndeskiG2 := Scan[ ( Print["Horndeski G2 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG2_*"] ];
@@ -130,54 +148,57 @@ CheckHorndeskiG4 := Scan[ ( Print["Horndeski G4 vertex exists for a=",#1,", b=",
 CheckHorndeskiG5 := Scan[ ( Print["Horndeski G5 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG5_*"] ];
 
 
-(* Procedures that check if libraries for simple axion-like interaction exist. *)
+(* Graviton-Axion. *)
 
 
 CheckGravitonAxionVector := Scan[ Print["Libraries for gravitational interaction of a scalar axion coupled to a single vector field exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonAxionVectorVertex_*"] ];
 
 
-(* Procedures that generates rules for simple models. *)
+(* Procedures that generate libraries. *)
 
 
-GenerateGravitonScalars[n_] := Module[
-	{
-		i,
-		filePath,
-		theFileIndicesArray,
-		theDictionary = {"\\[Kappa]"->"Kappa","(ScriptN)"->"scn","(ScriptM)"->"scm","\\[Lambda]"->"lbd","Lambda"->"lbd"}
-	},
+(* Scalars. *)
+
+
+FORMCodeCleanUp[filePath_,np_,nk_] := 
+	Module[
+		{
+			theDictionary = {"\\[Kappa]"->"Kappa","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptR)"->"scr","(ScriptL)"->"scl","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","\\[Lambda]"->"lbd","(Lambda)"->"lbd","(Tau)"->"tau","(Omega)"->"omg","(Epsilon)"->"eps"},
+			theFileIndicesArray
+		},
+		(* I modify the FORM file so that it can be executed. *)
+		(* Remove all Private` contexts. *)
+		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
+		(* Make the expression into a single line. *)
+		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
+		(* FeynCalc2FORM does not convert some symbols correctly. I am fixing this manually. *)
+		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
+		(* I collect all the Lorentz indices and write them in the head of the FORM file. *)
+		theFileIndicesArray =Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]]//DeleteDuplicates;
+		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[np],","]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[nk],","]<>";\n"<>Import[filePath,"Text"],"Text"];
+		(* I put the expression in the local variable theResult. *)
+		Export[filePath, MapAt["Local theResult = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
+		(* I add the end to the FORM file. *)
+		Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print theResult;", ".end"}], "Lines"];
+	];
+
+
+GenerateGravitonScalars[n_] := Module[{i,filePath},
 	
 	For[ i = 1, i <= n, i++,
+	
 		filePath = "GravitonScalarVertex_"<>ToString[i]<>".frm";
 		
-		(*Check if the FROM code file is exists and empty.*)
+		(* Check if the FROM code file exists and is empty. *)
 		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-		(*Check if the corresponding library exists and delete it if it does*)
+		(* Check if the corresponding library exists and delete it if it does. *)
 		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
 		
-		(*Writing the expression of the FORM file*)
-		FeynCalc2FORM[filePath,GravitonScalarVertexUncontracted[DummyArray[i],Global`p1,Global`p2,Global`m]];
+		(* FeynCalc converts the expression to FORM and writes it to the file. *)
+		FeynCalc2FORM[ filePath, GravitonScalarVertexUncontracted[DummyArray[i],p1,p2,m] ];
 		
-		(*FeynGrav uses many variables with the Private` context. I remove it.*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-		(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-		(*Apply replacements according to theDictionary*)
-		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-		(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-		theFileIndicesArray =Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]]//DeleteDuplicates;
-		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors p1,p2;\n"<>Import[filePath,"Text"],"Text"];
-	
-		(*Place the expresison in a local variable L*)
-		Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-		(* Finise the code*)
-		Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,0];
 		
 		(*Run the FORM*)
 		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -185,7 +206,7 @@ GenerateGravitonScalars[n_] := Module[
 		filePath = StringDrop[filePath, -4];
 		
 		(*Clean the output*)
-		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["L =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
+		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["theResult =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
 	
 		(* Bringing the output to the FeynCalc form*)
@@ -194,10 +215,11 @@ GenerateGravitonScalars[n_] := Module[
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
 		
-		Print["Done for the kinetic term for order n="<>ToString[i]<>"."];
+		Print["Scalar field kinetic term vertices is generated for n="<>ToString[i]<>"."];
 	];
 	
 	For[ i = 1, i <= n, i++,
+	
 		filePath = "GravitonScalarPotentialVertex_"<>ToString[i]<>".frm";
 		
 		(*Check if the FROM code file is exists and empty.*)
@@ -206,28 +228,11 @@ GenerateGravitonScalars[n_] := Module[
 		(*Check if the corresponding library exists and delete it if it does*)
 		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 
-		
 		(*Writing the expression of the FORM file*)
 		FeynCalc2FORM[filePath,GravitonScalarPotentialVertexUncontracted[DummyArray[i],Global`\[Lambda]]];
 		
-		(*FeynGrav uses many variables with the Private` context. I remove it.*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-		(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-		(*Apply replacements according to theDictionary*)
-		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-		(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-		theFileIndicesArray =Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]]//DeleteDuplicates;
-		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors p1,p2;\n"<>Import[filePath,"Text"],"Text"];
-	
-		(*Place the expresison in a local variable L*)
-		Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-		(* Finise the code*)
-		Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,0];
 		
 		(*Run the FORM*)
 		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -268,15 +273,10 @@ GenerateGravitonFermions[n_] := Module[{i},
 ];
 
 
-GenerateGravitonVectors[n_] := Module[
-	{
-		i,
-		filePath,
-		theFileIndicesArray,
-		theDictionary = {"\\[Kappa]"->"Kappa","(ScriptN)"->"scn","(ScriptM)"->"scm","\\[Lambda]"->"lbd","(Lambda)"->"lbd"}
-	},
+GenerateGravitonVectors[n_] := Module[{i,filePath},
 	
 	For[ i = 1, i <= n, i++,
+	
 		filePath = "GravitonMassiveVectorVertex_"<>ToString[i]<>".frm";
 		
 		(*Check if the FROM code file is exists and empty.*)
@@ -285,28 +285,11 @@ GenerateGravitonVectors[n_] := Module[
 		(*Check if the corresponding library exists and delete it if it does*)
 		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 
-		
 		(*Writing the expression of the FORM file*)
 		FeynCalc2FORM[filePath,GravitonMassiveVectorVertexUncontracted[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`m]];
 		
-		(*FeynGrav uses many variables with the Private` context. I remove it.*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-		(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-		(*Apply replacements according to theDictionary*)
-		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-		(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-		theFileIndicesArray =Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]]//DeleteDuplicates;
-		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors p1,p2,"<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[2+i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-		(*Place the expresison in a local variable L*)
-		Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-		(* Finise the code*)
-		Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,0];
 		
 		(*Run the FORM*)
 		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -327,6 +310,7 @@ GenerateGravitonVectors[n_] := Module[
 	];
 	
 	For[ i = 1, i <= n, i++,
+	
 		filePath = "GravitonVectorVertex_"<>ToString[i]<>".frm";
 		
 		(*Check if the FROM code file is exists and empty.*)
@@ -334,29 +318,12 @@ GenerateGravitonVectors[n_] := Module[
 		
 		(*Check if the corresponding library exists and delete it if it does*)
 		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
 		
 		(*Writing the expression of the FORM file*)
 		FeynCalc2FORM[filePath,GravitonVectorVertex[DummyArrayMomentaK[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`GaugeFixingEpsilonVector]];
 		
-		(*FeynGrav uses many variables with the Private` context. I remove it.*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-		(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-		(*Apply replacements according to theDictionary*)
-		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-		(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-		theFileIndicesArray =Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]]//DeleteDuplicates;
-		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors p1,p2,"<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-		(*Place the expresison in a local variable L*)
-		Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-		(* Finise the code*)
-		Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,i];
 		
 		(*Run the FORM*)
 		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -377,6 +344,7 @@ GenerateGravitonVectors[n_] := Module[
 	];
 	
 	For[ i = 1, i <= n, i++,
+	
 		filePath = "GravitonVectorGhostVertex_"<>ToString[i]<>".frm";
 		
 		(*Check if the FROM code file is exists and empty.*)
@@ -385,28 +353,11 @@ GenerateGravitonVectors[n_] := Module[
 		(*Check if the corresponding library exists and delete it if it does*)
 		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 
-		
 		(*Writing the expression of the FORM file*)
 		FeynCalc2FORM[filePath,GravitonVectorGhostVertex[DummyArray[i],Global`p1,Global`p2]];
 		
-		(*FeynGrav uses many variables with the Private` context. I remove it.*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-		(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-		(*Apply replacements according to theDictionary*)
-		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-		(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-		theFileIndicesArray =Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]]//DeleteDuplicates;
-		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors p1,p2,"<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-		(*Place the expresison in a local variable L*)
-		Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-		(* Finise the code*)
-		Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,i];
 		
 		(*Run the FORM*)
 		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -428,15 +379,10 @@ GenerateGravitonVectors[n_] := Module[
 ];
 
 
-GenerateGravitonVertex[n_] := Module[
-	{
-		i,
-		filePath,
-		theFileIndicesArray,
-		theDictionary = {"\\[Kappa]"->"Kappa","(Lambda)"->"lbd","(Tau)"->"tau"}
-	},
+GenerateGravitonVertex[n_] := Module[{i,filePath},
 	
 	For[ i = 1, i <= n, i++,
+	
 		filePath = "GravitonVertex_"<>ToString[i]<>".frm";
 		
 		(*Check if the FROM code file is exists and empty.*)
@@ -444,28 +390,12 @@ GenerateGravitonVertex[n_] := Module[
 		
 		(*Check if the corresponding library exists and delete it if it does*)
 		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
 		
 		(*Writing the expression of the FORM file*)
 		FeynCalc2FORM[filePath,GravitonVertexUncontracted[DummyArrayMomenta[2+i],Global`GaugeFixingEpsilon]];
 		
-		(*FeynGrav uses many variables with the Private` context. I remove it.*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-		(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-		(*Apply replacements according to theDictionary*)
-		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-		(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[2+i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-		(*Place the expresison in a local variable L*)
-		Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-		(* Finise the code*)
-		Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2+i,0];
 		
 		(*Run the FORM*)
 		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -486,6 +416,7 @@ GenerateGravitonVertex[n_] := Module[
 	];
 	
 	For[ i = 1, i <= n, i++,
+	
 		filePath = "GravitonGhostVertex_"<>ToString[i]<>".frm";
 		
 		(*Check if the FROM code file is exists and empty.*)
@@ -493,28 +424,12 @@ GenerateGravitonVertex[n_] := Module[
 		
 		(*Check if the corresponding library exists and delete it if it does*)
 		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
 		
 		(*Writing the expression of the FORM file*)
 		FeynCalc2FORM[filePath,GravitonGhostVertexUncontracted[DummyArrayMomenta[i],Global`\[Lambda]1,Global`k1,Global`\[Lambda]2,Global`k2]];
-		
-		(*FeynGrav uses many variables with the Private` context. I remove it.*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-		(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-		(*Apply replacements according to theDictionary*)
-		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-		(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[2+i],", "]<>",k1,k2;\n"<>Import[filePath,"Text"],"Text"];
-	
-		(*Place the expresison in a local variable L*)
-		Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-		(* Finise the code*)
-		Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,i,2];
 		
 		(*Run the FORM*)
 		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -600,13 +515,7 @@ GenerateGravitonSUNYM[n_] := Module[{i},
 (* Procedures that generates rules for Horndeski G2 interaction. *)
 
 
-GenerateHorndeskiG2[n_] := Module[
-	{
-		a,i,
-		filePath,
-		theFileIndicesArray,
-		theDictionary = {"\\[Kappa]"->"Kappa","(Lambda)"->"lbd","(Tau)"->"tau","(ScriptA)"->"sca","(ScriptB)"->"scb"}
-	},
+GenerateHorndeskiG2[n_] := Module[{a,i,filePath},
 	
 	(* b = 1 *)
 	
@@ -623,23 +532,8 @@ GenerateHorndeskiG2[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[i],DummyMomenta[a+2],1] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[2+a],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,2+a,0];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -675,23 +569,8 @@ GenerateHorndeskiG2[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[i],DummyMomenta[a+4],2] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[4+a],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,a+4,0];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -717,13 +596,7 @@ GenerateHorndeskiG2[n_] := Module[
 (* Procedures that generates rules for Horndeski G3 interaction. *)
 
 
-GenerateHorndeskiG3[n_] := Module[
-	{
-		a,i,
-		filePath,
-		theFileIndicesArray,
-		theDictionary = {"\\[Kappa]"->"Kappa","(Lambda)"->"lbd","(Tau)"->"tau","(ScriptN)"->"scn","(ScriptM)"->"scm","(ScriptR)"->"scr","(ScriptL)"->"scl","(ScriptS)"->"scs","(ScriptA)"->"sca","(ScriptB)"->"scb"}
-	},
+GenerateHorndeskiG3[n_] := Module[{a,i,filePath},
 	
 	(* b = 0 *)
 	
@@ -740,23 +613,8 @@ GenerateHorndeskiG3[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG3Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a+1],0] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[1+a],", "]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[n],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,a+1,i];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -792,23 +650,8 @@ GenerateHorndeskiG3[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG3Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a+2+1],1] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[1+2+a],", "]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[n],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,a+2+1,i];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -844,23 +687,8 @@ GenerateHorndeskiG3[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG3Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a+4+1],2] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[1+4+a],", "]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[n],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,a+4+1,i];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -883,13 +711,7 @@ GenerateHorndeskiG3[n_] := Module[
 ];
 
 
-GenerateHorndeskiG4[n_] := Module[
-	{
-		a,i,
-		filePath,
-		theFileIndicesArray,
-		theDictionary = {"\\[Kappa]"->"Kappa","(Lambda)"->"lbd","(Tau)"->"tau","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct"}
-	},
+GenerateHorndeskiG4[n_] := Module[{a,i,filePath},
 	
 	(* b = 0 *)
 	
@@ -906,23 +728,8 @@ GenerateHorndeskiG4[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG4Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a],0] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[a],", "]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,a,i];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -958,23 +765,8 @@ GenerateHorndeskiG4[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG4Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a+2],1] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[a+2],", "]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,a+2,i];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -1011,23 +803,8 @@ GenerateHorndeskiG4[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG4Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a+4],2] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[a+4],", "]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,a+4,i];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -1050,13 +827,7 @@ GenerateHorndeskiG4[n_] := Module[
 ];
 
 
-GenerateHorndeskiG5[n_] := Module[
-	{
-		a,i,
-		filePath,
-		theFileIndicesArray,
-		theDictionary = {"\\[Kappa]"->"Kappa","(Lambda)"->"lbd","(Tau)"->"tau","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","(Omega)"->"omg","(Epsilon)"->"eps"}
-	},
+GenerateHorndeskiG5[n_] := Module[{a,i,filePath},
 	
 	(* b = 0 *)
 	
@@ -1073,23 +844,8 @@ GenerateHorndeskiG5[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG5Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a],0] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[a],", "]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,a,i];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
@@ -1125,23 +881,8 @@ GenerateHorndeskiG5[n_] := Module[
 			(*Writing the expression of the FORM file*)
 			FeynCalc2FORM[filePath, HorndeskiG5Uncontracted[DummyArrayMomentaK[i],DummyMomenta[a+2],1] ];
 		
-			(*FeynGrav uses many variables with the Private` context. I remove it.*)
-			Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
-	
-			(*FeynCalc splits the expression in multiple lines. Make sure that it is a single line.*)
-			Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
-		
-			(*Apply replacements according to theDictionary*)
-			Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
-		
-			(*Collect all the Lorentz indices and writhe them in the FORM code heading.*)
-			Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[2+a],", "]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[i],", "]<>";\n"<>Import[filePath,"Text"],"Text"];
-	
-			(*Place the expresison in a local variable L*)
-			Export[filePath, MapAt["Local L = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
-	
-			(* Finise the code*)
-			Export[filePath, Join[Import[filePath, {"Text", "Lines"}], {"print L;", ".end"}], "Lines"];
+			(* I modify the FORM file so that it can be executed. *)
+			FORMCodeCleanUp[filePath,a+2,i];
 		
 			(*Run the FORM*)
 			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
