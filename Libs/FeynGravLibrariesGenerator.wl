@@ -201,7 +201,7 @@ FORMOutputCleanUp[filePath_] :=
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], "e_(" ~~ a : (WordCharacter ..) ~~ "," ~~ b : (WordCharacter ..) ~~ "," ~~ c : (WordCharacter ..) ~~ "," ~~ d : (WordCharacter ..) ~~ ")" :>  "LeviCivita[" <> a <> "," <> b <> "," <> c <> "," <> d <> "]"], "Text"];
-		(*Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];*)
+		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (WordCharacter ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
 		
 		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]","cthet"->"\\[CapitalTheta]"}], "Text"];
 	];
@@ -268,20 +268,33 @@ GenerateGravitonScalars[n_] := Module[{i,filePath},
 ];
 
 
-GenerateGravitonFermions[n_] := Module[{i},
-
-	i = 1;
-	
-	While[FileExistsQ["GravitonFermionVertex_"<>ToString[i]], 
-		DeleteFile["GravitonFermionVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
+GenerateGravitonFermions[n_] := Module[{i,filePath},
 	
 	For[ i = 1, i <= n, i++,
-		Put[ Evaluate[GravitonFermionVertex[DummyArray[i],Global`p1,Global`p2,Global`m]] , "GravitonFermionVertex_"<>ToString[i] ];
-		Print["Done for order "<>ToString[i] ];
+	
+		filePath = "GravitonFermionVertex_"<>ToString[i]<>".frm";
+		
+		(* Check if the FROM code file exists and is empty. *)
+		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		(* Check if the corresponding library exists and delete it if it does. *)
+		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+		(* FeynCalc converts the expression to FORM and writes it to the file. *)
+		FeynCalc2FORM[ filePath, GravitonFermionVertexUncontracted[DummyArray[i],p1,p2,m] ];
+		
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,0];
+		
+		(*Run the FORM*)
+		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+		DeleteFile[filePath];
+		filePath = StringDrop[filePath, -4];
+		
+		(*Clean the output*)
+		FORMOutputCleanUp[filePath];
+		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+
+		Print["Fermion vertices is generated for n="<>ToString[i]<>"."];
 	];
 ];
 
