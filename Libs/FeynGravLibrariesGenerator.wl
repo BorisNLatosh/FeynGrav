@@ -166,7 +166,7 @@ CheckGravitonAxionVector := Scan[ Print["Libraries for gravitational interaction
 FORMCodeCleanUp[filePath_,np_,nk_] := 
 	Module[
 		{
-			theDictionary = {"\\[Kappa]"->"Kappa","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","\\[Lambda]"->"lbd","(Lambda)"->"lbd","(Tau)"->"tau","(Omega)"->"omg","(Epsilon)"->"eps"},
+			theDictionary = {"\\[Kappa]"->"Kappa","\\[CapitalTheta]"->"cthet","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","\\[Lambda]"->"lbd","(Lambda)"->"lbd","(Tau)"->"tau","(Omega)"->"omg","(Epsilon)"->"eps","(CapitalTheta)"->"cthet"},
 			theFileIndicesArray
 		},
 		(* Remove all Private` contexts. *)
@@ -177,7 +177,9 @@ FORMCodeCleanUp[filePath_,np_,nk_] :=
 		Export[filePath,StringReplace[Import[filePath,"Text"],theDictionary],"Text"];
 		(* I collect all the Lorentz indices and write them in the head of the FORM file. *)
 		theFileIndicesArray =Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]]//DeleteDuplicates;
-		Export[filePath,"Indices "<>StringRiffle[DeleteDuplicates@Flatten[StringCases[Import[filePath,"Text"],"d_("~~x1:(WordCharacter..)~~","~~x2:(WordCharacter..)~~")":>{x1,x2}]],", "]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[np],","]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[nk],","]<>";\n"<>Import[filePath,"Text"],"Text"];
+		theFileIndicesArray = Join[ theFileIndicesArray , Flatten[StringCases[Import[filePath, "Text"], "e_(" ~~ a:(WordCharacter..) ~~ "," ~~ b:(WordCharacter..) ~~ "," ~~ c:(WordCharacter..) ~~ "," ~~ d:(WordCharacter..) ~~ ")":>{a, b, c, d}]] ] // DeleteDuplicates;
+
+		Export[filePath,"Indices "<>StringRiffle[theFileIndicesArray, ","]<>";\nVectors "<>StringRiffle[ToString["p"<>ToString[#]]&/@Range[np],","]<>","<>StringRiffle[ToString["k"<>ToString[#]]&/@Range[nk],","]<>";\n"<>Import[filePath,"Text"],"Text"];
 		(* I put the expression in the local variable theResult. *)
 		Export[filePath, MapAt["Local theResult = " <> # <> ";" &, Import[filePath, {"Text", "Lines"}], 4], "Lines"];
 		(* I add the end to the FORM file. *)
@@ -198,7 +200,10 @@ FORMOutputCleanUp[filePath_] :=
 		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]"}], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "e_(" ~~ a : (WordCharacter ..) ~~ "," ~~ b : (WordCharacter ..) ~~ "," ~~ c : (WordCharacter ..) ~~ "," ~~ d : (WordCharacter ..) ~~ ")" :>  "LeviCivita[" <> a <> "," <> b <> "," <> c <> "," <> d <> "]"], "Text"];
+		(*Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];*)
+		
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]","cthet"->"\\[CapitalTheta]"}], "Text"];
 	];
 
 
@@ -811,20 +816,32 @@ GenerateHorndeskiG5[n_] := Module[{a,i,filePath},
 (* Procedures that generates rules for the simplest axion-like interaction. *)
 
 
-GenerateGravitonAxionVector[n_] := Module[{i},
-
-	i = 1;
-	
-	While[FileExistsQ["GravitonAxionVectorVertex_"<>ToString[i]], 
-		DeleteFile["GravitonAxionVectorVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
+GenerateGravitonAxionVector[n_] := Module[{i,filePath},
 	
 	For[ i = 1, i <= n, i++,
-		timeTaken = First[Timing[ Put[ Evaluate[GravitonAxionVectorVertex[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`\[CapitalTheta]]] , "GravitonAxionVectorVertex_"<>ToString[i] ] ]];
-		Print["Done for order "<>ToString[i]<>". Time taken: " <> ToString[timeTaken] <> " seconds." ];
+	
+		filePath = "GravitonAxionVectorVertex_"<>ToString[i]<>".frm";
+		
+		(* Check if the FROM code file exists and is empty. *)
+		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		(* Check if the corresponding library exists and delete it if it does. *)
+		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+		(* FeynCalc converts the expression to FORM and writes it to the file. *)
+		FeynCalc2FORM[ filePath, (I) GravitonAxionVectorVertexUncontracted[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`\[CapitalTheta]] ];
+		
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,0];
+		
+		(*Run the FORM*)
+		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+		DeleteFile[filePath];
+		filePath = StringDrop[filePath, -4];
+		
+		(*Clean the output*)
+		FORMOutputCleanUp[filePath];
+
+		Print["Done for graviton-axion-like coupling of order n="<>ToString[i]<>"."];
 	];
 ];
 
