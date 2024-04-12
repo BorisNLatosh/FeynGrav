@@ -157,16 +157,18 @@ CheckGravitonAxionVector := Scan[ Print["Libraries for gravitational interaction
 (* Procedures that generate libraries. *)
 
 
-(* Scalars. *)
+(* Supplementary functions. *)
+
+
+(* The function converts FeynCalc output to a FORM-executable file with FeynCalc2FORM and other tools. *)
 
 
 FORMCodeCleanUp[filePath_,np_,nk_] := 
 	Module[
 		{
-			theDictionary = {"\\[Kappa]"->"Kappa","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptR)"->"scr","(ScriptL)"->"scl","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","\\[Lambda]"->"lbd","(Lambda)"->"lbd","(Tau)"->"tau","(Omega)"->"omg","(Epsilon)"->"eps"},
+			theDictionary = {"\\[Kappa]"->"Kappa","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","\\[Lambda]"->"lbd","(Lambda)"->"lbd","(Tau)"->"tau","(Omega)"->"omg","(Epsilon)"->"eps"},
 			theFileIndicesArray
 		},
-		(* I modify the FORM file so that it can be executed. *)
 		(* Remove all Private` contexts. *)
 		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
 		(* Make the expression into a single line. *)
@@ -183,6 +185,9 @@ FORMCodeCleanUp[filePath_,np_,nk_] :=
 	];
 
 
+(* The function that cleans the FORM output file. *)
+
+
 FORMOutputCleanUp[filePath_] :=
 	Module[{},
 		(* Clean the output *)
@@ -195,6 +200,9 @@ FORMOutputCleanUp[filePath_] :=
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]"}], "Text"];
 	];
+
+
+(* Scalars. *)
 
 
 GenerateGravitonScalars[n_] := Module[{i,filePath},
