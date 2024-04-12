@@ -1,7 +1,1 @@
-((I/2)*\[Kappa]*Pair[LorentzIndex[m1, D], Momentum[p2, D]]*
-   Pair[LorentzIndex[n1, D], Momentum[p1, D]] + 
-  (I/2)*\[Kappa]*Pair[LorentzIndex[m1, D], Momentum[p1, D]]*
-   Pair[LorentzIndex[n1, D], Momentum[p2, D]] - 
-  (I/2)*\[Kappa]*Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*
-   Pair[Momentum[p1, D], Momentum[p2, D]])*SUNDelta[SUNIndex[a1], 
-  SUNIndex[a2]]
+1/2*Pair[LorentzIndex[m1, D], Momentum[p1, D]]*Pair[LorentzIndex[n1, D], Momentum[p2, D]]*I*\[Kappa]*SUNDelta[SUNIndex[a1],SUNIndex[a2]]+1/2*Pair[LorentzIndex[n1, D], Momentum[p1, D]]*Pair[LorentzIndex[m1, D], Momentum[p2, D]]*I*\[Kappa]*SUNDelta[SUNIndex[a1],SUNIndex[a2]]-1/2*Pair[LorentzIndex[m1, D], LorentzIndex[n1, D]]*Pair[Momentum[p1, D], Momentum[p2, D]]*I*\[Kappa]*SUNDelta[SUNIndex[a1],SUNIndex[a2]]

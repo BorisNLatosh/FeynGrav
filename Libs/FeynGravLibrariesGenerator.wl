@@ -201,9 +201,8 @@ FORMOutputCleanUp[filePath_] :=
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], "e_(" ~~ a : (WordCharacter ..) ~~ "," ~~ b : (WordCharacter ..) ~~ "," ~~ c : (WordCharacter ..) ~~ "," ~~ d : (WordCharacter ..) ~~ ")" :>  "LeviCivita[" <> a <> "," <> b <> "," <> c <> "," <> d <> "]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (WordCharacter ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
 		
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]","cthet"->"\\[CapitalTheta]"}], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]","cthet"->"\\[CapitalTheta]","gsCoupling"->"SMP[\"g_s\"]" }], "Text"];
 	];
 
 
@@ -292,7 +291,9 @@ GenerateGravitonFermions[n_] := Module[{i,filePath},
 		
 		(*Clean the output*)
 		FORMOutputCleanUp[filePath];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (WordCharacter ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
 
 		Print["Fermion vertices is generated for n="<>ToString[i]<>"."];
 	];
@@ -445,60 +446,197 @@ GenerateGravitonVertex[n_] := Module[{i,filePath},
 (* Procedures that generates rules for SU(N) Yang-Mills model. *)
 
 
-GenerateGravitonSUNYM[n_] := Module[{i},
+(*GenerateGravitonSUNYM[n_] := Module[{i},
 
 	i = 1;
 	
-	While[FileExistsQ["GravitonQuarkGluonVertex_"<>ToString[i]], 
-		DeleteFile["GravitonQuarkGluonVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
-	
-	While[FileExistsQ["GravitonThreeGluonVertex_"<>ToString[i]], 
-		DeleteFile["GravitonThreeGluonVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
-	
-	While[FileExistsQ["GravitonFourGluonVertex_"<>ToString[i]], 
-		DeleteFile["GravitonFourGluonVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
-	
-	While[FileExistsQ["GravitonGluonVertex_"<>ToString[i]], 
-		DeleteFile["GravitonGluonVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
-	
-	While[FileExistsQ["GravitonYMGhostVertex_"<>ToString[i]], 
-		DeleteFile["GravitonYMGhostVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
-	
-	While[FileExistsQ["GravitonGluonGhostVertex_"<>ToString[i]], 
-		DeleteFile["GravitonGluonGhostVertex_"<>ToString[i]];
-		i += 1;
-	];
-	
-	i = 1;
-	
 	For[i=1,i<=n,i++,
-		Put[ Evaluate[GravitonGluonVertex[DummyArrayMomentaK[i],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2,Global`GaugeFixingEpsilonSUNYM]] , "GravitonGluonVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonThreeGluonVertex[DummyArray[i],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2,Global`p3,Global`\[Lambda]3,Global`a3]] , "GravitonThreeGluonVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonFourGluonVertex[DummyArray[i],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2,Global`p3,Global`\[Lambda]3,Global`a3,Global`p4,Global`\[Lambda]4,Global`a4]] , "GravitonFourGluonVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonQuarkGluonVertex[DummyArray[i],{Global`\[Lambda],Global`a}]] , "GravitonQuarkGluonVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonYMGhostVertex[DummyArray[i],Global`p1,Global`a1,Global`p2,Global`a2]] , "GravitonYMGhostVertex_"<>ToString[i] ];
-		Put[ Evaluate[GravitonGluonGhostVertex[DummyArray[i],{Global`\[Lambda]1,Global`a1,Global`p1},{Global`\[Lambda]2,Global`a2,Global`p2},{Global`\[Lambda]3,Global`a3,Global`p3}]] , "GravitonGluonGhostVertex_"<>ToString[i] ];
+			Put[ Evaluate[GravitonGluonGhostVertex[DummyArray[i],{Global`\[Lambda]1,Global`a1,Global`p1},{Global`\[Lambda]2,Global`a2,Global`p2},{Global`\[Lambda]3,Global`a3,Global`p3}]] , "GravitonGluonGhostVertex_"<>ToString[i] ];
 		Print["Done for order "<>ToString[i] ];
+	];
+]; *)
+
+
+GenerateGravitonSUNYM[n_] := Module[{i,filePath},
+	
+	For[ i = 1, i <= n, i++,
+	
+		filePath = "GravitonQuarkGluonVertex_"<>ToString[i]<>".frm";
+		
+		(* Check if the FROM code file exists and is empty. *)
+		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		(* Check if the corresponding library exists and delete it if it does. *)
+		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+		(* FeynCalc converts the expression to FORM and writes it to the file. *)
+		FeynCalc2FORM[ filePath, GravitonQuarkGluonVertexUncontracted[DummyArray[i],{Global`\[Lambda],Global`a}] ];
+		
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,i];
+		
+		(*Run the FORM*)
+		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+		DeleteFile[filePath];
+		filePath = StringDrop[filePath, -4];
+		
+		(*Clean the output*)
+		FORMOutputCleanUp[filePath];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNIndex[a]","syFC2"->"SUNT[SUNIndex[a]]"}], "Text"];
+
+		Print["Graviton-quark-gluon vertex is generated for n="<>ToString[i]<>"."];
+	];
+
+	For[ i = 1, i <= n, i++,
+	
+		filePath = "GravitonGluonVertex_"<>ToString[i]<>".frm";
+		
+		(* Check if the FROM code file exists and is empty. *)
+		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		(* Check if the corresponding library exists and delete it if it does. *)
+		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+		(* FeynCalc converts the expression to FORM and writes it to the file. *)
+		FeynCalc2FORM[ filePath, GravitonGluonVertexUncontracted[DummyArrayMomentaK[i],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2,Global`GaugeFixingEpsilonSUNYM] ];
+		
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,i];
+		
+		(*Run the FORM*)
+		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+		DeleteFile[filePath];
+		filePath = StringDrop[filePath, -4];
+		
+		(*Clean the output*)
+		FORMOutputCleanUp[filePath];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNDelta[SUNIndex[a1],SUNIndex[a2]]","syFC2"->"SUNIndex[a1]","syFC3"->"SUNIndex[a2]"}], "Text"];
+
+		Print["Graviton-gluon vertex is generated for n="<>ToString[i]<>"."];
+	];
+	
+	For[ i = 1, i <= n, i++,
+	
+		filePath = "GravitonThreeGluonVertex_"<>ToString[i]<>".frm";
+		
+		(* Check if the FROM code file exists and is empty. *)
+		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		(* Check if the corresponding library exists and delete it if it does. *)
+		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+		(* FeynCalc converts the expression to FORM and writes it to the file. *)
+		FeynCalc2FORM[ filePath, GravitonThreeGluonVertex[DummyArray[i],p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3] ];
+		
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,3,i];
+		
+		(*Run the FORM*)
+		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+		DeleteFile[filePath];
+		filePath = StringDrop[filePath, -4];
+		
+		(*Clean the output*)
+		FORMOutputCleanUp[filePath];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[a3]]","syFC3"->"SUNIndex[a1]","syFC4"->"SUNIndex[a2]","syFC5"->"SUNIndex[a3]"}], "Text"];
+
+		Print["Graviton-gluon-gluon-gluon vertex is generated for n="<>ToString[i]<>"."];
+	];
+	
+	For[ i = 1, i <= n, i++,
+	
+		filePath = "GravitonFourGluonVertex_"<>ToString[i]<>".frm";
+		
+		(* Check if the FROM code file exists and is empty. *)
+		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		(* Check if the corresponding library exists and delete it if it does. *)
+		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+		(* FeynCalc converts the expression to FORM and writes it to the file. *)
+		FeynCalc2FORM[ filePath, GravitonFourGluonVertexUncontracted[DummyArray[i],p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4] ];
+		
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,4,i];
+		
+		(*Run the FORM*)
+		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+		DeleteFile[filePath];
+		filePath = StringDrop[filePath, -4];
+		
+		(*Clean the output*)
+		FORMOutputCleanUp[filePath];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[s]]","syFC3"->"SUNF[SUNIndex[a1],SUNIndex[a3],SUNIndex[s]]","syFC4"->"SUNF[SUNIndex[a1],SUNIndex[a4],SUNIndex[s]]","syFC5"->"SUNF[SUNIndex[a2],SUNIndex[a3],SUNIndex[s]]","syFC6"->"SUNF[SUNIndex[a2],SUNIndex[a4],SUNIndex[s]]","syFC7"->"SUNF[SUNIndex[a3],SUNIndex[a4],SUNIndex[s]]","syFC8"->"SUNIndex[a1]","syFC9"->"SUNIndex[a2]","syFC10"->"SUNIndex[a3]","syFC11"->"SUNIndex[a4]","syFC12"->"SUNIndex[s]"} ], "Text"];
+
+		Print["Graviton-gluon-gluon-gluon-gluon vertex is generated for n="<>ToString[i]<>"."];
+	];
+	
+	For[ i = 1, i <= n, i++,
+	
+		filePath = "GravitonYMGhostVertex_"<>ToString[i]<>".frm";
+		
+		(* Check if the FROM code file exists and is empty. *)
+		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		(* Check if the corresponding library exists and delete it if it does. *)
+		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+		(* FeynCalc converts the expression to FORM and writes it to the file. *)
+		FeynCalc2FORM[ filePath, GravitonYMGhostVertexUncontracted[DummyArray[i],p1,a1,p2,a2] ];
+		
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,2,0];
+		
+		(*Run the FORM*)
+		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+		DeleteFile[filePath];
+		filePath = StringDrop[filePath, -4];
+		
+		(*Clean the output*)
+		FORMOutputCleanUp[filePath];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNDelta[SUNIndex[a1],SUNIndex[a2]]","syFC2"->"SUNIndex[a1]","syFC3"->"SUNIndex[a2]"} ], "Text"];
+
+		Print["Graviton-YM ghost vertex is generated for n="<>ToString[i]<>"."];
+	];
+	
+	For[ i = 1, i <= n, i++,
+	
+		filePath = "GravitonGluonGhostVertex_"<>ToString[i]<>".frm";
+		
+		(* Check if the FROM code file exists and is empty. *)
+		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		(* Check if the corresponding library exists and delete it if it does. *)
+		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+		(* FeynCalc converts the expression to FORM and writes it to the file. *)
+		FeynCalc2FORM[ filePath, GravitonGluonGhostVertexUncontracted[DummyArray[i],{p1,\[Lambda]1,a1},{p2,\[Lambda]2,a2},{p3,\[Lambda]3,a3}] ];
+		
+		(* I modify the FORM file so that it can be executed. *)
+		FORMCodeCleanUp[filePath,3,0];
+		
+		(*Run the FORM*)
+		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+		DeleteFile[filePath];
+		filePath = StringDrop[filePath, -4];
+		
+		(*Clean the output*)
+		FORMOutputCleanUp[filePath];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[p1],SUNIndex[p2],SUNIndex[p3]]","syFC3"->"SUNIndex[p1]","syFC4"->"SUNIndex[p2]","syFC5"->"SUNIndex[p3]"} ], "Text"];
+
+		Print["Graviton-gluon-YM ghost vertex is generated for n="<>ToString[i]<>"."];
 	];
 ];
 
