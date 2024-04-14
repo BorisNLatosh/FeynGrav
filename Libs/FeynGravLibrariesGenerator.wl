@@ -55,19 +55,25 @@ GenerateGravitonSUNYM::usage = "GenerateGravitonSUNYM[n]. This procedure generat
 GenerateGravitonAxionVector::usage = "GenerateGravitonAxionVector[n]. This procedure generates libraries for graviton-scalar axion-single vector interactions up to the order n. Pre-existing libraries will be removed!"
 
 
-GenerateHorndeskiG2::usage = "GenerateHorndeskiG2[n]. This procedure generates libraries for Horndeski G2 interaction up to the order n. Pre-existing libraries will be removed!";
-GenerateHorndeskiG3::usage = "GenerateHorndeskiG3[n]. This procedure generates libraries for Horndeski G3 interaction up to the order n. Pre-existing libraries will be removed!";
-GenerateHorndeskiG4::usage = "GenerateHorndeskiG4[n]. This procedure generates libraries for Horndeski G4 interaction up to the order n. Pre-existing libraries will be removed!";
-GenerateHorndeskiG5::usage = "GenerateHorndeskiG5[n]. This procedure generates libraries for Horndeski G5 interaction up to the order n. Pre-existing libraries will be removed!";
+GenerateHorndeskiG2::usage = "GenerateHorndeskiG2[p,n]. This procedure generates libraries for Horndeski G2 interaction involving up to p scalars up to the order n. Pre-existing libraries will be removed!";
+GenerateHorndeskiG3::usage = "GenerateHorndeskiG3[p,n]. This procedure generates libraries for Horndeski G3 interaction involving up to p scalars up to the order n. Pre-existing libraries will be removed!";
+GenerateHorndeskiG4::usage = "GenerateHorndeskiG4[p,n]. This procedure generates libraries for Horndeski G4 interaction involving up to p scalars up to the order n. Pre-existing libraries will be removed!";
+GenerateHorndeskiG5::usage = "GenerateHorndeskiG5[p,n]. This procedure generates libraries for Horndeski G5 interaction involving up to p scalars up to the order n. Pre-existing libraries will be removed!";
 
 
 (* Procedures that generate specific libraries. *)
 
 
-GenerateHorndeskiG2specific::usage = "GenerateHorndeskiG2specific[a,b,n]. This procedure generates libraries for Horndeski G2 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
-GenerateHorndeskiG3specific::usage = "GenerateHorndeskiG3specific[a,b,n]. This procedure generates libraries for Horndeski G3 interaction with given a abd b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
-GenerateHorndeskiG4specific::usage = "GenerateHorndeskiG4specific[a,b,n]. This procedure generates libraries for Horndeski G4 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
-GenerateHorndeskiG5specific::usage = "GenerateHorndeskiG5specific[a,b,n]. This procedure generates libraries for Horndeski G5 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
+GenerateGravitonScalarsSpecific::usage = "GenerateGravitonScalarsSpecific[n]. This procedure generates libraries for graviton-scalar interactions for the order n. Pre-existing libraries will be removed!";
+GenerateGravitonFermionsSpecific::usage = "GenerateGravitonFermionsSpecific[n]. This procedure generates libraries for graviton-fermion interactions for the order n. Pre-existing libraries will be removed!";
+GenerateGravitonVectorsSpecific::usage = "GenerateGravitonVectorsSpecific[n]. This procedure generates libraries for graviton-vector interactions for the order n. Pre-existing libraries will be removed!";
+GenerateGravitonVertexSpecific::usage = "GenerateGravitonVertexSpecific[n]. This procedure generates libraries for the gravity sector for the order n. Pre-existing libraries will be removed!";
+
+
+GenerateHorndeskiG2Specific::usage = "GenerateHorndeskiG2Specific[a,b,n]. This procedure generates libraries for Horndeski G2 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
+GenerateHorndeskiG3Specific::usage = "GenerateHorndeskiG3Specific[a,b,n]. This procedure generates libraries for Horndeski G3 interaction with given a abd b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
+GenerateHorndeskiG4Specific::usage = "GenerateHorndeskiG4Specific[a,b,n]. This procedure generates libraries for Horndeski G4 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
+GenerateHorndeskiG5Specific::usage = "GenerateHorndeskiG5Specific[a,b,n]. This procedure generates libraries for Horndeski G5 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
 
 
 Begin["Private`"];
@@ -205,237 +211,255 @@ FORMOutputCleanUp[filePath_] :=
 (* Scalars. *)
 
 
-GenerateGravitonScalars[n_] := Module[{i,filePath},
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonScalarVertex_"<>ToString[i]<>".frm";
-		
-		(* Check if the FROM code file exists and is empty. *)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		(* Check if the corresponding library exists and delete it if it does. *)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-		(* FeynCalc converts the expression to FORM and writes it to the file. *)
-		FeynCalc2FORM[ filePath, GravitonScalarVertexUncontracted[DummyArray[i],p1,p2,m] ];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,0];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-
-		Print["Scalar field kinetic term vertices is generated for n="<>ToString[i]<>"."];
-	];
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonScalarPotentialVertex_"<>ToString[i]<>".frm";
-		
-		(*Check if the FROM code file is exists and empty.*)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-		(*Check if the corresponding library exists and delete it if it does*)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-		(*Writing the expression of the FORM file*)
-		FeynCalc2FORM[filePath,GravitonScalarPotentialVertexUncontracted[DummyArray[i],Global`\[Lambda]]];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,0];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		
-		Print["Done for the kinetic term for order n="<>ToString[i]<>"."];
-	];
-
+GenerateGravitonScalars[n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Map[GenerateGravitonScalarsSpecific , Range[n]] ][[1]];
+	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
 ];
 
 
-GenerateGravitonFermions[n_] := Module[{i,filePath},
+GenerateGravitonScalarsSpecific[n_] := Module[{filePath,theTimingVariable},
+	(* Kinetic term *)
+	filePath = "GravitonScalarVertex_"<>ToString[n]<>".frm";
+		
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonScalarVertexUncontracted[DummyArray[n],p1,p2,m] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
 	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonFermionVertex_"<>ToString[i]<>".frm";
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,0];
 		
-		(* Check if the FROM code file exists and is empty. *)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		(* Check if the corresponding library exists and delete it if it does. *)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
 		
-		(* FeynCalc converts the expression to FORM and writes it to the file. *)
-		FeynCalc2FORM[ filePath, GravitonFermionVertexUncontracted[DummyArray[i],p1,p2,m] ];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,0];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (WordCharacter ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
 
-		Print["Fermion vertices is generated for n="<>ToString[i]<>"."];
-	];
+	Print["Scalar field kinetic term vertices is generated for n="<>ToString[n]<>"."];
+	
+	(* Potential term. *)
+	filePath = "GravitonScalarPotentialVertex_"<>ToString[n]<>".frm";
+		
+	(*Check if the FROM code file is exists and empty.*)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		
+	(*Check if the corresponding library exists and delete it if it does*)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+
+	(*Writing the expression of the FORM file*)
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonScalarPotentialVertexUncontracted[DummyArray[n],Global`\[Lambda]]] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,0];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+	
+	Print["Done for the kinetic term for order n="<>ToString[n]<>"."];
 ];
 
 
-GenerateGravitonVectors[n_] := Module[{i,filePath},
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonMassiveVectorVertex_"<>ToString[i]<>".frm";
-		
-		(*Check if the FROM code file is exists and empty.*)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-		(*Check if the corresponding library exists and delete it if it does*)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-		(*Writing the expression of the FORM file*)
-		FeynCalc2FORM[filePath,GravitonMassiveVectorVertexUncontracted[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`m]];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,0];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		
-		Print["Done for the Proca field for order n="<>ToString[i]<>"."];
-	];
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonVectorVertex_"<>ToString[i]<>".frm";
-		
-		(*Check if the FROM code file is exists and empty.*)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-		(*Check if the corresponding library exists and delete it if it does*)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-		(*Writing the expression of the FORM file*)
-		FeynCalc2FORM[filePath,GravitonVectorVertex[DummyArrayMomentaK[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`GaugeFixingEpsilonVector]];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,i];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		
-		Print["Done for the Maxwell field for order n="<>ToString[i]<>"."];
-	];
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonVectorGhostVertex_"<>ToString[i]<>".frm";
-		
-		(*Check if the FROM code file is exists and empty.*)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-		(*Check if the corresponding library exists and delete it if it does*)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-		(*Writing the expression of the FORM file*)
-		FeynCalc2FORM[filePath,GravitonVectorGhostVertex[DummyArray[i],Global`p1,Global`p2]];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,i];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		
-		Print["Done for the Maxwell-ghost for order n="<>ToString[i]<>"."];
-	];
+GenerateGravitonFermions[n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Map[GenerateGravitonFermionsSpecific , Range[n]] ][[1]];
+	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
 ];
 
 
-GenerateGravitonVertex[n_] := Module[{i,filePath},
+GenerateGravitonFermionsSpecific[n_] := Module[{filePath,theTimingVariable},
+	filePath = "GravitonFermionVertex_"<>ToString[n]<>".frm";
+		
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonFermionVertexUncontracted[DummyArray[n],p1,p2,m] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,0];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (WordCharacter ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+
+	Print["Fermion vertices is generated for n="<>ToString[n]<>"."];
+];
+
+
+GenerateGravitonVectors[n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Map[GenerateGravitonVectorsSpecific , Range[n]] ][[1]];
+	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
+];
+
+
+GenerateGravitonVectorsSpecific[n_] := Module[{filePath,theTimingVariable},
+(* Proca field *)
+	filePath = "GravitonMassiveVectorVertex_"<>ToString[n]<>".frm";
+		
+	(*Check if the FROM code file is exists and empty.*)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		
+	(*Check if the corresponding library exists and delete it if it does*)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+
+	(*Writing the expression of the FORM file*)
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonMassiveVectorVertexUncontracted[DummyArray[n],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`m]] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,0];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+		
+	Print["Done for the Proca field for order n="<>ToString[n]<>"."];
 	
-	For[ i = 1, i <= n, i++,
+(* Maxwell field *)
+	filePath = "GravitonVectorVertex_"<>ToString[n]<>".frm";
+		
+	(*Check if the FROM code file is exists and empty.*)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		
+	(*Check if the corresponding library exists and delete it if it does*)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(*Writing the expression of the FORM file*)
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonVectorVertex[DummyArrayMomentaK[n],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`GaugeFixingEpsilonVector]] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,n];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+		
+	Print["Done for the Maxwell field for order n="<>ToString[n]<>"."];
 	
-		filePath = "GravitonVertex_"<>ToString[i]<>".frm";
+(* Ghost *)
+	filePath = "GravitonVectorGhostVertex_"<>ToString[n]<>".frm";
 		
-		(*Check if the FROM code file is exists and empty.*)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(*Check if the FROM code file is exists and empty.*)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
 		
-		(*Check if the corresponding library exists and delete it if it does*)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+	(*Check if the corresponding library exists and delete it if it does*)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+
+	(*Writing the expression of the FORM file*)
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonVectorGhostVertex[DummyArray[n],Global`p1,Global`p2]] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
 		
-		(*Writing the expression of the FORM file*)
-		FeynCalc2FORM[filePath,GravitonVertexUncontracted[DummyArrayMomenta[2+i],Global`GaugeFixingEpsilon]];
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,n];
 		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2+i,0];
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
 		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
 		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
+	Print["Done for the Maxwell-ghost for order n="<>ToString[n]<>"."];
+];
+
+
+GenerateGravitonVertex[n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Map[GenerateGravitonVertexSpecific , Range[n]] ][[1]];
+	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
+];
+
+
+GenerateGravitonVertexSpecific[n_] := Module[{filePath,theTimingVariable},
+(* Gravitons *)
+	filePath = "GravitonVertex_"<>ToString[n]<>".frm";
+		
+	(*Check if the FROM code file is exists and empty.*)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		
+	(*Check if the corresponding library exists and delete it if it does*)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(*Writing the expression of the FORM file*)
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonVertexUncontracted[DummyArrayMomenta[2+n],Global`GaugeFixingEpsilon]] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2+n,0];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
 				
-		Print["Done for the graviton vertex for order n="<>ToString[i]<>"."];
-	];
+	Print["Done for the graviton vertex for order n="<>ToString[n]<>"."];
 	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonGhostVertex_"<>ToString[i]<>".frm";
+(* Ghost *)
+	filePath = "GravitonGhostVertex_"<>ToString[n]<>".frm";
 		
-		(*Check if the FROM code file is exists and empty.*)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(*Check if the FROM code file is exists and empty.*)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
 		
-		(*Check if the corresponding library exists and delete it if it does*)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+	(*Check if the corresponding library exists and delete it if it does*)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 		
-		(*Writing the expression of the FORM file*)
-		FeynCalc2FORM[filePath,GravitonGhostVertexUncontracted[DummyArrayMomenta[i],Global`\[Lambda]1,Global`k1,Global`\[Lambda]2,Global`k2]];
+	(*Writing the expression of the FORM file*)
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonGhostVertexUncontracted[DummyArrayMomenta[n],Global`\[Lambda]1,Global`k1,Global`\[Lambda]2,Global`k2]] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
 
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,i,2];
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,n,2];
 		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
 		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
 		
-		Print["Done for the graviton-ghost vertex for order n="<>ToString[i]<>"."];
-	];
+	Print["Done for the graviton-ghost vertex for order n="<>ToString[n]<>"."];
 ];
 
 
@@ -629,13 +653,13 @@ GenerateGravitonSUNYM[n_] := Module[{i,filePath},
 (* Procedures that generates rules for Horndeski G2 interaction. *)
 
 
-GenerateHorndeskiG2[n_] := Module[{numberOfScalars = 4,theTimingVariable},
-	theTimingVariable = Timing[ Apply[GenerateHorndeskiG2specific , Select[ Tuples[{Range[0,numberOfScalars],Range[1,Ceiling[numberOfScalars/2]],Range[n]}], (3<=#[[1]]+2#[[2]]<=numberOfScalars)&] , 1] ][[1]];
+GenerateHorndeskiG2[numberOfScalars_,n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Apply[GenerateHorndeskiG2Specific , Select[ Tuples[{Range[0,numberOfScalars],Range[1,Ceiling[numberOfScalars/2]],Range[n]}], (3<=#[[1]]+2#[[2]]<=numberOfScalars)&] , 1] ][[1]];
 	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
 ];
 
 
-GenerateHorndeskiG2specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
+GenerateHorndeskiG2Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
 	filePath = "HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]<>".frm";
 	
 	(*Check if the FROM code file is exists and empty.*)
@@ -667,13 +691,13 @@ GenerateHorndeskiG2specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
 (* Procedures that generates rules for Horndeski G3 interaction. *)
 
 
-GenerateHorndeskiG3[n_] := Module[{numberOfScalars = 4,theTimingVariable},
-	theTimingVariable = Timing[ Apply[GenerateHorndeskiG3specific , Select[ Tuples[{Range[0,numberOfScalars],Range[0,Ceiling[numberOfScalars/2]],Range[n]}], (3<=#[[1]]+2#[[2]]+1<=numberOfScalars)&] , 1] ][[1]];
+GenerateHorndeskiG3[numberOfScalars_,n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Apply[GenerateHorndeskiG3Specific , Select[ Tuples[{Range[0,numberOfScalars],Range[0,Ceiling[numberOfScalars/2]],Range[n]}], (3<=#[[1]]+2#[[2]]+1<=numberOfScalars)&] , 1] ][[1]];
 	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
 ];
 
 
-GenerateHorndeskiG3specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
+GenerateHorndeskiG3Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
 	filePath = "HorndeskiG3_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]<>".frm";
 		
 	(*Check if the FROM code file is exists and empty.*)
@@ -702,13 +726,13 @@ GenerateHorndeskiG3specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
 ];
 
 
-GenerateHorndeskiG4[n_] := Module[{numberOfScalars = 4,theTimingVariable},
-	theTimingVariable = Timing[ Apply[GenerateHorndeskiG4specific , Select[ Tuples[{Range[0,numberOfScalars],Range[0,Ceiling[numberOfScalars/2]],Range[n]}], (2<=#[[1]]+2#[[2]]<=numberOfScalars)&] , 1] ][[1]];
+GenerateHorndeskiG4[numberOfScalars_,n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Apply[GenerateHorndeskiG4Specific , Select[ Tuples[{Range[0,numberOfScalars],Range[0,Ceiling[numberOfScalars/2]],Range[n]}], (2<=#[[1]]+2#[[2]]<=numberOfScalars)&] , 1] ][[1]];
 	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
 ];
 
 
-GenerateHorndeskiG4specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
+GenerateHorndeskiG4Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
 	filePath = "HorndeskiG4_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]<>".frm";
 		
 	(*Check if the FROM code file is exists and empty.*)
@@ -737,13 +761,13 @@ GenerateHorndeskiG4specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
 ];
 
 
-GenerateHorndeskiG5[n_] := Module[{numberOfScalars = 4,theTimingVariable},
-	theTimingVariable = Timing[ Apply[GenerateHorndeskiG5specific , Select[ Tuples[{Range[0,numberOfScalars],Range[0,Ceiling[numberOfScalars/2]],Range[n]}], (3<=#[[1]]+2#[[2]]+1<=numberOfScalars)&] , 1] ][[1]];
+GenerateHorndeskiG5[numberOfScalars_,n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Apply[GenerateHorndeskiG5Specific , Select[ Tuples[{Range[0,numberOfScalars],Range[0,Ceiling[numberOfScalars/2]],Range[n]}], (3<=#[[1]]+2#[[2]]+1<=numberOfScalars)&] , 1] ][[1]];
 	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
 ];
 
 
-GenerateHorndeskiG5specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
+GenerateHorndeskiG5Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
 	filePath = "HorndeskiG5_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]<>".frm";
 		
 	(*Check if the FROM code file is exists and empty.*)
