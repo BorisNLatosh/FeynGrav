@@ -61,6 +61,12 @@ GenerateHorndeskiG4::usage = "GenerateHorndeskiG4[n]. This procedure generates l
 GenerateHorndeskiG5::usage = "GenerateHorndeskiG5[n]. This procedure generates libraries for Horndeski G5 interaction up to the order n. Pre-existing libraries will be removed!";
 
 
+(* Procedures that generate specific libraries. *)
+
+
+GenerateHorndeskiG2specific::usage = "GenerateHorndeskiG2specific[a,b,n]. This procedure generates libraries for Horndeski G2 interaction with given a and b for the n-th ordert in perturbation theory. Pre-existing libraries will be removed!";
+
+
 Begin["Private`"];
 
 
@@ -620,7 +626,7 @@ GenerateGravitonSUNYM[n_] := Module[{i,filePath},
 (* Procedures that generates rules for Horndeski G2 interaction. *)
 
 
-GenerateHorndeskiG2[n_] := Module[{a,i,filePath},
+GenerateHorndeskiG2[n_] := Module[{a,i,filePath,theTimingVariable},
 	
 	(* b = 1 *)
 	
@@ -635,13 +641,15 @@ GenerateHorndeskiG2[n_] := Module[{a,i,filePath},
 			If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 
 			(*Writing the expression of the FORM file*)
-			FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[i],DummyMomenta[a+2],1] ];
+			theTimingVariable = Timing[ FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[i],DummyMomenta[a+2],1] ] ][[1]];
+			Print["The expression is generated in ",theTimingVariable," seconds."];
 		
 			(* I modify the FORM file so that it can be executed. *)
 			FORMCodeCleanUp[filePath,2+a,0];
 		
 			(*Run the FORM*)
-			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+			theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+			Print["FORM calculated the expression in ",theTimingVariable," seconds."];
 			DeleteFile[filePath];
 			filePath = StringDrop[filePath, -4];
 		
@@ -665,13 +673,15 @@ GenerateHorndeskiG2[n_] := Module[{a,i,filePath},
 			If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 
 			(*Writing the expression of the FORM file*)
-			FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[i],DummyMomenta[a+4],2] ];
+			theTimingVariable = Timing[ FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[i],DummyMomenta[a+4],2] ] ][[1]];
+			Print["The expression is generated in ",theTimingVariable," seconds."];
 		
 			(* I modify the FORM file so that it can be executed. *)
 			FORMCodeCleanUp[filePath,a+4,0];
 		
 			(*Run the FORM*)
-			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+			theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+			Print["FORM calculated the expression in ",theTimingVariable," seconds."];
 			DeleteFile[filePath];
 			filePath = StringDrop[filePath, -4];
 		
@@ -695,13 +705,15 @@ GenerateHorndeskiG2[n_] := Module[{a,i,filePath},
 			If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 
 			(*Writing the expression of the FORM file*)
-			FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[i],DummyMomenta[a+6],3] ];
+			theTimingVariable = Timing[ FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[i],DummyMomenta[a+6],3] ] ][[1]];
+			Print["The expression is generated in ",theTimingVariable," seconds."];
 		
 			(* I modify the FORM file so that it can be executed. *)
 			FORMCodeCleanUp[filePath,a+6,0];
 		
 			(*Run the FORM*)
-			Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
+			theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+			Print["FORM calculated the expression in ",theTimingVariable," seconds."];
 			DeleteFile[filePath];
 			filePath = StringDrop[filePath, -4];
 		
@@ -711,6 +723,35 @@ GenerateHorndeskiG2[n_] := Module[{a,i,filePath},
 			Print["Done for the Horndeski G2 vertex with a=",a,", b=3 for order n="<>ToString[i]<>"."];
 		]
 	];
+];
+
+
+GenerateHorndeskiG2specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
+	filePath = "HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]<>".frm";
+	
+	(*Check if the FROM code file is exists and empty.*)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		
+	(*Check if the corresponding library exists and delete it if it does*)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+
+	(*Writing the expression of the FORM file*)
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[n],DummyMomenta[a + 2 b ],b] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath , a + 2 b , 0];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+					
+	Print["Done for the Horndeski G2 vertex with a=",a,", b="<>ToString[b]<>" for order n="<>ToString[n]<>"."];
 ];
 
 
