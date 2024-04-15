@@ -16,6 +16,7 @@ Needs["HorndeskiG3`","./../Rules/HorndeskiG3.wl"];
 Needs["HorndeskiG4`","./../Rules/HorndeskiG4.wl"];
 Needs["HorndeskiG5`","./../Rules/HorndeskiG5.wl"];
 Needs["GravitonAxionVectorVertex`","./../Rules/GravitonAxionVectorVertex.wl"];
+Needs["QuadraticGravityVertex`","./../Rules/QuadraticGravityVertex.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
 
 
@@ -40,6 +41,9 @@ CheckHorndeskiG4::usage = "CheckHorndeskiG4. This procedure checks what librarie
 CheckHorndeskiG5::usage = "CheckHorndeskiG5. This procedure checks what libraries for Horndeski G5 interactions are present.";
 
 
+CheckQuadraticGravityVertex::usage = "CheckQuadraticGravityVertex. This procedure checks what libraries for quadratic gravity vertices are present.";
+
+
 (* Procedures that generate libraries. *)
 
 
@@ -61,6 +65,9 @@ GenerateHorndeskiG4::usage = "GenerateHorndeskiG4[p,n]. This procedure generates
 GenerateHorndeskiG5::usage = "GenerateHorndeskiG5[p,n]. This procedure generates libraries for Horndeski G5 interaction involving up to p scalars up to the order n. Pre-existing libraries will be removed!";
 
 
+GenerateQuadraticGravityVertex::usage = "GenerateGenerateQuadraticGravityVertex[n]. This procedure generates libraries for quadratic gravity up to the order n. Pre-existing libraries will be removed!";
+
+
 (* Procedures that generate specific libraries. *)
 
 
@@ -80,6 +87,9 @@ GenerateHorndeskiG2Specific::usage = "GenerateHorndeskiG2Specific[a,b,n]. This p
 GenerateHorndeskiG3Specific::usage = "GenerateHorndeskiG3Specific[a,b,n]. This procedure generates libraries for Horndeski G3 interaction with given a abd b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
 GenerateHorndeskiG4Specific::usage = "GenerateHorndeskiG4Specific[a,b,n]. This procedure generates libraries for Horndeski G4 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
 GenerateHorndeskiG5Specific::usage = "GenerateHorndeskiG5Specific[a,b,n]. This procedure generates libraries for Horndeski G5 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
+
+
+GenerateQuadraticGravityVertexSpecific::usage = "GenerateGenerateQuadraticGravityVertexSpecific[n]. This procedure generates libraries for quadratic gravity for the order n. Pre-existing libraries will be removed!";
 
 
 Begin["Private`"];
@@ -162,6 +172,14 @@ CheckHorndeskiG5 := Scan[ ( Print["Horndeski G5 vertex exists for a=",#1,", b=",
 CheckGravitonAxionVector := Scan[ Print["Libraries for gravitational interaction of a scalar axion coupled to a single vector field exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonAxionVectorVertex_*"] ];
 
 
+(* Quadratic gravity. *)
+
+
+CheckQuadraticGravityVertex := (
+	Scan[ Print["Libraries for quadratic gravity vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["QuadraticGravityVertex_*"] ];
+);
+
+
 (* Procedures that generate libraries. *)
 
 
@@ -174,7 +192,7 @@ CheckGravitonAxionVector := Scan[ Print["Libraries for gravitational interaction
 FORMCodeCleanUp[filePath_,np_,nk_] := 
 	Module[
 		{
-			theDictionary = {"\\[Kappa]"->"Kappa","\\[CapitalTheta]"->"cthet","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","\\[Lambda]"->"lbd","(Lambda)"->"lbd","(Tau)"->"tau","(Omega)"->"omg","(Epsilon)"->"eps","(CapitalTheta)"->"cthet"},
+			theDictionary = {"\\[Kappa]"->"Kappa","\\[Alpha]"->"al","\\[Beta]"->"be","\\[CapitalTheta]"->"cthet","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","\\[Lambda]"->"lbd","(Lambda)"->"lbd","(Tau)"->"tau","(Omega)"->"omg","(Epsilon)"->"eps","(CapitalTheta)"->"cthet"},
 			theFileIndicesArray
 		},
 		(* Remove all Private` contexts. *)
@@ -210,7 +228,7 @@ FORMOutputCleanUp[filePath_] :=
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], "e_(" ~~ a : (WordCharacter ..) ~~ "," ~~ b : (WordCharacter ..) ~~ "," ~~ c : (WordCharacter ..) ~~ "," ~~ d : (WordCharacter ..) ~~ ")" :>  "LeviCivita[" <> a <> "," <> b <> "," <> c <> "," <> d <> "]"], "Text"];
 		
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","lbd"->"\\[Lambda]","cthet"->"\\[CapitalTheta]","gsCoupling"->"SMP[\"g_s\"]" }], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","al"->"\\[Alpha]","be"->"\\[Beta]","lbd"->"\\[Lambda]","cthet"->"\\[CapitalTheta]","gsCoupling"->"SMP[\"g_s\"]" }], "Text"];
 	];
 
 
@@ -844,6 +862,42 @@ GenerateGravitonAxionVectorSpecific[n_] := Module[{filePath,theTimingVariable},
 	FORMOutputCleanUp[filePath];
 
 	Print["Done for graviton-axion-like coupling of order n="<>ToString[n]<>"."];
+];
+
+
+GenerateQuadraticGravityVertex[n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Map[GenerateQuadraticGravityVertexSpecific , Range[n]] ][[1]];
+	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
+];
+
+
+GenerateQuadraticGravityVertexSpecific[n_] := Module[{filePath,theTimingVariable},
+(* Gravitons *)
+	filePath = "QuadraticGravityVertex_"<>ToString[n]<>".frm";
+		
+	(*Check if the FROM code file is exists and empty.*)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+		
+	(*Check if the corresponding library exists and delete it if it does*)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(*Writing the expression of the FORM file*)
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath,QuadraticGravityVertex[DummyArrayMomenta[2+n],\[Alpha],\[Beta],Global`GaugeFixingEpsilon]] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2+n,0];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+				
+	Print["Done for the quadratic gravity vertex for order n="<>ToString[n]<>"."];
 ];
 
 
