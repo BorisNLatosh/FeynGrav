@@ -70,6 +70,12 @@ GenerateGravitonVectorsSpecific::usage = "GenerateGravitonVectorsSpecific[n]. Th
 GenerateGravitonVertexSpecific::usage = "GenerateGravitonVertexSpecific[n]. This procedure generates libraries for the gravity sector for the order n. Pre-existing libraries will be removed!";
 
 
+GenerateGravitonSUNYMSpecific::usage = "GenerateGravitonSUNYM[n]. This procedure generates libraries for gravitational interaction for SU(N)YM model up to the order n. Pre-existing libraries will be removed!";
+
+
+GenerateGravitonAxionVectorSpecific::usage = "GenerateGravitonAxionVector[n]. This procedure generates libraries for graviton-scalar axion-single vector interactions up to the order n. Pre-existing libraries will be removed!"
+
+
 GenerateHorndeskiG2Specific::usage = "GenerateHorndeskiG2Specific[a,b,n]. This procedure generates libraries for Horndeski G2 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
 GenerateHorndeskiG3Specific::usage = "GenerateHorndeskiG3Specific[a,b,n]. This procedure generates libraries for Horndeski G3 interaction with given a abd b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
 GenerateHorndeskiG4Specific::usage = "GenerateHorndeskiG4Specific[a,b,n]. This procedure generates libraries for Horndeski G4 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
@@ -466,187 +472,194 @@ GenerateGravitonVertexSpecific[n_] := Module[{filePath,theTimingVariable},
 (* Procedures that generates rules for SU(N) Yang-Mills model. *)
 
 
-GenerateGravitonSUNYM[n_] := Module[{i,filePath},
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonQuarkGluonVertex_"<>ToString[i]<>".frm";
-		
-		(* Check if the FROM code file exists and is empty. *)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		(* Check if the corresponding library exists and delete it if it does. *)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-		(* FeynCalc converts the expression to FORM and writes it to the file. *)
-		FeynCalc2FORM[ filePath, GravitonQuarkGluonVertexUncontracted[DummyArray[i],{Global`\[Lambda],Global`a}] ];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,i];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNIndex[a]","syFC2"->"SUNT[SUNIndex[a]]"}], "Text"];
+GenerateGravitonSUNYM[n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Map[GenerateGravitonSUNYMSpecific , Range[n]] ][[1]];
+	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
+];
 
-		Print["Graviton-quark-gluon vertex is generated for n="<>ToString[i]<>"."];
-	];
 
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonGluonVertex_"<>ToString[i]<>".frm";
+GenerateGravitonSUNYMSpecific[n_] := Module[{filePath,theTimingVariable},
+(* Graviton-Quark-Gluon vertex *)
+	filePath = "GravitonQuarkGluonVertex_"<>ToString[n]<>".frm";
 		
-		(* Check if the FROM code file exists and is empty. *)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		(* Check if the corresponding library exists and delete it if it does. *)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 		
-		(* FeynCalc converts the expression to FORM and writes it to the file. *)
-		FeynCalc2FORM[ filePath, GravitonGluonVertexUncontracted[DummyArrayMomentaK[i],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2,Global`GaugeFixingEpsilonSUNYM] ];
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonQuarkGluonVertexUncontracted[DummyArray[n],{Global`\[Lambda],Global`a}] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
 		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,i];
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,n];
 		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
 		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNDelta[SUNIndex[a1],SUNIndex[a2]]","syFC2"->"SUNIndex[a1]","syFC3"->"SUNIndex[a2]"}], "Text"];
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNIndex[a]","syFC2"->"SUNT[SUNIndex[a]]"}], "Text"];
 
-		Print["Graviton-gluon vertex is generated for n="<>ToString[i]<>"."];
-	];
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonThreeGluonVertex_"<>ToString[i]<>".frm";
-		
-		(* Check if the FROM code file exists and is empty. *)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		(* Check if the corresponding library exists and delete it if it does. *)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-		(* FeynCalc converts the expression to FORM and writes it to the file. *)
-		FeynCalc2FORM[ filePath, GravitonThreeGluonVertex[DummyArray[i],p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3] ];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,3,i];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[a3]]","syFC3"->"SUNIndex[a1]","syFC4"->"SUNIndex[a2]","syFC5"->"SUNIndex[a3]"}], "Text"];
+	Print["Graviton-quark-gluon vertex is generated for n="<>ToString[n]<>"."];
 
-		Print["Graviton-gluon-gluon-gluon vertex is generated for n="<>ToString[i]<>"."];
-	];
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonFourGluonVertex_"<>ToString[i]<>".frm";
+(* Graviton-Gluon-Gluon vertex *)
+	filePath = "GravitonGluonVertex_"<>ToString[n]<>".frm";
 		
-		(* Check if the FROM code file exists and is empty. *)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		(* Check if the corresponding library exists and delete it if it does. *)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 		
-		(* FeynCalc converts the expression to FORM and writes it to the file. *)
-		FeynCalc2FORM[ filePath, GravitonFourGluonVertexUncontracted[DummyArray[i],p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4] ];
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonGluonVertexUncontracted[DummyArrayMomentaK[n],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2,Global`GaugeFixingEpsilonSUNYM] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
 		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,4,i];
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,n];
 		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
 		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[s]]","syFC3"->"SUNF[SUNIndex[a1],SUNIndex[a3],SUNIndex[s]]","syFC4"->"SUNF[SUNIndex[a1],SUNIndex[a4],SUNIndex[s]]","syFC5"->"SUNF[SUNIndex[a2],SUNIndex[a3],SUNIndex[s]]","syFC6"->"SUNF[SUNIndex[a2],SUNIndex[a4],SUNIndex[s]]","syFC7"->"SUNF[SUNIndex[a3],SUNIndex[a4],SUNIndex[s]]","syFC8"->"SUNIndex[a1]","syFC9"->"SUNIndex[a2]","syFC10"->"SUNIndex[a3]","syFC11"->"SUNIndex[a4]","syFC12"->"SUNIndex[s]"} ], "Text"];
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNDelta[SUNIndex[a1],SUNIndex[a2]]","syFC2"->"SUNIndex[a1]","syFC3"->"SUNIndex[a2]"}], "Text"];
 
-		Print["Graviton-gluon-gluon-gluon-gluon vertex is generated for n="<>ToString[i]<>"."];
-	];
+	Print["Graviton-gluon vertex is generated for n="<>ToString[n]<>"."];
+		
+(* Graviton-Gluon-Gluon-Gluon vertex *)
 	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonYMGhostVertex_"<>ToString[i]<>".frm";
+	filePath = "GravitonThreeGluonVertex_"<>ToString[n]<>".frm";
 		
-		(* Check if the FROM code file exists and is empty. *)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		(* Check if the corresponding library exists and delete it if it does. *)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 		
-		(* FeynCalc converts the expression to FORM and writes it to the file. *)
-		FeynCalc2FORM[ filePath, GravitonYMGhostVertexUncontracted[DummyArray[i],p1,a1,p2,a2] ];
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonThreeGluonVertex[DummyArray[n],p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
 		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,0];
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,3,n];
 		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
 		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNDelta[SUNIndex[a1],SUNIndex[a2]]","syFC2"->"SUNIndex[a1]","syFC3"->"SUNIndex[a2]"} ], "Text"];
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[a3]]","syFC3"->"SUNIndex[a1]","syFC4"->"SUNIndex[a2]","syFC5"->"SUNIndex[a3]"}], "Text"];
 
-		Print["Graviton-YM ghost vertex is generated for n="<>ToString[i]<>"."];
-	];
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonGluonGhostVertex_"<>ToString[i]<>".frm";
-		
-		(* Check if the FROM code file exists and is empty. *)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		(* Check if the corresponding library exists and delete it if it does. *)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-		(* FeynCalc converts the expression to FORM and writes it to the file. *)
-		FeynCalc2FORM[ filePath, GravitonGluonGhostVertexUncontracted[DummyArray[i],{p1,\[Lambda]1,a1},{p2,\[Lambda]2,a2},{p3,\[Lambda]3,a3}] ];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,3,0];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[p1],SUNIndex[p2],SUNIndex[p3]]","syFC3"->"SUNIndex[p1]","syFC4"->"SUNIndex[p2]","syFC5"->"SUNIndex[p3]"} ], "Text"];
+	Print["Graviton-gluon-gluon-gluon vertex is generated for n="<>ToString[n]<>"."];
 
-		Print["Graviton-gluon-YM ghost vertex is generated for n="<>ToString[i]<>"."];
-	];
+(* Graviton-Gluon-Gluon-Gluon-Gluon vertex *)
+	filePath = "GravitonFourGluonVertex_"<>ToString[n]<>".frm";
+		
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonFourGluonVertexUncontracted[DummyArray[n],p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,4,n];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[s]]","syFC3"->"SUNF[SUNIndex[a1],SUNIndex[a3],SUNIndex[s]]","syFC4"->"SUNF[SUNIndex[a1],SUNIndex[a4],SUNIndex[s]]","syFC5"->"SUNF[SUNIndex[a2],SUNIndex[a3],SUNIndex[s]]","syFC6"->"SUNF[SUNIndex[a2],SUNIndex[a4],SUNIndex[s]]","syFC7"->"SUNF[SUNIndex[a3],SUNIndex[a4],SUNIndex[s]]","syFC8"->"SUNIndex[a1]","syFC9"->"SUNIndex[a2]","syFC10"->"SUNIndex[a3]","syFC11"->"SUNIndex[a4]","syFC12"->"SUNIndex[s]"} ], "Text"];
+
+	Print["Graviton-gluon-gluon-gluon-gluon vertex is generated for n="<>ToString[n]<>"."];
+
+(* Gravtion-Yang-Mills-Ghost vertex *)	
+	filePath = "GravitonYMGhostVertex_"<>ToString[n]<>".frm";
+		
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonYMGhostVertexUncontracted[DummyArray[n],p1,a1,p2,a2] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,0];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNDelta[SUNIndex[a1],SUNIndex[a2]]","syFC2"->"SUNIndex[a1]","syFC3"->"SUNIndex[a2]"} ], "Text"];
+
+	Print["Graviton-YM ghost vertex is generated for n="<>ToString[n]<>"."];
+
+(* Graviton-Gluon-Ghost vertex *)
+	filePath = "GravitonGluonGhostVertex_"<>ToString[n]<>".frm";
+		
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonGluonGhostVertexUncontracted[DummyArray[n],{p1,\[Lambda]1,a1},{p2,\[Lambda]2,a2},{p3,\[Lambda]3,a3}] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,3,0];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[p1],SUNIndex[p2],SUNIndex[p3]]","syFC3"->"SUNIndex[p1]","syFC4"->"SUNIndex[p2]","syFC5"->"SUNIndex[p3]"} ], "Text"];
+
+	Print["Graviton-gluon-YM ghost vertex is generated for n="<>ToString[n]<>"."];
+
 ];
 
 
@@ -799,33 +812,38 @@ GenerateHorndeskiG5Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
 (* Procedures that generates rules for the simplest axion-like interaction. *)
 
 
-GenerateGravitonAxionVector[n_] := Module[{i,filePath},
-	
-	For[ i = 1, i <= n, i++,
-	
-		filePath = "GravitonAxionVectorVertex_"<>ToString[i]<>".frm";
-		
-		(* Check if the FROM code file exists and is empty. *)
-		If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		(* Check if the corresponding library exists and delete it if it does. *)
-		If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-		(* FeynCalc converts the expression to FORM and writes it to the file. *)
-		FeynCalc2FORM[ filePath, (I) GravitonAxionVectorVertexUncontracted[DummyArray[i],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`\[CapitalTheta]] ];
-		
-		(* I modify the FORM file so that it can be executed. *)
-		FORMCodeCleanUp[filePath,2,0];
-		
-		(*Run the FORM*)
-		Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]];
-		DeleteFile[filePath];
-		filePath = StringDrop[filePath, -4];
-		
-		(*Clean the output*)
-		FORMOutputCleanUp[filePath];
+GenerateGravitonAxionVector[n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Map[GenerateGravitonAxionVectorSpecific , Range[n]] ][[1]];
+	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
+];
 
-		Print["Done for graviton-axion-like coupling of order n="<>ToString[i]<>"."];
-	];
+
+GenerateGravitonAxionVectorSpecific[n_] := Module[{filePath,theTimingVariable},
+	
+	filePath = "GravitonAxionVectorVertex_"<>ToString[n]<>".frm";
+		
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, (I) GravitonAxionVectorVertexUncontracted[DummyArray[n],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`\[CapitalTheta]] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,2,0];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+
+	Print["Done for graviton-axion-like coupling of order n="<>ToString[n]<>"."];
 ];
 
 
