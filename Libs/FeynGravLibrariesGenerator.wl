@@ -65,7 +65,7 @@ GenerateHorndeskiG4::usage = "GenerateHorndeskiG4[p,n]. This procedure generates
 GenerateHorndeskiG5::usage = "GenerateHorndeskiG5[p,n]. This procedure generates libraries for Horndeski G5 interaction involving up to p scalars up to the order n. Pre-existing libraries will be removed!";
 
 
-GenerateQuadraticGravityVertex::usage = "GenerateGenerateQuadraticGravityVertex[n]. This procedure generates libraries for quadratic gravity up to the order n. Pre-existing libraries will be removed!";
+GenerateQuadraticGravityVertex::usage = "GenerateQuadraticGravityVertex[n]. This procedure generates libraries for quadratic gravity up to the order n. Pre-existing libraries will be removed!";
 
 
 (* Procedures that generate specific libraries. *)
@@ -89,7 +89,7 @@ GenerateHorndeskiG4Specific::usage = "GenerateHorndeskiG4Specific[a,b,n]. This p
 GenerateHorndeskiG5Specific::usage = "GenerateHorndeskiG5Specific[a,b,n]. This procedure generates libraries for Horndeski G5 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
 
 
-GenerateQuadraticGravityVertexSpecific::usage = "GenerateGenerateQuadraticGravityVertexSpecific[n]. This procedure generates libraries for quadratic gravity for the order n. Pre-existing libraries will be removed!";
+GenerateQuadraticGravityVertexSpecific::usage = "GenerateQuadraticGravityVertexSpecific[n]. This procedure generates libraries for quadratic gravity for the order n. Pre-existing libraries will be removed!";
 
 
 Begin["Private`"];
