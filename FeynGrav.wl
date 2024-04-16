@@ -96,7 +96,7 @@ HorndeskiG5::usage = "HorndeskiG5[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\
 (* Quadratic gravity *)
 
 
-QuadraticGravityVertex::usage = "QuadraticGravityVertex[{\!\(\*SubscriptBox[\(m\), \(1\)]\),\!\(\*SubscriptBox[\(n\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(m\), \(n\)]\),\!\(\*SubscriptBox[\(n\), \(n\)]\),\!\(\*SubscriptBox[\(p\), \(n\)]\)},\[Alpha],\[Beta],\[Rho]].";
+QuadraticGravityVertex::usage = "QuadraticGravityVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\),\!\(\*SubscriptBox[\(p\), \(n\)]\)},\!\(\*SubscriptBox[\(m\), \(0\)]\),\!\(\*SubscriptBox[\(m\), \(2\)]\)].";
 
 
 QuadraticGravityPropagator::usage = "QuadraticGravityPropagator[\[Mu],\[Nu],\[Alpha],\[Beta],p,\!\(\*SubscriptBox[\(m\), \(0\)]\),\!\(\*SubscriptBox[\(m\), \(2\)]\)].";
@@ -458,6 +458,8 @@ Block[{cursor,a},
 
 
 (* Quadratic gravity *)
+
+
 (* QuadraticGravityVertex *)
 
 
@@ -468,13 +470,11 @@ Block[{cursor,\[Lambda]1,k1,\[Lambda]2,k2},
 	Clear[QuadraticGravityVertex];
 	
 	While[FileExistsQ["./Libs/QuadraticGravityVertex_"<>ToString[cursor]],
-		Evaluate[QuadraticGravityVertex[DummyArrayMomentaVariables[cursor+2],\[Alpha]_,\[Beta]_,\[CurlyEpsilon]_]] = Get["./Libs/QuadraticGravityVertex_"<>ToString[cursor]];
+		Evaluate[QuadraticGravityVertex[DummyArrayMomentaVariables[cursor+2],\[GothicM]0_,\[GothicM]2_]] = Get["./Libs/QuadraticGravityVertex_"<>ToString[cursor]];
 		cursor++;
 	];
 	
 	Print["Quadratic gravity vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-	
-	Remove[\[Alpha],\[Beta],\[CurlyEpsilon]];
 ]
 
 

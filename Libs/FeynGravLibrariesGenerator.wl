@@ -192,11 +192,11 @@ CheckQuadraticGravityVertex := (
 FORMCodeCleanUp[filePath_,np_,nk_] := 
 	Module[
 		{
-			theDictionary = {"\\[Kappa]"->"Kappa","\\[Alpha]"->"al","\\[Beta]"->"be","\\[CapitalTheta]"->"cthet","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","\\[Lambda]"->"lbd","(Lambda)"->"lbd","(Tau)"->"tau","(Omega)"->"omg","(Epsilon)"->"eps","(CapitalTheta)"->"cthet"},
+			theDictionary = {"\\[Kappa]"->"Kappa","\\[Alpha]"->"al","\\[Beta]"->"be","\\[CapitalTheta]"->"cthet","\\[GothicM]"->"gom","(ScriptA)"->"sca","(ScriptB)"->"scb","(ScriptM)"->"scm","(ScriptN)"->"scn","(ScriptR)"->"scr","(ScriptS)"->"scs","(ScriptL)"->"scl","(ScriptT)"->"sct","\\[Lambda]"->"lbd","(Lambda)"->"lbd","(Tau)"->"tau","(Omega)"->"omg","(Epsilon)"->"eps","(CapitalTheta)"->"cthet","GaugeFixingEpsilon"->"gfEPS","(GothicM)"->"gom"},
 			theFileIndicesArray
 		},
 		(* Remove all Private` contexts. *)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "Private`" -> ""], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"Private`" -> "","FeynGrav`"->""}], "Text"];
 		(* Make the expression into a single line. *)
 		Export[filePath,StringRiffle[Join[{First[#]},{StringJoin[Rest[#]]}],"\n"]&@Import[filePath,"Lines"],"Text"];
 		(* FeynCalc2FORM does not convert some symbols correctly. I am fixing this manually. *)
@@ -228,7 +228,7 @@ FORMOutputCleanUp[filePath_] :=
 		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
 		Export[filePath, StringReplace[Import[filePath, "Text"], "e_(" ~~ a : (WordCharacter ..) ~~ "," ~~ b : (WordCharacter ..) ~~ "," ~~ c : (WordCharacter ..) ~~ "," ~~ d : (WordCharacter ..) ~~ ")" :>  "LeviCivita[" <> a <> "," <> b <> "," <> c <> "," <> d <> "]"], "Text"];
 		
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","al"->"\\[Alpha]","be"->"\\[Beta]","lbd"->"\\[Lambda]","cthet"->"\\[CapitalTheta]","gsCoupling"->"SMP[\"g_s\"]" }], "Text"];
+		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","gfEPS"->"GaugeFixingEpsilon","al"->"\\[Alpha]","be"->"\\[Beta]","lbd"->"\\[Lambda]","cthet"->"\\[CapitalTheta]","gsCoupling"->"SMP[\"g_s\"]","gom"->"\\[GothicM]" }], "Text"];
 	];
 
 
@@ -882,7 +882,7 @@ GenerateQuadraticGravityVertexSpecific[n_] := Module[{filePath,theTimingVariable
 	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 		
 	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath,QuadraticGravityVertex[DummyArrayMomenta[2+n],\[Alpha],\[Beta],Global`GaugeFixingEpsilon]] ][[1]];
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath,QuadraticGravityVertex[DummyArrayMomenta[2+n],\[GothicM]0,\[GothicM]2]] ][[1]];
 	Print["The expression is generated in ",theTimingVariable," seconds."];
 		
 	(* I modify the FORM file so that it can be executed. *)
