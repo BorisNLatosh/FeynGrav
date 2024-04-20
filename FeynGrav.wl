@@ -1,15 +1,16 @@
 (* ::Package:: *)
 
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
-Print[Style["FeynGrav 2.2",Bold]];
+
+
+Print[Style["FeynGrav 2.3",Bold]];
 Print["FeynGrav: FeynGravCommands print the list of all supported commands."];
+Print["FeynGrav: For the sake of performance, on initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2  with minimal couplings up to the third order. Additional libraries can be imported with \"import*\" commands."];
 Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and arXiv:2201.06812."];
 Print["Core publications: arXiv:2201.06812, arXiv:2302.14310."];
 
 
-SetDirectory[DirectoryName[$InputFileName]];
-Needs["Nieuwenhuizen`","./Rules/Nieuwenhuizen.wl"];
-SetDirectory[DirectoryName[$InputFileName]];
+Needs["Nieuwenhuizen`",DirectoryName[$InputFileName]<>"Rules/Nieuwenhuizen.wl"];
 
 
 (* Scalar sector *)
@@ -103,10 +104,26 @@ QuadraticGravityPropagator::usage = "QuadraticGravityPropagator[\[Mu],\[Nu],\[Al
 QuadraticGravityPropagatorAlternative::usage = "QuadraticGravityPropagatorAlternative[\[Mu],\[Nu],\[Alpha],\[Beta],p,\!\(\*SubscriptBox[\(m\), \(0\)]\),\!\(\*SubscriptBox[\(m\), \(2\)]\)].";
 
 
-FeynGravCommands := Print["GravitonPropagator","GravitonPropagatorTop","GravitonPropagatorTopFAD","GravitonPropagatorAlternative","GravitonPropagatorMassive","GravitonPropagatorMassiveTop","GravitonPropagatorMassiveAlternative","GravitonVertex","GravitonGhostVertex","PolarizationTensor","SetPolarizationTensor","ScalarPropagator","GravitonScalarVertex","GravitonScalarPotentialVertex","HorndeskiG2","ProcaPropagator","GravitonVectorVertex","GravitonVectorGhostVertex","GravitonMassiveVectorVertex","GravitonAxionVectorVertex","GravitonFermionVertex","GravitonQuarkGluonVertex","GravitonGluonVertex","GravitonGluonGhostVertex","GravitonYMGhostVertex"];
+(* Import procedures *)
 
 
-SetDirectory[DirectoryName[$InputFileName]];
+importGravitons::usage = "importGravitons[n]. The command imports libraries for graviton vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importScalars::usage = "importScalars[n]. The command imports libraries for the scalar field kinetic and potential term vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importFermions::usage = "importFermions[n]. The command imports libraries for the Dirac fermion vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importVectors::usage = "importVectors[n]. The command imports libraries for vector vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importSUNYM::usage = "importSUNYM[n]. The command imports libraries for SU(N) Yang-Mills theory up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importAxionVectorVertex::usage = "importAxionVectorVertex[n]. The command imports libraries axion-like coupling to a single vector field up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importQuadraticGravity::usage = "importQuadraticGravity[n]. The command imports libraries for quadratic gravity up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importHorndeskiG2::usage = "importHorndeskiG2[n]. The command imports libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(2\)]\) vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importHorndeskiG3::usage = "importHorndeskiG3[n]. The command imports libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(3\)]\) vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importHorndeskiG4::usage = "importHorndeskiG4[n]. The command imports libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(4\)]\) vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importHorndeskiG5::usage = "importHorndeskiG5[n]. The command imports libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(5\)]\) vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+
+
+(* The list of commands *)
+
+
+FeynGravCommands := Print["GravitonPropagator, GravitonPropagatorAlternative, GravitonPropagatorTop, GravitonPropagatorTopFAD, GravitonPropagatorMassive, GravitonPropagatorMassiveAlternative, GravitonPropagatorMassiveTop,\n","GravitonVertex, GravitonGhostVertex, PolarizationTensor, SetPolarizationTensor,\n","ScalarPropagator, GravitonScalarVertex, GravitonScalarPotentialVertex, GravitonFermionVertex,\n","ProcaPropagator, GravitonMassiveVectorVertex, GravitonVectorVertex, GravitonVectorGhostVertex,\n","GravitonGluonVertex, GravitonGluonGhostVertex, GravitonYMGhostVertex, GravitonQuarkGluonVertex,\n","GravitonAxionVectorVertex,\n","HorndeskiG2, HorndeskiG3, HorndeskiG4, HorndeskiG5,\n","QuadraticGravityPropagator, QuadraticGravityPropagatorAlternative, QuadraticGravityVertex,\n","importGravitons, importScalars, importFermions, importVectors, importSUNYM,\n","importHorndeskiG2, importHorndeskiG3, importHorndeskiG4, importHorndeskiG5,\n","importAxionVectorVertex, importQuadraticGravity."];
 
 
 (* Symbols *)
@@ -125,6 +142,9 @@ FeynGrav`GaugeFixingEpsilonVector = -1;
 FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 
 
+Begin["Private`"];
+
+
 (* Dummy arrays *)
 
 
@@ -138,359 +158,347 @@ DummyArrayMomentaK = n |-> Flatten[{ToExpression["m"<>ToString[#]],ToExpression[
 DummyArrayMomentaKVariables = n |-> Flatten[{ToExpression["m"<>ToString[#]<>"_"],ToExpression["n"<>ToString[#]<>"_"],ToExpression["k"<>ToString[#]<>"_"]}&/@Range[n]];
 
 
+(* Package directory *)
+
+
+packageDirectory = DirectoryName[$InputFileName];
+
+
 (* Graviton sector *)
 
 
-Block[{cursor,\[Lambda]1,k1,\[Lambda]2,k2},
+Options[importGravitons] = { printOutput -> False};
 
-	cursor = 1;
+importGravitons[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	
-	Clear[GravitonVertex];
+	nImport = Min[nExternal, Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVertex_*", packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGhostVertex_*", packageDirectory]]]];
 	
-	While[FileExistsQ["./Libs/GravitonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVertex[Sequence@@DummyArrayMomentaVariables[cursor+2]]] = Get["./Libs/GravitonVertex_"<>ToString[cursor]];
-		cursor++;
+	If[OptionValue[printOutput], 
+		Print["Graviton vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVertex_*", packageDirectory]]],"."];
+		Print["Graviton-ghost vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGhostVertex_*", packageDirectory]]],"."];
+		Print["Libraries will be imported up to the order ",nImport,"."];
+	];
+
+	Clear[GravitonVertex,GravitonGhostVertex];
+	
+	Map[
+		(Evaluate[GravitonVertex[Sequence@@DummyArrayMomentaVariables[#+2]]] = Get[packageDirectory<>"Libs/GravitonVertex_"<>ToString[#]])&,
+		Range[nImport] 
+	];
+	Map[
+		(Evaluate[GravitonGhostVertex[DummyArrayMomentaVariables[#],\[Lambda]1_,k1_,\[Lambda]2_,k2_]] = Get[packageDirectory<>"Libs/GravitonGhostVertex_"<>ToString[#]])&,
+		Range[nImport] 
 	];
 	
-	cursor = 1;
-	
-	Clear[GravitonGhostVertex];
-	
-	While[FileExistsQ["./Libs/GravitonGhostVertex_"<>ToString[cursor]],
-		Evaluate[GravitonGhostVertex[DummyArrayMomentaVariables[cursor],\[Lambda]1_,k1_,\[Lambda]2_,k2_]] = Get["./Libs/GravitonGhostVertex_"<>ToString[cursor]];
-		cursor++;
+	If[OptionValue[printOutput],
+		Print["Graviton vertices imported up to order ",nImport,"."]
 	];
-	
-	Print["Graviton vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-]
+];
 
 
 (* Scalar sector *)
 
 
-Block[{cursor,m,p1,p2},
+Options[importScalars] = { printOutput -> False};
 
-	cursor = 1;
-
-	Clear[GravitonScalarVertex];
+importScalars[nExternal_ : 2, OptionsPattern[] ] := Block[{nImport},
 	
-	While[FileExistsQ["./Libs/GravitonScalarVertex_"<>ToString[cursor]],
-		Evaluate[ GravitonScalarVertex[DummyArrayVariables[cursor],p1_,p2_,m_ ]] = Get["./Libs/GravitonScalarVertex_"<>ToString[cursor]];
-		cursor++;
+	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonScalarVertex_*", packageDirectory]]],Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonScalarPotentialVertex_*", packageDirectory]]]];
+	
+	If[OptionValue[printOutput], 
+		Print["Graviton-scalar vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonScalarVertex_*", packageDirectory]]],"."];
+		Print["Graviton-scalar potential vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonScalarPotentialVertex_*", packageDirectory]]],"."];
+		Print["Libraries will be imported up to the order ",nImport,"."];
 	];
-]
 
-
-Block[{cursor,\[Lambda]},
-
-	cursor = 1;
+	Clear[GravitonScalarVertex,GravitonScalarPotentialVertex];
 	
-	Clear[GravitonScalarPotentialVertex];
-	
-	While[FileExistsQ["./Libs/GravitonScalarPotentialVertex_"<>ToString[cursor]],
-		Evaluate[GravitonScalarPotentialVertex[DummyArrayVariables[cursor],\[Lambda]_]] = Get["./Libs/GravitonScalarPotentialVertex_"<>ToString[cursor]];
-		cursor++;
+	Map[
+		(Evaluate[ GravitonScalarVertex[DummyArrayVariables[#],p1_,p2_,m_ ]] = Get[packageDirectory<>"Libs/GravitonScalarVertex_"<>ToString[#]])&,
+		Range[nImport] 
 	];
-]
+	Map[
+		(Evaluate[GravitonScalarPotentialVertex[DummyArrayVariables[#],\[Lambda]_]] = Get[packageDirectory<>"Libs/GravitonScalarPotentialVertex_"<>ToString[#]])&,
+		Range[nImport] 
+	];
+	
+	If[OptionValue[printOutput],
+		Print["Graviton-scalar vertices imported up to order ",nImport,"."]
+	];
+];
 
 
 (* Fermion sector *)
 
 
-Block[{cursor,p1,p2,m},
+Options[importFermions] = { printOutput -> False};
 
-	cursor = 1;
+importFermions[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+	
+	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFermionVertex*", packageDirectory]]]];
+	
+	If[OptionValue[printOutput], 
+		Print["Graviton-Dirac fermion vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFermionVertex_*",packageDirectory]]],"."];
+		Print["Libraries will be imported up to the order ",Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFermionVertex*",packageDirectory]]]],"."];
+	];
 
 	Clear[GravitonFermionVertex];
 	
-	While[FileExistsQ["./Libs/GravitonFermionVertex_"<>ToString[cursor]],
-		Evaluate[GravitonFermionVertex[DummyArrayVariables[cursor],p1_,p2_,m_]] = Get["./Libs/GravitonFermionVertex_"<>ToString[cursor]];
-		cursor++;
+	Map[
+		(Evaluate[GravitonFermionVertex[DummyArrayVariables[#],p1_,p2_,m_]] = Get[packageDirectory<>"Libs/GravitonFermionVertex_"<>ToString[#]])&,
+		Range[nImport] 
 	];
-]
+	
+	If[OptionValue[printOutput],
+		Print["Graviton-Dirac fermion vertices imported up to order ",nImport,"."]
+	];
+];
 
 
 (* Vector sector *)
 
 
-Block[{cursor,p1,p2,\[Lambda]1,\[Lambda]2,m},	
+Options[importVectors] = { printOutput -> False};
 
-	cursor = 1;
+importVectors[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+
+	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonMassiveVectorVertex_*",packageDirectory]]],Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVectorVertex_*",packageDirectory]]],Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVectorGhostVertex_*",packageDirectory]]]];
 	
-	Clear[GravitonMassiveVectorVertex];
+	If[OptionValue[printOutput], 
+		Print["Graviton-massive vector vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonMassiveVectorVertex_*",packageDirectory]]],"."];
+		Print["Graviton-massless vector vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVectorVertex_*",packageDirectory]]],"."];
+		Print["Graviton-vector ghost vertices vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVectorGhostVertex_*",packageDirectory]]],"."];
+		Print["Libraries will be imported up to the order ",nImport,"."];
+	];
+
+	Clear[GravitonMassiveVectorVertex,GravitonVectorVertex,GravitonVectorGhostVertex];
 	
-	While[FileExistsQ["./Libs/GravitonMassiveVectorVertex_"<>ToString[cursor]],
-		Evaluate[GravitonMassiveVectorVertex[DummyArrayVariables[cursor],\[Lambda]1_,p1_,\[Lambda]2_,p2_,m_]] = Get["./Libs/GravitonMassiveVectorVertex_"<>ToString[cursor]];
-		cursor++;
+	Map[
+		(Evaluate[GravitonMassiveVectorVertex[DummyArrayVariables[#],\[Lambda]1_,p1_,\[Lambda]2_,p2_,m_]] = Get[packageDirectory<>"Libs/GravitonMassiveVectorVertex_"<>ToString[#]])&,
+		Range[nImport] 
+	];
+	Map[
+		(Evaluate[GravitonVectorVertex[DummyArrayMomentaKVariables[#],\[Lambda]1_,p1_,\[Lambda]2_,p2_]] = Get[packageDirectory<>"Libs/GravitonVectorVertex_"<>ToString[#]])&,
+		Range[nImport] 
+	];
+	Map[
+		(Evaluate[GravitonVectorGhostVertex[DummyArrayVariables[#],p1_,p2_]] = Get[packageDirectory<>"Libs/GravitonVectorGhostVertex_"<>ToString[#]])&,
+		Range[nImport] 
 	];
 	
-	cursor = 1;
-	
-	Clear[GravitonVectorVertex];
-	
-	While[FileExistsQ["./Libs/GravitonVectorVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVectorVertex[DummyArrayMomentaKVariables[cursor],\[Lambda]1_,p1_,\[Lambda]2_,p2_]] = Get["./Libs/GravitonVectorVertex_"<>ToString[cursor]];
-		cursor++;
+	If[OptionValue[printOutput],
+		Print["Graviton-vector vertices imported up to order ",nImport,"."]
 	];
-	
-	cursor = 1;
-	
-	Clear[GravitonVectorGhostVertex];
-	
-	While[FileExistsQ["./Libs/GravitonVectorGhostVertex_"<>ToString[cursor]],
-		Evaluate[GravitonVectorGhostVertex[DummyArrayVariables[cursor],p1_,p2_]] = Get["./Libs/GravitonVectorGhostVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-		
-	Print["Graviton-Matter vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-]
+];
 
 
 (* SU(N) Yang-Mills sector *)
 
 
-Block[{cursor,a1,a2,a3,a4,\[Lambda]1,\[Lambda]2,\[Lambda]3,\[Lambda]4,p1,p2,p3,p4},
+Options[importSUNYM] = { printOutput -> False};
 
-	cursor = 1;
+importSUNYM[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	
-	Clear[GravitonGluonVertex];
+	nImport = Min[ nExternal, Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGluonVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonThreeGluonVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFourGluonVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonQuarkGluonVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonYMGhostVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGluonGhostVertex_*",packageDirectory]]] ];
 	
-	While[FileExistsQ["./Libs/GravitonGluonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonGluonVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArrayMomentaK[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,\[Lambda]1,a1,p2,\[Lambda]2,a2}]] = Get["./Libs/GravitonGluonVertex_"<>ToString[cursor]];
-		cursor++;
+	If[OptionValue[printOutput], 
+		Print["Graviton-gluon-gluon vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGluonVertex_*", packageDirectory]]],"."];
+		Print["Graviton-gluon-gluon-gluon vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonThreeGluonVertex_*", packageDirectory]]],"."];
+		Print["Graviton-gluon-gluon-gluon-gluon vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFourGluonVertex_*", packageDirectory]]],"."];
+		Print["Graviton-quark-quark-gluon vector vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonQuarkGluonVertex_*", packageDirectory]]],"."];
+		Print["Graviton-(Yang-Mills)ghost vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonYMGhostVertex_*", packageDirectory]]],"."];
+		Print["Graviton-gluon-(Yang-Mills)ghost vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGluonGhostVertex_*", packageDirectory]]],"."];
+		Print["Libraries will be imported up to the order ",nImport,"."];
+	];
+
+	Clear[GravitonGluonVertex,GravitonQuarkGluonVertex,GravitonYMGhostVertex,GravitonGluonGhostVertex];
+	
+	Map[
+		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],p1_,\[Lambda]1_,a1_,p2_,\[Lambda]2_,a2_]] = Get[packageDirectory<>"Libs/GravitonGluonVertex_"<>ToString[#]])&,
+		Range[nImport] 
+	];
+	Map[
+		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],p1_,\[Lambda]1_,a1_,p2_,\[Lambda]2_,a2_,p3_,\[Lambda]3_,a3_]] = Get[packageDirectory<>"Libs/GravitonThreeGluonVertex_"<>ToString[#]])&,
+		Range[nImport] 
+	];
+	Map[
+		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],p1_,\[Lambda]1_,a1_,p2_,\[Lambda]2_,a2_,p3_,\[Lambda]3_,a3_,p4_,\[Lambda]4_,a4_]] = Get[packageDirectory<>"Libs/GravitonFourGluonVertex_"<>ToString[#]])&,
+		Range[nImport] 
+	];
+	Map[
+		(Evaluate[GravitonQuarkGluonVertex[DummyArrayVariables[#],\[Lambda]_,a_ ]] = Get[packageDirectory<>"Libs/GravitonQuarkGluonVertex_"<>ToString[#]])&,
+		Range[nImport] 
+	];
+	Map[
+		(Evaluate[GravitonYMGhostVertex[DummyArrayVariables[#],p1_,a1_,p2_,a2_ ]] = Get[packageDirectory<>"Libs/GravitonYMGhostVertex_"<>ToString[#]])&,
+		Range[nImport] 
+	];
+	Map[
+		(Evaluate[GravitonGluonGhostVertex[DummyArrayVariables[#],\[Lambda]1_,a1_,p1_,\[Lambda]2_,a2_,p2_,\[Lambda]3_,a3_,p3_  ]] = Get[packageDirectory<>"Libs/GravitonGluonGhostVertex_"<>ToString[#]])&,
+		Range[nImport] 
 	];
 	
-	cursor = 1;
-	
-	While[FileExistsQ["./Libs/GravitonThreeGluonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonGluonVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArrayMomentaK[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3}]] = Get["./Libs/GravitonThreeGluonVertex_"<>ToString[cursor]];
-		cursor++;
+	If[OptionValue[printOutput],
+		Print["Graviton-SU(N) Yang-Mills vertices imported up to order ",nImport,"."]
 	];
-	
-	cursor = 1;
-	
-	While[FileExistsQ["./Libs/GravitonFourGluonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonGluonVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArrayMomentaK[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4}]] = Get["./Libs/GravitonFourGluonVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	
-	cursor = 1;
-	
-	Clear[GravitonQuarkGluonVertex];
-	
-	While[FileExistsQ["./Libs/GravitonQuarkGluonVertex_"<>ToString[cursor]],
-		Evaluate[GravitonQuarkGluonVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda],a} ]] = Get["./Libs/GravitonQuarkGluonVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	
-	cursor = 1;
-	
-	Clear[GravitonYMGhostVertex];
-	
-	While[FileExistsQ["./Libs/GravitonYMGhostVertex_"<>ToString[cursor]],
-		Evaluate[GravitonYMGhostVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{p1,a1,p2,a2} ]] = Get["./Libs/GravitonYMGhostVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	
-	cursor = 1;
-	
-	Clear[GravitonGluonGhostVertex];
-	
-	While[FileExistsQ["./Libs/GravitonGluonGhostVertex_"<>ToString[cursor]],
-		Evaluate[GravitonGluonGhostVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]1,a1,p1,\[Lambda]2,a2,p2,\[Lambda]3,a3,p3}  ]] = Get["./Libs/GravitonGluonGhostVertex_"<>ToString[cursor]];
-		cursor++;
-	];
-	
-	Print["Graviton-SU(N) Yang-Mills vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-]
+];
 
 
 (* Graviton-Scalar Axion-Single Vector Sector *)
 
 
-Block[{cursor,\[Lambda]1,p1,\[Lambda]2,p2,\[CapitalTheta]},
+Options[importAxionVectorVertex] = { printOutput -> False};
 
-	cursor = 1;
+importAxionVectorVertex[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	
+	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonAxionVectorVertex_*",packageDirectory]]]];
+	
+	If[OptionValue[printOutput], 
+		Print["Axion-Vector vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonAxionVectorVertex_*",packageDirectory]]],"."];
+		Print["Libraries will be imported up to the order ",nImport,"."];
+	];
+
 	Clear[GravitonAxionVectorVertex];
 	
-	While[FileExistsQ["./Libs/GravitonAxionVectorVertex_"<>ToString[cursor]],
-		Evaluate[GravitonAxionVectorVertex[{Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@DummyArray[cursor]},Sequence@@Function[ToExpression[ToString[#]<>"_"]]/@{\[Lambda]1,p1,\[Lambda]2,p2,\[CapitalTheta]}  ]  ] = Get["./Libs/GravitonAxionVectorVertex_"<>ToString[cursor]];
-		cursor++;
+	Map[
+		(Evaluate[GravitonAxionVectorVertex[DummyArrayVariables[#],\[Lambda]1_,p1_,\[Lambda]2_,p2_,\[CapitalTheta]_]  ] = Get[packageDirectory<>"Libs/GravitonAxionVectorVertex_"<>ToString[#]];)&,
+		Range[nImport] 
 	];
 	
-	Print["Graviton-Scalar Axion-Single Vector vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-]
+	If[OptionValue[printOutput],
+		Print["Axion-Vector vertices imported up to order ",nImport,"."]
+	];
+];
 
 
 (* Horndeski G2 *)
 
 
-Block[{cursor,a},
+Options[importHorndeskiG2] = { printOutput -> False};
 
+importHorndeskiG2[OptionsPattern[] ] := Block[{indexArray},
+
+	indexArray =Flatten[ Map[ToExpression ,StringCases[FileNames["Libs/HorndeskiG2_*",packageDirectory], "HorndeskiG2_"~~a_~~"_" ~~b_~~"_"~~n_-> {a,b,n} ], {3}] ,1];
+	If[ OptionValue[printOutput],
+		Print["Libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(2\)]\) interaction (\!\(\*SqrtBox[\(-g\)]\)\!\(\*SuperscriptBox[\(\[Phi]\), \(a\)]\)\!\(\*SuperscriptBox[\(X\), \(b\)]\))=\[ScriptCapitalO](\!\(\*SuperscriptBox[\(\[Kappa]\), \(n\)]\)) exist for :"];
+		Map[ Print["a = ",#[[1]],", b = ",#[[2]],", n = ",#[[3]]," ."]&, indexArray];
+		Print["Import all of them."];
+	];
+	
 	Clear[HorndeskiG2];
-	
-	(* b=1 family *)
-	For[ a = 1, a <= 4, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_1_"<>ToString[cursor] ],
-			HorndeskiG2[DummyArrayVariables[cursor],DummyMomentaVariables[a+2],1,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_1_"<>ToString[cursor] ];
-			cursor++;
-		];
+	Map[
+		(HorndeskiG2[DummyArrayVariables[#[[3]]],DummyMomentaVariables[#[[1]] + 2 #[[2]]], #[[2]], \[Lambda]_] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG2_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		indexArray
 	];
-	
-	(* b=2 family *)
-	For[ a = 0, a <= 2, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_2_"<>ToString[cursor] ],
-			HorndeskiG2[DummyArrayVariables[cursor],DummyMomentaVariables[a+4],2,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG2_"<>ToString[a]<>"_2_"<>ToString[cursor] ];
-			cursor++;
-		];
+	If[OptionValue[printOutput],
+		Print["Import is done."];
 	];
-	
-	Print["Horndeski G2 vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-]
+];
 
 
 (* Horndeski G3 *)
 
 
-Block[{cursor,a},
+Options[importHorndeskiG3] = { printOutput -> False};
 
+importHorndeskiG3[ OptionsPattern[] ] := Block[{indexArray},
+
+	indexArray =Flatten[ Map[ToExpression ,StringCases[FileNames["Libs/HorndeskiG3_*",packageDirectory], "HorndeskiG3_"~~a_~~"_" ~~b_~~"_"~~n_-> {a,b,n} ], {3}] ,1];
+	If[ OptionValue[printOutput],
+		Print["Libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(3\)]\) interaction (\!\(\*SqrtBox[\(-g\)]\)\!\(\*SuperscriptBox[\(\[Phi]\), \(a\)]\)\!\(\*SuperscriptBox[\(X\), \(b\)] \[Square]\[Phi]\))=\[ScriptCapitalO](\!\(\*SuperscriptBox[\(\[Kappa]\), \(n\)]\)) exist for :"];
+		Map[ Print["a = ",#[[1]],", b = ",#[[2]],", n = ",#[[3]]," ."]&, indexArray];
+		Print["Import all of them."];
+	];
+	
 	Clear[HorndeskiG3];
-	
-	(* b = 0 *)
-	For[ a = 2, a <= 5, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_0_"<>ToString[cursor] ],
-			HorndeskiG3[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a+1],0,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_0_"<>ToString[cursor] ];
-			cursor++;
-		];
+	Map[
+		(HorndeskiG3[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]+1],#[[2]],\[Lambda]_] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG3_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		indexArray
 	];
-	
-	(* b = 1 *)
-	For[ a = 0, a <= 3, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[cursor] ],
-			HorndeskiG3[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a+2+1],1,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_1_"<>ToString[cursor] ];
-			cursor++;
-		];
+	If[OptionValue[printOutput],
+		Print["Import is done."];
 	];
-	
-	(* b = 2 *)
-	For[ a = 0, a <= 1, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[cursor] ],
-			HorndeskiG3[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a+2*2+1],2,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG3_"<>ToString[a]<>"_2_"<>ToString[cursor] ];
-			cursor++;
-		];
-	];
-	
-	Print["Horndeski G3 vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-]
+];
 
 
 (* Horndeski G4 *)
 
 
-Block[{cursor,a},
+Options[importHorndeskiG4] = { printOutput -> False};
 
+importHorndeskiG4[ OptionsPattern[] ] := Block[{indexArray},
+
+	indexArray =Flatten[ Map[ToExpression ,StringCases[FileNames["Libs/HorndeskiG4_*",packageDirectory], "HorndeskiG4_"~~a_~~"_" ~~b_~~"_"~~n_-> {a,b,n} ], {3}] ,1];
+	If[ OptionValue[printOutput],
+		Print["Libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(4\)]\) interaction ( \!\(\*SqrtBox[\(-g\)]\) R \!\(\*SuperscriptBox[\(\[Phi]\), \(a\)]\) \!\(\*SuperscriptBox[\(X\), \(b\)]\))=\[ScriptCapitalO](\!\(\*SuperscriptBox[\(\[Kappa]\), \(n\)]\)) exist for :"];
+		Map[ Print["a = ",#[[1]],", b = ",#[[2]],", n = ",#[[3]]," ."]&, indexArray];
+		Print["Import all of them."];
+	];
+	
 	Clear[HorndeskiG4];
-	
-	(* b = 0 *)
-	For[ a = 1, a <= 4, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG4_1_0_"<>ToString[cursor] ],
-			HorndeskiG4[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a],0,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG4_1_0_"<>ToString[cursor] ];
-			cursor++;
-		];
+	Map[
+		(HorndeskiG4[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]],#[[2]],\[Lambda]_] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG4_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		indexArray
 	];
-	
-	(* b = 1 *)
-	For[ a = 0, a <= 2, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG4_"<>ToString[a]<>"_1_"<>ToString[cursor] ],
-			HorndeskiG4[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a+2],1,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG4_"<>ToString[a]<>"_1_"<>ToString[cursor] ];
-			cursor++;
-		];
+	If[OptionValue[printOutput],
+		Print["Import is done."];
 	];
-	
-	(* b = 2 *)
-	For[ a = 0, a <= 0, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG4_"<>ToString[a]<>"_2_"<>ToString[cursor] ],
-			HorndeskiG4[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a+2*2],2,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG4_"<>ToString[a]<>"_2_"<>ToString[cursor] ];
-			cursor++;
-		];
-	];
-	
-	Print["Horndeski G4 vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-]
+];
 
 
 (* Horndeski G5 *)
 
 
-Block[{cursor,a},
+Options[importHorndeskiG5] = { printOutput -> False};
 
+importHorndeskiG5[ OptionsPattern[] ] := Block[{indexArray},
+
+	indexArray =Flatten[ Map[ToExpression ,StringCases[FileNames["Libs/HorndeskiG5_*",packageDirectory], "HorndeskiG5_"~~a_~~"_" ~~b_~~"_"~~n_-> {a,b,n} ], {3}] ,1];
+	If[ OptionValue[printOutput],
+		Print["Libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(5\)]\) interaction ( \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(G\), \(\[Mu]\[Nu]\)]\)\!\(\*SubscriptBox[\(\[Del]\), \(\[Mu]\[Nu]\)]\)\[Phi] \!\(\*SuperscriptBox[\(\[Phi]\), \(a\)]\) \!\(\*SuperscriptBox[\(X\), \(b\)]\))=\[ScriptCapitalO](\!\(\*SuperscriptBox[\(\[Kappa]\), \(n\)]\)) exist for :"];
+		Map[ Print["a = ",#[[1]],", b = ",#[[2]],", n = ",#[[3]]," ."]&, indexArray];
+		Print["Import all of them."];
+	];
+	
 	Clear[HorndeskiG5];
-	
-	(* b = 0 *)
-	For[ a = 1, a <= 4, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG5_"<>ToString[a]<>"_0_"<>ToString[cursor] ],
-			HorndeskiG5[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a],0,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG5_"<>ToString[a]<>"_0_"<>ToString[cursor] ];
-			cursor++;
-		];
+	Map[
+		(HorndeskiG5[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2 #[[2]]],#[[2]],\[Lambda]_] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG5_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		indexArray
 	];
-	
-	(* b = 1 *)
-	For[ a = 1, a <= 2, a++,
-		cursor = 1;
-		While[FileExistsQ[ "./Libs/HorndeskiG5_"<>ToString[a]<>"_1_"<>ToString[cursor] ],
-			HorndeskiG5[DummyArrayMomentaKVariables[cursor],DummyMomentaVariables[a+2],1,\[Lambda]_] = \[Lambda] Get[ "./Libs/HorndeskiG5_"<>ToString[a]<>"_1_"<>ToString[cursor] ];
-			cursor++;
-		];
+	If[OptionValue[printOutput],
+		Print["Import is done."];
 	];
-	
-	Print["Horndeski G5 vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-]
+];
 
 
 (* Quadratic gravity *)
 
 
-(* QuadraticGravityVertex *)
+Options[importQuadraticGravity] = { printOutput -> False};
 
+importQuadraticGravity[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 
-Block[{cursor,\[Lambda]1,k1,\[Lambda]2,k2},
-
-	cursor = 1;
+	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/QuadraticGravityVertex_*",packageDirectory]]]];
 	
+	If[OptionValue[printOutput], 
+		Print["Quadratic gravity vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/QuadraticGravityVertex_*",packageDirectory]]],"."];
+		Print["Libraries will be imported up to the order ",nImport,"."];
+	];
+
 	Clear[QuadraticGravityVertex];
 	
-	While[FileExistsQ["./Libs/QuadraticGravityVertex_"<>ToString[cursor]],
-		Evaluate[QuadraticGravityVertex[DummyArrayMomentaVariables[cursor+2],\[GothicM]0_,\[GothicM]2_]] = Get["./Libs/QuadraticGravityVertex_"<>ToString[cursor]];
-		cursor++;
+	Map[
+		(Evaluate[QuadraticGravityVertex[DummyArrayMomentaVariables[#+2],\[GothicM]0_,\[GothicM]2_]] = Get[packageDirectory<>"Libs/QuadraticGravityVertex_"<>ToString[#]])&,
+		Range[nImport] 
 	];
 	
-	Print["Quadratic gravity vertices are imported up to order "<>ToString[cursor-1]<>" in \[Kappa]."];
-]
+	If[OptionValue[printOutput],
+		Print["Quadratic gravity vertices imported up to order ",nImport,"."]
+	];
+];
 
 
-(* Cleanup *)
-
-
-Remove[a,a1,a2,a3,a4,b,cursor,k1,k2,k3,m,m1,m2,m3,m4,m5,n,n1,n2,n3,n4,n5,p1,p2,p3,p4,p5,p6,\[CapitalTheta],\[Lambda],\[Lambda]1,\[Lambda]2,\[Lambda]3,\[Lambda]4];
-
-
-Remove["DummyArray","DummyArrayMomenta","DummyArrayMomentaK","DummyArrayMomentaKVariables","DummyArrayMomentaVariables","DummyArrayVariables","DummyMomenta","DummyMomentaVariables"];
-
-
-ResetDirectory[];
-
-
-Begin["Private`"];
+(* Propagators *)
 
 
 ScalarPropagator[p_,m_] = I FAD[{p,m}];
@@ -514,6 +522,9 @@ QuadraticGravityPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= m0^2/2
 QuadraticGravityPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= (m0^2/2) 1/(SPD[p,p](SPD[p,p]-m0^2)) Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p]  - (m2^2)/( SPD[p,p] (SPD[p,p]-m2^2) ) Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] + ( (4/FeynGrav`GaugeFixingEpsilon) (1/SPD[p,p]) + (3/2 m0^2) 1/(SPD[p,p] (SPD[p,p]-m0^2) ) ) Nieuwenhuizen`NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p] + m0^2/2 FAD[p,{p,m0}] Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p] //Calc ;
 
 
+(* Polarisation tensors *)
+
+
 PolarizationTensor={\[Mu],\[Nu],p}|->Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Mu],D]]Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Nu],D]];
 SetPolarizationTensor := Module[{},
 	Pair[Momentum[Polarization[x_,I],D],Momentum[Polarization[x_,I],D]]=0;
@@ -521,6 +532,12 @@ SetPolarizationTensor := Module[{},
 	Pair[Momentum[Polarization[x_,I],D],Momentum[x_,D]]=0;
 	Pair[Momentum[Polarization[x_,I]],Momentum[x_]]=0;
 ];
+
+
+importGravitons[2];
+importScalars[2];
+importFermions[2];
+importVectors[2];
 
 
 End[];
