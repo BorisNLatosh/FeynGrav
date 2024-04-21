@@ -4,10 +4,9 @@ BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
 Print[Style["FeynGrav 2.3",Bold]];
-Print["FeynGrav: FeynGravCommands print the list of all supported commands."];
-Print["FeynGrav: For the sake of performance, on initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2  with minimal couplings up to the third order. Additional libraries can be imported with \"import*\" commands."];
-Print["FeynGrav: Examples can be found in FeynGrav_Examples.nb and arXiv:2201.06812."];
-Print["Core publications: arXiv:2201.06812, arXiv:2302.14310."];
+Print["FeynGrav: FeynGravCommands prints the list of all supported commands."];
+Print["FeynGrav: On initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the \"import*\" command."];
+Print["FeynGrav: Core publications describing FeynGrav functionality are ",Hyperlink["Class.Quant.Grav. 39 (2022) 16, 165006","https://doi.org/10.1088/1361-6382/ac7e15"],", ",Hyperlink["Comput.Phys.Commun. 292 (2023) 108871","https://doi.org/10.1016/j.cpc.2023.108871"],"."];
 
 
 Needs["Nieuwenhuizen`",DirectoryName[$InputFileName]<>"Rules/Nieuwenhuizen.wl"];
@@ -16,15 +15,15 @@ Needs["Nieuwenhuizen`",DirectoryName[$InputFileName]<>"Rules/Nieuwenhuizen.wl"];
 (* Scalar sector *)
 
 
-GravitonScalarVertex::usage = "GravitonScalarVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Expression for gravitational interaction of a scalar field kinetic energy. {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are graviton indices, \!\(\*SubscriptBox[\(p\), \(i\)]\) are scalar field momenta, m is the scalar field mass.";
-GravitonScalarPotentialVertex::usage = "GravitonScalarPotentialVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(\[Lambda]\), \(p\)]\)]. Expression for gravitational interaction of a scalar field potential energy. {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are gravitational indices, \!\(\*SubscriptBox[\(\[Lambda]\), \(l\)]\) is the scalar field self-coupling constant.";
 ScalarPropagator::usage = "ScalarPropagator[p,m]. Propagator of a scalar field with mass m.";
+GravitonScalarVertex::usage = "GravitonScalarVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Interaction vertex for gravity minimally coupled to the scalar field kinetic energy. Here, \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are Lorentz indices of the i-th graviton; \!\(\*SubscriptBox[\(p\), \(1\)]\) and \!\(\*SubscriptBox[\(p\), \(2\)]\) are the scalar field momenta; m is the scalar field mass.";
+GravitonScalarPotentialVertex::usage = "GravitonScalarPotentialVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(\[Lambda]\), \(p\)]\)]. Interaction vertex for gravity minimally coupled to the scalar field potential energy. The vertex corresponds to \!\(\*FractionBox[SubscriptBox[\(\[Lambda]\), \(p\)], \(p!\)]\)\!\(\*SuperscriptBox[\(\[Phi]\), \(p\)]\) scalar field potential. Here, \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are Lorentz indices of the i-th graviton; \!\(\*SubscriptBox[\(p\), \(1\)]\) and \!\(\*SubscriptBox[\(p\), \(2\)]\) are the scalar field momenta; \!\(\*SubscriptBox[\(\[Lambda]\), \(p\)]\) is the scalar field coiupling.";
 
 
 (* Fermion sector *)
 
 
-GravitonFermionVertex::usage = "GravitonFermionVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Expression for gravitational interaction of a Dirac field kinetic energy. {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are graviton indices, \!\(\*SubscriptBox[\(p\), \(i\)]\) are fermion momenta, m is the fermion mass.";
+GravitonFermionVertex::usage = "GravitonFermionVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)},\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),m]. Interaction vertex for gravity minimally coupled to the Dirac fermion. Here, \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are Lorentz indices of the i-th graviton; \!\(\*SubscriptBox[\(p\), \(1\)]\) and \!\(\*SubscriptBox[\(p\), \(2\)]\) are the fermion momenta; m is the fermion mass.";
 
 
 (* Vector sector *)
@@ -140,6 +139,12 @@ FormatValues[FeynGrav`GaugeFixingEpsilonSUNYM] = {HoldPattern[MakeBoxes[FeynGrav
 FeynGrav`GaugeFixingEpsilon = 2;
 FeynGrav`GaugeFixingEpsilonVector = -1;
 FeynGrav`GaugeFixingEpsilonSUNYM = -1;
+
+
+(* A make sure that the gravitational coupling has the correct context. *)
+
+
+\[Kappa] =. ;
 
 
 Begin["Private`"];
@@ -504,28 +509,28 @@ importQuadraticGravity[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 ScalarPropagator[p_,m_] = I FAD[{p,m}];
 
 
-ProcaPropagator[\[Mu]_,\[Nu]_,p_,m_]=(-I)(MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[Nu]]/m^2)FAD[{p,m}];
+ProcaPropagator[\[Mu]_,\[Nu]_,p_,m_] = (-I)(MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[Nu]]/m^2)FAD[{p,m}];
 
 
-GravitonPropagatorTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_]:=(-(1/2) Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p] + Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] -((3 FeynGrav`GaugeFixingEpsilon - 8)/(2 FeynGrav`GaugeFixingEpsilon))Nieuwenhuizen`NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p]-1/2 Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p])//Calc;
-GravitonPropagatorTopFAD[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_]:=(-(1/2) Nieuwenhuizen`NieuwenhuizenOperator0FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator1FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + Nieuwenhuizen`NieuwenhuizenOperator2FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] -((3 FeynGrav`GaugeFixingEpsilon - 8)/(2 FeynGrav`GaugeFixingEpsilon))Nieuwenhuizen`NieuwenhuizenOperator0BarFAD[\[Mu],\[Nu],\[Alpha],\[Beta],p]-1/2 Nieuwenhuizen`NieuwenhuizenOperator0BarBarFAD[\[Mu],\[Nu],\[Alpha],\[Beta],p])//Calc;
-GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]:= I GravitonPropagatorTopFAD[\[Mu],\[Nu],\[Alpha],\[Beta],k] FAD[k] //Calc;
-GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_]:=I (GravitonPropagatorTop[\[Mu],\[Nu],\[Alpha],\[Beta],k])/SPD[k,k];
+GravitonPropagatorTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := (-(1/2) Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p] + Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] -((3 FeynGrav`GaugeFixingEpsilon - 8)/(2 FeynGrav`GaugeFixingEpsilon))Nieuwenhuizen`NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p]-1/2 Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p]) //Expand;
+GravitonPropagatorTopFAD[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := (-(1/2) Nieuwenhuizen`NieuwenhuizenOperator0FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator1FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + Nieuwenhuizen`NieuwenhuizenOperator2FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] -((3 FeynGrav`GaugeFixingEpsilon - 8)/(2 FeynGrav`GaugeFixingEpsilon))Nieuwenhuizen`NieuwenhuizenOperator0BarFAD[\[Mu],\[Nu],\[Alpha],\[Beta],p]-1/2 Nieuwenhuizen`NieuwenhuizenOperator0BarBarFAD[\[Mu],\[Nu],\[Alpha],\[Beta],p]) //FeynAmpDenominatorCombine;
+GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_] := I GravitonPropagatorTopFAD[\[Mu],\[Nu],\[Alpha],\[Beta],k] FAD[k] //FeynAmpDenominatorCombine ;
+GravitonPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_] := I (GravitonPropagatorTop[\[Mu],\[Nu],\[Alpha],\[Beta],k])/Pair[Momentum[k,D],Momentum[k,D]] //Expand;
 
 
-GravitonPropagatorMassiveTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m_]:= ( 1/2 ( (MTD[\[Mu],\[Alpha]]-FVD[p,\[Mu]]FVD[p,\[Alpha]]/m^2)(MTD[\[Nu],\[Beta]]-FVD[p,\[Nu]]FVD[p,\[Beta]]/m^2)+(MTD[\[Mu],\[Beta]]-FVD[p,\[Mu]]FVD[p,\[Beta]]/m^2)(MTD[\[Nu],\[Alpha]]-FVD[p,\[Nu]]FVD[p,\[Alpha]]/m^2) ) - 1/(D-1) (MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[Nu]]/m^2)(MTD[\[Alpha],\[Beta]]-FVD[p,\[Alpha]]FVD[p,\[Beta]]/m^2) ) //Calc ;
-GravitonPropagatorMassive[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m_]:=(-I)FAD[{p,m}] GravitonPropagatorMassiveTop[\[Mu],\[Nu],\[Alpha],\[Beta],p,m] //Calc;
-GravitonPropagatorMassiveAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m_]:=(-I) GravitonPropagatorMassiveTop[\[Mu],\[Nu],\[Alpha],\[Beta],p,m]/(SPD[p,p]-m^2) //Calc;
+GravitonPropagatorMassiveTop[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m_] = ( 1/2 ( (MTD[\[Mu],\[Alpha]]-FVD[p,\[Mu]]FVD[p,\[Alpha]]/m^2)(MTD[\[Nu],\[Beta]]-FVD[p,\[Nu]]FVD[p,\[Beta]]/m^2)+(MTD[\[Mu],\[Beta]]-FVD[p,\[Mu]]FVD[p,\[Beta]]/m^2)(MTD[\[Nu],\[Alpha]]-FVD[p,\[Nu]]FVD[p,\[Alpha]]/m^2) ) - 1/(D-1) (MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[Nu]]/m^2)(MTD[\[Alpha],\[Beta]]-FVD[p,\[Alpha]]FVD[p,\[Beta]]/m^2) )  //FeynCalcInternal//Expand;
+GravitonPropagatorMassive[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m_]:=(-I)FAD[{p,m}] GravitonPropagatorMassiveTop[\[Mu],\[Nu],\[Alpha],\[Beta],p,m] //FeynAmpDenominatorCombine;
+GravitonPropagatorMassiveAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m_]:=(-I) GravitonPropagatorMassiveTop[\[Mu],\[Nu],\[Alpha],\[Beta],p,m]/(SPD[p,p]-m^2) //FeynCalcInternal//Expand;
 
 
-QuadraticGravityPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= m0^2/2 FAD[p,{p,m0}] Nieuwenhuizen`NieuwenhuizenOperator0FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator0FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p]  - m2^2 FAD[p,{p,m2}] Nieuwenhuizen`NieuwenhuizenOperator2FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + ( 4/FeynGrav`GaugeFixingEpsilon FAD[p] + (3 m0^2)/2 FAD[p,{p,m0}] ) Nieuwenhuizen`NieuwenhuizenOperator0BarFAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + m0^2/2 FAD[p,{p,m0}] Nieuwenhuizen`NieuwenhuizenOperator0BarBarFAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] //Calc//FeynAmpDenominatorCombine ;
-QuadraticGravityPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= (m0^2/2) 1/(SPD[p,p](SPD[p,p]-m0^2)) Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p]  - (m2^2)/( SPD[p,p] (SPD[p,p]-m2^2) ) Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] + ( (4/FeynGrav`GaugeFixingEpsilon) (1/SPD[p,p]) + (3/2 m0^2) 1/(SPD[p,p] (SPD[p,p]-m0^2) ) ) Nieuwenhuizen`NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p] + m0^2/2 FAD[p,{p,m0}] Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p] //Calc ;
+QuadraticGravityPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= m0^2/2 FAD[p,{p,m0}] Nieuwenhuizen`NieuwenhuizenOperator0FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator0FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p]  - m2^2 FAD[p,{p,m2}] Nieuwenhuizen`NieuwenhuizenOperator2FAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + ( 4/FeynGrav`GaugeFixingEpsilon FAD[p] + (3 m0^2)/2 FAD[p,{p,m0}] ) Nieuwenhuizen`NieuwenhuizenOperator0BarFAD[\[Mu],\[Nu],\[Alpha],\[Beta],p] + m0^2/2 FAD[p,{p,m0}] Nieuwenhuizen`NieuwenhuizenOperator0BarBarFAD[\[Mu],\[Nu],\[Alpha],\[Beta],p]  //FeynAmpDenominatorCombine;
+QuadraticGravityPropagatorAlternative[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= (m0^2/2) 1/(SPD[p,p](SPD[p,p]-m0^2)) Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p]  - (m2^2)/( SPD[p,p] (SPD[p,p]-m2^2) ) Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] + ( (4/FeynGrav`GaugeFixingEpsilon) (1/SPD[p,p]) + (3/2 m0^2) 1/(SPD[p,p] (SPD[p,p]-m0^2) ) ) Nieuwenhuizen`NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p] + m0^2/2 FAD[p,{p,m0}] Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p] //FeynCalcInternal//Expand ;
 
 
 (* Polarisation tensors *)
 
 
-PolarizationTensor={\[Mu],\[Nu],p}|->Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Mu],D]]Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Nu],D]];
+PolarizationTensor[\[Mu]_,\[Nu]_,p_] = Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Mu],D]]Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Nu],D]];
 SetPolarizationTensor := Module[{},
 	Pair[Momentum[Polarization[x_,I],D],Momentum[Polarization[x_,I],D]]=0;
 	Pair[Momentum[Polarization[x_,I]],Momentum[Polarization[x_,I]]]=0;
