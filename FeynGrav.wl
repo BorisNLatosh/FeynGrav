@@ -493,7 +493,7 @@ importQuadraticGravity[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	Clear[QuadraticGravityVertex];
 	
 	Map[
-		(Evaluate[QuadraticGravityVertex[DummyArrayMomentaVariables[#+2],\[GothicM]0_,\[GothicM]2_]] = Get[packageDirectory<>"Libs/QuadraticGravityVertex_"<>ToString[#]])&,
+		(Evaluate[QuadraticGravityVertex[DummyArrayMomentaVariables[#+2],ToExpression["\[GothicM]0_"],ToExpression["\[GothicM]2_"]]] = Get[packageDirectory<>"Libs/QuadraticGravityVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
