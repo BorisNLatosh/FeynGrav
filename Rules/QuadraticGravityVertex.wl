@@ -58,7 +58,7 @@ VertexRicciSquare[gravitonParameters_List] := VertexRicciSquare[gravitonParamete
 (* The vertex *)
 
 
-QuadraticGravityVertexCore[gravitonParameters_List,m0_,m2_] := QuadraticGravityVertexCore[gravitonParameters,m0,m2] = GRVertex[gravitonParameters] + I (Global`\[Kappa])^(Length[indexArray]/3-2) 1/(3 (Global`\[Kappa])^2) (2/m2^2+1/m0^2) VertexCurvatureSquare[gravitonParameters]  - I (Global`\[Kappa])^(Length[indexArray]/3-2) 2/(Global`\[Kappa])^2 1/m2^2 VertexRicciSquare[gravitonParameters] ;
+QuadraticGravityVertexCore[gravitonParameters_List,m0_,m2_] := QuadraticGravityVertexCore[gravitonParameters,m0,m2] = GRVertex[gravitonParameters] + I (Global`\[Kappa])^(Length[gravitonParameters]/3) 1/(3 (Global`\[Kappa])^2) (2/m2^2+1/m0^2) VertexCurvatureSquare[gravitonParameters]  - I (Global`\[Kappa])^(Length[gravitonParameters]/3) 2/(Global`\[Kappa])^2 1/m2^2 VertexRicciSquare[gravitonParameters] ;
 
 
 QuadraticGravityVertex[gravitonParameters_List,m0_,m2_] := QuadraticGravityVertex[gravitonParameters,m0,m2] = Total[Map[ QuadraticGravityVertexCore[#,m0,m2]& , Flatten/@Permutations[Partition[gravitonParameters,3]] ]] ;
