@@ -15,6 +15,7 @@ Needs["HorndeskiG2`","./../Rules/HorndeskiG2.wl"];
 Needs["HorndeskiG3`","./../Rules/HorndeskiG3.wl"];
 Needs["HorndeskiG4`","./../Rules/HorndeskiG4.wl"];
 Needs["HorndeskiG5`","./../Rules/HorndeskiG5.wl"];
+Needs["ScalarGaussBonnet`","./../Rules/ScalarGaussBonnet.wl"];
 Needs["GravitonAxionVectorVertex`","./../Rules/GravitonAxionVectorVertex.wl"];
 Needs["QuadraticGravityVertex`","./../Rules/QuadraticGravityVertex.wl"];
 SetDirectory[DirectoryName[$InputFileName]];
@@ -41,6 +42,9 @@ CheckHorndeskiG4::usage = "CheckHorndeskiG4. This procedure checks what librarie
 CheckHorndeskiG5::usage = "CheckHorndeskiG5. This procedure checks what libraries for Horndeski G5 interactions are present.";
 
 
+CheckScalarGaussBonnet::usage = "CheckScalarGaussBonnet. This procedure checks what libraries for Scalar-Gauss-Bonnet interactions are present.";
+
+
 CheckQuadraticGravityVertex::usage = "CheckQuadraticGravityVertex. This procedure checks what libraries for quadratic gravity vertices are present.";
 
 
@@ -65,6 +69,9 @@ GenerateHorndeskiG4::usage = "GenerateHorndeskiG4[p,n]. This procedure generates
 GenerateHorndeskiG5::usage = "GenerateHorndeskiG5[p,n]. This procedure generates libraries for Horndeski G5 interaction involving up to p scalars up to the order n. Pre-existing libraries will be removed!";
 
 
+GenerateScalarGaussBonnet::usage = "GenerateScalarGaussBonnet[n]. This procedure generates libraries for Scalar-Gauss-Bonnet interaction up to the order n. Pre-existing libraries will be removed!";
+
+
 GenerateQuadraticGravityVertex::usage = "GenerateQuadraticGravityVertex[n]. This procedure generates libraries for quadratic gravity up to the order n. Pre-existing libraries will be removed!";
 
 
@@ -87,6 +94,9 @@ GenerateHorndeskiG2Specific::usage = "GenerateHorndeskiG2Specific[a,b,n]. This p
 GenerateHorndeskiG3Specific::usage = "GenerateHorndeskiG3Specific[a,b,n]. This procedure generates libraries for Horndeski G3 interaction with given a abd b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
 GenerateHorndeskiG4Specific::usage = "GenerateHorndeskiG4Specific[a,b,n]. This procedure generates libraries for Horndeski G4 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
 GenerateHorndeskiG5Specific::usage = "GenerateHorndeskiG5Specific[a,b,n]. This procedure generates libraries for Horndeski G5 interaction with given a and b for the n-th order in perturbation theory. Pre-existing libraries will be removed!";
+
+
+GenerateScalarGaussBonnetSpecific::usage = "GenerateScalarGaussBonnetSpecific[n]. This procedure generates libraries for Scalar-Gauss-Bonnet vertices of the n-th order in perturbation theory. Pre-existing libraries will be removed!";
 
 
 GenerateQuadraticGravityVertexSpecific::usage = "GenerateQuadraticGravityVertexSpecific[n]. This procedure generates libraries for quadratic gravity for the order n. Pre-existing libraries will be removed!";
@@ -164,6 +174,9 @@ CheckHorndeskiG4 := Scan[ ( Print["Horndeski G4 vertex exists for a=",#1,", b=",
 
 
 CheckHorndeskiG5 := Scan[ ( Print["Horndeski G5 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG5_*"] ];
+
+
+CheckScalarGaussBonnet := Scan[ Print["Libraries for Scalar-Gauss-Bonnet vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["ScalarGaussBonnet_*"] ];
 
 
 (* Graviton-Axion. *)
@@ -824,6 +837,46 @@ GenerateHorndeskiG5Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
 	FORMOutputCleanUp[filePath];
 		
 	Print["Done for the Horndeski G5 vertex with a=",a,", b="<>ToString[b]<>" for order n="<>ToString[n]<>"."];
+];
+
+
+(* Scalar-Gauss-Bonnet *)
+
+
+GenerateScalarGaussBonnet[n_] := Module[{theTimingVariable},
+	theTimingVariable = Timing[ Map[GenerateScalarGaussBonnetSpecific , Range[2,n]] ][[1]];
+	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
+];
+
+
+GenerateScalarGaussBonnetSpecific[n_] := Module[{filePath,theTimingVariable},
+	filePath = "ScalarGaussBonnet_"<>ToString[n]<>".frm";
+		
+	(* Check if the FROM code file exists and is empty. *)
+	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
+	(* Check if the corresponding library exists and delete it if it does. *)
+	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
+		
+	(* FeynCalc converts the expression to FORM and writes it to the file. *)
+	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, ScalarGaussBonnet[DummyArrayMomentaK[n]] ] ][[1]];
+	Print["The expression is generated in ",theTimingVariable," seconds."];
+		
+	(* I modify the FORM file so that it can be executed. *)
+	FORMCodeCleanUp[filePath,0,n];
+		
+	(*Run the FORM*)
+	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
+	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
+	DeleteFile[filePath];
+	filePath = StringDrop[filePath, -4];
+		
+	(*Clean the output*)
+	FORMOutputCleanUp[filePath];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (WordCharacter ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
+
+	Print["Scalar-GaussBonnet vertices is generated for n="<>ToString[n]<>"."];
 ];
 
 

@@ -93,6 +93,9 @@ HorndeskiG4::usage = "HorndeskiG4[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\
 HorndeskiG5::usage = "HorndeskiG5[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\),\!\(\*SubscriptBox[\(k\), \(n\)]\)},{\!\(\*SubscriptBox[\(p\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(p\), \(a + 2  b + 1 \)]\)},b,\[Lambda]]. The function returns the Horndeski \!\(\*SubscriptBox[\(G\), \(5\)]\) interaction vertex. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are Lorentz indices of gravitons, \!\(\*SubscriptBox[\(k\), \(i\)]\) are graviton momenta, \!\(\*SubscriptBox[\(p\), \(i\)]\) are momenta of scalars, b is the number of kinetic terms, and \[Lambda] is the coupling.";
 
 
+ScalarGaussBonnet::usage = "ScalarGaussBonnet[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\),\!\(\*SubscriptBox[\(k\), \(n\)]\)},g]. The function returns Scalar-Gauss-Bonnet vertex for an arbitrary number of scalars and n\[GreaterEqual]2 gravitons. Here, \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are Lorentz indices of a graviton, \!\(\*SubscriptBox[\(k\), \(i\)]\) is a momentum of a graviton, g is the coupling.";
+
+
 (* Quadratic gravity *)
 
 
@@ -117,6 +120,7 @@ importHorndeskiG2::usage = "importHorndeskiG2[n]. The command imports libraries 
 importHorndeskiG3::usage = "importHorndeskiG3[n]. The command imports libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(3\)]\) vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
 importHorndeskiG4::usage = "importHorndeskiG4[n]. The command imports libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(4\)]\) vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
 importHorndeskiG5::usage = "importHorndeskiG5[n]. The command imports libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(5\)]\) vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
+importScalarGaussBonnet::usage "importScalarGaussBonnet[n]. The command imports libraries for Scalar-Gauss-Bonnet vertices up to order n\[GreaterEqual]2. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
 
 
 (* The list of commands *)
@@ -472,6 +476,33 @@ importHorndeskiG5[ OptionsPattern[] ] := Block[{indexArray},
 	];
 	If[OptionValue[printOutput],
 		Print["Import is done."];
+	];
+];
+
+
+(* Scalar-Gauss-Bonnet *)
+
+
+Options[importScalarGaussBonnet] = { printOutput -> False};
+
+importScalarGaussBonnet[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+	
+	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/ScalarGaussBonnet_*", packageDirectory]]]];
+	
+	If[OptionValue[printOutput], 
+		Print["Scalar-Gauss-Bonnet vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/ScalarGaussBonnet_*",packageDirectory]]],"."];
+		Print["Libraries will be imported up to the order ",Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/ScalarGaussBonnet*",packageDirectory]]]],"."];
+	];
+
+	Clear[ScalarGaussBonnet];
+	
+	Map[
+		(Evaluate[ScalarGaussBonnet[DummyArrayMomentaKVariables[#],g_]] = g Get[packageDirectory<>"Libs/ScalarGaussBonnet_"<>ToString[#]])&,
+		Range[2,nImport] 
+	];
+	
+	If[OptionValue[printOutput],
+		Print["Scalar-Gauss-Bonnet fermion vertices imported up to order ",nImport,"."]
 	];
 ];
 
