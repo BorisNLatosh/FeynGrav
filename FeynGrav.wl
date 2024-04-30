@@ -195,7 +195,7 @@ importGravitons[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonGhostVertex[DummyArrayMomentaVariables[#],\[Lambda]1_,k1_,\[Lambda]2_,k2_]] = Get[packageDirectory<>"Libs/GravitonGhostVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonGhostVertex[DummyArrayMomentaVariables[#],ToExpression["\[Lambda]1_"],ToExpression["k1_"],ToExpression["\[Lambda]2_"],ToExpression["k2_"]]] = Get[packageDirectory<>"Libs/GravitonGhostVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
@@ -223,11 +223,11 @@ importScalars[nExternal_ : 2, OptionsPattern[] ] := Block[{nImport},
 	Clear[GravitonScalarVertex,GravitonScalarPotentialVertex];
 	
 	Map[
-		(Evaluate[ GravitonScalarVertex[DummyArrayVariables[#],p1_,p2_,m_ ]] = Get[packageDirectory<>"Libs/GravitonScalarVertex_"<>ToString[#]])&,
+		(Evaluate[ GravitonScalarVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["p2_"],ToExpression["m_"] ]] = Get[packageDirectory<>"Libs/GravitonScalarVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonScalarPotentialVertex[DummyArrayVariables[#],\[Lambda]_]] = Get[packageDirectory<>"Libs/GravitonScalarPotentialVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonScalarPotentialVertex[DummyArrayVariables[#],ToExpression["\[Lambda]_"]]] = Get[packageDirectory<>"Libs/GravitonScalarPotentialVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
@@ -254,7 +254,7 @@ importFermions[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	Clear[GravitonFermionVertex];
 	
 	Map[
-		(Evaluate[GravitonFermionVertex[DummyArrayVariables[#],p1_,p2_,m_]] = Get[packageDirectory<>"Libs/GravitonFermionVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonFermionVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["p2_"],ToExpression["m_"]]] = Get[packageDirectory<>"Libs/GravitonFermionVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
@@ -283,15 +283,15 @@ importVectors[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	Clear[GravitonMassiveVectorVertex,GravitonVectorVertex,GravitonVectorGhostVertex];
 	
 	Map[
-		(Evaluate[GravitonMassiveVectorVertex[DummyArrayVariables[#],\[Lambda]1_,p1_,\[Lambda]2_,p2_,m_]] = Get[packageDirectory<>"Libs/GravitonMassiveVectorVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonMassiveVectorVertex[DummyArrayVariables[#],ToExpression["\[Lambda]1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["p2_"],ToExpression["m_"]]] = Get[packageDirectory<>"Libs/GravitonMassiveVectorVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonVectorVertex[DummyArrayMomentaKVariables[#],\[Lambda]1_,p1_,\[Lambda]2_,p2_]] = Get[packageDirectory<>"Libs/GravitonVectorVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonVectorVertex[DummyArrayMomentaKVariables[#],ToExpression["\[Lambda]1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["p2_"]]] = Get[packageDirectory<>"Libs/GravitonVectorVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonVectorGhostVertex[DummyArrayVariables[#],p1_,p2_]] = Get[packageDirectory<>"Libs/GravitonVectorGhostVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonVectorGhostVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["p2_"]]] = Get[packageDirectory<>"Libs/GravitonVectorGhostVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
@@ -323,27 +323,27 @@ importSUNYM[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	Clear[GravitonGluonVertex,GravitonQuarkGluonVertex,GravitonYMGhostVertex,GravitonGluonGhostVertex];
 	
 	Map[
-		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],p1_,\[Lambda]1_,a1_,p2_,\[Lambda]2_,a2_]] = Get[packageDirectory<>"Libs/GravitonGluonVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"]]] = Get[packageDirectory<>"Libs/GravitonGluonVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],p1_,\[Lambda]1_,a1_,p2_,\[Lambda]2_,a2_,p3_,\[Lambda]3_,a3_]] = Get[packageDirectory<>"Libs/GravitonThreeGluonVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"],ToExpression["p3_"],ToExpression["\[Lambda]3_"],ToExpression["a3_"]]] = Get[packageDirectory<>"Libs/GravitonThreeGluonVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],p1_,\[Lambda]1_,a1_,p2_,\[Lambda]2_,a2_,p3_,\[Lambda]3_,a3_,p4_,\[Lambda]4_,a4_]] = Get[packageDirectory<>"Libs/GravitonFourGluonVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"],ToExpression["p3_"],ToExpression["\[Lambda]3_"],ToExpression["a3_"],ToExpression["p4_"],ToExpression["\[Lambda]4_"],ToExpression["a4_"]]] = Get[packageDirectory<>"Libs/GravitonFourGluonVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonQuarkGluonVertex[DummyArrayVariables[#],\[Lambda]_,a_ ]] = Get[packageDirectory<>"Libs/GravitonQuarkGluonVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonQuarkGluonVertex[DummyArrayVariables[#],ToExpression["\[Lambda]_"],a_ ]] = Get[packageDirectory<>"Libs/GravitonQuarkGluonVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonYMGhostVertex[DummyArrayVariables[#],p1_,a1_,p2_,a2_ ]] = Get[packageDirectory<>"Libs/GravitonYMGhostVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonYMGhostVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["a2_"] ]] = Get[packageDirectory<>"Libs/GravitonYMGhostVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonGluonGhostVertex[DummyArrayVariables[#],\[Lambda]1_,a1_,p1_,\[Lambda]2_,a2_,p2_,\[Lambda]3_,a3_,p3_  ]] = Get[packageDirectory<>"Libs/GravitonGluonGhostVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonGluonGhostVertex[DummyArrayVariables[#],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"],ToExpression["p2_"],ToExpression["\[Lambda]3_"],ToExpression["a3_"],ToExpression["p3_"]  ]] = Get[packageDirectory<>"Libs/GravitonGluonGhostVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
@@ -370,7 +370,7 @@ importAxionVectorVertex[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	Clear[GravitonAxionVectorVertex];
 	
 	Map[
-		(Evaluate[GravitonAxionVectorVertex[DummyArrayVariables[#],\[Lambda]1_,p1_,\[Lambda]2_,p2_,\[CapitalTheta]_]  ] = Get[packageDirectory<>"Libs/GravitonAxionVectorVertex_"<>ToString[#]];)&,
+		(Evaluate[GravitonAxionVectorVertex[DummyArrayVariables[#],ToExpression["\[Lambda]1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["p2_"],ToExpression["\[CapitalTheta]_"]]  ] = Get[packageDirectory<>"Libs/GravitonAxionVectorVertex_"<>ToString[#]];)&,
 		Range[nImport] 
 	];
 	
@@ -396,7 +396,7 @@ importHorndeskiG2[OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG2];
 	Map[
-		(HorndeskiG2[DummyArrayVariables[#[[3]]],DummyMomentaVariables[#[[1]] + 2 #[[2]]], #[[2]], \[Lambda]_] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG2_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG2[DummyArrayVariables[#[[3]]],DummyMomentaVariables[#[[1]] + 2 #[[2]]], #[[2]], ToExpression["\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG2_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
 	If[OptionValue[printOutput],
@@ -421,7 +421,7 @@ importHorndeskiG3[ OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG3];
 	Map[
-		(HorndeskiG3[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]+1],#[[2]],\[Lambda]_] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG3_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG3[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]+1],#[[2]],ToExpression["\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG3_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
 	If[OptionValue[printOutput],
@@ -446,7 +446,7 @@ importHorndeskiG4[ OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG4];
 	Map[
-		(HorndeskiG4[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]],#[[2]],\[Lambda]_] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG4_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG4[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]],#[[2]],ToExpression["\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG4_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
 	If[OptionValue[printOutput],
@@ -471,7 +471,7 @@ importHorndeskiG5[ OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG5];
 	Map[
-		(HorndeskiG5[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2 #[[2]]],#[[2]],\[Lambda]_] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG5_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG5[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2 #[[2]]],#[[2]],ToExpression["\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG5_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
 	If[OptionValue[printOutput],
@@ -497,7 +497,7 @@ importScalarGaussBonnet[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	Clear[ScalarGaussBonnet];
 	
 	Map[
-		(Evaluate[ScalarGaussBonnet[DummyArrayMomentaKVariables[#],g_]] = g Get[packageDirectory<>"Libs/ScalarGaussBonnet_"<>ToString[#]])&,
+		(Evaluate[ScalarGaussBonnet[DummyArrayMomentaKVariables[#],ToExpression["g_"]]] = g Get[packageDirectory<>"Libs/ScalarGaussBonnet_"<>ToString[#]])&,
 		Range[2,nImport] 
 	];
 	
