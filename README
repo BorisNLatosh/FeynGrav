@@ -14,15 +14,14 @@ FeynCalc 9.3.1 or higher is required.
 "FeynGrav.wl"
 The main package file.
 
-"FeynGrav_Examples.nb"
-The file contains a few examples discussed in ArXiV:2201.06812.
+"Examples"
+The directory contains a few files with examples.
 
 "Rules"
-The directory contains files with Feynman rules for gravity and auxiliary functions.
+The directory contains all the rules used in the package.
 
 "Libs"
-The directory contains library files and the libraries generator.
-The package is provided with pre-generated libraries up to O(\kappa^3) order in perturbation theory.
+The directory contains all the libraries used by the package. Libraries describing interactions with a large number of gravitons take up a lot of space. Therefore, they are published separately and not included in the package version available on GitHub.
 
 "Libs/FeynGravLibrariesGenerator.wl"
-The package file provides a tool to generate libraries.
+The package generates libraries. It is unnecessary for a user to interact with the package since libraries only need to be generated once and then published online. Because of this, the package is not very user-friendly.

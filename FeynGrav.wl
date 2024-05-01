@@ -580,3 +580,9 @@ End[];
 
 
 EndPackage[];
+
+
+(* This line ensures that one shall not specify the Nieuwenhuizen context every time they call for a command from the Nieuwenhuizen package. *)
+
+
+AppendTo[$ContextPath, "Nieuwenhuizen`"];
