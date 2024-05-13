@@ -1,26 +1,69 @@
-***DEPENDENCIES***
-FeynCalc 9.3.1 or higher is required.
-FORM is required to run the script that generates libraries.
+FeynGrav
+================
 
-***INSTALLATION**
+FeynGrav is a package designed to extend FeynCalc's capabilities to handle calculations involving gravitons. This document provides a short guide for installing and using the package.
 
-*) Run "$UserBaseDirectory" in Wolfram Mathematica and locate the User Base Directory.
-*) Copy the whole "FeynGrav" folder to "UserBaseDirectory/Applications".
-*) Command "<<FeynGrav`" loads FeynGrav alongside FeynCalc in Mathematica.
+Dependencies
+------------
+- FeynCalc version 9.3.1 or higher is required.
+- FORM version 4.2 or higher is needed for generating libraries.
 
-***FILES DESCRIPTION***
+Installation
+------------
+To install FeynGrav, follow these steps:
 
-"FeynGrav.wl"
-The main package file.
+1. Locate User Base Directory:
+   - In Wolfram Mathematica, execute the "$UserBaseDirectory" command to find the User Base Directory path.
 
-"Examples"
-The directory contains a few files with examples.
+2. Copy Package Files:
+   - Copy the "FeynGrav" folder to the "Applications" subdirectory within your User Base Directory.
 
-"Rules"
-The directory contains all the rules used in the package.
+3. Load the Package:
+   - In Mathematica, load the package by executing the command "<<FeynGrav`".
+   - This command will also load FeynCalc if it still needs to be loaded.
 
-"Libs"
-The directory contains all the libraries used by the package. Libraries describing interactions with a large number of gravitons take up a lot of space. Therefore, they are published separately and not included in the package version available on GitHub.
+File Description
+----------------
+The package contains several key components:
 
-"Libs/FeynGravLibrariesGenerator.wl"
-The package generates libraries. It is unnecessary for a user to interact with the package since libraries only need to be generated once and then published online. Because of this, the package is not very user-friendly.
+- FeynGrav.wl:
+  - The main package file that defines the core functionality of FeynGrav.
+
+- Examples Directory:
+  - Contains example files demonstrating the use of FeynGrav for various calculations.
+
+- Rules Directory:
+  - Includes all the rules applied by the package during computations.
+
+- Libs Directory:
+  - Contains the libraries used by the package. Note that libraries for interactions involving many gravitons are substantial and provided separately online, not included in the GitHub package.
+
+- Libs/FeynGravLibrariesGenerator.wl:
+  - A script for generating the necessary libraries. This script is primarily for developers and not for regular users, as libraries only need to be generated once and published online.
+
+Usage Notes
+-----------
+- FeynGrav is designed to work seamlessly with FeynCalc, enhancing its capabilities to manage complex interactions involving gravitons.
+- Users generally do not need to interact with the library generation script, as pre-generated libraries are available online.
+- Refer to the files in the "Examples" directory for specific examples and usage patterns.
+
+Version History
+---------------
+- **Version 1:**
+  - Supported massless fields with spin 0, 1/2, 1, and gravity.
+- **Version 2:**
+  - Added support for fields with spins 0, 1/2, and 1 of arbitrary mass.
+  - General relativity was included with advanced gauge fixing.
+  - Implemented SU(N) Yang-Mills.
+- **Version 3:**
+  - Implemented a propagator for massive gravity.
+  - Included Horndeski models.
+  - Added axion-like coupling.
+  - Introduced quadratic gravity.
+
+Contact Information
+-------------------
+For further assistance, please contact:
+
+Dr Boris Latosh
+Email: latosh.boris@gmail.com

@@ -3,10 +3,40 @@
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
-Print[Style["FeynGrav 3.0",Bold]];
-Print["FeynGrav: FeynGravCommands prints the list of all commands."];
-Print["FeynGrav: On initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the \"import*\" command."];
-Print["FeynGrav: Core publications on FeynGrav are ",Hyperlink["Class.Quant.Grav. 39 (2022) 16, 165006","https://doi.org/10.1088/1361-6382/ac7e15"],", ",Hyperlink["Comput.Phys.Commun. 292 (2023) 108871","https://doi.org/10.1016/j.cpc.2023.108871"],"."];
+(* Function to display initialization messages for FeynGrav package. *)
+
+
+DisplayInitializationMessages[] := Module[{},
+  Print[Style["FeynGrav 3.0", Bold, 16]];
+  
+  Print[Style["FeynGrav: ", Bold], 
+        "Use ", 
+        Button[Style["FeynGravCommands", Underlined, Blue], 
+               FeynGravCommands[], 
+               Appearance -> None], 
+        " to print the list of all commands."];
+
+  Print[Style["FeynGrav: ", Bold], 
+        "On initialization, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the \"import*\" command."];
+
+  Print[Style["FeynGrav: Core publications on FeynGrav are ", Bold], 
+      Row[{Style[Hyperlink["Class.Quant.Grav. 39 (2022) 16, 165006", 
+                          "https://doi.org/10.1088/1361-6382/ac7e15"], Blue, Underlined], 
+           ", ", 
+           Style[Hyperlink["Comput.Phys.Commun. 292 (2023) 108871", 
+                          "https://doi.org/10.1016/j.cpc.2023.108871"], Blue, Underlined]}]
+	];
+
+];
+
+
+(* Ensure the package is initialized only once. *)
+
+
+If[!ValueQ[FeynGravInitialized],
+  DisplayInitializationMessages[];
+  FeynGravInitialized = True;
+];
 
 
 (* The package imports the Nieuwenhuizen operators and gauge projectors. *)
@@ -123,7 +153,26 @@ importScalarGaussBonnet::usage "importScalarGaussBonnet[n]. The command imports 
 (* The list of commands. *)
 
 
-FeynGravCommands := Print["GravitonPropagator, GravitonPropagatorMassive, GravitonVertex, GravitonGhostVertex, PolarizationTensor, SetPolarizationTensor,\n","ScalarPropagator, GravitonScalarVertex, GravitonScalarPotentialVertex, GravitonFermionVertex,\n","ProcaPropagator, GravitonMassiveVectorVertex, GravitonVectorVertex, GravitonVectorGhostVertex,\n","GravitonGluonVertex, GravitonGluonGhostVertex, GravitonYMGhostVertex, GravitonQuarkGluonVertex,\n","GravitonAxionVectorVertex,\n","HorndeskiG2, HorndeskiG3, HorndeskiG4, HorndeskiG5, importScalarGaussBonnet,\n","QuadraticGravityPropagator, QuadraticGravityVertex,\n","importGravitons, importScalars, importFermions, importVectors, importSUNYM,\n","importHorndeskiG2, importHorndeskiG3, importHorndeskiG4, importHorndeskiG5,\n","importAxionVectorVertex, importQuadraticGravity."];
+FeynGravCommands := Print[
+  Style[
+    StringRiffle[
+      {
+        "GravitonPropagator", "GravitonPropagatorMassive", "GravitonVertex", "GravitonGhostVertex", "PolarizationTensor", "SetPolarizationTensor",
+        "ScalarPropagator", "GravitonScalarVertex", "GravitonScalarPotentialVertex", "GravitonFermionVertex",
+        "ProcaPropagator", "GravitonMassiveVectorVertex", "GravitonVectorVertex", "GravitonVectorGhostVertex",
+        "GravitonGluonVertex", "GravitonGluonGhostVertex", "GravitonYMGhostVertex", "GravitonQuarkGluonVertex",
+        "GravitonAxionVectorVertex",
+        "HorndeskiG2", "HorndeskiG3", "HorndeskiG4", "HorndeskiG5", "importScalarGaussBonnet",
+        "QuadraticGravityPropagator", "QuadraticGravityVertex",
+        "importGravitons", "importScalars", "importFermions", "importVectors", "importSUNYM",
+        "importHorndeskiG2", "importHorndeskiG3", "importHorndeskiG4", "importHorndeskiG5",
+        "importAxionVectorVertex", "importQuadraticGravity"
+      }, 
+      ", "
+    ],
+    FontSize -> 16
+  ]
+];
 
 
 (* Gauge fixing parameters. *)
