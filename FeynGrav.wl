@@ -439,7 +439,7 @@ importHorndeskiG2[OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG2];
 	Map[
-		(HorndeskiG2[DummyArrayVariables[#[[3]]],DummyMomentaVariables[#[[1]] + 2 #[[2]]], #[[2]], ToExpression["\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG2_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG2[DummyArrayVariables[#[[3]]],DummyMomentaVariables[#[[1]] + 2 #[[2]]], #[[2]], ToExpression["Private`\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG2_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
 	If[OptionValue[printOutput],
@@ -464,7 +464,7 @@ importHorndeskiG3[ OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG3];
 	Map[
-		(HorndeskiG3[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]+1],#[[2]],ToExpression["\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG3_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG3[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]+1],#[[2]],ToExpression["Private`\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG3_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
 	If[OptionValue[printOutput],
@@ -489,7 +489,7 @@ importHorndeskiG4[ OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG4];
 	Map[
-		(HorndeskiG4[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]],#[[2]],ToExpression["\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG4_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG4[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]],#[[2]],ToExpression["Private`\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG4_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
 	If[OptionValue[printOutput],
@@ -514,7 +514,7 @@ importHorndeskiG5[ OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG5];
 	Map[
-		(HorndeskiG5[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2 #[[2]]],#[[2]],ToExpression["\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG5_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG5[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2 #[[2]]],#[[2]],ToExpression["Private`\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG5_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
 	If[OptionValue[printOutput],
@@ -540,7 +540,7 @@ importScalarGaussBonnet[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	Clear[ScalarGaussBonnet];
 	
 	Map[
-		(Evaluate[ScalarGaussBonnet[DummyArrayMomentaKVariables[#],ToExpression["g_"]]] = g Get[packageDirectory<>"Libs/ScalarGaussBonnet_"<>ToString[#]])&,
+		(Evaluate[ScalarGaussBonnet[DummyArrayMomentaKVariables[#],ToExpression["Private`g_"]]] = g Get[packageDirectory<>"Libs/ScalarGaussBonnet_"<>ToString[#]])&,
 		Range[2,nImport] 
 	];
 	
