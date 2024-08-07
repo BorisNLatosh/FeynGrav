@@ -144,7 +144,6 @@ CheckGravitonVectors := (
 
 CheckGravitonVertex := (
 	Scan[ Print["Libraries for graviton vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonVertex_*"] ];
-	Scan[ Print["Libraries for graviton-ghost vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonGhostVertex_*"] ];
 );
 
 
@@ -470,33 +469,6 @@ GenerateGravitonVertexSpecific[n_] := Module[{filePath,theTimingVariable},
 	FORMOutputCleanUp[filePath];
 				
 	Print["Done for the graviton vertex for order n="<>ToString[n]<>"."];
-	
-(* Ghost *)
-	filePath = "GravitonGhostVertex_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonGhostVertexUncontracted[DummyArrayMomenta[n],Global`\[Lambda]1,Global`k1,Global`\[Lambda]2,Global`k2]] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,n,2];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-		
-	Print["Done for the graviton-ghost vertex for order n="<>ToString[n]<>"."];
 ];
 
 

@@ -84,7 +84,7 @@ GravitonGluonGhostVertex::usage = "GravitonGluonGhostVertex[{\!\(\*SubscriptBox[
 
 
 GravitonVertex::usage = "GravitonVertex[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\),\!\(\*SubscriptBox[\(p\), \(n\)]\)]. Vertex for n\[GreaterEqual]3 graviton interaction within general relativity. Here {\!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\)} are Lorentz indices of gravitons; {\!\(\*SubscriptBox[\(p\), \(i\)]\)} are momenta of gravitons. The gauge fixing parameter is already fixed and enters the expression.";
-GravitonGhostVertex::usage = "GravitonGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis]},\!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)]. Vertex for the Faddeev-Popov ghost for general relativity. Here {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)} are Lorentz indices of gravitons; {\!\(\*SubscriptBox[\(k\), \(i\)]\)} are momenta of gravitons; {\!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\)} are Lorentz indices of ghosts; {\!\(\*SubscriptBox[\(p\), \(i\)]\)} are momenta of ghosts.";
+GravitonGhostVertex::usage = "GravitonGhostVertex[\[Rho],\[Sigma],k,\[Mu],\!\(\*SubscriptBox[\(p\), \(1\)]\),\[Nu],\!\(\*SubscriptBox[\(p\), \(2\)]\)]. Vertex for the Faddeev-Popov ghost for general relativity obtained within BRST formalism. Here {\[Rho],\[Sigma]} are Lorentz indices of the graviton; k is momentum of the graviton; \[Mu] and \[Nu] are Lorentz indices of ghost and antighost;  \!\(\*SubscriptBox[\(p\), \(1\)]\) and \!\(\*SubscriptBox[\(p\), \(2\)]\) are momenta of ghost and antighost.";
 
 
 GravitonPropagator::usage = "GravitonPropagator[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Graviton propagator. The gauge fixing parameter is already fixed and enters the expression. Here \[Mu],\[Nu],\[Alpha], and \[Beta] are Lorentz indices; p is the graviton momentum. The expression uses FAD function from FeynCalc, so it is more suitable for loop calculations.";
@@ -223,22 +223,17 @@ Options[importGravitons] = { printOutput -> False};
 
 importGravitons[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	
-	nImport = Min[nExternal, Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVertex_*", packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGhostVertex_*", packageDirectory]]]];
+	nImport = Min[ nExternal, Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVertex_*", packageDirectory]]] ];
 	
 	If[OptionValue[printOutput], 
 		Print["Graviton vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVertex_*", packageDirectory]]],"."];
-		Print["Graviton-ghost vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGhostVertex_*", packageDirectory]]],"."];
 		Print["Libraries will be imported up to the order ",nImport,"."];
 	];
 
-	Clear[GravitonVertex,GravitonGhostVertex];
+	Clear[GravitonVertex];
 	
 	Map[
 		(Evaluate[GravitonVertex[Sequence@@DummyArrayMomentaVariables[#+2]]] = Get[packageDirectory<>"Libs/GravitonVertex_"<>ToString[#]])&,
-		Range[nImport] 
-	];
-	Map[
-		(Evaluate[GravitonGhostVertex[DummyArrayMomentaVariables[#],ToExpression["\[Lambda]1_"],ToExpression["k1_"],ToExpression["\[Lambda]2_"],ToExpression["k2_"]]] = Get[packageDirectory<>"Libs/GravitonGhostVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
@@ -246,6 +241,10 @@ importGravitons[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 		Print["Graviton vertices imported up to order ",nImport,"."]
 	];
 ];
+
+Clear[GravitonGhostVertex];
+
+GravitonGhostVertex = {\[Rho],\[Sigma],k,\[Mu],p1,\[Nu],p2} |->  I ( (FeynGrav`\[Kappa])/2 ) FVD[p2,\[Lambda]] ( MTD[\[Nu],\[Alpha]]MTD[\[Lambda],\[Beta]] + MTD[\[Nu],\[Beta]]MTD[\[Lambda],\[Alpha]] - MTD[\[Nu],\[Lambda]]MTD[\[Alpha],\[Beta]] ) ( FVD[p1,\[Alpha]](1/2)(MTD[\[Beta],\[Rho]]MTD[\[Nu],\[Sigma]]+MTD[\[Beta],\[Sigma]]MTD[\[Nu],\[Rho]]) + FVD[p1,\[Beta]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Nu],\[Sigma]]+MTD[\[Alpha],\[Sigma]]MTD[\[Nu],\[Rho]]) + FVD[k,\[Mu]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Beta],\[Sigma]] + MTD[\[Beta],\[Rho]]MTD[\[Alpha],\[Sigma]]) ) //Expand//Calc ;
 
 
 (* Scalar sector *)
@@ -586,7 +585,7 @@ ScalarPropagator[p_,m_] = I FAD[{p,m}];
 ProcaPropagator[\[Mu]_,\[Nu]_,p_,m_] = (-I)(MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[Nu]]/m^2)FAD[{p,m}];
 
 
-GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := I (-(1/2) Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon Nieuwenhuizen`NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p] + Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] -((3 FeynGrav`GaugeFixingEpsilon - 8)/(2 FeynGrav`GaugeFixingEpsilon))Nieuwenhuizen`NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p]-1/2 Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p]) FAD[p] //FeynAmpDenominatorCombine ;
+GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := I ( (D-5)/(D-2) NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + (FeynGrav`GaugeFixingEpsilon/2) NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p] + Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] + ( ((D-1)(FeynGrav`GaugeFixingEpsilon-1)-FeynGrav`GaugeFixingEpsilon)/(D-2) ) NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p] - ( 1/(D-2) ) Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p]) FAD[p] //FeynAmpDenominatorCombine ;
 
 
 GravitonPropagatorMassive[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m_]:=(-I)FAD[{p,m}] ( 1/2 ( (MTD[\[Mu],\[Alpha]]-FVD[p,\[Mu]]FVD[p,\[Alpha]]/m^2)(MTD[\[Nu],\[Beta]]-FVD[p,\[Nu]]FVD[p,\[Beta]]/m^2)+(MTD[\[Mu],\[Beta]]-FVD[p,\[Mu]]FVD[p,\[Beta]]/m^2)(MTD[\[Nu],\[Alpha]]-FVD[p,\[Nu]]FVD[p,\[Alpha]]/m^2) ) - 1/(D-1) (MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[Nu]]/m^2)(MTD[\[Alpha],\[Beta]]-FVD[p,\[Alpha]]FVD[p,\[Beta]]/m^2) ) //FeynAmpDenominatorCombine;
