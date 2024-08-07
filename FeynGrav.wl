@@ -244,7 +244,7 @@ importGravitons[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 
 Clear[GravitonGhostVertex];
 
-GravitonGhostVertex = {\[Rho],\[Sigma],k,\[Mu],p1,\[Nu],p2} |->  I ( (FeynGrav`\[Kappa])/2 ) FVD[p2,\[Lambda]] ( MTD[\[Nu],\[Alpha]]MTD[\[Lambda],\[Beta]] + MTD[\[Nu],\[Beta]]MTD[\[Lambda],\[Alpha]] - MTD[\[Nu],\[Lambda]]MTD[\[Alpha],\[Beta]] ) ( FVD[p1,\[Alpha]](1/2)(MTD[\[Beta],\[Rho]]MTD[\[Nu],\[Sigma]]+MTD[\[Beta],\[Sigma]]MTD[\[Nu],\[Rho]]) + FVD[p1,\[Beta]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Nu],\[Sigma]]+MTD[\[Alpha],\[Sigma]]MTD[\[Nu],\[Rho]]) + FVD[k,\[Mu]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Beta],\[Sigma]] + MTD[\[Beta],\[Rho]]MTD[\[Alpha],\[Sigma]]) ) //Expand//Calc ;
+GravitonGhostVertex = {\[Rho],\[Sigma],k,\[Mu],p1,\[Nu],p2} |->  I ( (FeynGrav`\[Kappa])/2 ) FVD[p2,\[Lambda]] ( MTD[\[Nu],\[Alpha]]MTD[\[Lambda],\[Beta]] + MTD[\[Nu],\[Beta]]MTD[\[Lambda],\[Alpha]] - MTD[\[Nu],\[Lambda]]MTD[\[Alpha],\[Beta]] ) ( FVD[p1,\[Alpha]](1/2)(MTD[\[Beta],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Beta],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[p1,\[Beta]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Alpha],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[k,\[Mu]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Beta],\[Sigma]] + MTD[\[Beta],\[Rho]]MTD[\[Alpha],\[Sigma]]) ) //Expand//Calc ;
 
 
 (* Scalar sector *)
