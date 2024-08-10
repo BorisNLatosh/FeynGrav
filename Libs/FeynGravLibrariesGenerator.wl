@@ -453,7 +453,7 @@ GenerateGravitonVertexSpecific[n_] := Module[{filePath,theTimingVariable},
 	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
 		
 	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonVertexUncontracted[DummyArrayMomenta[2+n],Global`GaugeFixingEpsilon]] ][[1]];
+	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonVertexUncontracted[DummyArrayMomenta[2+n]]] ][[1]];
 	Print["The expression is generated in ",theTimingVariable," seconds."];
 		
 	(* I modify the FORM file so that it can be executed. *)

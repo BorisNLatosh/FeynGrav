@@ -585,13 +585,13 @@ ScalarPropagator[p_,m_] = I FAD[{p,m}];
 ProcaPropagator[\[Mu]_,\[Nu]_,p_,m_] = (-I)(MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[Nu]]/m^2)FAD[{p,m}];
 
 
-GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := I ( (D-5)/(D-2) NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + (FeynGrav`GaugeFixingEpsilon/2) NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p] + Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] + ( ((D-1)(FeynGrav`GaugeFixingEpsilon-1)-FeynGrav`GaugeFixingEpsilon)/(D-2) ) NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p] - ( 1/(D-2) ) Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p]) FAD[p] //FeynAmpDenominatorCombine ;
+GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := I (FeynGrav`GaugeFixingEpsilon/2 NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p]+ NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p]+(D-5)/(D-2) NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p]+((D-1)(FeynGrav`GaugeFixingEpsilon-1)-FeynGrav`GaugeFixingEpsilon)/(D-2) NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p]-1/(D-2) NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p])FAD[p] //FeynAmpDenominatorCombine//Simplify ;
 
 
 GravitonPropagatorMassive[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m_]:=(-I)FAD[{p,m}] ( 1/2 ( (MTD[\[Mu],\[Alpha]]-FVD[p,\[Mu]]FVD[p,\[Alpha]]/m^2)(MTD[\[Nu],\[Beta]]-FVD[p,\[Nu]]FVD[p,\[Beta]]/m^2)+(MTD[\[Mu],\[Beta]]-FVD[p,\[Mu]]FVD[p,\[Beta]]/m^2)(MTD[\[Nu],\[Alpha]]-FVD[p,\[Nu]]FVD[p,\[Alpha]]/m^2) ) - 1/(D-1) (MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[Nu]]/m^2)(MTD[\[Alpha],\[Beta]]-FVD[p,\[Alpha]]FVD[p,\[Beta]]/m^2) ) //FeynAmpDenominatorCombine;
 
 
-QuadraticGravityPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= I (m0^2/2 FAD[p,{p,m0}] Nieuwenhuizen`NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p] + 2/FeynGrav`GaugeFixingEpsilon FAD[p] Nieuwenhuizen`NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p]  - m2^2 FAD[p,{p,m2}] Nieuwenhuizen`NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p] + ( 4/FeynGrav`GaugeFixingEpsilon FAD[p] + (3 m0^2)/2 FAD[p,{p,m0}] ) Nieuwenhuizen`NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p] + m0^2/2 FAD[p,{p,m0}] Nieuwenhuizen`NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p] ) //FeynAmpDenominatorCombine;
+QuadraticGravityPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= GravitonPropagator[\[Mu],\[Nu],\[Alpha],\[Beta],p] - I Collect[ ( NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p]+(D-4)/(D-1) NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p])FAD[{p,m2}] ,FeynAmpDenominator[__],Simplify] + I Collect[ 1/(D-2) (3/(D-1) NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p]+(D-1)  NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p]+  NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p])FAD[{p,Sqrt[(3 (D-2) m0^2 m2^2)/((D-4) m0^2+2 (D-1) m2^2)]}] ,FeynAmpDenominator[__],Simplify] ;
 
 
 (* Polarisation tensors *)

@@ -27,7 +27,7 @@ TakeLorenzIndices = indexArray |-> Flatten[(#[[;;2]]&)/@Partition[indexArray,3]]
 GRVertex[indexArray_] := GRVertex[indexArray] = Switch[ Length[indexArray]/3,
 	0, 0,
 	1, 0,
-	_, I (Global`\[Kappa])^(Length[indexArray]/3-2) CTensorGeneral[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[indexArray[[7;;]]]]FVD[indexArray[[3]],\[Lambda]1]FVD[indexArray[[6]],\[Lambda]2] (2 GammaTensor[\[Alpha],\[Mu],\[Rho],\[Lambda]1,indexArray[[1]],indexArray[[2]]]GammaTensor[\[Sigma],\[Nu],\[Beta],\[Lambda]2,indexArray[[4]],indexArray[[5]]] - 2 GammaTensor[\[Alpha],\[Mu],\[Nu],\[Lambda]1,indexArray[[1]],indexArray[[2]]]GammaTensor[\[Rho],\[Beta],\[Sigma],\[Lambda]2,indexArray[[4]],indexArray[[5]]] - (1/2) (FeynGrav`GaugeFixingEpsilon) GammaTensor[\[Mu],\[Alpha],\[Beta],\[Lambda]1,indexArray[[1]],indexArray[[2]]]GammaTensor[\[Nu],\[Rho],\[Sigma],\[Lambda]2,indexArray[[4]],indexArray[[5]]]) 
+	_, I (Global`\[Kappa])^(Length[indexArray]/3-2) CTensorGeneral[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]},TakeLorenzIndices[indexArray[[7;;]]]]FVD[indexArray[[3]],\[Lambda]1]FVD[indexArray[[6]],\[Lambda]2] (2 GammaTensor[\[Alpha],\[Mu],\[Rho],\[Lambda]1,indexArray[[1]],indexArray[[2]]]GammaTensor[\[Sigma],\[Nu],\[Beta],\[Lambda]2,indexArray[[4]],indexArray[[5]]] - 2 GammaTensor[\[Alpha],\[Mu],\[Nu],\[Lambda]1,indexArray[[1]],indexArray[[2]]]GammaTensor[\[Rho],\[Beta],\[Sigma],\[Lambda]2,indexArray[[4]],indexArray[[5]]] ) 
 ];
 
 
