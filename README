@@ -1,7 +1,7 @@
 FeynGrav
 ================
 
-FeynGrav is a package designed to extend FeynCalc's capabilities to handle calculations involving gravitons. This document provides a short guide for installing and using the package.
+FeynGrav is a package designed to extend FeynCalc capabilities to handle calculations involving gravitons. This document provides a short guide for installing and using the package.
 
 Dependencies
 ------------
@@ -13,14 +13,17 @@ Installation
 To install FeynGrav, follow these steps:
 
 1. Locate User Base Directory:
-   - In Wolfram Mathematica, execute the "$UserBaseDirectory" command to find the User Base Directory path.
+   - In Wolfram Mathematica, execute the "$UserBaseDirectory" command. This will display the path to the User Base Directory, where Mathematica automatically searches for packages.
 
 2. Copy Package Files:
-   - Copy the "FeynGrav" folder to the "Applications" subdirectory within your User Base Directory.
+   - Copy the "FeynGrav" folder into the "Applications" subdirectory within your User Base Directory.
+   - The "Applications" folder is part of "$Path", meaning packages placed here are automatically recognised.
 
 3. Load the Package:
    - In Mathematica, load the package by executing the command "<<FeynGrav`".
    - This command will also load FeynCalc if it still needs to be loaded.
+
+If you encounter any issues, ensure that the FeynGrav folder is in the correct location, as described above. Advanced users can also add custom installation paths by modifying "$Path" variable.
 
 File Description
 ----------------
@@ -56,6 +59,7 @@ Version History
   - General relativity was included with advanced gauge fixing.
   - Implemented SU(N) Yang-Mills.
 - **Version 3:**
+  - Implemented recurrent formulae for calculation of supplementary tensors.
   - Implemented a propagator for massive gravity.
   - Included Horndeski models.
   - Added axion-like coupling.
