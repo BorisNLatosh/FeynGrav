@@ -145,6 +145,17 @@ GravitonPropagator::usage = "GravitonPropagator[\[Mu],\[Nu],\[Alpha],\[Beta],p].
 GravitonPropagatorMassive::usage = "GravitonPropagatorMassive[\[Mu],\[Nu],\[Alpha],\[Beta],p,m]. Massive graviton propagator. Here \[Mu],\[Nu],\[Alpha], and \[Beta] are Lorentz indices; p is the graviton momentum; m is the graviton mass. The expression uses FAD function from FeynCalc, so it is more suitable for loop calculations.";
 
 
+(* Cheung-Remmen variables *)
+
+
+GravitonPropagatorCR::usage = "GravitonPropagatorCR[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Propagator for \[GothicH] perturbations in Cheung-Remmen variables. The gauge fixing parameter is already fixed and enters the expression. Here \[Mu],\[Nu],\[Alpha], and \[Beta] are Lorentz indices; p is the perturbation's momentum. The expression uses FAD function from FeynCalc, so it is more suitable for loop calculations.";
+GravitonPropagatorAuxiliaryCR::usage = "GravitonPropagatorAuxiliaryCR[\[Lambda]1,\[Mu]1,\[Nu]1,\[Lambda]2,\[Mu]2,\[Nu]2]. Propagator for the auxliary field B in Cheung-Temmen variables. The field is not a gauge invariant and does not contain a guage fixing parameters. The field is auxiliary, so the propagator has no momenta.";
+
+GravitonVertexCRhhh::usage = "GravitonVertexCRhhh[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\),\!\(\*SubscriptBox[\(p\), \(3\)]\)].";
+GravitonVertexCRBhh::usage = "GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(p\), \(1\)]\),\!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\),\!\(\*SubscriptBox[\(p\), \(2\)]\)].";
+GravitonVertexCRBBh::usage = "GravitonVertexCRBBh[\!\(\*SubscriptBox[\(\[Alpha]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Alpha]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Rho]\), \(2\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(2\)]\),\[Mu],\[Nu]].";
+
+
 (* Polarisation tensors. *)
 
 
@@ -252,11 +263,13 @@ FeynGravCommands := Print[
 
 
 FormatValues[FeynGrav`GaugeFixingEpsilon] = {HoldPattern[MakeBoxes[FeynGrav`GaugeFixingEpsilon,TraditionalForm]]:>SubscriptBox["\[CurlyEpsilon]","Gravity"]} ;
+FormatValues[FeynGrav`GaugeFixingEpsilonCR] = {HoldPattern[MakeBoxes[FeynGrav`GaugeFixingEpsilonCR,TraditionalForm]]:>SubscriptBox["\[CurlyEpsilon]","CR"]} ;
 FormatValues[FeynGrav`GaugeFixingEpsilonVector] = {HoldPattern[MakeBoxes[FeynGrav`GaugeFixingEpsilonVector,TraditionalForm]]:>SubscriptBox["\[CurlyEpsilon]","Vector"]} ;
 FormatValues[FeynGrav`GaugeFixingEpsilonSUNYM] = {HoldPattern[MakeBoxes[FeynGrav`GaugeFixingEpsilonSUNYM,TraditionalForm]]:>SubscriptBox["\[CurlyEpsilon]","SU(N)YM"]} ;
 
 
 FeynGrav`GaugeFixingEpsilon = 2;
+FeynGrav`GaugeFixingEpsilonCR = -1/2;
 FeynGrav`GaugeFixingEpsilonVector = -1;
 FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 
@@ -287,6 +300,36 @@ DummyArrayMomentaKVariables = n |-> Flatten[{ToExpression["m"<>ToString[#]<>"_"]
 
 
 packageDirectory = DirectoryName[$InputFileName];
+
+
+(* Cheung-Remmen variabless *)
+
+
+GravitonPropagatorCR[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := I FAD[p] NieuwenhuizenOperatorInverse[-(1/2) 1/FeynGrav`GaugeFixingEpsilonCR,1,(D-5)/(D-2),-((D-1)/(D-2) +1/FeynGrav`GaugeFixingEpsilonCR),-(1/(D-2)),\[Mu],\[Nu],\[Alpha],\[Beta],p] //FeynAmpDenominatorCombine//Simplify ;
+
+
+GravitonPropagatorAuxiliaryCR[\[Lambda]1_,\[Mu]1_,\[Nu]1_,\[Lambda]2_,\[Mu]2_,\[Nu]2_] := I \[Kappa]^(2-D) ( MTD[\[Lambda]1,\[Nu]2] MTD[\[Lambda]2,\[Nu]1] MTD[\[Mu]1,\[Mu]2]+MTD[\[Lambda]1,\[Mu]2] MTD[\[Lambda]2,\[Nu]1] MTD[\[Mu]1,\[Nu]2]+MTD[\[Lambda]1,\[Nu]2] MTD[\[Lambda]2,\[Mu]1] MTD[\[Mu]2,\[Nu]1]+MTD[\[Lambda]1,\[Mu]2] MTD[\[Lambda]2,\[Mu]1] MTD[\[Nu]1,\[Nu]2]+(MTD[\[Lambda]1,\[Mu]1] MTD[\[Lambda]2,\[Mu]2] MTD[\[Nu]1,\[Nu]2])/(1-D)+(MTD[\[Lambda]1,\[Mu]1] MTD[\[Lambda]2,\[Nu]2] MTD[\[Mu]2,\[Nu]1])/(1-D)+(MTD[\[Lambda]1,\[Nu]1] MTD[\[Lambda]2,\[Nu]2] MTD[\[Mu]1,\[Mu]2])/(1-D)+(MTD[\[Lambda]1,\[Nu]1] MTD[\[Lambda]2,\[Mu]2] MTD[\[Mu]1,\[Nu]2])/(1-D) )//Calc;
+
+
+GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_] =FVD[p1,\[Mu]2]FVD[p2,\[Mu]1]MTD[\[Mu]3,\[Nu]1]MTD[\[Nu]3,\[Nu]2]+1/2 FVD[p1,\[Mu]2]FVD[p3,\[Nu]2](MTD[\[Mu]1,\[Mu]3]MTD[\[Nu]1,\[Nu]3]-1/(D-2) MTD[\[Mu]1,\[Nu]1]MTD[\[Mu]3,\[Nu]3])-SPD[p1,p2](MTD[\[Nu]1,\[Mu]2]MTD[\[Nu]2,\[Mu]3]MTD[\[Nu]3,\[Mu]1]- 1/(D-2) MTD[\[Mu]1,\[Nu]1]MTD[\[Mu]2,\[Nu]3]MTD[\[Mu]3,\[Nu]2])//Calc;
+GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=1/2 (GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]+GravitonVertexCRhhh[\[Nu]1,\[Mu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]);
+GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=1/2 (GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]+GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Nu]2,\[Mu]2,p2,\[Mu]3,\[Nu]3,p3]);
+GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=1/2 (GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]+GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Nu]3,\[Mu]3,p3]);
+GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=\[Kappa]^(5-D) Total[GravitonVertexCRhhh@@@Flatten/@Permutations[Partition[{\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3},3]]]//Calc;
+
+
+GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_] = -1/4 (FVD[p1,\[Alpha]]MTD[\[Rho],\[Mu]1]MTD[\[Sigma],\[Mu]2]MTD[\[Nu]1,\[Nu]2]- FVD[p1,\[Rho]](MTD[\[Alpha],\[Mu]1]MTD[\[Sigma],\[Mu]2]MTD[\[Nu]1,\[Nu]2]-1/(D-2) MTD[\[Alpha],\[Mu]2]MTD[\[Sigma],\[Nu]2]MTD[\[Mu]1,\[Nu]1])+FVD[p1,\[Mu]2](MTD[\[Alpha],\[Mu]1]MTD[\[Sigma],\[Nu]1]MTD[\[Rho],\[Nu]2]-1/(D-2) MTD[\[Alpha],\[Sigma]]MTD[\[Mu]1,\[Nu]1]MTD[\[Nu]2,\[Rho]]));
+GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Sigma],\[Rho],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2];
+GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Nu]1,\[Mu]1,p1,\[Mu]2,\[Nu]2,p2];
+GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Nu]2,\[Mu]2,p2];
+GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=-I \[Kappa]^(4-D) (GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]2,\[Nu]2,p2,\[Mu]1,\[Nu]1,p1])//Calc;
+
+
+GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=1/8 (- (MTD[\[Alpha]1,\[Rho]2]MTD[\[Alpha]2,\[Rho]1]-1/(D-1) MTD[\[Alpha]1,\[Rho]1]MTD[\[Alpha]2,\[Rho]2])MTD[\[Mu],\[Sigma]1]MTD[\[Nu],\[Sigma]2])//Calc;
+GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]1,\[Sigma]1,\[Rho]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]];
+GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Sigma]2,\[Rho]2,\[Mu],\[Nu]];
+GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Nu],\[Mu]];
+GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=\[Kappa]^(3-D) (GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]2,\[Rho]2,\[Sigma]2,\[Alpha]1,\[Rho]1,\[Sigma]1,\[Mu],\[Nu]])//Calc;
 
 
 (* Graviton sector *)
