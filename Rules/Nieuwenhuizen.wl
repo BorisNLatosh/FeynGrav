@@ -16,6 +16,9 @@ NieuwenhuizenOperator::usage = "NieuwenhuizenOperator[\!\(\*SubscriptBox[\(z\), 
 NieuwenhuizenOperatorInverse::usage = "NieuwenhuizenOperatorInverse[\!\(\*SubscriptBox[\(z\), \(1\)]\),\!\(\*SubscriptBox[\(z\), \(2\)]\),\!\(\*SubscriptBox[\(z\), \(0\)]\),\!\(\*SubscriptBox[\(z\), \(b\)]\),\!\(\*SubscriptBox[\(z\), \(bb\)]\),\[Mu],\[Nu],\[Alpha],\[Beta],p]. A linear combination of Nieuwenhuizen operators which is inverse for \!\(\*SubscriptBox[\(z\), \(1\)]\)\!\(\*SubscriptBox[SuperscriptBox[\(P\), \(1\)], \(\[Mu]\[Nu]\[Alpha]\[Beta]\)]\)(p)+\!\(\*SubscriptBox[\(z\), \(2\)]\)\!\(\*SubscriptBox[SuperscriptBox[\(P\), \(2\)], \(\[Mu]\[Nu]\[Alpha]\[Beta]\)]\)(p)+\!\(\*SubscriptBox[\(z\), \(0\)]\)\!\(\*SubscriptBox[SuperscriptBox[\(P\), \(0\)], \(\[Mu]\[Nu]\[Alpha]\[Beta]\)]\)(p)+\!\(\*SubscriptBox[\(z\), \(b\)]\)\!\(\*SubscriptBox[SuperscriptBox[OverscriptBox[\(P\), \(_\)], \(0\)], \(\[Mu]\[Nu]\[Alpha]\[Beta]\)]\)(p)+\!\(\*SubscriptBox[\(z\), \(bb\)]\)\!\(\*SubscriptBox[SuperscriptBox[OverscriptBox[\(P\), OverscriptBox[\(_\), \(_\)]], \(0\)], \(\[Mu]\[Nu]\[Alpha]\[Beta]\)]\)(p)."
 
 
+NieuwenhuizenOperatorExpansion::usage = "NieuwenhuizenOperatorExpansion[T,\[Mu],\[Nu],\[Alpha],\[Beta],p]. The function takes a tensor T with Lorentz indices {\[Mu],\[Nu],\[Alpha],\[Beta]} that may depend on the momentum p. The function expands the tensor in Nieuwenhuizen operators and returns a set of coordinates {\!\(\*SubscriptBox[\(z\), \(1\)]\),\!\(\*SubscriptBox[\(z\), \(2\)]\),\!\(\*SubscriptBox[\(z\), \(0\)]\),\!\(\*SubscriptBox[OverscriptBox[\(z\), \(_\)], \(0\)]\),\!\(\*SubscriptBox[OverscriptBox[\(z\), OverscriptBox[\(_\), \(_\)]], \(0\)]\)} which can be used with NieuwenhuizenOperator.";
+
+
 Begin["Private`"];
 
 
@@ -32,6 +35,12 @@ NieuwenhuizenOperator0BarBar = {\[Mu],\[Nu],\[Alpha],\[Beta],k}|->GaugeProjector
 
 NieuwenhuizenOperator = {z1,z2,z0,z0b,z0bb,\[Mu],\[Nu],\[Alpha],\[Beta],k}|->z1 NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],k]+z2 NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],k]+z0 NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],k]+z0b NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],k]+z0bb NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],k]//FeynAmpDenominatorCombine;
 NieuwenhuizenOperatorInverse = {z1,z2,z0,z0b,z0bb,\[Mu],\[Nu],\[Alpha],\[Beta],k}|->1/z1 NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],k]+1/z2 NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],k]+1/z2 (((D-4)(z0 z0b -3 z0bb^2)-(D-7)z2 z0b)/((D-1)(z0 z0b -3 z0bb^2)-(D-4)z2 z0b)) NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],k]+((D-1)z0-(D-4)z2)/((D-1)(z0 z0b -3 z0bb^2)-(D-4)z2 z0b) NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],k]-(3 z0bb)/((D-1)(z0 z0b -3 z0bb^2)-(D-4)z2 z0b) NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],k]//FeynAmpDenominatorCombine;
+
+
+NieuwenhuizenSymmetryCheck[T_,m_,n_,a_,b_,p_] := TrueQ[Calc[T-(T/.{m->n,n->m})]==0]&&TrueQ[Calc[T-(T/.{a->b,b->a})]==0]&&TrueQ[Calc[T-(T/.{m->a,n->b,a->m,b->n})]==0];
+
+
+NieuwenhuizenOperatorExpansion[T_,m_,n_,a_,b_,p_] := If[ NieuwenhuizenSymmetryCheck[T,m,n,a,b,p], SolveValues[  #==0&/@Coefficient[ Calc[FeynAmpDenominatorExplicit[T-NieuwenhuizenOperator[z1,z2,z0,zb,zbb,m,n,a,b,p]]] ,Calc[{MTD[m,n]MTD[a,b],MTD[m,a]MTD[n,b],MTD[m,n]FVD[p,a]FVD[p,b],MTD[m,a]FVD[p,n]FVD[p,b],FVD[p,m]FVD[p,n]FVD[p,a]FVD[p,b]}]]  ,{z1,z2,z0,zb,zbb} ][[1]]  , Print["The tensor does not admits symmetries required to be expanded by the Nieuwenhuizen operators!"] ] ; 
 
 
 End[];
