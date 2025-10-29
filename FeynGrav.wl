@@ -27,7 +27,10 @@ DisplayInitializationMessages[] := Module[{},
                           "https://doi.org/10.1016/j.cpc.2023.108871"], Blue, Underlined], 
            ", ", 
            Style[Hyperlink["Comput.Phys.Commun. 310 (2025) 109508", 
-                          "https://doi.org/10.1016/j.cpc.2025.109508"], Blue, Underlined]}]
+                          "https://doi.org/10.1016/j.cpc.2025.109508"], Blue, Underlined],
+                          ", ", 
+           Style[Hyperlink["arXiv:2510.17320", 
+                          "https://doi.org/10.48550/arXiv.2510.17320"], Blue, Underlined]}]
 	];
 
 ];
