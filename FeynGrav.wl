@@ -1,5 +1,8 @@
 (* ::Package:: *)
 
+c
+
+
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
@@ -244,6 +247,10 @@ importHorndeskiG5::usage = "importHorndeskiG5. The command imports all exisiting
 importScalarGaussBonnet::usage "importScalarGaussBonnet[n]. The command imports libraries for Scalar-Gauss-Bonnet vertices up to order n\[GreaterEqual]2. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
 
 
+(* FeynGravContractor*)
+FeynGravContractor::usage = "";
+
+
 (* The list of commands. *)
 
 
@@ -261,7 +268,8 @@ FeynGravCommands := Print[
         "QuadraticGravityPropagator","QuadraticGravityPropagatorHD","GravitonGhostVertexHD","QuadraticGravityVertex","GhostVectorPropagatorHD",
         "importGravitons", "importScalars", "importFermions", "importVectors", "importSUNYM",
         "importHorndeskiG2", "importHorndeskiG3", "importHorndeskiG4", "importHorndeskiG5",
-        "importAxionVectorVertex", "importQuadraticGravity"
+        "importAxionVectorVertex", "importQuadraticGravity",
+        "FeynGravContractor"
       }, 
       ", "
     ],
@@ -749,6 +757,18 @@ SetPolarizationTensor := Module[{},
 	Pair[Momentum[Polarization[x_,I],D],Momentum[x_,D]]=0;
 	Pair[Momentum[Polarization[x_,I]],Momentum[x_]]=0;
 ];
+
+
+(* FeynGravContractor *)
+
+
+FeynGravContractor[theInput_] := Module[{},
+	ImportString[
+		RunProcess[ParentDirectory[packageDirectory]<>"/contractor/bin/contractor","StandardOutput",
+			ExportString[FeynCalcInternal[theInput],"ExpressionJSON"]
+		]
+	,"ExpressionJSON"]	
+]
 
 
 importGravitons[2];
