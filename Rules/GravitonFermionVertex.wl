@@ -21,14 +21,82 @@ TakeLorenzIndices = indexArray |-> Flatten[(#[[;;2]]&)/@Partition[indexArray,3]]
 TakeMomenta = indexArray |-> If[ Length[indexArray]!=0,Flatten[(#[[3]]&)/@Partition[indexArray,3]],{}];
 
 
+(* GravitonFermionVertex with contraction *)
+
+
+Clear[GravitonFermionVertex1];
+
+GravitonFermionVertex1[indexArray_,p1_,p2_,m_] := 
+	GravitonFermionVertex1[indexArray,p1,p2,m] =  
+		(I Global`\[Kappa]^(Length[indexArray]/3)) (
+			+(1/2) CEITensor[{\[ScriptM],\[ScriptN]},TakeLorenzIndices[indexArray]] GAD[\[ScriptM]]FVD[p1-p2,\[ScriptN]] //Contract//ExpandScalarProduct
+		 ) //Expand//FeynCalcInternal ;
+
+
+Clear[GravitonFermionVertex2];
+
+GravitonFermionVertex2[indexArray_,p1_,p2_,m_] := 
+	GravitonFermionVertex2[indexArray,p1,p2,m] =  
+		(I Global`\[Kappa]^(Length[indexArray]/3)) (
+			+ (1/8)(GAD[\[ScriptB],\[ScriptA],\[ScriptM]]-GAD[\[ScriptM],\[ScriptA],\[ScriptB]])Sum[ 
+				FVD[ Total[TakeMomenta[indexArray][[;;\[ScriptS]]]] ,\[GothicA]]
+				EITensor[{\[GothicB],\[ScriptM]},TakeLorenzIndices[indexArray][[;;2 \[ScriptS]]]]
+				CEIETensor[{\[GothicA],\[ScriptA]},{\[GothicB],\[ScriptB]},TakeLorenzIndices[indexArray][[2\[ScriptS]+1;;]]]  
+			,{\[ScriptS],0,Length[indexArray]/3}] //Contract
+		 ) //Expand//FeynCalcInternal ;
+
+
+Clear[GravitonFermionVertex3];
+
+GravitonFermionVertex3[indexArray_,p1_,p2_,m_] := 
+	GravitonFermionVertex3[indexArray,p1,p2,m] =  
+		(I Global`\[Kappa]^(Length[indexArray]/3)) (- CTensorGeneral[{},TakeLorenzIndices[indexArray]] m  ) //Expand//FeynCalcInternal ;
+
+
 Clear[GravitonFermionVertex];
 
-GravitonFermionVertex[indexArray_,p1_,p2_,m_] := GravitonFermionVertex[indexArray,p1,p2,m] =  (I Global`\[Kappa]^(Length[indexArray]/3)) ( (1/2) ExpandScalarProduct[Contract[ CEITensor[{\[ScriptM],\[ScriptN]},TakeLorenzIndices[indexArray]] GAD[\[ScriptM]]FVD[p1-p2,\[ScriptN]] ]] + Contract[(1/8)Sum[ FVD[Total[TakeMomenta[indexArray][[;;\[ScriptS]]]],\[GothicA]] EITensor[{\[GothicB],\[ScriptM]},TakeLorenzIndices[indexArray][[;;2 \[ScriptS]]]]CEIETensor[{\[GothicA],\[ScriptA]},{\[GothicB],\[ScriptB]},TakeLorenzIndices[indexArray][[2\[ScriptS]+1;;]]]  ,{\[ScriptS],0,Length[indexArray]/3}](GAD[\[ScriptB],\[ScriptA],\[ScriptM]]-GAD[\[ScriptM],\[ScriptA],\[ScriptB]])] - CTensorGeneral[{},TakeLorenzIndices[indexArray]] m ) //Expand//FeynCalcInternal ;
+GravitonFermionVertex[indexArray_,p1_,p2_,m_] := 
+	GravitonFermionVertex[indexArray,p1,p2,m] =  
+		+ GravitonFermionVertex1[indexArray,p1,p2,m] + GravitonFermionVertex3[indexArray,p1,p2,m] + 1/Length[indexArray/3]! Total[GravitonFermionVertex2[#,p1,p2,m]&/@Flatten/@Permutations[Partition[indexArray,3]]] //Expand//FeynCalcInternal ;
+
+
+(* GravitonFermionVertex without contraction *)
+
+
+Clear[GravitonFermionVertex1Uncontracted];
+
+GravitonFermionVertex1Uncontracted[indexArray_,p1_,p2_,m_] := 
+	GravitonFermionVertex1Uncontracted[indexArray,p1,p2,m] =  
+		(I Global`\[Kappa]^(Length[indexArray]/3)) (
+			+(1/2) CEITensor[{\[ScriptM],\[ScriptN]},TakeLorenzIndices[indexArray]] GAD[\[ScriptM]]FVD[p1-p2,\[ScriptN]] //ExpandScalarProduct
+		 ) //Expand//FeynCalcInternal ;
+
+
+Clear[GravitonFermionVertex2Uncontracted];
+
+GravitonFermionVertex2Uncontracted[indexArray_,p1_,p2_,m_] := 
+	GravitonFermionVertex2Uncontracted[indexArray,p1,p2,m] =  
+		(I Global`\[Kappa]^(Length[indexArray]/3)) (
+			+ (1/8)(GAD[\[ScriptB],\[ScriptA],\[ScriptM]]-GAD[\[ScriptM],\[ScriptA],\[ScriptB]])Sum[ 
+				FVD[ Total[TakeMomenta[indexArray][[;;\[ScriptS]]]] ,\[GothicA]]
+				EITensor[{\[GothicB],\[ScriptM]},TakeLorenzIndices[indexArray][[;;2 \[ScriptS]]]]
+				CEIETensor[{\[GothicA],\[ScriptA]},{\[GothicB],\[ScriptB]},TakeLorenzIndices[indexArray][[2\[ScriptS]+1;;]]]  
+			,{\[ScriptS],0,Length[indexArray]/3}] 
+		 ) //Expand//FeynCalcInternal ;
+
+
+Clear[GravitonFermionVertex3Uncontracted];
+
+GravitonFermionVertex3Uncontracted[indexArray_,p1_,p2_,m_] := 
+	GravitonFermionVertex3Uncontracted[indexArray,p1,p2,m] =  
+		(I Global`\[Kappa]^(Length[indexArray]/3)) (- CTensorGeneral[{},TakeLorenzIndices[indexArray]] m  ) //Expand//FeynCalcInternal ;
 
 
 Clear[GravitonFermionVertexUncontracted];
 
-GravitonFermionVertexUncontracted[indexArray_,p1_,p2_,m_] := GravitonFermionVertexUncontracted[indexArray,p1,p2,m] =  (I Global`\[Kappa]^(Length[indexArray]/3)) ( (1/2) CEITensor[{\[ScriptM],\[ScriptN]},TakeLorenzIndices[indexArray]] GA[\[ScriptM]](FVD[p1,\[ScriptN]]-FVD[p2,\[ScriptN]]) (1/8)Sum[ FVD[Total[TakeMomenta[indexArray][[;;\[ScriptS]]]],\[GothicA]] EITensor[{\[GothicB],\[ScriptM]},TakeLorenzIndices[indexArray][[;;2 \[ScriptS]]]]CEIETensor[{\[GothicA],\[ScriptA]},{\[GothicB],\[ScriptB]},TakeLorenzIndices[indexArray][[2\[ScriptS]+1;;]]]  ,{\[ScriptS],0,Length[indexArray]/3}](GAD[\[ScriptB],\[ScriptA],\[ScriptM]]-GAD[\[ScriptM],\[ScriptA],\[ScriptB]])  - CTensorGeneral[{},TakeLorenzIndices[indexArray]] m )  ;
+GravitonFermionVertexUncontracted[indexArray_,p1_,p2_,m_] := 
+	GravitonFermionVertexUncontracted[indexArray,p1,p2,m] =  
+		+ GravitonFermionVertex1[indexArray,p1,p2,m] + GravitonFermionVertex3[indexArray,p1,p2,m] + 1/Length[indexArray/3]! Total[GravitonFermionVertex2[#,p1,p2,m]&/@Flatten/@Permutations[Partition[indexArray,3]]] //Expand//FeynCalcInternal ;
 
 
 End[];
