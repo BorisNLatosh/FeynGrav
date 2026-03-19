@@ -12,19 +12,45 @@ indexArraySymmetrization3::usage = "indexArraySymmetrization3[indexArray]. Gener
 Begin["Private`"];
 
 
-(* indexArraySymmetrization = indexArray |-> If[ Length[indexArray]==0 , {{}} , Partition[Flatten[ Fold[Join[#1,#1/.{#2[[1]]->#2[[2]],#2[[2]]->#2[[1]]}]&,#,Partition[#,2]]&/@(Flatten/@Permutations[Partition[indexArray,2]]) ],Length[indexArray]] ]; *)
+(* indexArraySymmetrization realization without parallelization *)
 
 
 ClearAll[indexArraySymmetrization];
 
-indexArraySymmetrization[indexArray_List] := indexArraySymmetrization[indexArray] =
-  If[Length[indexArray] == 0, 
-    {{}}, 
-    Partition[Flatten[Fold[Join[#1, #1 /. {#2[[1]] -> #2[[2]], #2[[2]] -> #2[[1]]}] &, #, Partition[#, 2]] & /@ (Flatten /@ Permutations[Partition[indexArray, 2]])], Length[indexArray]]
-  ];
+indexArraySymmetrization[indexArray_List] := 
+	indexArraySymmetrization[indexArray] =
+		Module[{pairs, perms},
+			If[indexArray === {},
+				{{}},
+				pairs = Partition[indexArray, 2];
+				perms = Permutations[pairs];
+				Flatten[
+					ParallelMap[
+						(Flatten /@ Tuples[Transpose[{#, Reverse /@ #}]]) &,
+						perms,
+						Method -> "CoarsestGrained"
+					],
+					1
+				]
+			]
+		];
 
 
-indexArraySymmetrization3 = indexArray |-> If[ Length[indexArray]==0 , {{}} , Partition[Flatten[ Fold[Join[#1,#1/.{#2[[1]]->#2[[2]],#2[[2]]->#2[[1]]}]&,#,Partition[#,3]]&/@(Flatten/@Permutations[Partition[indexArray,3]]) ],Length[indexArray]] ];
+ClearAll[indexArraySymmetrization3];
+
+indexArraySymmetrization3[indexArray_List] := 
+	indexArraySymmetrization3[indexArray] =
+		Module[{triplets},
+			If[indexArray === {},
+				{{}},
+				triplets = Partition[indexArray, 3];
+				Flatten[
+					(Flatten /@ Tuples[Transpose[{#, #[[All, {2, 1, 3}]]}]]) & /@ 
+					Permutations[triplets],
+					1
+				]
+			]
+		];
 
 
 End[];
