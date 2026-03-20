@@ -6,10 +6,29 @@ BeginPackage["MTDWrapper`",{"FeynCalc`"}];
 SetDirectory[DirectoryName[$InputFileName]];
 
 
-MTDWrapper::usage = "MTDWrapper[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\)}] = \!\(\*SuperscriptBox[\(g\), \(\*SubscriptBox[\(\[Mu]\), \(1\)] \*SubscriptBox[\(\[Nu]\), \(1\)]\)]\)\!\(\*SuperscriptBox[\(\[Ellipsis]g\), \(\*SubscriptBox[\(\[Mu]\), \(n\)] \*SubscriptBox[\(\[Nu]\), \(n\)]\)]\). The function returns MTD[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\)]\[Ellipsis]MTD[\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\)].";
+MTDWrapper::usage =
+"MTDWrapper[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\)}] \
+gives the product of D-dimensional metric tensors \
+MTD[\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\[Nu]1]\[Ellipsis]MTD[\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\)], \
+taking the indices in consecutive pairs. The input list must contain \
+an even number of elements.";
 
 
-MTDWrapper =Times@@MTD@@@Partition[#,2] &;
+Begin["Private`"];
+
+
+MTDWrapper[indexArray_List] := 
+	MTDWrapper[indexArray] =
+		Apply[
+			Times,
+			MapApply[
+				MTD,
+				Partition[indexArray,2]
+			]
+		];
+
+
+End[];
 
 
 EndPackage[];
