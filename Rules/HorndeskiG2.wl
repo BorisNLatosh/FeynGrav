@@ -19,10 +19,26 @@ Expression for Horndeski interaction of \!\(\*SubscriptBox[\(G\), \(2\)]\) class
 Begin["Private`"];
 
 
-MomentaWrapper = scalarMomenta |-> Times @@ MapThread[ FVD, { scalarMomenta, DummyArray2[Length[scalarMomenta]/2] } ] ;
+MomentaWrapper[scalarMomenta_] :=
+	Apply[
+		Times,
+		MapThread[
+			FVD,
+			{scalarMomenta, DummyArray2[ Quotient[Length[scalarMomenta], 2] ] }
+		]
+	];
 
 
-DummyArray2 = n |-> Flatten[ {ToExpression["\[ScriptA]"<>ToString[#]], ToExpression["\[ScriptB]"<>ToString[#]]}& /@ Range[n]];
+DummyArray2[n_] :=
+	Flatten[
+		Table[
+			{
+				Symbol["\[ScriptA]" <> ToString[i]],
+				Symbol["\[ScriptB]" <> ToString[i]]
+			},
+		{i, n}
+	]
+];
 
 
 Clear[HorndeskiG2];
