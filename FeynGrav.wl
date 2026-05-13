@@ -432,7 +432,7 @@ importFermions[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
 	Clear[GravitonFermionVertex];
 	
 	Map[
-		(Evaluate[GravitonFermionVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["p2_"],ToExpression["m_"]]] = Get[packageDirectory<>"Libs/GravitonFermionVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonFermionVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["p2_"],ToExpression["m_"]]] = Get[packageDirectory<>"Libs/GravitonFermionVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
