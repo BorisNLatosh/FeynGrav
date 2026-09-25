@@ -14,6 +14,11 @@
 	leave every expression that FeynGrav passes to Calc unchanged, so they are
 	not reproduced here.
 
+	The definitions below use the fully qualified name Calc`Calc on purpose. A
+	bare Calc binds to whatever Calc already exists on $ContextPath, so with
+	the FeynCalcLegacy addon loaded it would bind to FeynCalc`Calc and these
+	definitions would silently overwrite FeynCalc's own function.
+
 	Options[Calc] is kept for call compatibility. The options Assumptions and
 	PowerExpand were consumed only by the removed PowerSimplify step and have
 	no effect here.
@@ -23,7 +28,7 @@
 BeginPackage["Calc`",{"FeynCalc`"}];
 
 
-Calc::usage = 
+Calc`Calc::usage = 
 "Calc[exp] performs several simplifications that involve Contract, DiracSimplify, SUNSimplify, DotSimplify, EpsEvaluate, ExpandScalarProduct and Expand2. The chain is applied repeatedly, and the fixed point is returned. \
 The options Assumptions and PowerExpand are accepted for compatibility with FeynCalc's Calc; they had an effect only through the legacy PowerSimplify step and are inert here.";
 
@@ -31,13 +36,13 @@ The options Assumptions and PowerExpand are accepted for compatibility with Feyn
 Begin["`Private`"];
 
 
-Clear[Calc];
+Clear[Calc`Calc];
 
 
-Options[Calc] = { Assumptions -> True, PowerExpand -> True };
+Options[Calc`Calc] = { Assumptions -> True, PowerExpand -> True };
 
 
-Calc[expr_, OptionsPattern[]] :=
+Calc`Calc[expr_, OptionsPattern[]] :=
 	FixedPoint[
 		Function[exp,
 			Expand2 @ ExpandScalarProduct @ DotSimplify @ DiracSimplify @ EpsEvaluate @
