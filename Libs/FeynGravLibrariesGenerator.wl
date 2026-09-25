@@ -175,6 +175,8 @@ With[
             and fileName is the corresponding file in ../Rules.
         *)
         rulePackages = {
+            (* Calc comes first: the rule packages below resolve Calc when they are read. *)
+            {"Calc`",                        "Calc.wl"},
             {"GravitonScalarVertex`",        "GravitonScalarVertex.wl"},
             {"GravitonFermionVertex`",       "GravitonFermionVertex.wl"},
             {"GravitonVectorVertex`",        "GravitonVectorVertex.wl"},

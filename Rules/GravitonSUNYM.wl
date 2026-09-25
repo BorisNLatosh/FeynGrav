@@ -3,7 +3,7 @@
 SetDirectory[DirectoryName[$InputFileName]];
 
 
-BeginPackage["GravitonSUNYM`",{"FeynCalc`","CTensorGeneral`","CETensor`","GravitonFermionVertex`","GravitonVectorVertex`"}];
+BeginPackage["GravitonSUNYM`",{"Calc`","FeynCalc`","CTensorGeneral`","CETensor`","GravitonFermionVertex`","GravitonVectorVertex`"}];
 
 
 GravitonQuarkGluonVertex::usage = 

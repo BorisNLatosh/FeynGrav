@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-BeginPackage["Nieuwenhuizen`",{"FeynCalc`"}];
+BeginPackage["Nieuwenhuizen`",{"Calc`","FeynCalc`"}];
 
 
 GaugeProjector::usage = 

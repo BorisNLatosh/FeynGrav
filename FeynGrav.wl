@@ -45,6 +45,12 @@ If[!ValueQ[FeynGravInitialized],
 ];
 
 
+(* The package imports its own implementation of Calc. FeynCalc 10.2 and later do not provide Calc by default. The import precedes the imports of the rules that use Calc. *)
+
+
+Needs["Calc`",DirectoryName[$InputFileName]<>"Rules/Calc.wl"];
+
+
 (* The package imports the Nieuwenhuizen operators and gauge projectors. *)
 
 
