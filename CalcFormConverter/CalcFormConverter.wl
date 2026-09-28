@@ -190,16 +190,18 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
   expr = FCI[expression];
   dim = chooseDimension[expr, requestedDimension];
 
-  register[kind_, value_, extra_: <||>] := Module[{key, name, number, prefix},
-    (* Structural keys avoid serializing every repeated occurrence. *)
-    key = HoldComplete[kind, value];
-    If[KeyExistsQ[registry, key], Return[registry[key]]];
-    number = Lookup[counters, kind, 0] + 1; AssociateTo[counters, kind -> number];
-    prefix = $kindSpecs[kind]["Prefix"];
-    name = prefix <> intString[number];
-    AssociateTo[registry, key -> name];
-    AppendTo[entries, Join[<|"Name" -> name, "Kind" -> kind, "Expression" -> encode[value]|>, extra]];
-    name
+  register[kind_, value_, extra_: <||>] := With[{key = HoldComplete[kind, value]},
+    (* Structural keys avoid serializing repeated occurrences. Allocate fresh
+       locals only when inserting a new entry into the registry. *)
+    If[KeyExistsQ[registry, key], registry[key],
+      Module[{name, number, prefix},
+        number = Lookup[counters, kind, 0] + 1; AssociateTo[counters, kind -> number];
+        prefix = $kindSpecs[kind]["Prefix"];
+        name = prefix <> intString[number];
+        AssociateTo[registry, key -> name];
+        AppendTo[entries, Join[<|"Name" -> name, "Kind" -> kind, "Expression" -> encode[value]|>, extra]];
+        name
+      ]]
   ];
   makeMacro[s_] := Module[{name = "CFCF" <> intString[Length[macros] + 1]},
     AppendTo[macros, "#define " <> name <> " \"(" <> s <> ")\""];
@@ -410,7 +412,7 @@ CalcFormConverter`CalcFormExport[___] := Failure["InvalidArguments", <|"MessageT
    Vector/index tokens have distinct types until converted into Pair objects. *)
 parseResult[text_String, values_Association, dim_] := Module[
  {tokens, pos = 1, peek, take, expect, atom, power, unary, product, sum,
-  scalarValue, entryValue, call, dot, result, tokenPattern, stripped, classes},
+  scalarValue, entryValue, call, dot, result, tokenPattern, stripped, classes, tokenCount},
  tokenPattern = RegularExpression["[A-Za-z][A-Za-z0-9_]*|[0-9]+|[+*/^(),.\\-]"];
  stripped = StringReplace[text, WhitespaceCharacter -> ""];
  tokens = StringCases[text, tokenPattern];
@@ -419,10 +421,13 @@ parseResult[text_String, values_Association, dim_] := Module[
     expression at every occurrence in a large result. *)
  classes = Association[Map[# -> Which[StringMatchQ[#, DigitCharacter ..], 0,
    StringMatchQ[#, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]], 1, True, 2] &, DeleteDuplicates[tokens]]];
- peek[] := If[pos <= Length[tokens], tokens[[pos]], "END"];
- take[] := Module[{t},
-   If[pos > Length[tokens], fail["InvalidResult", "Unexpected end of FORM result."]];
-   t = tokens[[pos]]; pos++; t];
+ (* The sentinel serves lookahead only. take[] and the trailing-token check
+    use the original count, so it can never be consumed as input. *)
+ tokenCount = Length[tokens]; tokens = Append[tokens, "END"];
+ peek[] := tokens[[pos]];
+ take[] := (
+   If[pos > tokenCount, fail["InvalidResult", "Unexpected end of FORM result."]];
+   tokens[[pos++]]);
  expect[t_] := If[take[] =!= t, fail["InvalidResult", "Unexpected token in FORM result."]];
  (* Check types before arithmetic can cancel an invalid vector/index. *)
  scalarValue[x_] := If[!FreeQ[x, _vectorToken | _indexToken],
@@ -441,47 +446,51 @@ parseResult[text_String, values_Association, dim_] := Module[
  dot[a_, b_] := If[MatchQ[{a, b}, {_vectorToken, _vectorToken}],
    Pair[Momentum[a[[1]], dim], Momentum[b[[1]], dim]],
    fail["InvalidResult", "Dot products require two declared vectors."]];
- atom[] := Module[{t = take[], args = {}, v},
+ (* Allocate mutable locals only on branches that need them; immutable
+    bindings remain local to each recursive invocation. *)
+ atom[] := With[{t = take[]},
    Which[
      classes[t] === 0, FromDigits[t],
-     t === "(", v = sum[]; expect[")"]; v,
+     t === "(", With[{v = sum[]}, expect[")"]; v],
      classes[t] === 1,
-       If[peek[] === "(", take[];
+       If[peek[] === "(", Module[{args = {}}, take[];
          If[peek[] =!= ")", AppendTo[args, sum[]]; While[peek[] === ",", take[]; AppendTo[args, sum[]]]];
-         expect[")"]; call[t, args], If[t === "i_", I, entryValue[t]]],
+         expect[")"]; call[t, args]], If[t === "i_", I, entryValue[t]]],
      True, fail["InvalidResult", "Expected a number, declared symbol or parenthesized expression."]
    ]
  ];
- power[] := Module[{v = atom[], n, sign = 1, parenthesized = False},
+ power[] := Module[{v = atom[]},
    While[peek[] === ".", take[]; v = dot[v, atom[]]];
-   If[peek[] === "^", take[];
+   If[peek[] === "^", Module[{n, sign = 1, parenthesized = False}, take[];
      If[peek[] === "(", take[]; parenthesized = True];
      If[peek[] === "-", take[]; sign = -1, If[peek[] === "+", take[]]];
      n = take[]; If[!StringMatchQ[n, DigitCharacter ..], fail["InvalidResult", "FORM exponents must be integers."]];
      If[parenthesized, expect[")"]];
      If[v === 0 && sign FromDigits[n] <= 0, fail["InvalidResult", "Undefined power of zero."]];
-     v = scalarValue[v]^(sign FromDigits[n])]; v
+     v = scalarValue[v]^(sign FromDigits[n])]]; v
  ];
  unary[] := Switch[peek[], "+", take[]; unary[], "-", take[]; -scalarValue[unary[]], _, power[]];
  (* Reap/Sow collects arbitrarily long products and sums without repeatedly
     copying a growing list. Nested parser calls own their collectors. *)
- product[] := Module[{v = unary[], op, r, factors},
-   If[!MemberQ[{"*", "/"}, peek[]], Return[v]];
-   factors = Reap[
-     Sow[scalarValue[v]];
-     While[MemberQ[{"*", "/"}, peek[]], op = take[]; r = scalarValue[unary[]];
-       If[op === "/" && r === 0, fail["InvalidResult", "Division by zero."]];
-       Sow[If[op === "*", r, 1/r]]]][[2, 1]];
-   Times @@ factors];
- sum[] := Module[{v = product[], op, r, terms},
-   If[!MemberQ[{"+", "-"}, peek[]], Return[v]];
-   terms = Reap[
-     Sow[scalarValue[v]];
-     While[MemberQ[{"+", "-"}, peek[]], op = take[]; r = scalarValue[product[]];
-       Sow[If[op === "+", r, -r]]]][[2, 1]];
-   Plus @@ terms];
+ product[] := With[{v = unary[]},
+   If[!MemberQ[{"*", "/"}, peek[]], v,
+     Module[{op, r, factors},
+       factors = Reap[
+         Sow[scalarValue[v]];
+         While[MemberQ[{"*", "/"}, peek[]], op = take[]; r = scalarValue[unary[]];
+           If[op === "/" && r === 0, fail["InvalidResult", "Division by zero."]];
+           Sow[If[op === "*", r, 1/r]]]][[2, 1]];
+       Times @@ factors]]];
+ sum[] := With[{v = product[]},
+   If[!MemberQ[{"+", "-"}, peek[]], v,
+     Module[{op, r, terms},
+       terms = Reap[
+         Sow[scalarValue[v]];
+         While[MemberQ[{"+", "-"}, peek[]], op = take[]; r = scalarValue[product[]];
+           Sow[If[op === "+", r, -r]]]][[2, 1]];
+       Plus @@ terms]]];
  result = scalarValue[sum[]];
- If[pos <= Length[tokens], fail["InvalidResult", "Unexpected trailing tokens in FORM result."]];
+ If[pos <= tokenCount, fail["InvalidResult", "Unexpected trailing tokens in FORM result."]];
  result
 ];
 

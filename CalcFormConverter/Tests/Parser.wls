@@ -20,6 +20,15 @@ assert["nested master arguments",parseBody["cfB0("<>xName<>"+1,2*3,4^2)"]===B0[x
 assert["repeated scalar products",parseBody[StringRiffle[ConstantArray[pName<>"."<>qName,1500],"+"]]===1500 FCI[SPD[p,q]]];
 assert["metric and component reconstruction",parseBody["d_("<>muName<>","<>nuName<>")+"<>pName<>"("<>muName<>")"]===FCI[MTD[mu,nu]+FVD[p,mu]]];
 
+(* Lookahead may inspect EOF, but consuming it must always fail. *)
+Scan[Function[body,assertFailure["incomplete syntax rejected: "<>body,"InvalidResult",parseBody[body]]],{
+ "+", "(", "(1", "1*", "1/", "1^", "1^(", "1^(-", "1^(2",
+ "cfA0(", "cfB0(1,", pName<>".", "1)", "1 2"}];
+assertFailure["empty result body rejected","MappingMismatch",parseBody[""]];
+assertFailure["literal END is not the sentinel","UnknownIdentifier",parseBody["END"]];
+assert["recursive function arguments keep their own state",
+ parseBody["cfB0(cfA0(2),cfB0(3,4,5),6)+7"]===B0[A0[2],B0[3,4,5],6]+7];
+
 (* Invalid typed tokens must fail even when ordinary arithmetic would hide them. *)
 Scan[Function[body,assertFailure["typed syntax rejected: "<>body,"InvalidResult",parseBody[body]]],{
  "0*"<>pName,pName<>"-"<>pName,muName<>"^0","cfA0("<>muName<>")",

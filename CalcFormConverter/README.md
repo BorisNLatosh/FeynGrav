@@ -2,6 +2,75 @@
 
 A standalone Wolfram Language package for translating exact bosonic FeynCalc expressions to FORM and reconstructing FORM results. It loads automatically with FeynGrav. It does not load the library generator or FeynCalcLegacy.
 
+## Contents
+
+- [Getting started](#getting-started)
+- [Command and option reference](#command-and-option-reference)
+- [Manual workflow](#manual-workflow)
+- [Automated workflow](#automated-workflow)
+- [Timing, progress and parallel execution](#timing-progress-and-parallel-execution)
+- [Explicit installation](#explicit-installation)
+- [Troubleshooting](#troubleshooting)
+- [Export options and failures](#export-options-and-failures)
+- [Supported vocabulary](#supported-vocabulary)
+- [What FORM does](#what-form-does)
+- [Performance guidance](#performance-guidance)
+- [Developer guide](DEVELOPER.md) and [persisted format contract](FORMAT.md)
+
+## Getting started
+
+You need a Wolfram kernel with `WithCleanup` and an installed, loadable FeynCalc. Development verification uses Wolfram 15.0.1. FORM is needed to execute generated programs; it is not needed to load the converter, export a program or import an existing result. Python is used only by the developer test driver.
+
+The converter loads with FeynGrav. To use it without loading the rest of FeynGrav, evaluate the `Get` command in the manual workflow below. FeynCalc is loaded as a package dependency. No vertex library is required for the neutral examples here. Restart the kernel after package updates to avoid mixing old and new definitions.
+
+A small complete calculation, after loading:
+
+```mathematica
+Clear[p, mu, nu];
+expression = MTD[mu, nu] FVD[p, mu] FVD[p, nu];
+result = CalcFormCalculate[expression, TimeConstraint -> 60];
+If[FailureQ[result], result, result === FCI[SPD[p, p]]]
+(* True when FORM is available and the calculation succeeds. *)
+```
+
+`CalcFormCalculate` checks availability itself. If it reports `FORMUnavailable`, inspect `CalcFormCheck[]` before choosing an executable or explicitly installing FORM. It never installs software automatically.
+
+## Command and option reference
+
+Public commands and converter-specific options belong to the `` CalcFormConverter` `` context. After loading, their short names are normally available through `$ContextPath`; a fully qualified name such as ``CalcFormConverter`CalcFormImport`` also works. FeynCalc supplies tensor notation and its dimension/loop-momentum symbols; ordinary Wolfram options such as `TimeConstraint` retain their normal symbol identities.
+
+| Call | Successful return | Work performed |
+| --- | --- | --- |
+| `CalcFormExport[expr, file, opts]` | Association with absolute `InputFile`, `MappingFile`, `ResultFile` paths | Normalize with `FCI`, validate, write program and mapping; the result path is reserved for FORM |
+| `CalcFormImport[resultFile, mappingFile]` | Reconstructed FeynCalc internal expression | Read and validate the two files, reconstruct exact expressions; no options |
+| `CalcFormCheck[opts]` | Availability association; inspect `Available` and `Status` | Locate executable and run an arithmetic probe when found |
+| `CalcFormCalculate[expr, opts]` | Reconstructed FeynCalc expression | Check, export, run, import, then clean up successful job files |
+| `CalcFormInstall[FORMThreads -> n]` | Availability association after a successful check | Check existing installation; explicitly install only a missing requested engine on supported systems, then check again |
+
+Conversion and calculation errors return `Failure`. A check that finds missing or unusable FORM normally returns an association with `Available -> False`; invalid options or inability to create a probe directory can instead return `Failure`. Check both cases:
+
+```mathematica
+status = CalcFormCheck[];
+available = AssociationQ[status] && TrueQ[status["Available"]];
+```
+
+The check association always has `Available`, `Status`, `Executable`, `Version`, `RequestedEngine`, `FORMThreads`, and `InstallationGuidance`. When a probe ran it also reports `ExitCode`, `StandardOutput`, `StandardError`, and `Messages`. `RequestedEngine` describes the requested configuration, not an independent identification of an explicitly chosen binary. `Version` may be `Missing["NotReported"]`. Probe directories are cleaned up; use the returned diagnostic text.
+
+| Option | Accepted values | Export default | Check default | Calculate default | Install default |
+| --- | --- | --- | --- | --- | --- |
+| `Dimension` | `Automatic`, a symbolic dimension other than `I`, or integer at least 2 | `Automatic` | — | `Automatic` | — |
+| `LoopMomenta` | List of distinct unassigned symbols | `{}` | — | `{}` | — |
+| `OverwriteTarget` | `True` or `False` | `False` | — | — | — |
+| `FORMExecutable` | `Automatic`, executable name or path | — | `Automatic` | `Automatic` | — |
+| `FORMThreads` | Positive integer worker count | — | `1` | `1` | `1` |
+| `TimeConstraint` | Positive numeric seconds or `Infinity` | — | `10` | `Infinity` | — |
+| `WorkingDirectory` | `Automatic` or existing parent-directory path | — | — | `Automatic` | — |
+| `KeepFiles` | `True` or `False` | — | — | `False` | — |
+| `ShowTiming` | `True` or `False` | — | — | `False` | — |
+| `ShowProgress` | `True` or `False` | — | — | `False` | — |
+
+A dash means that command does not accept the option. `CalcFormImport` has no option arguments. Installation accepts only `FORMThreads`; it does not accept an executable path or calculation timeout. Settings passed to one command do not change the defaults of later calls. Use `Options[CalcFormCalculate]` or `?CalcFormCalculate` to inspect the loaded interface.
+
 ## Manual workflow
 
 Load FeynGrav normally, or load this module independently:
@@ -78,7 +147,7 @@ Import reconstructs the expression in the Wolfram kernel, so its time is separat
 
 The return value is a FeynCalc expression, or a `Failure` describing the stage and cause. Calculation failures after job creation include `JobDirectory`; process details include the exit code and log paths. Execution writes `stdout.log` and `stderr.log` while retaining only bounded diagnostic tails in memory. Timeout or user abort stops the calculation process and retains the job. One cleanup boundary covers log acquisition, execution and final inspection, including nonlocal exits. Probe directories have the same acquisition-to-cleanup protection. An abort during execution returns a failure rather than a partial expression.
 
-Successful jobs are deleted unless `KeepFiles -> True`. Retained successful jobs report their path with `CalcFormCalculate::files`. Failed jobs are always retained. `job.frm`, `job.map.json` and `job.out` can then be used with the manual workflow. Never infer a successful calculation solely from a result file: check the returned value.
+Successful jobs are deleted unless `KeepFiles -> True`. Retained successful jobs report their path with `CalcFormCalculate::files`. Failed calculation jobs are retained once a job directory has been created. A failure during the initial availability check can occur before there are any job files. `job.frm`, `job.map.json` and `job.out` can then be used with the manual workflow. Never infer a successful calculation solely from a result file: check the returned value.
 
 This workflow performs the template's existing algebra and Lorentz contractions. It does not perform loop integration or integral reduction.
 
@@ -127,13 +196,32 @@ CalcFormCheck[FORMThreads -> 4]
 CalcFormInstall[FORMThreads -> 4]
 ```
 
-A successful call returns the availability association, including version, probe output and installation guidance. `Available -> True` and `ExitCode -> 0` mean the requested configuration passed its probe. Guidance is included even when nothing needed installing. Checking or installing with four workers does not change future calculation defaults: pass `FORMThreads -> 4` to each calculation that should use them.
+A successful installation/check returns the availability association, including version, probe output and installation guidance. `Available -> True` and `ExitCode -> 0` mean the requested configuration passed its probe. Guidance is included even when nothing needed installing. Checking or installing with four workers does not change future calculation defaults: pass `FORMThreads -> 4` to each calculation that should use them.
 
 If the package manager reports success but the requested executable is still missing or fails its probe, installation returns `InstallationVerificationFailed` with the check result and retained logs. Installation success requires the requested executable to work.
 
-### Troubleshooting
+## Troubleshooting
 
 A kernel launched from a desktop may have a different `PATH` from your terminal; supply an absolute `FORMExecutable` path. If the file exists but the check reports `LaunchFailed`, inspect the returned messages and the operating system's execution restrictions. Reinstalling FORM does not fix a sandbox that prevents Mathematica from launching processes. If `ProbeFailed` or a calculation failure occurs, inspect standard output/error; calculation log files are retained in `JobDirectory`.
+
+For a calculation failure, the payload is available as `failure[[2]]`; keys such as `Stage`, `Cause`, `Check`, `Process`, and `JobDirectory` depend on where it failed. A nested `Cause` preserves export/import diagnostics. `KeepFiles -> True` still returns an expression, not a job association; the location is reported with `CalcFormCalculate::files`.
+
+| Symptom or tag | What to check |
+| --- | --- |
+| `NotFound` / `FORMUnavailable` | Kernel `PATH`, explicit executable path, requested FORM versus TFORM configuration; inspect the nested `Check` |
+| `ThreadingUnavailable` | Use a working TFORM executable for `FORMThreads > 1`; an ordinary FORM probe is insufficient |
+| `InvalidOption` / `InvalidArguments` | Consult the command table; use actual Boolean values and a positive integer worker count |
+| `InvalidPath` / `FileExists` | Existing destination directory, `.frm` extension, permitted path characters and intentional `OverwriteTarget -> True` |
+| `MixedDimensions` / `DimensionMismatch` | Use one Lorentz space throughout; setting `Dimension` does not convert tensors |
+| `Unsupported…` during export | Exact numbers, supported heads, rational linear momentum routing, ordinary quadratic denominators |
+| `TimedOut` / `Aborted` | Retained calculation logs; choose a larger execution limit if appropriate. The availability probe remains a separate ten-second operation |
+| `FORMFailed` / `MissingResult` | Exit code and logs; preserve the program/mapping/result together for diagnosis |
+| `MappingMismatch` | Correct original mapping, unedited JSON text, and the dedicated result rather than console output |
+| `InvalidMapping` / `UnknownIdentifier` / `InvalidResult` | Supported mapping version, declared names, result grammar, and unassigned imported symbols |
+| `RollbackFailed` | Preserve the reported `RecoveryFiles` before attempting another export |
+| `FORMUnusable` during installation | Resolve the existing executable's launch/probe failure; the installer deliberately does not replace it |
+| `AuthorizationUnavailable` / `InstallationFailed` | System authentication agent and retained package-manager diagnostics; manual installation is separate |
+| Long pause after FORM finishes | Import and notebook formatting are separate stages; suppress large output with a semicolon and time the complete call |
 
 ## Export options and failures
 
@@ -143,7 +231,7 @@ A kernel launched from a desktop may have a different `PATH` from your terminal;
 | `LoopMomenta` | `{}` | Distinct momentum symbols recorded for later reduction. No loop-count restriction. |
 | `OverwriteTarget` | `False` | Refuse an existing input, mapping, or result path unless replacement is explicitly requested. |
 
-Use a `.frm` filename. Paths may contain spaces; quotes, angle brackets, backticks and line breaks are rejected. Export does not create the destination directory. With replacement enabled, export stages both files and keeps recovery copies while replacing the program and mapping. A failed operation or abort before commit restores the previous pair; if restoration itself fails, `Failure["RollbackFailed", ...]` reports retained `RecoveryFiles`. This handles recoverable errors and Wolfram interrupts, not a machine crash or concurrent writers to the same paths. After a successful export, FORM overwrites the result when run. Until then, any old result remains on disk and should not be treated as a new calculation.
+Use a `.frm` filename. Paths may contain spaces; quotes, angle brackets, backticks and line breaks are rejected. Export does not create the destination directory. With replacement enabled, export stages both files and keeps recovery copies while replacing the program and mapping. A failed operation or abort before commit restores the previous pair; if restoration itself fails, `Failure["RollbackFailed", ...]` reports retained `RecoveryFiles`. This handles recoverable errors and Wolfram interrupts, not a machine crash or concurrent writers to the same paths. Export replaces only the program and mapping; it does not delete an existing result. After a successful export, FORM overwrites the result when run. Until then, any old result remains on disk and should not be treated as a new calculation, even if exporting the same expression produces a matching mapping digest.
 
 Invalid arguments, unsupported expressions, incompatible dimensions, invalid mappings, unknown result identifiers and malformed output return `Failure` objects. Inspect them with `FailureQ[job]` or `FailureQ[result]` before proceeding.
 
@@ -158,6 +246,23 @@ Invalid arguments, unsupported expressions, incompatible dimensions, invalid map
 - Scalar `A0`, `B0`, `C0`, `D0`, with respectively 1, 3, 6 and 10 positional arguments. Options on master functions and general `PaVe` objects are outside this first version.
 
 Dirac/color objects, Levi-Civita tensors, noncommutative products, mixed Lorentz spaces, inexact numbers, nonlinear or symbolically weighted momentum routing, `SFAD`/`CFAD`, and unknown function heads are rejected. Unknown tensors are never automatically classified as scalars. Assigned symbols follow ordinary Wolfram Language evaluation; use unassigned symbols for symbolic inputs and imports.
+
+### Dimensions and symbol identity
+
+`MT`, `FV`, and `SP` describe four-dimensional objects; `MTD`, `FVD`, and `SPD` describe the symbolic `D` space. The converter rejects mixtures rather than converting between them. Purely scalar input defaults to `D`. A symbolic dimension must be a single symbol: an explicit `D - 4` is an expression and is not accepted. For example, `CalcFormExport[x + 1, file, Dimension -> 4]` selects four dimensions when no tensor dimension contradicts it. `LoopMomenta` records symbols as metadata; it neither integrates them nor imposes kinematics.
+
+The mapping retains full symbol contexts: ``Left`p`` and ``Right`p`` remain distinct even though their short names match. Greek/script symbols are encoded as data, while FORM receives generated ASCII identifiers. The same symbol used as a scalar, vector and index is registered separately for each role. Identifier numbering belongs to one export; never reuse a name such as `cfv1` across jobs without its mapping.
+
+After a successful export, inspect the dictionary without changing its file:
+
+```mathematica
+mapping = Import[job["MappingFile"], "RawJSON"];
+Dataset[KeyTake[#, {"Name", "Kind", "Expression"}] & /@ mapping["Entries"]]
+```
+
+`Name` is the generated FORM identifier, `Kind` is its scalar/vector/index/abbreviation/denominator role, and `Expression` is the restricted encoded definition. For example, a vector entry can map `cfv1` to ``{"Symbol", "Global`p"}``. The full [prefix and entry table](FORMAT.md#mapping-fields) explains each kind. Keep the original JSON file unchanged: rewriting or reformatting it changes the correspondence digest even when the decoded data seems identical.
+
+Import reconstructs actual Wolfram symbols and allowed expression heads. Existing own-values, down-values or up-values can therefore affect evaluation. Use unassigned symbols and an appropriate kernel/context for saved calculations. The restricted parser prevents arbitrary source-text execution; it is not a sandbox for definitions already installed in the kernel. See [FORMAT.md](FORMAT.md) for encoding, metadata authority and compatibility details.
 
 ## What FORM does
 
@@ -179,71 +284,35 @@ The importer parses a restricted arithmetic grammar with native tensor syntax an
 
 - `CalcFormConverter.wl`: public interface and private implementation, organized into Mathematica initialization cells. Shared specifications define supported heads, master functions and symbol categories. Export builds conversion data in memory, renders the program and mapping, then writes the files through separate private functions.
 - `Templates/Program.frm.in`: declarations, factor definitions, target expression, processing boundary, dedicated result output and termination.
-- `Examples/ScalarBubble.wl`: the supplied scalar-projected quadratic-gravity bubble, before symmetry factor and integration measure. Load the cubic library with `importQuadraticGravity[1]` before evaluating the example.
+- [`Examples/ScalarBubble.wl`](Examples/ScalarBubble.wl): the supplied scalar-projected quadratic-gravity bubble, before symmetry factor and integration measure. Its workflow comments show manual export/import, automated calculation, TFORM, progress and timing. Load FeynGrav and the cubic library with `importQuadraticGravity[1]` before evaluating `ScalarBubbleExample`. Loading the example file only defines the example function; it does not execute FORM.
 - `FORMRuntime.wl`: executable discovery, arithmetic probe, streamed process logs, automated calculation and explicit installation. Loaded as definitions only in the same private context.
 - `FORMAT.md`: version-one mapping schema, result grammar and compatibility policy.
 - `Tests/`: separate core, FORM round-trip, runtime and FeynGrav integration suites, with a development-only Python driver. Fixed version-one artifacts test compatibility with saved calculations.
 
 Future FORM procedures can be inserted at the marked processing boundary without changing the export/import commands. Denominator algebra, repeated-propagator reduction, exceptional kinematics, integral normalization, dimensional-regularization conventions and general one-loop tadpole/bubble/triangle/box reduction remain separate work. Master-integral names are already supported in both directions. Multiple loop momenta can already be recorded; no two-loop reduction is implemented.
 
-## Verification
+## Performance guidance
 
-The cleanup implementation uses Wolfram Language's built-in [WithCleanup](https://reference.wolfram.com/language/ref/WithCleanup.html). Use a kernel that provides this function; verification was performed with Wolfram 15.0.1.
+Measure the stage you want to improve. `ShowTiming` covers the external calculation process; `AbsoluteTiming` around the full call covers checking, export and import as well. A retained result can be re-imported without repeating FORM, which helps isolate reconstruction time:
 
-Run from this directory or use the full path:
-
-```sh
-python3 Tests/run.py
+```mathematica
+(* Substitute the actual retained directory reported by the calculation. *)
+retainedDirectory = "/absolute/path/to/retained/job";
+AbsoluteTiming[
+  result = CalcFormImport[
+    FileNameJoin[{retainedDirectory, "job.out"}],
+    FileNameJoin[{retainedDirectory, "job.map.json"}]];
+]
 ```
 
-The default runs all four suites. Installer tests always use mocks and never modify system packages. To run them separately:
+Keep expressions factored when practical and let the generated FORM modules perform expansion. TFORM worker counts affect FORM execution, not Wolfram export/import. More workers need not help short jobs or unsuitable expression shapes. Reuse a result and its unchanged mapping for import comparisons, restart after code updates, and compare repeated runs on representative inputs.
 
-```sh
-python3 Tests/run.py --suite core
-python3 Tests/run.py --suite form
-python3 Tests/run.py --suite runtime
-python3 Tests/run.py --suite integration
-```
+The importer caches decoded identifiers and token classifications, collects sums/products before constructing their expressions, and avoids per-token temporary variables. Lookahead uses a sentinel with separate bounds checks. Recursive parser branches allocate mutable locals only when needed; export registration similarly allocates insertion locals only for new entries. These choices reduce repeated work while retaining type checks and job-local state. They do not imply that `Function`, `With`, or `Set` is universally faster than `Module` or `SetDelayed`.
 
-| Suite | Dependencies | Coverage |
-| --- | --- | --- |
-| `core` | WolframKernel and FeynCalc | Mapping/parser checks, long and nested sums/products, typed-token rejection before cancellation, persisted version-one fixture, in-memory rendering, export rollback/recovery and mocked installation decisions |
-| `form` | Core dependencies plus FORM | Bosonic export–FORM–import comparisons, staged and independent monolithic programs, free/contracted indices, mapping order and fallback cases |
-| `runtime` | FORM dependencies; Linux/POSIX test environment | Real probes/calculations, optional installed TFORM checks, reporting options, controlled failing executables, logging, timeout, abort at acquisition/polling/finalization and cleanup |
-| `integration` | FORM dependencies plus FeynGrav's cubic quadratic-gravity library | Vertex/propagator comparisons, loading and namespace isolation, complete bubble export |
+Bounded development comparisons found further full-import reductions of about 34% on one retained result after the token-reader improvement, and about 8% for in-memory export-data construction on one large expression after the registry adjustment. These measure different stages and baselines; they must not be added together or treated as guaranteed end-to-end speedups. Details and historical measurements are in the [developer guide](DEVELOPER.md#performance-measurement).
 
-Executables must be on `PATH`; `core` does not locate or launch FORM. The `runtime` suite requires Mathematica to be allowed to start external processes; a restricted execution sandbox may block it. The driver uses separate temporary directories and fresh kernels. Tests identify cases by descriptive keys, so adding a case does not change other tests' meaning. The fixed compatibility artifacts in `Tests/Fixtures` are read without regeneration.
+## Development and tests
 
-The complete example bubble was constructed and exported on the development machine using FORM 4.3 as the available test backend. The latest recorded export after staged generation took **2.039 seconds**, producing **480,503 bytes** of FORM source and **6,685 bytes** of mapping from an expression with **178,961 leaves**. This measures conversion only. Full-bubble FORM contraction was not benchmarked, and no speedup claim is made. Smaller generated programs are executed in the test suite and compared with FeynCalc. The full-bubble test checks its mapping against the original propagators, masses, indices, abbreviations and loop momenta without executing the complete FORM job. Source size varies slightly with the output path embedded in the program.
+Run `python3 Tests/run.py --suite core` for conversion, parser, transaction and mocked installer tests without FORM. The default `python3 Tests/run.py` additionally runs FORM, runtime and FeynGrav integration suites with their dependencies. Tests do not install system packages.
 
-
-### Recorded performance checks
-
-On the development machine, a retained 636 KB result containing 6,244 terms was used for paired full-import comparisons. The original importer took 7.626 and 7.683 seconds; the optimized importer took 2.989 and 3.573 seconds in the corresponding runs. All imported expressions were exactly equal under `SameQ`. These are measurements on one result, not a general performance guarantee.
-
-A separate bounded comparison used the retained program that produced that result:
-
-| Program structure | Serial FORM | TFORM, four workers |
-| --- | ---: | ---: |
-| One defining module | 0.861 s | 0.921 s |
-| Staged multiplication in original factor order | 0.338 s | 0.180 s |
-
-All four result files were byte-for-byte identical. These single-run measurements illustrate the effect of the generated program's structure; the complete scalar bubble was not evaluated for this comparison. Export-registry microbenchmarks also showed approximately 19–23% improvement on synthetic repeated-symbol expressions, with identical generated data.
-
-The completed regression run passed 285 assertions across the four suites, plus package-loading and full-bubble export checks. Independent staged-program checks also passed under TFORM. No system packages were installed during testing.
-
-## Maintaining the converter
-
-Keep the public export/import signatures independent of internal refactoring. The private export stages are:
-
-1. `buildExportData[expression, dimension, loopMomenta]`: normalize and inspect the input, register symbols, and return the initial expression text, staged multiplication texts, factor macros and mapping data. It performs no file access.
-2. `renderExport[data, resultPath, templateText]`: generate program and JSON text in memory. It performs no file access.
-3. `writeExport[paths, rendered, overwrite]`: write the prepared files. Path checks and template reading are separate helpers used by the public command.
-
-The export registry uses held expression keys containing both the symbol kind and value. This keeps identical names in different contexts and the same symbol in different roles distinct, without repeatedly encoding values as text. Each new mapping entry is encoded once. Staging must preserve the original traversal order so identifiers remain deterministic.
-
-For a new scalar master function, add its head, FORM name, argument count and argument category to `$expressionSpecs`. Mapping decoding, export/import validation, serialization and FORM declarations use that specification. Add an explicit mathematical round-trip test and document the new vocabulary. Supporting a new tensor structure can still require translation and parser rules; the specification does not supply those algorithms.
-
-Mapping prefixes, declaration classes and value checks live in `$kindSpecs`. Consult [the format contract](FORMAT.md) before changing persisted fields or their meaning. Preserve the existing version-one fixture when introducing another format version.
-
-The import stages validate file correspondence and mapping names, decode all mapping entries into a job-local typed dictionary with `decodeEntries`, and reconstruct the result with `parseResult`. Every mapping expression is validated once, including entries absent from the result; repeated identifiers reuse their decoded value. The parser classifies each distinct lexical token once and uses documented `Reap`/`Sow` collectors for sums and products, constructing `Plus` and `Times` only after collecting and checking their operands. Keep vector/index validation before arithmetic evaluation so cancellation cannot hide an invalid token. The dictionary is local to each import; no decoded mapping state is shared between jobs.
+See [DEVELOPER.md](DEVELOPER.md) for architecture, invariants, suite dependencies and measurement methodology. [FORMAT.md](FORMAT.md) is the persisted version-one contract; private helper associations are not public APIs.

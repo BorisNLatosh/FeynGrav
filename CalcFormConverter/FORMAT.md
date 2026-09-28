@@ -15,13 +15,15 @@ The marker is derived from the format version in the implementation. Version 1 a
 
 The mapping is read as UTF-8 text. Its primary digest is Wolfram Language `Hash[jsonText, "SHA256", "HexString"]`. For compatibility with early notebook exports, the importer also accepts the digest of `FromCharacterCode[ToCharacterCode[jsonText, "UTF-8"]]`: those exports hashed the UTF-8 byte string before writing Unicode text. Both checks bind the complete mapping. These are Wolfram string hashes, not a specification to hash arbitrary raw file bytes with an external utility. Even JSON reformatting changes the digest. Preserve the mapping file with its result. This check detects mismatched artifacts, not deliberate tampering.
 
+For the user workflow and commands, see [README.md](README.md); implementation invariants and tests are in [DEVELOPER.md](DEVELOPER.md).
+
 ## Mapping fields
 
 | Field | Meaning | Import requirement |
 | --- | --- | --- |
 | `Format` | Fixed format name above | Required and checked |
 | `Version` | Integer format version | Required and checked |
-| `Dimension` | Encoded symbolic or integer Lorentz dimension | Required; a symbol or integer at least 2 |
+| `Dimension` | Encoded symbolic or integer Lorentz dimension | Required; a symbol other than `I`, or integer at least 2 |
 | `Entries` | Array of mapping entries | Required and validated |
 | `ExpressionDigest` | `Hash[FCI[input], "SHA256", "HexString"]` | Always exported; participates in mapping digest, not otherwise interpreted |
 | `LoopMomenta` | Array of encoded momentum symbols supplied by the user | Always exported; informational to the current importer |
@@ -83,6 +85,16 @@ This is data, not Wolfram Language source. Arbitrary heads, assignments and exec
 After the header, the result is a single expression with optional whitespace and line wrapping. Supported forms are exact integers, declared scalar identifiers, `i_`, arithmetic `+ - * /`, parentheses and integer powers. Vector dots use `cfv1.cfv2`; components use `cfv1(cfi1)`; metrics use `d_(cfi1,cfi2)`. Scalar master functions use `cfA0`, `cfB0`, `cfC0`, `cfD0` with their documented scalar argument counts. Bare vectors/indices in scalar arithmetic, unknown identifiers, trailing statements and undefined division/powers of zero are rejected.
 
 FORM output performs algebra and contractions, so the result need not retain the original factorization or denominator grouping. Opaque scalar abbreviations and denominator identifiers retain their definitions through the mapping.
+
+### Tokenization and precedence
+
+The result body is tokenized into ASCII identifiers (`[A-Za-z][A-Za-z0-9_]*`), decimal digit sequences, and `+ - * / ^ ( ) , .`. Whitespace may separate tokens; it cannot hide other characters. There is no implicit multiplication, decimal/scientific notation, assignment, semicolon terminator, string literal or comment syntax. Use the dedicated `.out` file, not the FORM console transcript.
+
+From lowest to highest, parsing handles sums, products/division, unary signs, integer powers and vector dots/atoms. Division chains are left associative: `24/3/2` gives `4`. An exponent is one signed integer, optionally parenthesized, such as `x^-2` or `x^(-2)`; arbitrary exponent expressions and chained powers are rejected. Unary signs precede a power expression, so `-2^2` is `-4`, whereas `(-2)^2` is `4`.
+
+Identifiers must be declared in the mapping, except `i_` and the reserved call names. Function argument counts and scalar/vector/index roles are checked before reconstruction. A dot requires two vector values, a component requires one index, and `d_` requires two indices. Bare typed values cannot be cancelled into apparent scalars: `0*cfv1`, `cfv1-cfv1`, and `cfi1^0` fail. Unknown identifiers are rejected even in terms that would vanish. Division by zero and zero to a nonpositive power fail.
+
+All mapping expressions are decoded and checked, including entries unused by the result. A valid digest does not bypass grammar, entry-kind, dimension or expression validation. Conversely, the digest authenticates no sender and proves no mathematical calculation. Restored symbols and whitelisted heads undergo normal Wolfram evaluation in the receiving kernel; this data format does not isolate pre-existing kernel definitions.
 
 ## Compatibility fixture
 
