@@ -18,6 +18,26 @@ assertFailure["unknown scalar abbreviation rejected", "UnsupportedScalar", CalcF
 assertFailure["invalid dimension rejected", "UnsupportedDimension", CalcFormExport[1,FileNameJoin[{testDirectory,"bad.frm"}],Dimension->I]];
 assert["dimension infer D", Import[cases["trace_D"]["Job"]["MappingFile"],"RawJSON"]["Dimension"]==={"Symbol","System`D"}];
 
+assertFailure["polarization propagator rejected", "UnsupportedMomentum", CalcFormExport[FAD[{Polarization[p,I],m}],FileNameJoin[{testDirectory,"bad.frm"}]]];
+assertFailure["polarization invalid label rejected", "UnsupportedMomentum", CalcFormExport[FVD[Polarization[p,1],mu],FileNameJoin[{testDirectory,"bad.frm"}]]];
+assertFailure["polarization unknown option rejected", "UnsupportedMomentum", CalcFormExport[FVD[Polarization[p,I,OtherOption->True],mu],FileNameJoin[{testDirectory,"bad.frm"}]]];
+assertFailure["polarization mixed dimensions rejected", "MixedDimensions", CalcFormExport[FVD[Polarization[p,I],mu]+FV[Polarization[q,-I],nu],FileNameJoin[{testDirectory,"bad.frm"}]]];
+Do[
+ pol=Polarization[p,phase];
+ assert["polarization exact encoding "<>ToString[phase,InputForm],CalcFormConverter`Private`decode[CalcFormConverter`Private`encode[pol]]===pol];
+ Do[pol=Polarization[p,phase,Transversality->flag];
+ assert["polarization option encoding "<>ToString[{phase,flag},InputForm],CalcFormConverter`Private`decode[CalcFormConverter`Private`encode[pol]]===pol],{flag,{True,False}}],{phase,{I,-I}}];
+
+Do[assertFailure["nonlinear polarization label rejected "<>ToString[route,InputForm], "UnsupportedMomentum",
+ CalcFormExport[FVD[Polarization[route,I],mu],FileNameJoin[{testDirectory,"bad.frm"}]]],
+ {route,{p q, x p + q, f[p], Polarization[p,I], p^2, 0, 0.5 p}}];
+Do[pol=Polarization[-p/2-q-r,phase,Transversality->flag];
+ assert["routed polarization exact encoding "<>ToString[{phase,flag},InputForm],
+ CalcFormConverter`Private`decode[CalcFormConverter`Private`encode[pol]]===pol],
+ {phase,{I,-I}},{flag,{True,False}}];
+routedData=CalcFormConverter`Private`buildExportData[FVD[Polarization[-p-q-r,I],mu],Automatic,{}];
+assert["routed polarization remains one vector identity", Count[routedData["Mapping"]["Entries"], e_Association /; e["Kind"]==="Vector"]===1];
+
 job1=CalcFormExport[x+y,FileNameJoin[{testDirectory,"digest1.frm"}]];
 job2=CalcFormExport[x-y,FileNameJoin[{testDirectory,"digest2.frm"}]];
 assert["expression fingerprint",Import[job1["MappingFile"],"Text"] =!= Import[job2["MappingFile"],"Text"]];
@@ -56,6 +76,21 @@ Export[badMappingFile,json,"Text"];
 Export[malformedFile,"CFC1 "<>Hash[json,"SHA256","HexString"]<>"\ncfs1","Text"];
 assertFailure["executable mapping head rejected","InvalidMapping",CalcFormImport[malformedFile,badMappingFile]];
 
+(* Validate every encoded polarization, even if FORM's result does not use it. *)
+Do[
+ badMapping["Entries"]={<|"Name"->"cfv1","Kind"->"Vector","Expression"->node|>};
+ json=ExportString[badMapping,"RawJSON"];Export[badMappingFile,json,"Text"];
+ Export[malformedFile,"CFC1 "<>Hash[json,"SHA256","HexString"]<>"\n0","Text"];
+ assertFailure["malformed polarization mapping "<>ToString[node,InputForm],"InvalidMapping",CalcFormImport[malformedFile,badMappingFile]],
+ {node,{
+  {"Polarization",{"Integer","2"},{"Complex",{"Integer","0"},{"Integer","1"}}},
+  {"Polarization",{"Times",{"Symbol","Global`p"},{"Symbol","Global`q"}},{"Complex",{"Integer","0"},{"Integer","1"}}},
+  {"Polarization",{"Symbol","Global`p"},{"Integer","1"}},
+  {"Polarization",{"Symbol","Global`p"},{"Complex",{"Integer","0"},{"Integer","1"}},{"Transversality","Automatic"}},
+  {"Polarization",{"Symbol","Global`p"},{"Complex",{"Integer","0"},{"Integer","1"}},{"Rule",{"Symbol","FeynCalc`Transversality"},{"Symbol","System`True"}}},
+  {"Polarization",{"Symbol","Global`p"},{"Complex",{"Integer","0"},{"Integer","1"}},{"Transversality","True"},{"Transversality","False"}}
+ }}];
+
 (* Exercise the separated stages without writing an export job. *)
 beforeFiles=FileNames["*",testDirectory,Infinity];
 data=CalcFormConverter`Private`buildExportData[MTD[mu,nu] FVD[p,mu] FVD[p,nu]+A0[m^2],Automatic,{}];
@@ -77,6 +112,18 @@ assert["registry reuses compound abbreviations",
 assert["registry preserves symbol contexts",
  Length[Select[registryEntries,#["Kind"]==="Scalar"&&
   MemberQ[{registryX,CalcFormConverter`Private`encode[CFCRegistryTest`x]},#["Expression"]]&]]===2];
+
+(* Cached fragments must not reuse identifiers from a different export. *)
+cacheExpression=(FVD[p,mu]+x FAD[{l,m}]+1/(x+y)) *
+ (FVD[p,mu]+z FAD[{l,m}]+z/(x+y));
+cacheFirst=CalcFormConverter`Private`buildExportData[cacheExpression,Automatic,{}];
+cacheShifted=CalcFormConverter`Private`buildExportData[cacheExpression,Automatic,{q,p}];
+cacheAgain=CalcFormConverter`Private`buildExportData[cacheExpression,Automatic,{}];
+assert["export fragment caches are isolated between jobs",cacheFirst===cacheAgain];
+cacheVectors=Select[cacheShifted["Mapping"]["Entries"],#["Kind"]==="Vector"&];
+assert["cached vectors respect this job's registration order",
+ Take[Lookup[cacheVectors,"Expression"],2] === (CalcFormConverter`Private`encode /@ {q,p}) &&
+ AnyTrue[cacheShifted["Factors"],StringContainsQ[#,"cfv2("]&]];
 
 (* Notebook-generated mappings may contain literal Unicode rather than the
    UTF-8 byte strings returned by RawJSON in command-line kernels. *)

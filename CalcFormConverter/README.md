@@ -309,6 +309,10 @@ Keep expressions factored when practical and let the generated FORM modules perf
 
 The importer caches decoded identifiers and token classifications, collects sums/products before constructing their expressions, and avoids per-token temporary variables. Lookahead uses a sentinel with separate bounds checks. Recursive parser branches allocate mutable locals only when needed; export registration similarly allocates insertion locals only for new entries. These choices reduce repeated work while retaining type checks and job-local state. They do not imply that `Function`, `With`, or `Set` is universally faster than `Module` or `SetDelayed`.
 
+Complete native vector-component and metric calls are recognized as single import tokens and decoded lazily through the normal identifier and argument checks. Repeated calls reuse their validated values within that import. Other syntax, including nested arguments and dot chains, keeps the ordinary parser; successful dot reconstruction is cached locally. This preserves error order and avoids repeatedly parsing the same short tensor calls. The measured median paired improvement was about 29.5% across ten full-import comparisons on one retained result; scalar and master-function inputs showed little benefit. Cache memory grows with distinct calls and vector pairs, and peak memory has not been measured.
+
+Repeated tensor, denominator and scalar-abbreviation conversions are cached within each export call. The first occurrence still performs validation and symbol registration; later occurrences reuse its serialized fragment. No cache is shared between jobs, and general expression emission is not cached because sums allocate ordered macros. This benefits expressions with repeated structures; mostly unique inputs can incur extra lookup and memory costs. Cache storage grows with the number and size of distinct cached expressions.
+
 Bounded development comparisons found further full-import reductions of about 34% on one retained result after the token-reader improvement, and about 8% for in-memory export-data construction on one large expression after the registry adjustment. These measure different stages and baselines; they must not be added together or treated as guaranteed end-to-end speedups. Details and historical measurements are in the [developer guide](DEVELOPER.md#performance-measurement).
 
 ## Development and tests
@@ -316,3 +320,18 @@ Bounded development comparisons found further full-import reductions of about 34
 Run `python3 Tests/run.py --suite core` for conversion, parser, transaction and mocked installer tests without FORM. The default `python3 Tests/run.py` additionally runs FORM, runtime and FeynGrav integration suites with their dependencies. Tests do not install system packages.
 
 See [DEVELOPER.md](DEVELOPER.md) for architecture, invariants, suite dependencies and measurement methodology. [FORMAT.md](FORMAT.md) is the persisted version-one contract; private helper associations are not public APIs.
+
+### Polarization vectors
+
+Lorentz components and scalar products support `Momentum[Polarization[p, I], dim]`
+and the complex conjugate identity `Momentum[Polarization[p, -I], dim]`, with
+`p` an unassigned symbol or an exact rational linear combination of momentum
+symbols, such as `-p2-p3-p4`. The entire polarization of this momentum is one
+vector identity; it is never distributed over the sum. An optional `Transversality -> True` or `False` is
+preserved. The two labels remain distinct vectors; they are not factors of `I`.
+This supports FeynGrav's `PolarizationTensor` after normalization with `FCI`.
+FORM contracts these vectors, and import reconstructs their full identities,
+allowing FeynCalc's current scalar-product and transversality definitions to
+apply. No polarization sum, normalization or helicity condition is inferred.
+Use one Lorentz dimension throughout. Color-labelled polarizations, other
+options and polarization vectors in propagator routing remain unsupported.

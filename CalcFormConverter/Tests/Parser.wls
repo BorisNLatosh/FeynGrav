@@ -29,6 +29,28 @@ assertFailure["literal END is not the sentinel","UnknownIdentifier",parseBody["E
 assert["recursive function arguments keep their own state",
  parseBody["cfB0(cfA0(2),cfB0(3,4,5),6)+7"]===B0[A0[2],B0[3,4,5],6]+7];
 
+(* Complete tensor-call tokens share the ordinary parser's validation. *)
+assert["component call whitespace",
+ parseBody[pName<>" \t(\n "<>muName<>" )"]===FCI[FVD[p,mu]]];
+assert["metric call whitespace",
+ parseBody["d_ \t( "<>muName<>" ,\n "<>nuName<>" )"]===FCI[MTD[mu,nu]]];
+assert["parenthesized component argument falls back",
+ parseBody[pName<>"(("<>muName<>"))"]===FCI[FVD[p,mu]]];
+assert["repeated complete tensor calls",
+ parseBody[pName<>"("<>muName<>")+"<>pName<>"("<>muName<>")"]===2 FCI[FVD[p,mu]]];
+assertFailure["index identifier suffix is not swallowed","UnknownIdentifier",
+ parseBody[pName<>"("<>muName<>"suffix)"]];
+assertFailure["whitespace cannot join index identifier","UnknownIdentifier",
+ parseBody[pName<>"(cfi 1)"]];
+assertFailure["unknown complete component function","InvalidResult",parseBody["cfv999("<>muName<>")"]];
+assertFailure["unknown complete component index","UnknownIdentifier",parseBody[pName<>"(cfi999)"]];
+assertFailure["earlier arithmetic failure precedes composite lookup","InvalidResult",
+ parseBody["1/0+"<>pName<>"(cfi999)"]];
+assertFailure["dot chain rejects before later unknown identifier","InvalidResult",
+ parseBody[pName<>"."<>qName<>"."<>pName<>".cfv999"]];
+assertFailure["dot right operand call is validated first","UnknownIdentifier",
+ parseBody[pName<>"."<>qName<>"(cfi999)"]];
+
 (* Invalid typed tokens must fail even when ordinary arithmetic would hide them. *)
 Scan[Function[body,assertFailure["typed syntax rejected: "<>body,"InvalidResult",parseBody[body]]],{
  "0*"<>pName,pName<>"-"<>pName,muName<>"^0","cfA0("<>muName<>")",

@@ -19,6 +19,10 @@ Keep the public export/import signatures independent of internal refactoring. Th
 
 The export registry uses held expression keys containing both the symbol kind and value. This keeps identical names in different contexts and the same symbol in different roles distinct, without repeatedly encoding values as text. Each new mapping entry is encoded once. Staging must preserve the original traversal order so identifiers remain deterministic.
 
+Complete native vector-component and metric calls are recognized as single import tokens and decoded lazily through the normal identifier and argument checks. Repeated calls reuse their validated values within that import. Other syntax, including nested arguments and dot chains, keeps the ordinary parser; successful dot reconstruction is cached locally. This preserves error order and avoids repeatedly parsing the same short tensor calls. The measured median paired improvement was about 29.5% across ten full-import comparisons on one retained result; scalar and master-function inputs showed little benefit. Cache memory grows with distinct calls and vector pairs, and peak memory has not been measured.
+
+Repeated tensor, denominator and scalar-abbreviation conversions are cached within each export call. The first occurrence still performs validation and symbol registration; later occurrences reuse its serialized fragment. No cache is shared between jobs, and general expression emission is not cached because sums allocate ordered macros. This benefits expressions with repeated structures; mostly unique inputs can incur extra lookup and memory costs. Cache storage grows with the number and size of distinct cached expressions.
+
 For a new scalar master function, add its head, FORM name, argument count and argument category to `$expressionSpecs`. Mapping decoding, export/import validation, serialization and FORM declarations use that specification. Add an explicit mathematical round-trip test and document the new vocabulary. Supporting a new tensor structure can still require translation and parser rules; the specification does not supply those algorithms.
 
 Mapping prefixes, declaration classes and value checks live in `$kindSpecs`. Consult [the format contract](FORMAT.md) before changing persisted fields or their meaning. Preserve the existing version-one fixture when introducing another format version.
@@ -106,3 +110,16 @@ The medians were 3.281041 and 2.165659 seconds, about 34% lower. Every result wa
 A separate registry comparison constructed export data for a representative expression with 178,961 leaves. Four alternating pairs had medians 1.385728 and 1.274246 seconds, about 8% lower, with identical export data. This measurement excludes rendering and writing files. It is distinct from the earlier repeated-symbol microbenchmarks above.
 
 These are recorded development observations, not performance requirements or current-machine guarantees. Later regression counts and timing runs should be reported with their actual revision, environment, scope and baseline. Faster functional syntax is not an optimization rule: fresh symbols, repeated evaluation, list copying and built-in bulk operations must be assessed in the actual path. Retain validation, evaluation order, compatibility and cleanup behavior when optimizing.
+
+### Polarization identities
+
+`vectorIdentityQ` recognizes momentum symbols and constrained FeynCalc
+polarization identities. `physicalMomentumLabelQ` also permits exact rational
+linear momentum labels after routing substitutions. Register the complete
+polarization as one vector; do not distribute it over that routing. Dedicated encoding/decoding preserves the `I` versus
+`-I` label and an optional Boolean `Transversality` setting without enabling
+general rule decoding. Vector reconstruction still goes through `Momentum`
+and `Pair`, so current FeynCalc scalar-product definitions apply at import.
+Propagator routing explicitly excludes polarizations. Keep tests for free
+components, contractions, conjugation, transversality, dimensions and rejected
+identities when extending this vocabulary.

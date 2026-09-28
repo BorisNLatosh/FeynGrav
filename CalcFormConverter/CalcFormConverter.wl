@@ -86,7 +86,7 @@ masterArgumentsQ[spec_Association, args_List] := arityQ[spec, Length[args]] &&
 (* Kind names, prefixes, declaration classes and value checks have one owner. *)
 $kindSpecs = <|
   "Scalar" -> <|"Prefix" -> "cfs", "Declaration" -> "Symbols", "ValidExpression" -> (Head[#] === Symbol &)|>,
-  "Vector" -> <|"Prefix" -> "cfv", "Declaration" -> "Vectors", "ValidExpression" -> (Head[#] === Symbol &)|>,
+  "Vector" -> <|"Prefix" -> "cfv", "Declaration" -> "Vectors", "ValidExpression" -> (vectorIdentityQ[#] &)|>,
   "Index" -> <|"Prefix" -> "cfi", "Declaration" -> "Indices", "ValidExpression" -> (Head[#] === Symbol &)|>,
   "Abbreviation" -> <|"Prefix" -> "cfa", "Declaration" -> "Symbols", "ValidExpression" -> (scalarQ[#] &)|>,
   "Denominator" -> <|"Prefix" -> "cfd", "Declaration" -> "Symbols", "ValidExpression" -> (MatchQ[#, FeynAmpDenominator[_PropagatorDenominator]] &)|>
@@ -100,6 +100,20 @@ symbolName[s_Symbol] := Context[s] <> SymbolName[s];
 encode[n_Integer] := {"Integer", intString[n]};
 encode[n_Rational] := {"Rational", intString[Numerator[n]], intString[Denominator[n]]};
 encode[z_Complex] := {"Complex", encode[Re[z]], encode[Im[z]]};
+(* Polarization labels identify independent vectors, including conjugation.
+   Encode their sole supported option as data, never as a general Rule head. *)
+(* A momentum label may be routed, but the polarization of that routing stays
+   one vector identity: polarization is not a linear function of momentum. *)
+physicalMomentumLabelQ[p_] := AllTrue[If[Head[p] === Plus, List @@ p, {p}],
+  MatchQ[#, _Symbol | Times[(_Integer | _Rational), _Symbol]] &];
+polarizationQ[Polarization[p_, phase_, opts___]] :=
+  physicalMomentumLabelQ[p] && MemberQ[{I, -I}, phase] && MemberQ[{{}, {Transversality -> True}, {Transversality -> False}}, {opts}];
+polarizationQ[_] := False;
+vectorIdentityQ[x_] := Head[x] === Symbol || polarizationQ[x];
+encode[x_Polarization] := If[polarizationQ[x],
+  Join[{"Polarization", encode[x[[1]]], encode[x[[2]]]},
+    If[Length[x] === 3, {{"Transversality", If[TrueQ[x[[3, 2]]], "True", "False"]}}, {}]],
+  fail["UnsupportedMomentum", "Unsupported polarization vector identity."]];
 encode[s_Symbol] := {"Symbol", symbolName[s]};
 encode[x_] := Module[{name = Lookup[$headNames, Head[x], Missing["Unknown"]]},
   If[MissingQ[name], fail["UnsupportedHead", "Unsupported expression head.", <|"Expression" -> HoldForm[x], "Head" -> Head[x]|>]];
@@ -128,6 +142,13 @@ decode[{"Complex", a_, b_}] := Module[{re = decode[a], im = decode[b]},
     fail["InvalidMapping", "Complex coefficients must be exact numbers."]]; re + I im];
 decode[{"Symbol", s_String}] := If[validSymbolNameQ[s], Symbol[s],
   fail["InvalidMapping", "Invalid fully qualified symbol name."]];
+decode[{"Polarization", p_, phase_, opts___}] := Module[{momentum = decode[p], label = decode[phase], optionData = {opts}},
+  If[!physicalMomentumLabelQ[momentum] || !MemberQ[{I, -I}, label] ||
+     !MemberQ[{{}, {{"Transversality", "True"}}, {{"Transversality", "False"}}}, optionData],
+    fail["InvalidMapping", "Invalid polarization vector identity."]];
+  If[optionData === {}, Polarization[momentum, label],
+    Polarization[momentum, label, Transversality -> (optionData[[1, 2]] === "True")]]
+];
 decode[{name_String, args___}] /; KeyExistsQ[$heads, name] := Module[{a = {args}, h = $heads[name]},
   If[!arityQ[$expressionSpecs[name], Length[a]],
     fail["InvalidMapping", "Invalid expression arity in mapping."]];
@@ -158,7 +179,7 @@ chooseDimension[x_, requested_] := Module[{spaces, dim},
 
 (* ::Input::Initialization:: *)
 linearMomentumQ[Momentum[v_, ___]] := AllTrue[If[Head[v] === Plus, List @@ v, {v}],
-  MatchQ[#, _Symbol | Times[(_Integer | _Rational), _Symbol]] &];
+  (vectorIdentityQ[#] || MatchQ[#, Times[(_Integer | _Rational), _?vectorIdentityQ]]) &];
 linearMomentumQ[_] := False;
 
 scalarQ[x_] := Which[
@@ -213,10 +234,10 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
   vector[Momentum[v_, ___]] := Module[{terms},
     terms = If[Head[v] === Plus, List @@ v, {v}];
     Map[Function[term, Module[{factors, momenta, coefficients},
-      If[Head[term] === Symbol, {1, register["Vector", term]},
+      If[vectorIdentityQ[term], {1, register["Vector", term]},
       If[Head[term] =!= Times, fail["UnsupportedMomentum", "Momentum routing must be a linear combination with exact rational coefficients."]];
-      factors = List @@ term; momenta = Select[factors, Head[#] === Symbol &];
-      coefficients = Select[factors, Head[#] =!= Symbol &];
+      factors = List @@ term; momenta = Select[factors, vectorIdentityQ];
+      coefficients = Select[factors, !vectorIdentityQ[#] &];
       If[Length[momenta] =!= 1 || !AllTrue[coefficients, MatchQ[#, _Integer | _Rational] &],
         fail["UnsupportedMomentum", "Momentum routing must be a linear combination with exact rational coefficients."]];
       {Times @@ coefficients, register["Vector", First[momenta]]}]
@@ -225,17 +246,21 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
   vector[x_Plus] := Flatten[vector /@ (List @@ x), 1];
   vector[Times[c : (_Integer | _Rational), m_Momentum]] := ({c #[[1]], #[[2]]} & /@ vector[m]);
   vector[_] := fail["UnsupportedMomentum", "Expected a linear combination of dimension-tagged momenta."];
-  pair[Pair[a_LorentzIndex, b_LorentzIndex]] := "d_(" <> index[a] <> "," <> index[b] <> ")";
-  pair[Pair[a_LorentzIndex, b_Momentum]] := Module[{i = index[a]},
+  (* Memoize successful fragments only within this export's Module. First
+     occurrences still validate and register in traversal order; failures throw
+     before assignment. Do not memoize emit: sums allocate ordered macros. *)
+  pair[p : Pair[a_LorentzIndex, b_LorentzIndex]] := pair[p] = "d_(" <> index[a] <> "," <> index[b] <> ")";
+  pair[p : Pair[a_LorentzIndex, b_Momentum]] := pair[p] = Module[{i = index[a]},
     "(" <> StringRiffle[("(" <> emit[#[[1]]] <> "*" <> #[[2]] <> "(" <> i <> "))") & /@ vector[b], "+"] <> ")"];
   pair[Pair[a_Momentum, b_LorentzIndex]] := pair[Pair[b, a]];
-  pair[Pair[a_Momentum, b_Momentum]] := Module[{va = vector[a], vb = vector[b]},
+  pair[p : Pair[a_Momentum, b_Momentum]] := pair[p] = Module[{va = vector[a], vb = vector[b]},
     "(" <> StringRiffle[Flatten[Table[
       "(" <> emit[u[[1]] v[[1]]] <> "*" <> u[[2]] <> "." <> v[[2]] <> ")",
       {u, va}, {v, vb}]], "+"] <> ")"];
   pair[_] := fail["UnsupportedPair", "Only Lorentz metrics, momentum components and scalar products are supported."];
 
-  denominator[pd : PropagatorDenominator[mom_, mass_: 0]] := Module[{},
+  denominator[pd : PropagatorDenominator[mom_, mass_: 0]] := denominator[pd] = Module[{},
+    If[!FreeQ[mom, _Polarization], fail["UnsupportedMomentum", "Propagator routing cannot contain polarization vectors."]];
     vector[mom]; If[!scalarQ[mass], fail["UnsupportedMass", "Propagator masses must be exact scalar expressions."]];
     (* Positive integer powers remain powers of the same identifier. Each
        identifier denotes one ordinary Feynman denominator, including i0. *)
@@ -244,7 +269,7 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
       "Dimension" -> encode[dim], "Prescription" -> "Feynman+i0"|>]
   ];
   denominator[x_] := fail["UnsupportedDenominator", "Only ordinary quadratic PropagatorDenominator objects are supported.", <|"Expression" -> HoldForm[x]|>];
-  abbreviation[x_] := If[scalarQ[x], register["Abbreviation", x],
+  abbreviation[x_] := abbreviation[x] = If[scalarQ[x], register["Abbreviation", x],
     fail["UnsupportedScalar", "Only supported scalar expressions may be abbreviated."]];
 
   emit[x_] := Which[
@@ -412,15 +437,25 @@ CalcFormConverter`CalcFormExport[___] := Failure["InvalidArguments", <|"MessageT
    Vector/index tokens have distinct types until converted into Pair objects. *)
 parseResult[text_String, values_Association, dim_] := Module[
  {tokens, pos = 1, peek, take, expect, atom, power, unary, product, sum,
-  scalarValue, entryValue, call, dot, result, tokenPattern, stripped, classes, tokenCount},
- tokenPattern = RegularExpression["[A-Za-z][A-Za-z0-9_]*|[0-9]+|[+*/^(),.\\-]"];
+  scalarValue, entryValue, call, dot, result, tokenPattern, stripped, classes, tokenCount, compoundPattern, compoundValue},
+ (* Only complete component/metric calls form composite tokens. Tokenize the
+    original text so whitespace cannot join identifier fragments. Dots remain
+    ordinary operators to preserve left-to-right validation of invalid chains. *)
+ compoundPattern = "(?:cfv[0-9]+\\s*\\(\\s*cfi[0-9]+\\s*\\)|d_\\s*\\(\\s*cfi[0-9]+\\s*,\\s*cfi[0-9]+\\s*\\))";
+ tokenPattern = RegularExpression[compoundPattern <> "|[A-Za-z][A-Za-z0-9_]*|[0-9]+|[+*/^(),.\\-]"];
  stripped = StringReplace[text, WhitespaceCharacter -> ""];
  tokens = StringCases[text, tokenPattern];
- If[StringJoin[tokens] =!= stripped || tokens === {}, fail["InvalidResult", "The result contains invalid syntax."]];
+ If[StringReplace[StringJoin[tokens], WhitespaceCharacter -> ""] =!= stripped || tokens === {}, fail["InvalidResult", "The result contains invalid syntax."]];
  (* Classify each distinct lexeme once rather than matching a regular
     expression at every occurrence in a large result. *)
  classes = Association[Map[# -> Which[StringMatchQ[#, DigitCharacter ..], 0,
-   StringMatchQ[#, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]], 1, True, 2] &, DeleteDuplicates[tokens]]];
+   StringMatchQ[#, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]], 1,
+   StringMatchQ[#, RegularExpression[compoundPattern]], 3, True, 2] &, DeleteDuplicates[tokens]]];
+ (* Decode lazily in parse order, using the same identifier and argument
+    checks as ordinary calls. Cache only successful results within this import. *)
+ compoundValue[t_] := compoundValue[t] = With[
+   {parts = StringCases[t, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]]},
+   call[First[parts], entryValue /@ Rest[parts]]];
  (* The sentinel serves lookahead only. take[] and the trailing-token check
     use the original count, so it can never be consumed as input. *)
  tokenCount = Length[tokens]; tokens = Append[tokens, "END"];
@@ -443,7 +478,7 @@ parseResult[text_String, values_Association, dim_] := Module[
      $mastersByFORM[n]["Head"] @@ (scalarValue /@ args),
    True, fail["InvalidResult", "Unsupported function or argument types in FORM result.", <|"Function" -> n|>]
  ];
- dot[a_, b_] := If[MatchQ[{a, b}, {_vectorToken, _vectorToken}],
+ dot[a_, b_] := dot[a, b] = If[MatchQ[{a, b}, {_vectorToken, _vectorToken}],
    Pair[Momentum[a[[1]], dim], Momentum[b[[1]], dim]],
    fail["InvalidResult", "Dot products require two declared vectors."]];
  (* Allocate mutable locals only on branches that need them; immutable
@@ -451,6 +486,7 @@ parseResult[text_String, values_Association, dim_] := Module[
  atom[] := With[{t = take[]},
    Which[
      classes[t] === 0, FromDigits[t],
+     classes[t] === 3, compoundValue[t],
      t === "(", With[{v = sum[]}, expect[")"]; v],
      classes[t] === 1,
        If[peek[] === "(", Module[{args = {}}, take[];
