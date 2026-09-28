@@ -65,4 +65,31 @@ assert["rendered JSON preserves mapping",ImportString[rendered["MappingJSON"],"R
 assert["template placeholders resolved",!StringContainsQ[rendered["Program"],RegularExpression["@[A-Z]+@"]]];
 assert["version-one result marker",StringContainsQ[rendered["Program"],"CFC1 "<>Hash[rendered["MappingJSON"],"SHA256","HexString"]]];
 assert["master declaration",StringContainsQ[rendered["Program"],"CFunctions cfA0,cfB0,cfC0,cfD0;"]];
+(* Registry identity includes both kind and the complete Wolfram expression. *)
+registryData=CalcFormConverter`Private`buildExportData[
+ x+CFCRegistryTest`x+FVD[x,x]+1/(x+y)+z/(x+y),Automatic,{}];
+registryEntries=registryData["Mapping"]["Entries"];
+registryX=CalcFormConverter`Private`encode[x];
+assert["registry separates scalar vector and index kinds",
+ Sort[Lookup[Select[registryEntries,#["Expression"]===registryX&],"Kind"]]==={"Index","Scalar","Vector"}];
+assert["registry reuses compound abbreviations",
+ Count[Lookup[registryEntries,"Expression"],CalcFormConverter`Private`encode[1/(x+y)]]===1];
+assert["registry preserves symbol contexts",
+ Length[Select[registryEntries,#["Kind"]==="Scalar"&&
+  MemberQ[{registryX,CalcFormConverter`Private`encode[CFCRegistryTest`x]},#["Expression"]]&]]===2];
+
+(* Notebook-generated mappings may contain literal Unicode rather than the
+   UTF-8 byte strings returned by RawJSON in command-line kernels. *)
+unicodeMapping=CalcFormConverter`Private`buildExportData[MTD[\[Mu],\[Nu]]^2,Automatic,{}]["Mapping"];
+unicodeJSON=FromCharacterCode[Normal[ExportByteArray[unicodeMapping,"RawJSON","Compact"->True]],"UTF-8"];
+unicodeMapFile=FileNameJoin[{testDirectory,"unicode.map.json"}];
+unicodeResultFile=FileNameJoin[{testDirectory,"unicode.out"}];
+Export[unicodeMapFile,unicodeJSON,"Text",CharacterEncoding->"UTF-8"];
+Export[unicodeResultFile,"CFC1 "<>Hash[unicodeJSON,"SHA256","HexString"]<>"\ncfs1\n","Text"];
+assert["literal Unicode mapping imports contracted trace",CalcFormImport[unicodeResultFile,unicodeMapFile]===D];
+Export[unicodeResultFile,"CFC1 "<>Hash[unicodeJSON,"SHA256","HexString"]<>"\nd_(cfi1,cfi2)\n","Text"];
+assert["literal Unicode mapping restores Greek indices",CalcFormImport[unicodeResultFile,unicodeMapFile]===FCI[MTD[\[Mu],\[Nu]]]];
+legacyDigest=Hash[FromCharacterCode[ToCharacterCode[unicodeJSON,"UTF-8"]],"SHA256","HexString"];
+Export[unicodeResultFile,"CFC1 "<>legacyDigest<>"\ncfs1\n","Text"];
+assert["legacy notebook Unicode checksum",CalcFormImport[unicodeResultFile,unicodeMapFile]===D];
 finish["Core"];

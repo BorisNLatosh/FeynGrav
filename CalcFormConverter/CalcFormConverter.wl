@@ -20,11 +20,14 @@ CalcFormConverter`CalcFormExport::usage =
 CalcFormConverter`CalcFormImport::usage =
 "CalcFormImport[resultFile, mappingFile] reads the dedicated result of an exported FORM program and reconstructs FeynCalc internal notation. It does not execute Wolfram Language source or run tensor/integral reduction.";
 
-CalcFormConverter`CalcFormCheck::usage = "CalcFormCheck[opts] probes FORM on demand and returns availability, version and diagnostics. Options: FORMExecutable -> Automatic, TimeConstraint -> 10.";
-CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[] explicitly attempts Debian/Ubuntu installation of missing FORM using system authorization, then verifies it. It is never called automatically.";
-CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory and KeepFiles. Failed jobs are retained.";
-CalcFormConverter`FORMExecutable::usage = "FORMExecutable selects the FORM executable by name or path; Automatic searches the Wolfram kernel's PATH.";
+CalcFormConverter`CalcFormCheck::usage = "CalcFormCheck[opts] probes FORM on demand and returns availability, version and diagnostics. Options: FORMExecutable -> Automatic, FORMThreads -> 1, TimeConstraint -> 10.";
+CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[opts] explicitly attempts Debian/Ubuntu installation of missing FORM or TFORM using system authorization, then verifies the requested configuration. FORMThreads -> 1 is the default; values above 1 require TFORM. It is never called automatically.";
+CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress and FORMThreads. Failed jobs are retained.";
+CalcFormConverter`FORMExecutable::usage = "FORMExecutable selects the FORM executable by name or path; Automatic searches the Wolfram kernel's PATH for form, or tform when FORMThreads > 1.";
 CalcFormConverter`WorkingDirectory::usage = "WorkingDirectory specifies an existing parent directory for unique FORM jobs; Automatic uses the system temporary directory.";
+CalcFormConverter`ShowTiming::usage = "ShowTiming -> True prints FORM process elapsed wall-clock seconds, excluding the availability probe, export and import. Defaults to False; the returned expression is unchanged.";
+CalcFormConverter`ShowProgress::usage = "ShowProgress -> True prints calculation stages and elapsed FORM execution time every ten seconds. It does not estimate a completion percentage. Defaults to False.";
+CalcFormConverter`FORMThreads::usage = "FORMThreads specifies a positive integer worker count for CalcFormCheck, CalcFormInstall and CalcFormCalculate. The default 1 uses ordinary FORM; values above 1 select TFORM with -wN when FORMExecutable is Automatic. Explicit executables must pass a TFORM probe for multiple workers.";
 CalcFormConverter`KeepFiles::usage = "KeepFiles -> True retains successful FORM calculation files and reports their location. Failed jobs are always retained.";
 
 (* ::Subsection:: *)
@@ -181,15 +184,15 @@ scalarQ[x_] := Which[
 buildExportData[expression_, requestedDimension_, loops_] := Module[
  {expr, dim, entries = {}, registry = <||>, counters = <||>, macros = {},
   register, scalar, vector, index, pair, denominator, emit, abbreviation, makeMacro,
-  body, dimensionName, payload},
+  body, dimensionName, payload, factorExpressions, factorTexts, stageEnds, multiplications = {}},
   If[!ListQ[loops] || !AllTrue[loops, MatchQ[#, _Symbol] &] || !DuplicateFreeQ[loops],
     fail["InvalidLoopMomenta", "LoopMomenta must be a list of distinct momentum symbols."]];
   expr = FCI[expression];
   dim = chooseDimension[expr, requestedDimension];
 
   register[kind_, value_, extra_: <||>] := Module[{key, name, number, prefix},
-    key = ToString[encode[value], InputForm, PageWidth -> Infinity];
-    key = kind <> ":" <> key;
+    (* Structural keys avoid serializing every repeated occurrence. *)
+    key = HoldComplete[kind, value];
     If[KeyExistsQ[registry, key], Return[registry[key]]];
     number = Lookup[counters, kind, 0] + 1; AssociateTo[counters, kind -> number];
     prefix = $kindSpecs[kind]["Prefix"];
@@ -262,12 +265,28 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
   (* 4. FORM program generation: declarations, factors and result output. *)
   dimensionName = If[IntegerQ[dim], intString[dim], scalar[dim]];
   Scan[(register["Vector", #]) &, loops];
-  body = emit[expr];
+  (* A new FORM expression is initially one input term, even when its source
+     contains large sums. Sort between top-level sum factors so later products
+     can use TFORM workers and combine intermediate terms before expanding more.
+     Emit in the original traversal order to preserve the mapping and macros.
+     Non-sum factors stay in order, in the same stage as the following sum;
+     trailing factors belong to the final stage. No Wolfram expansion is used. *)
+  If[Head[expr] === Times && Count[List @@ expr, _Plus] >= 2,
+    factorExpressions = List @@ expr;
+    factorTexts = emit /@ factorExpressions;
+    stageEnds = Flatten[Position[factorExpressions, _Plus, {1}, Heads -> False]];
+    stageEnds[[-1]] = Length[factorTexts];
+    body = "(" <> StringRiffle[Take[factorTexts, First[stageEnds]], "*"] <> ")";
+    multiplications = MapThread[
+      ("(" <> StringRiffle[Take[factorTexts, {#1 + 1, #2}], "*"] <> ")") &,
+      {Most[stageEnds], Rest[stageEnds]}],
+    body = emit[expr]];
   payload = <|"Format" -> $formatName, "Version" -> $formatVersion,
     "ExpressionDigest" -> Hash[expr, "SHA256", "HexString"],
     "Dimension" -> encode[dim], "LoopMomenta" -> (encode /@ loops),
     "Processing" -> "TensorAlgebraOnly", "Entries" -> entries|>;
-  <|"DimensionName" -> dimensionName, "Body" -> body, "Factors" -> macros, "Mapping" -> payload|>
+  <|"DimensionName" -> dimensionName, "Body" -> body, "Multiplications" -> multiplications,
+    "Factors" -> macros, "Mapping" -> payload|>
 ];
 
 (* ::Subsection:: *)
@@ -289,6 +308,7 @@ renderExport[data_Association, result_String, template_String] := Module[
     "@SCALARS@" -> declaration["Symbols"], "@DIMENSION@" -> data["DimensionName"],
     "@VECTORS@" -> declaration["Vectors"], "@INDICES@" -> declaration["Indices"],
     "@FACTORS@" -> StringRiffle[data["Factors"], "\n"], "@EXPRESSION@" -> data["Body"],
+    "@MULTIPLICATIONS@" -> StringJoin[(".sort\nMultiply " <> # <> ";\n") & /@ data["Multiplications"]],
     "@RESULT@" -> StringReplace[result, "\\" -> "/"], "@DIGEST@" -> digest}];
   <|"Program" -> program, "MappingJSON" -> json|>
 ];
@@ -318,7 +338,7 @@ exportPaths[file_String, overwrite_] := Module[{input, mapping, result, paths},
 ];
 
 (* Small I/O boundaries allow failure injection without replacing filesystem primitives. *)
-exportWriteText[path_, text_] := Quiet[Check[Export[path, text, "Text"], $Failed]];
+exportWriteText[path_, text_] := Quiet[Check[Export[path, text, "Text", CharacterEncoding -> "UTF-8"], $Failed]];
 exportCopyFile[source_, target_, overwrite_: False] := Quiet[Check[CopyFile[source, target, OverwriteTarget -> overwrite], $Failed]];
 exportRenameFile[source_, target_, overwrite_] := Quiet[Check[RenameFile[source, target, OverwriteTarget -> overwrite], $Failed]];
 exportDeleteFile[path_] := !FileExistsQ[path] || TrueQ[Quiet[Check[DeleteFile[path]; True, False]]];
@@ -388,33 +408,32 @@ CalcFormConverter`CalcFormExport[___] := Failure["InvalidArguments", <|"MessageT
 (* 5. FORM result parsing and FeynCalc reconstruction. Recursive descent recognizes arithmetic,
    native tensor syntax and four reserved master-integral functions only.
    Vector/index tokens have distinct types until converted into Pair objects. *)
-parseResult[text_String, entries_List, dim_] := Module[
- {tokens, pos = 1, names, peek, take, expect, atom, power, unary, product, sum,
-  scalarValue, entryValue, call, dot, result, tokenPattern, stripped},
+parseResult[text_String, values_Association, dim_] := Module[
+ {tokens, pos = 1, peek, take, expect, atom, power, unary, product, sum,
+  scalarValue, entryValue, call, dot, result, tokenPattern, stripped, classes},
  tokenPattern = RegularExpression["[A-Za-z][A-Za-z0-9_]*|[0-9]+|[+*/^(),.\\-]"];
  stripped = StringReplace[text, WhitespaceCharacter -> ""];
  tokens = StringCases[text, tokenPattern];
  If[StringJoin[tokens] =!= stripped || tokens === {}, fail["InvalidResult", "The result contains invalid syntax."]];
- names = Association[Map[#["Name"] -> # &, entries]];
+ (* Classify each distinct lexeme once rather than matching a regular
+    expression at every occurrence in a large result. *)
+ classes = Association[Map[# -> Which[StringMatchQ[#, DigitCharacter ..], 0,
+   StringMatchQ[#, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]], 1, True, 2] &, DeleteDuplicates[tokens]]];
  peek[] := If[pos <= Length[tokens], tokens[[pos]], "END"];
  take[] := Module[{t},
    If[pos > Length[tokens], fail["InvalidResult", "Unexpected end of FORM result."]];
    t = tokens[[pos]]; pos++; t];
  expect[t_] := If[take[] =!= t, fail["InvalidResult", "Unexpected token in FORM result."]];
+ (* Check types before arithmetic can cancel an invalid vector/index. *)
  scalarValue[x_] := If[!FreeQ[x, _vectorToken | _indexToken],
    fail["InvalidResult", "A vector or index occurs outside a tensor object."], x];
- entryValue[n_] := Module[{entry = Lookup[names, n, Missing["Unknown"]]},
-   If[MissingQ[entry], fail["UnknownIdentifier", "Unknown identifier in FORM result.", <|"Identifier" -> n|>]];
-   Switch[entry["Kind"],
-     "Vector", vectorToken[decode[entry["Expression"]]],
-     "Index", indexToken[decode[entry["Expression"]]],
-     _, decode[entry["Expression"]]]
- ];
+ entryValue[n_] := Lookup[values, n,
+   fail["UnknownIdentifier", "Unknown identifier in FORM result.", <|"Identifier" -> n|>]];
  call[n_, args_] := Which[
    n === "d_" && Length[args] == 2 && MatchQ[args, {_indexToken, _indexToken}],
      Pair[LorentzIndex[args[[1, 1]], dim], LorentzIndex[args[[2, 1]], dim]],
-   KeyExistsQ[names, n] && names[n]["Kind"] === "Vector" && MatchQ[args, {_indexToken}],
-     Pair[Momentum[decode[names[n]["Expression"]], dim], LorentzIndex[args[[1, 1]], dim]],
+   KeyExistsQ[values, n] && MatchQ[values[n], _vectorToken] && MatchQ[args, {_indexToken}],
+     Pair[Momentum[values[n][[1]], dim], LorentzIndex[args[[1, 1]], dim]],
    KeyExistsQ[$mastersByFORM, n] && masterArgumentsQ[$mastersByFORM[n], scalarValue /@ args],
      $mastersByFORM[n]["Head"] @@ (scalarValue /@ args),
    True, fail["InvalidResult", "Unsupported function or argument types in FORM result.", <|"Function" -> n|>]
@@ -424,9 +443,9 @@ parseResult[text_String, entries_List, dim_] := Module[
    fail["InvalidResult", "Dot products require two declared vectors."]];
  atom[] := Module[{t = take[], args = {}, v},
    Which[
-     StringMatchQ[t, DigitCharacter ..], FromDigits[t],
+     classes[t] === 0, FromDigits[t],
      t === "(", v = sum[]; expect[")"]; v,
-     StringMatchQ[t, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]],
+     classes[t] === 1,
        If[peek[] === "(", take[];
          If[peek[] =!= ")", AppendTo[args, sum[]]; While[peek[] === ",", take[]; AppendTo[args, sum[]]]];
          expect[")"]; call[t, args], If[t === "i_", I, entryValue[t]]],
@@ -444,15 +463,23 @@ parseResult[text_String, entries_List, dim_] := Module[
      v = scalarValue[v]^(sign FromDigits[n])]; v
  ];
  unary[] := Switch[peek[], "+", take[]; unary[], "-", take[]; -scalarValue[unary[]], _, power[]];
- product[] := Module[{v = unary[], op, r, factors = {}},
-   While[MemberQ[{"*", "/"}, peek[]], op = take[]; r = scalarValue[unary[]];
-     If[op === "/" && r === 0, fail["InvalidResult", "Division by zero."]];
-     AppendTo[factors, If[op === "*", r, 1/r]]];
-   If[factors === {}, v, Times @@ Prepend[factors, scalarValue[v]]]];
- sum[] := Module[{v = product[], op, r, terms = {}},
-   While[MemberQ[{"+", "-"}, peek[]], op = take[]; r = scalarValue[product[]];
-     AppendTo[terms, If[op === "+", r, -r]]];
-   If[terms === {}, v, Plus @@ Prepend[terms, scalarValue[v]]]];
+ (* Reap/Sow collects arbitrarily long products and sums without repeatedly
+    copying a growing list. Nested parser calls own their collectors. *)
+ product[] := Module[{v = unary[], op, r, factors},
+   If[!MemberQ[{"*", "/"}, peek[]], Return[v]];
+   factors = Reap[
+     Sow[scalarValue[v]];
+     While[MemberQ[{"*", "/"}, peek[]], op = take[]; r = scalarValue[unary[]];
+       If[op === "/" && r === 0, fail["InvalidResult", "Division by zero."]];
+       Sow[If[op === "*", r, 1/r]]]][[2, 1]];
+   Times @@ factors];
+ sum[] := Module[{v = product[], op, r, terms},
+   If[!MemberQ[{"+", "-"}, peek[]], Return[v]];
+   terms = Reap[
+     Sow[scalarValue[v]];
+     While[MemberQ[{"+", "-"}, peek[]], op = take[]; r = scalarValue[product[]];
+       Sow[If[op === "+", r, -r]]]][[2, 1]];
+   Plus @@ terms];
  result = scalarValue[sum[]];
  If[pos <= Length[tokens], fail["InvalidResult", "Unexpected trailing tokens in FORM result."]];
  result
@@ -462,19 +489,37 @@ parseResult[text_String, entries_List, dim_] := Module[
 (*Mapping validation and public importer*)
 
 (* ::Input::Initialization:: *)
+(* Decode and validate every entry once, including entries eliminated by FORM.
+   The job-local dictionary also carries vector/index types for the parser. *)
+decodeEntries[entries_List] := Association[Map[Function[entry, Module[{value = decode[entry["Expression"]]},
+  If[!TrueQ[$kindSpecs[entry["Kind"]]["ValidExpression"][value]],
+    fail["InvalidMapping", "Mapped expression does not match its declared kind."]];
+  entry["Name"] -> Switch[entry["Kind"],
+    "Vector", vectorToken[value], "Index", indexToken[value], _, value]
+]], entries]];
+
 (* Validate the result/mapping pair before reconstruction. *)
 CalcFormConverter`CalcFormImport[resultFile_String, mappingFile_String] := Catch[
- Module[{json, mapping, text, lines, digest, entries, dim, names},
-  json = Quiet[Check[Import[mappingFile, "Text"], $Failed]];
-  text = Quiet[Check[Import[resultFile, "Text"], $Failed]];
+ Module[{json, mapping, text, lines, digest, entries, dim, names, values},
+  json = Quiet[Check[Import[mappingFile, "Text", CharacterEncoding -> "UTF-8"], $Failed]];
+  text = Quiet[Check[Import[resultFile, "Text", CharacterEncoding -> "UTF-8"], $Failed]];
   If[!StringQ[json] || !StringQ[text], fail["ReadFailed", "Cannot read the result or mapping file."]];
+  (* Older kernels expose RawJSON strings as UTF-8 bytes, while notebook
+     sessions may supply Unicode text. Keep version-one byte-string files
+     readable and retry genuine Unicode through an explicit UTF-8 buffer. *)
   mapping = Quiet[Check[ImportString[json, "RawJSON"], $Failed]];
+  If[mapping === $Failed,
+    mapping = Quiet[Check[ImportByteArray[ByteArray[ToCharacterCode[json, "UTF-8"]], "RawJSON"], $Failed]]];
   If[!AssociationQ[mapping] || Lookup[mapping, "Format", None] =!= $formatName ||
      Lookup[mapping, "Version", None] =!= $formatVersion,
     fail["InvalidMapping", "Unsupported mapping format or version."]];
   lines = StringSplit[StringReplace[text, "\r\n" -> "\n"], "\n"];
-  digest = Hash[json, "SHA256", "HexString"];
-  If[Length[lines] < 2 || First[lines] =!= resultMarker[] <> " " <> digest,
+  (* Early notebook exports could decode the UTF-8 byte string during
+     writing, after its checksum was calculated. Accept that exact legacy
+     representation too; both checksums still bind the complete mapping. *)
+  digest = Hash[#, "SHA256", "HexString"] & /@
+    {json, FromCharacterCode[ToCharacterCode[json, "UTF-8"]]};
+  If[Length[lines] < 2 || !MemberQ[(resultMarker[] <> " " <> # &) /@ digest, First[lines]],
     fail["MappingMismatch", "The result does not correspond to this mapping file."]];
   entries = Lookup[mapping, "Entries", None];
   If[!ListQ[entries] || !AllTrue[entries, AssociationQ], fail["InvalidMapping", "Invalid mapping entries."]];
@@ -484,12 +529,8 @@ CalcFormConverter`CalcFormImport[resultFile_String, mappingFile_String] := Catch
      KeyExistsQ[#, "Expression"] &], fail["InvalidMapping", "Invalid or duplicate mapping identifiers."]];
   dim = decode[Lookup[mapping, "Dimension", None]];
   If[!MatchQ[dim, _Symbol | _Integer] || (IntegerQ[dim] && dim < 2) || dim === I, fail["InvalidMapping", "Invalid mapped dimension."]];
-  (* Validate all mapping expressions, even if FORM eliminated them. *)
-  Scan[Function[entry, Module[{value = decode[entry["Expression"]]},
-    If[!TrueQ[$kindSpecs[entry["Kind"]]["ValidExpression"][value]],
-      fail["InvalidMapping", "Mapped expression does not match its declared kind."]]
-  ]], entries];
-  parseResult[StringRiffle[Rest[lines], "\n"], entries, dim]
+  values = decodeEntries[entries];
+  parseResult[StringRiffle[Rest[lines], "\n"], values, dim]
  ], $failureTag];
 CalcFormConverter`CalcFormImport[___] := Failure["InvalidArguments", <|"MessageTemplate" -> "Use CalcFormImport[resultFile, mappingFile]."|>];
 

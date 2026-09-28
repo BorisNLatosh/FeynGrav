@@ -18,6 +18,7 @@ If[(DownValues /@ {QuadraticGravityPropagator,QuadraticGravityVertex})=!=beforeG
  Directory[]=!=beforeDirectory,Print["FAIL: independent reload changed existing definitions"];Quit[1]];
 If[processCalls=!=0 || !AllTrue[{CalcFormCheck,CalcFormInstall,CalcFormCalculate},DownValues[#]=!={}&],
  Print["FAIL: runtime definitions or process launched during loading"];Quit[1]];
+If[!AllTrue[{CalcFormConverter`ShowTiming,CalcFormConverter`ShowProgress,CalcFormConverter`FORMThreads},StringQ[MessageName[#,"usage"]]&],Print["FAIL: new option help"];Quit[1]];
 Print["Automatic loading and namespace isolation passed."];
 Export[FileNameJoin[{Environment["CFC_TEST_DIR"],"test-completed"}],"Loading","Text"];
 Quit[];

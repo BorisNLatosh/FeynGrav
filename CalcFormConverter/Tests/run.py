@@ -37,6 +37,7 @@ def main():
 
             if suite == 'core':
                 run_kernel('Core')
+                run_kernel('Parser')
                 run_kernel('Transactions')
                 run_kernel('Installer')
                 continue
@@ -45,6 +46,8 @@ def main():
                 run_kernel('Runtime')
                 continue
             run_kernel('Export' if suite == 'form' else 'GravityExport')
+            if suite == 'form':
+                run_kernel('FormStages')
             for source in sorted(work.rglob('*.frm')):
                 completed = subprocess.run([form, '-q', str(source)], cwd=work,
                                            text=True, capture_output=True)

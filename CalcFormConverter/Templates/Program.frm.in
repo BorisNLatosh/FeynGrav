@@ -1,3 +1,4 @@
+#-
 * CalcFormConverter format @FORMATVERSION@. Generated file; mapping is stored separately.
 * Tensor algebra only: no integration, symmetry factors or on-shell substitutions.
 Off Statistics;
@@ -10,6 +11,7 @@ Dimension @DIMENSION@;
 * Reusable factors. Expansion takes place in FORM, not in Mathematica.
 @FACTORS@
 Local cfcResult = @EXPRESSION@;
+@MULTIPLICATIONS@
 
 * Processing stage: FORM contracts native Lorentz objects during normalization.
 * Future denominator and one-loop reduction procedures belong at this boundary.

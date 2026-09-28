@@ -17,6 +17,40 @@ assert["probe timeout",CalcFormCheck[FORMExecutable->FileNameJoin[{root,"probeha
 assert["probe wrong arithmetic",CalcFormCheck[FORMExecutable->FileNameJoin[{root,"probebad"}]]["Status"]==="ProbeFailed"];
 assert["probe cleanup",Sort[FileNames["calcform-probe-*",$TemporaryDirectory]]===probeBefore];
 
+assert["Greek metric trace",CalcFormCalculate[MTD[\[Mu],\[Nu]] MTD[\[Mu],\[Nu]]]===D];
+
+(* Timing and progress must leave the mathematical result unchanged. *)
+events={};
+observed=Block[{CalcFormConverter`Private`reportCalculation},
+ CalcFormConverter`Private`reportCalculation[event_Association]:=AppendTo[events,event];
+ CalcFormCalculate[MTD[\[Mu],\[Nu]]^2,ShowTiming->True,ShowProgress->True]];
+assert["observation preserves result",observed===D];
+assert["reported stages",Select[Lookup[events,"Stage"],MemberQ[{"Check","Export","Execute","Import","Complete"},#]&]==={"Check","Export","Execute","Import","Complete"}];
+timingEvents=Select[events,KeyExistsQ[#,"ElapsedSeconds"]&];
+assert["execution timing reported",Length[timingEvents]===1 && NumberQ[First[timingEvents]["ElapsedSeconds"]] && First[timingEvents]["ElapsedSeconds"]>=0];
+events={};
+Block[{CalcFormConverter`Private`reportCalculation},
+ CalcFormConverter`Private`reportCalculation[event_Association]:=AppendTo[events,event];
+ CalcFormCalculate[1]];
+assert["default output remains quiet",events==={}];
+assertFailure["invalid timing option","InvalidOption",CalcFormCalculate[1,ShowTiming->42]];
+assertFailure["invalid progress option","InvalidOption",CalcFormCalculate[1,ShowProgress->42]];
+assertFailure["invalid worker count","InvalidOption",CalcFormCalculate[1,FORMThreads->0]];
+assertFailure["fractional worker count","InvalidOption",CalcFormCheck[FORMThreads->1/2]];
+assert["ordinary FORM cannot silently ignore workers",CalcFormCheck[FORMExecutable->info["Executable"],FORMThreads->2]["Status"]==="ThreadingUnavailable"];
+If[StringQ[CalcFormConverter`Private`resolveExecutable["tform"]],
+ threaded=CalcFormCheck[FORMThreads->2];
+ assert["TFORM availability and version",TrueQ[threaded["Available"]] && StringQ[threaded["Version"]] && threaded["FORMThreads"]===2];
+ assert["TFORM vs serial result",CalcFormCalculate[MTD[\[Mu],\[Nu]] FVD[p-l,\[Mu]] FVD[p,\[Nu]],FORMThreads->2]===CalcFormCalculate[MTD[\[Mu],\[Nu]] FVD[p-l,\[Mu]] FVD[p,\[Nu]]]],
+ Print["SKIP: TFORM is not installed."]];
+progressDir=CreateDirectory[FileNameJoin[{root,"progress-timeout"}]];
+events={};
+progressRun=Block[{CalcFormConverter`Private`reportCalculation,CalcFormConverter`Private`$progressInterval=.01},
+ CalcFormConverter`Private`reportCalculation[event_Association]:=AppendTo[events,event];
+ CalcFormConverter`Private`runtimeProcess[{FileNameJoin[{root,"hang"}]},progressDir,.1,True,True]];
+assert["periodic execution progress",Length[events]>0 && AllTrue[events,#["Stage"]==="Execute" && NumberQ[#["ElapsedSeconds"]]&]];
+assert["progress preserves timeout cleanup",progressRun["Status"]==="TimedOut" && progressRun["ProcessStatus"]==="Finished" && NumberQ[progressRun["ElapsedSeconds"]]];
+
 parent=CreateDirectory[FileNameJoin[{root,"jobs with spaces"}]];
 expr=MTD[mu,nu] FVD[p-l,mu] FVD[p,nu] FAD[{l,m}] + I/3;
 auto=CalcFormCalculate[expr,LoopMomenta->{l},WorkingDirectory->parent];

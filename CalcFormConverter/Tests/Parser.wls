@@ -1,0 +1,39 @@
+Get[FileNameJoin[{DirectoryName[$InputFileName],"Common.wl"}]];
+(* Exercise reconstruction without launching FORM. The mapping is produced by
+   the exporter; only the restricted result body is synthesized here. *)
+parserJob=CalcFormExport[x+FVD[p,mu]+FVD[q,nu],FileNameJoin[{testDirectory,"parser.frm"}]];
+assert["parser fixture exports",AssociationQ[parserJob]];
+parserJSON=Import[parserJob["MappingFile"],"Text",CharacterEncoding->"UTF-8"];
+parserMapping=ImportString[parserJSON,"RawJSON"];
+parserHeader="CFC1 "<>Hash[parserJSON,"SHA256","HexString"]<>"\n";
+nameFor[symbol_]:=SelectFirst[parserMapping["Entries"],#["Expression"]==={"Symbol",Context[symbol]<>SymbolName[symbol]}&]["Name"];
+xName=nameFor[x]; pName=nameFor[p]; qName=nameFor[q]; muName=nameFor[mu]; nuName=nameFor[nu];
+parseBody[body_String]:=(Export[parserJob["ResultFile"],parserHeader<>body,"Text",CharacterEncoding->"UTF-8"];
+ CalcFormImport[parserJob["ResultFile"],parserJob["MappingFile"]]);
+
+assert["long sum",parseBody[StringRiffle[Table[ToString[k]<>"*"<>xName<>"^"<>ToString[k],{k,1,1500}],"+"]]===Sum[k x^k,{k,1,1500}]];
+assert["long product",parseBody[StringRiffle[ConstantArray["("<>xName<>"+1)",2000],"*"]] === (1+x)^2000];
+assert["nested collectors",parseBody["("<>xName<>"+1)*(2+3*"<>xName<>")+4*("<>xName<>"-1)"] === (1+x)(2+3x)+4(x-1)];
+assert["division associativity",parseBody["24/3/2"]===4];
+assert["signed integer exponents",parseBody["2^(-3)+2^(+3)-2^2+(-2)^2"]===65/8];
+assert["nested master arguments",parseBody["cfB0("<>xName<>"+1,2*3,4^2)"]===B0[x+1,6,16]];
+assert["repeated scalar products",parseBody[StringRiffle[ConstantArray[pName<>"."<>qName,1500],"+"]]===1500 FCI[SPD[p,q]]];
+assert["metric and component reconstruction",parseBody["d_("<>muName<>","<>nuName<>")+"<>pName<>"("<>muName<>")"]===FCI[MTD[mu,nu]+FVD[p,mu]]];
+
+(* Invalid typed tokens must fail even when ordinary arithmetic would hide them. *)
+Scan[Function[body,assertFailure["typed syntax rejected: "<>body,"InvalidResult",parseBody[body]]],{
+ "0*"<>pName,pName<>"-"<>pName,muName<>"^0","cfA0("<>muName<>")",
+ pName<>"*0",pName<>"/"<>pName,pName<>"+0",muName<>"."<>pName,
+ pName<>"("<>qName<>")","d_("<>muName<>","<>pName<>")", "cfB0(1,2,3,4)","1+"}];
+assertFailure["unknown identifier before cancellation","UnknownIdentifier",parseBody["unknownIdentifier*0"]];
+
+(* Validation still visits unused entries, even when the result is zero. *)
+badEntries=parserMapping["Entries"];
+scalarPosition=First[FirstPosition[Lookup[badEntries,"Name"],xName]];
+badEntries[[scalarPosition,"Expression"]]={"Momentum",{"Symbol","Global`p"},{"Symbol","System`D"}};
+parserMapping["Entries"]=badEntries;
+badJSON=ExportString[parserMapping,"RawJSON"];
+Export[parserJob["MappingFile"],badJSON,"Text",CharacterEncoding->"UTF-8"];
+Export[parserJob["ResultFile"],"CFC1 "<>Hash[badJSON,"SHA256","HexString"]<>"\n0","Text",CharacterEncoding->"UTF-8"];
+assertFailure["unused invalid mapped value","InvalidMapping",CalcFormImport[parserJob["ResultFile"],parserJob["MappingFile"]]];
+finish["Parser"];

@@ -37,7 +37,19 @@ ScalarBubbleExample[p_, l_, m0_, m2_] := Module[
    importQuadraticGravity[1];
    expression = ScalarBubbleExample[p, l, m0, m2];
    result = CalcFormCalculate[expression, LoopMomenta -> {l},
-     WorkingDirectory -> "/tmp", KeepFiles -> True];
+     WorkingDirectory -> "/tmp", KeepFiles -> True,
+     ShowTiming -> True, ShowProgress -> True];
+
+   To request four TFORM workers, add FORMThreads -> 4.
+   CalcFormCheck[FORMThreads -> 4] checks that configuration first.
+   If TFORM is missing, explicitly call CalcFormInstall[FORMThreads -> 4].
+
+   For an end-to-end elapsed-time measurement, use:
+   AbsoluteTiming[
+     result = CalcFormCalculate[expression, LoopMomenta -> {l},
+       FORMThreads -> 4, ShowTiming -> True, ShowProgress -> True];
+   ]
+   Timing reports Mathematica kernel CPU time, not total elapsed time.
 
    This runs the complete FORM algebra and imports its result. It does not
    integrate the loop. The full bubble may require substantial time and disk;
