@@ -51,6 +51,10 @@ If[!ValueQ[FeynGravInitialized],
 Needs["Calc`",DirectoryName[$InputFileName]<>"Rules/Calc.wl"];
 
 
+(* Standalone bosonic FeynCalc/FORM conversion; loading never runs FORM. *)
+Needs["CalcFormConverter`", FileNameJoin[{DirectoryName[$InputFileName], "CalcFormConverter", "CalcFormConverter.wl"}]];
+
+
 (* The package imports the Nieuwenhuizen operators and gauge projectors. *)
 
 
@@ -290,7 +294,8 @@ FeynGravCommands := Print[
         "QuadraticGravityPropagator","QuadraticGravityPropagatorHD","GravitonGhostVertexHD","QuadraticGravityVertex","GhostVectorPropagatorHD",
         "importGravitons", "importScalars", "importFermions", "importVectors", "importSUNYM",
         "importHorndeskiG2", "importHorndeskiG3", "importHorndeskiG4", "importHorndeskiG5",
-        "importAxionVectorVertex", "importQuadraticGravity"
+        "importAxionVectorVertex", "importQuadraticGravity",
+        "CalcFormExport", "CalcFormImport", "CalcFormCheck", "CalcFormInstall", "CalcFormCalculate"
       }, 
       ", "
     ],
@@ -809,3 +814,7 @@ EndPackage[];
 
 
 AppendTo[$ContextPath, "Nieuwenhuizen`"];
+
+
+(* Keep converter commands visible after closing the FeynGrav context. *)
+If[!MemberQ[$ContextPath, "CalcFormConverter`"], AppendTo[$ContextPath, "CalcFormConverter`"]];

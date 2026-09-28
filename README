@@ -41,6 +41,10 @@ The package contains several key components:
 - Libs/FeynGravLibrariesGenerator.wl:
   - A script for generating the necessary libraries. This script is primarily for developers and not for regular users, as libraries only need to be generated once and published online.
 
+CalcFormConverter
+-----------------
+The independently loadable CalcFormConverter module is loaded automatically with FeynGrav. CalcFormExport writes a ready-to-execute FORM program and a JSON mapping; CalcFormImport reconstructs the dedicated FORM result in FeynCalc notation. This version supports exact bosonic tensor algebra and ordinary quadratic propagators, with scalar A0 through D0 functions. CalcFormCheck probes FORM on demand, CalcFormInstall explicitly offers Debian/Ubuntu installation, and CalcFormCalculate automates export, execution and import. Integral reduction is not implemented. See CalcFormConverter/README.md for the complete workflow, supported vocabulary, examples and tests.
+
 Usage Notes
 -----------
 - FeynGrav is designed to work seamlessly with FeynCalc, enhancing its capabilities to manage complex interactions involving gravitons.
