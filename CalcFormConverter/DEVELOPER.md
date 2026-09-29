@@ -17,7 +17,7 @@ Keep the public export/import signatures independent of internal refactoring. Th
 2. `renderExport[data, resultPath, templateText]`: generate program and JSON text in memory. It performs no file access.
 3. `writeExport[paths, rendered, overwrite]`: write the prepared files. Path checks and template reading are separate helpers used by the public command.
 
-The export registry uses held expression keys containing both the symbol kind and value. This keeps identical names in different contexts and the same symbol in different roles distinct, without repeatedly encoding values as text. Each new mapping entry is encoded once. Staging must preserve the original traversal order so identifiers remain deterministic.
+The export registry uses held expression keys containing both the symbol kind and value. This keeps identical names in different contexts and the same symbol in different roles distinct, without repeatedly encoding values as text. Each new mapping entry is encoded once. Serialization must preserve the original traversal order so identifiers remain deterministic. Stage planning runs only after serialization and cannot change mappings or macros.
 
 Complete native vector-component and metric calls are recognized as single import tokens and decoded lazily through the normal identifier and argument checks. Repeated calls reuse their validated values within that import. Other syntax, including nested arguments and dot chains, keeps the ordinary parser; successful dot reconstruction is cached locally. This preserves error order and avoids repeatedly parsing the same short tensor calls. The measured median paired improvement was about 29.5% across ten full-import comparisons on one retained result; scalar and master-function inputs showed little benefit. Cache memory grows with distinct calls and vector pairs, and peak memory has not been measured.
 
@@ -70,7 +70,7 @@ python3 Tests/run.py --suite integration
 
 Executables must be on `PATH`; `core` does not locate or launch FORM. The `runtime` suite requires Mathematica to be allowed to start external processes; a restricted execution sandbox may block it. The driver uses separate temporary directories and fresh kernels. Tests identify cases by descriptive keys, so adding a case does not change other tests' meaning. The fixed compatibility artifacts in `Tests/Fixtures` are read without regeneration.
 
-The complete example bubble was constructed and exported on the development machine using FORM 4.3 as the available test backend. A recorded export after staged generation took **2.039 seconds**, producing **480,503 bytes** of FORM source and **6,685 bytes** of mapping from an expression with **178,961 leaves**. This measures conversion only. Full-bubble FORM contraction was not benchmarked, and no speedup claim is made. Smaller generated programs are executed in the test suite and compared with FeynCalc. The full-bubble test checks its mapping against the original propagators, masses, indices, abbreviations and loop momenta without executing the complete FORM job. Source size varies slightly with the output path embedded in the program.
+The complete example bubble was constructed and exported on the development machine using FORM 4.3 as the available test backend. A recorded export after staged generation took **2.039 seconds**, producing **480,503 bytes** of FORM source and **6,685 bytes** of mapping from an expression with **178,961 leaves**. This measures conversion only. That initial staging check did not benchmark full-bubble FORM contraction; the later factor-normalization measurements below cover it separately. Smaller generated programs are executed in the test suite and compared with FeynCalc. The full-bubble test checks its mapping against the original propagators, masses, indices, abbreviations and loop momenta without executing the complete FORM job. Source size varies slightly with the output path embedded in the program.
 
 
 ### Earlier recorded performance checks
@@ -123,3 +123,98 @@ and `Pair`, so current FeynCalc scalar-product definitions apply at import.
 Propagator routing explicitly excludes polarizations. Keep tests for free
 components, contractions, conjugation, transversality, dimensions and rejected
 identities when extending this vocabulary.
+
+
+### Connected tensor stage ordering
+
+`connectedStageOrder` computes index multiplicities recursively without distributing products. `Plus` branches must have identical signatures; `Times` adds counts and nonnegative integer powers scale them. Native `Pair` signatures are cached locally. Any inconsistent sum or index occurring more than twice makes the planner retain the original stage order. This also protects existing behavior for ambiguous repeated-index expressions. Internal dummy indices have multiplicity two and are excluded from the open-index set. Scalar-only stages retain their original order when the whole product has no open indices.
+
+For eligible products, the next stage maximizes the number of shared open indices, then prefers a tensor stage, smaller `LeafCount`, and original position. Shared indices leave the active set after contraction. This is an inexpensive deterministic heuristic, not an optimal contraction-tree search. Serialization, validation and macro registration precede planning; version-one mappings, fingerprints, failure behavior and factor definitions remain unchanged. Runtime and importer code are unchanged.
+
+#### Measurement against b73c1a7
+
+On 2026-09-29, FORM/TFORM 4.3 on an Intel Core i5-1235U (10 physical/12 logical CPUs) gave the following external-process wall times. Baseline and candidate used identical exported expressions and mappings, with only stage order changed. Runs were sequential and alternated order. The smaller job contains one complete quadratic-gravity vertex, one propagator and a projector; the larger contains a vertex, two propagators and a projector. They are substantial partial products of `ScalarBubbleExample`, not the complete bubble.
+
+| Input / engine | Pairs | Baseline median | Candidate median | Speedup | Wall-time reduction |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 89,320 leaves / FORM | 7 | 0.600567 s | 0.112637 s | 5.33x | 81.24% |
+| Same / TFORM 2 workers | 7 | 0.384959 s | 0.104414 s | 3.69x | 72.88% |
+| Same / TFORM 4 workers | 7 | 0.293125 s | 0.109719 s | 2.67x | 62.57% |
+| 90,489 leaves / TFORM 4 workers | 3 | 23.185782 s | 1.388039 s | 16.70x | 94.01% |
+
+Small scalar, free-index tensor and polarization controls also produced identical outputs under FORM and TFORM with four workers. Two alternating pairs after warmup took roughly 2.8–5.6 milliseconds; process startup dominates, so no speedup is claimed for those controls. Some measured differences were small slowdowns below 0.3 milliseconds.
+
+The larger baseline ranged from 23.120–23.666 s and candidate from 1.344–1.414 s. Output files were byte-identical: 6,244 terms / 624,358 bytes for the smaller job, 79,449 terms / 10,038,006 bytes for the larger. The actual generator reproduced the measured programs, apart from blank lines and isolated result paths; mappings were byte-identical. The smaller baseline's intermediate outputs were 31, 86, 6,244 terms, versus 3, 882, 6,244. The larger baseline produced 31, 4,293, 11,123, 79,449 terms, versus 3, 882, 6,244, 79,449.
+
+Export is separate. Four alternating public-export pairs had medians 0.575905 s baseline and 0.638233 s candidate on the larger partial (+0.062328 s), and 1.142099 s versus 1.239619 s on the full bubble (+0.097520 s). These include writing and overwrite handling; the first pair was cold. Import and complete-call timings were not benchmarked. Byte-identical outputs leave import work unchanged, but that is not an end-to-end timing measurement.
+
+The full bubble baseline timed out after 40 s at four workers; the candidate also timed out in a separate 30 s pilot. **Those stage-order measurements did not establish a complete-bubble speedup.** The subsequent normalization measurements below use that connected-stage version as their baseline. A serial larger-partial baseline also exceeded a 40 s pilot limit, so it is excluded from the timing table. The laptop has heterogeneous cores, dynamic frequency and background desktop activity (initial load averages 1.42/1.57/1.42); timings are observations on this machine, not guarantees. Worker counts were controlled; CPU affinity and governor were not changed. No other heavy benchmark ran concurrently. No memory or disk-buffer settings were tuned.
+
+#### Reproducing an execution comparison
+
+Export the same expression with baseline and candidate revisions and preserve both mappings. `Tests/BenchmarkFORM.py` redirects each generated result into a separate new directory, warms both programs once, then runs alternating pairs sequentially. It checks the complete output digest after every run, records bytes, elapsed seconds and logs, and rejects failures, timeouts or unequal outputs. It does not run export/import or alter the original artifacts.
+
+```sh
+python3 Tests/BenchmarkFORM.py baseline.frm candidate.frm \
+  --workers 4 --pairs 5 --timeout 60 --output /tmp/cfc-comparison
+```
+
+Use `--workers 1` for serial FORM. Use fresh kernels for export, and keep factor/dummy-index identities fixed between revisions. Historical experiment inputs, scripts and logs from this measurement were retained under `/tmp/cfc-form-perf-20260929`; these temporary files are not repository fixtures. Regression cases in `Tests/FormStages.wls` compare independent monolithic and staged programs, including free indices, contraction loops, internal dummy indices, polarization and conservative fallback cases.
+
+#### Sources and interpretation
+
+The official [FORM reference manual](https://form-dev.github.io/form-docs/stable/manual/) explains that `.sort` combines terms, too many or too few boundaries can both hurt performance, and a newly defined expression starts as one input term, limiting parallelism in that module. The specialised [FORM benchmark discussion #702](https://github.com/form-dev/form/discussions/702) recommends repeated representative jobs and discusses noisy hosts. [FORM performance discussion #859](https://github.com/form-dev/form/discussions/859) shows sensitivity to thread placement and cache topology. These are documented observations and established measurement considerations. The connected-index ordering rule is this converter's heuristic, motivated by reducing intermediate products and validated only on the cases above; those sources do not guarantee its speedup.
+
+Verification passed 421 named assertions across the core, FORM, runtime and integration suites, plus automatic-loading/namespace and full-bubble metadata checks. Runtime process tests required running outside the execution sandbox. The benchmark driver was additionally checked with paths containing spaces, deliberately different output, and a forced timeout.
+
+
+### Normalizing large FORM stage factors
+
+A second bounded optimization round used the **uncommitted connected-stage implementation above as its baseline**, not b73c1a7. Its converter snapshot SHA256 is `719e8a04a53c2aa44fd0f199e42ff4ace2b954d1a44edc68c0d26a5874879ecf`; the complete snapshot and experiment files are in `/tmp/cfc-form-perf-round2-20260929`. These are incremental measurements and must not be presented as another comparison with the original revision.
+
+`stageIndexSignatures` now supplies the shared eligibility check for ordering and preparation. When signatures are valid, tensor indices are present, and at least one stage has 1,024 leaves, the exporter records the ordered stage factors in its private `Preparations` field. Rendering defines `cfcStage1`, etc., normalizes them in one module, then explicitly hides them. The result modules multiply these expression references in the existing connected order. This combines duplicate terms and expands short momentum routing once per factor instead of repeating that work for every incoming term.
+
+The 1,024-leaf threshold is a conservative small-job bypass, **not an empirically optimal crossover**. There is no normalization for inconsistent signatures or an index appearing more than twice. This restriction matters even when stage order would remain unchanged: independently contracting malformed index expressions could alter their existing behavior. No `Sum`, `Renumber`, `PushHide` or `PopHide` is emitted. Declared named indices retain their identities; internal contractions belong to their own factor and free indices can still contract with later factors. Scalar master functions, abbreviations and denominators retain their existing meanings. Mapping bytes and result format are unchanged.
+
+Hidden factors persist until the generated program ends. The full-bubble diagnostic reported 149,036 bytes of combined auxiliary expression contents, excluding FORM buffers and other overhead. Peak process memory and peak scratch usage were not measured. As documented in the [FORM manual's Hide section](https://form-dev.github.io/form-docs/stable/manual/#hide), hidden storage can spill to disk according to `ScratchSize`. This trades additional temporary storage and one preparation module for less repeated algebra; it is not a universal performance guarantee. The [specialist issue #828](https://github.com/form-dev/form/issues/828) illustrates interactions between ordinary Hide and push/pop hiding. This generator uses only explicit named Hide statements. The [FORM benchmark discussion #702](https://github.com/form-dev/form/discussions/702) informed the repeated, sequential measurement method.
+
+#### Incremental execution results
+
+Same i5-1235U laptop and FORM/TFORM 4.3; programs use identical inputs and mappings, with isolated output files. CPU frequency/affinity were not controlled. Initial load averages were 2.42/4.64/3.38. This session's absolute timings differ considerably from the previous session, so comparisons below use only the new paired baselines.
+
+The complete 178,961-leaf bubble produced **byte-identical 14,172,390-byte outputs with 145,098 terms** in both implementations. Two completed comparisons at four TFORM workers were deliberately bounded; they are too few to establish a precise expected speedup:
+
+| Full-bubble comparison | Connected-stage baseline | Prepared factors | Incremental speedup | Wall-time reduction |
+| --- | ---: | ---: | ---: | ---: |
+| Diagnostic pilot, candidate first | 157.14 s | 23.09 s | 6.81x | 85.31% |
+| Actual generated files, baseline first | 149.58 s | 32.04 s | 4.67x | 78.58% |
+
+The diagnostic comparison enabled FORM statistics; the second disabled them. An initial baseline attempt hit a 60-second limit; completed baseline runs were capped at 180 seconds. No additional full-bubble trials were run. Candidate times varied substantially, so both observations are reported explicitly. The output SHA256 in all four completed runs was `6af9ed3402e12f0dfcb0647cd726bda43b226ee489a748607ad6d69a0e46e818`.
+
+The diagnostic explains the mechanism: each large vertex normalized to 1,173 terms. The expensive module generated 387,711,120 terms in the baseline and 93,193,677 with prepared factors; both produced the same 342,482 intermediate terms and ultimately the same result. These counters explain the observed reduction in repeated work; they are not a prediction for other inputs.
+
+The existing partial products were tested with **five alternating pairs per engine** using actual generated files and statistics disabled. Every run checked the complete result hash. Medians:
+
+| Input / engine | Connected-stage baseline | Prepared factors | Incremental speedup | Wall-time reduction |
+| --- | ---: | ---: | ---: | ---: |
+| Vertex + propagator / FORM | 0.0647 s | 0.0461 s | 1.40x | 28.66% |
+| Same / TFORM 2 workers | 0.0561 s | 0.0497 s | 1.13x | 11.40% |
+| Same / TFORM 4 workers | 0.0561 s | 0.0481 s | 1.17x | 14.30% |
+| Vertex + two propagators / FORM | 1.4868 s | 0.9099 s | 1.63x | 38.80% |
+| Same / TFORM 2 workers | 0.9822 s | 0.6953 s | 1.41x | 29.20% |
+| Same / TFORM 4 workers | 0.8357 s | 0.6313 s | 1.32x | 24.45% |
+
+These percentages are incremental to connected ordering. They should not be added to the earlier percentages or multiplied into a cumulative claim without a matching controlled comparison. Import and complete-call time were not benchmarked.
+
+
+Export was measured separately with four alternating public-export pairs after one excluded warmup. Each measurement includes rendering, file writes and overwrite handling. The baseline and candidate package versions were loaded outside the timed call, using the same saved input expressions.
+
+| Export input | Baseline median | Candidate median | Observed change |
+| --- | ---: | ---: | ---: |
+| Vertex + propagator | 0.3376 s | 0.3593 s | +21.7 ms |
+| Vertex + two propagators | 0.3634 s | 0.3419 s | -21.4 ms |
+| Full bubble | 0.7551 s | 0.6577 s | -97.4 ms |
+
+These observations do not establish a general export improvement; the retained change targets FORM execution. Mapping files were byte-identical in every export comparison. Detailed observations and scripts are in the round-two experiment directory.
+
+Focused verification passed **405 fresh assertions**: 181 core/parser/transaction/installer, 220 FORM export/stage/import, and 4 integration assertions. Loading/namespace isolation and full-bubble metadata checks also passed. New cases exercise prepared internal dummy contractions, free indices, momentum routing, polarization, scalar master functions and denominators, plus large/tiny threshold paths and invalid-signature bypass. The unchanged runtime's 65 passing assertions from the first round were reused, not rerun or counted as fresh checks. The benchmark driver and fixed saved-format fixtures were unchanged. No second optimization hypothesis was pursued after normalization met the target.

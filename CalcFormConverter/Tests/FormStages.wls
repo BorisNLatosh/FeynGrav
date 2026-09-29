@@ -28,5 +28,51 @@ stageCase["stages_contracted",(MTD[mu,nu]+FVD[p,mu]FVD[p,nu])(FVD[q,mu]+FVD[r,mu
 stageCase["stages_single_sum",x+y,0];
 stageCase["stages_single_power",(x+y)^3,0];
 stageCase["stages_one_sum_factor",z(x+y),0];
+(* Connected ordering is a planning step after all identifiers are registered. *)
+plan[stages_] := CalcFormConverter`Private`connectedStageOrder[FCI /@ stages];
+assert["connected planner follows shared indices",
+ plan[{MTD[a,b]+FVD[p,a]FVD[p,b], FVD[q,c]+FVD[r,c],
+   MTD[b,c]+FVD[p,b]FVD[p,c]}]==={2,3,1}];
+assert["scalar stages retain original order",plan[{x+y,z+t,u+v}]==={1,2,3}];
+assert["inconsistent sum signature retains original order",
+ plan[{FVD[p,a]+x,FVD[q,a]+y}]==={1,2}];
+assert["triple index retains original order",
+ plan[{FVD[p,a]+FVD[q,a],FVD[r,a]+FVD[s,a],FVD[t,a]+FVD[u,a]}]==={1,2,3}];
+assert["internal contraction and external reuse retains original order",
+ plan[{FVD[p,a]^2+x FVD[q,a]^2,FVD[r,a]+FVD[s,a]}]==={1,2}];
+stageCase["stages_chain",(MTD[a,b]+FVD[p,a]FVD[p,b])
+ (MTD[b,c]+FVD[q,b]FVD[q,c])(FVD[r,c]+FVD[s,c]),2];
+stageCase["stages_loop",(MTD[a,b]+FVD[p,a]FVD[p,b])
+ (MTD[b,c]+FVD[q,b]FVD[q,c])(MTD[c,a]+FVD[r,c]FVD[r,a]),2];
+stageCase["stages_internal_dummy",(FVD[p,a]^2+FVD[q,a]^2)
+ (MTD[b,c]+FVD[r,b]FVD[r,c])(FVD[s,c]+FVD[t,c]) FVD[v,b],2];
+stageCase["stages_dummy_signature_fallback",(FVD[p,a]^2+FVD[q,b]^2)
+ (FVD[r,c]+FVD[s,c])(FVD[t,c]+FVD[u,c]),2];
+stageCase["stages_polarized",(MTD[a,b]+FVD[p,a]FVD[p,b])
+ (Pair[LorentzIndex[b,D],Momentum[Polarization[q,I],D]]+
+  Pair[LorentzIndex[b,D],Momentum[Polarization[r,-I],D]])
+ (MTD[a,c]+FVD[s,a]FVD[s,c]),2];
+(* Exercise independent FORM normalization on large stages. The threshold is
+   deliberately conservative; it is not a claim of an optimal crossover size. *)
+largeTensor = Sum[(x^j+y^j) (MTD[a,b]+j FVD[p-q,a]FVD[p-q,b]), {j,1,40}];
+largeChain = largeTensor (MTD[b,c]+FVD[q,b]FVD[q,c]) (FVD[r,c]+FVD[s,c]) FVD[t,a];
+largeData = CalcFormConverter`Private`buildExportData[largeChain,Automatic,{}];
+assert["large tensor stages are prepared",Length[largeData["Preparations"]]===3];
+smallData = CalcFormConverter`Private`buildExportData[
+ (MTD[a,b]+FVD[p,a]FVD[p,b])(FVD[q,b]+FVD[r,b]),Automatic,{}];
+assert["tiny tensor stages bypass preparation",smallData["Preparations"]==={}];
+invalidData = CalcFormConverter`Private`buildExportData[largeChain FVD[u,a],Automatic,{}];
+assert["ambiguous repeated index bypasses preparation",invalidData["Preparations"]==={}];
+inconsistentData = CalcFormConverter`Private`buildExportData[
+ (largeTensor+x) (FVD[q,b]+FVD[r,b]),Automatic,{}];
+assert["inconsistent large sum bypasses preparation",inconsistentData["Preparations"]==={}];
+stageCase["prepared_routed",largeChain,2];
+stageCase["prepared_free",largeTensor (MTD[b,c]+FVD[q,b]FVD[q,c])
+ (FVD[r,c]+FVD[s,c]),2];
+stageCase["prepared_opaque",FAD[{l,m}] (A0[m^2]+B0[SPD[p],m^2,m^2]) largeChain,3];
+stageCase["prepared_polarized",largeChain /. p -> Polarization[k,I],2];
+largeInternal = Sum[(x^j+y^j) (FVD[p,mu]^2+j FVD[q,mu]^2), {j,1,40}];
+stageCase["prepared_internal",largeInternal (MTD[a,b]+FVD[r,a]FVD[r,b])
+ (FVD[s,b]+FVD[t,b]) FVD[u,a],2];
 saveCases[];
 finish["FORM stages"];

@@ -206,12 +206,53 @@ scalarQ[x_] := Which[
 (*Build conversion data in memory*)
 
 (* ::Input::Initialization:: *)
+(* Plan only after serialization, so identifier and macro numbering keep the
+   original traversal order. Consistent monomial index counts are required:
+   ambiguous sums or indices occurring more than twice retain the old order. *)
+stageIndexSignatures[stages_List] := Module[{counts, signatures},
+  counts[p_Pair] := counts[p] = KeySort[Counts[Cases[p, _LorentzIndex, Infinity]]];
+  counts[x_Plus] := Module[{parts = counts /@ (List @@ x)},
+    If[MemberQ[parts, $Failed] || !SameQ @@ parts, $Failed, First[parts]]];
+  counts[x_Times] := Module[{parts = counts /@ (List @@ x)},
+    If[MemberQ[parts, $Failed], $Failed, KeySort[Merge[parts, Total]]]];
+  counts[Power[x_, n_Integer]] /; n >= 0 := Module[{part = counts[x]},
+    If[part === $Failed, $Failed, Map[n # &, part]]];
+  counts[_] := <||>;
+  signatures = counts /@ stages;
+  If[MemberQ[signatures, $Failed] ||
+     AnyTrue[Values[Merge[signatures, Total]], # > 2 &], $Failed, signatures]
+];
+
+connectedStageOrder[stages_List] := connectedStageOrder[stages,
+  If[FreeQ[stages, _LorentzIndex], ConstantArray[<||>, Length[stages]], stageIndexSignatures[stages]]];
+connectedStageOrder[stages_List, signatures_] := Module[
+  {free, sizes, remaining, order = {}, active = {}, next},
+  If[signatures === $Failed, Return[Range[Length[stages]]]];
+  free = Keys[Select[#, # === 1 &]] & /@ signatures;
+  If[AllTrue[free, # === {} &], Return[Range[Length[stages]]]];
+  sizes = LeafCount /@ stages;
+  remaining = Range[Length[stages]];
+  While[remaining =!= {},
+    (* Prefer shared open indices, then tensors, smaller factors and the
+       original position. This is a deterministic heuristic, not a cost model. *)
+    next = First[SortBy[remaining,
+      {-Length[Intersection[active, free[[#]]]],
+       If[free[[#]] === {}, 1, 0], sizes[[#]], #} &]];
+    AppendTo[order, next];
+    (* A shared open index contracts; an unshared one remains open. *)
+    active = Complement[Union[active, free[[next]]], Intersection[active, free[[next]]]];
+    remaining = DeleteCases[remaining, next]];
+  order
+];
+
 (* Local mutable state belongs only to expression traversal. Rendering and
    file writing consume the resulting association and cannot change it. *)
 buildExportData[expression_, requestedDimension_, loops_] := Module[
   {expr, dim, entries = {}, registry = <||>, counters = <||>, macros = {},
    register, scalar, vector, index, pair, denominator, emit, abbreviation, makeMacro,
-   body, dimensionName, payload, factorExpressions, factorTexts, stageEnds, multiplications = {}},
+   body, dimensionName, payload, factorExpressions, factorTexts, stageEnds, stageRanges,
+   stageTexts, stageExpressions, stageSignatures, stageOrder,
+   preparations = {}, multiplications = {}},
   If[!ListQ[loops] || !AllTrue[loops, MatchQ[#, _Symbol] &] || !DuplicateFreeQ[loops],
     fail["InvalidLoopMomenta", "LoopMomenta must be a list of distinct momentum symbols."]];
   expr = FCI[expression];
@@ -316,28 +357,39 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
      traversal, fixing their names independently of later staged emission. *)
   dimensionName = If[IntegerQ[dim], intString[dim], scalar[dim]];
   Scan[(register["Vector", #]) &, loops];
-  (* A new FORM expression is initially one input term, even when its source
-     contains large sums. Sort between top-level sum factors so later products
-     can use TFORM workers and combine intermediate terms before expanding more.
-     Emit in the original traversal order to preserve the mapping and macros.
-     Non-sum factors stay in order, in the same stage as the following sum;
-     trailing factors belong to the final stage. No Wolfram expansion is used. *)
+  (* Sort between top-level sums. Serialize first in original traversal order;
+     only the later multiplication plan may change. The planner conservatively
+     prioritizes connected tensor factors to avoid disjoint intermediate products. *)
   If[Head[expr] === Times && Count[List @@ expr, _Plus] >= 2,
     factorExpressions = List @@ expr;
     factorTexts = emit /@ factorExpressions;
     stageEnds = Flatten[Position[factorExpressions, _Plus, {1}, Heads -> False]];
     stageEnds[[-1]] = Length[factorTexts];
-    body = "(" <> StringRiffle[Take[factorTexts, First[stageEnds]], "*"] <> ")";
-    multiplications = MapThread[
-      ("(" <> StringRiffle[Take[factorTexts, {#1 + 1, #2}], "*"] <> ")") &,
-      {Most[stageEnds], Rest[stageEnds]}],
+    stageRanges = MapThread[{#1 + 1, #2} &, {Prepend[Most[stageEnds], 0], stageEnds}];
+    stageTexts = ("(" <> StringRiffle[Take[factorTexts, #], "*"] <> ")") & /@ stageRanges;
+    stageExpressions = (Times @@ Take[factorExpressions, #]) & /@ stageRanges;
+    stageSignatures = If[FreeQ[stageExpressions, _LorentzIndex],
+      ConstantArray[<||>, Length[stageExpressions]], stageIndexSignatures[stageExpressions]];
+    stageOrder = connectedStageOrder[stageExpressions, stageSignatures];
+    stageTexts = stageTexts[[stageOrder]];
+    (* Large, unambiguous tensor stages are normalized once in FORM before
+       reuse. The 1024-leaf cutoff is a conservative heuristic for small jobs.
+       Named hidden factors remain available until the program ends. Never
+       prepare an ambiguous index expression: that could change its existing
+       contraction behavior even when the stage order is unchanged. *)
+    If[stageSignatures =!= $Failed && !FreeQ[stageExpressions, _LorentzIndex] &&
+       Max[LeafCount /@ stageExpressions] >= 1024,
+      preparations = stageTexts;
+      stageTexts = Table["cfcStage" <> intString[i], {i, Length[stageTexts]}]];
+    body = First[stageTexts];
+    multiplications = Rest[stageTexts],
     body = emit[expr]];
   payload = <|"Format" -> $formatName, "Version" -> $formatVersion,
     "ExpressionDigest" -> Hash[expr, "SHA256", "HexString"],
     "Dimension" -> encode[dim], "LoopMomenta" -> (encode /@ loops),
     "Processing" -> "TensorAlgebraOnly", "Entries" -> entries|>;
   <|"DimensionName" -> dimensionName, "Body" -> body, "Multiplications" -> multiplications,
-    "Factors" -> macros, "Mapping" -> payload|>
+    "Factors" -> macros, "Preparations" -> preparations, "Mapping" -> payload|>
 ];
 
 (* ::Subsection:: *)
@@ -361,6 +413,10 @@ renderExport[data_Association, result_String, template_String] := Module[
     "@SCALARS@" -> declaration["Symbols"], "@DIMENSION@" -> data["DimensionName"],
     "@VECTORS@" -> declaration["Vectors"], "@INDICES@" -> declaration["Indices"],
     "@FACTORS@" -> StringRiffle[data["Factors"], "\n"], "@EXPRESSION@" -> data["Body"],
+    "@PREPARATIONS@" -> If[data["Preparations"] === {}, "",
+      StringJoin[MapIndexed[("Local cfcStage" <> intString[First[#2]] <> " = " <> #1 <> ";\n") &,
+        data["Preparations"]]] <> ".sort\nHide " <>
+      StringRiffle[Table["cfcStage" <> intString[i], {i, Length[data["Preparations"]]}], ","] <> ";\n"],
     "@MULTIPLICATIONS@" -> StringJoin[(".sort\nMultiply " <> # <> ";\n") & /@ data["Multiplications"]],
     "@RESULT@" -> StringReplace[result, "\\" -> "/"], "@DIGEST@" -> digest}];
   <|"Program" -> program, "MappingJSON" -> json|>
