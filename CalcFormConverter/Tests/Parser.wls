@@ -58,6 +58,48 @@ Scan[Function[body,assertFailure["typed syntax rejected: "<>body,"InvalidResult"
  pName<>"("<>qName<>")","d_("<>muName<>","<>pName<>")", "cfB0(1,2,3,4)","1+"}];
 assertFailure["unknown identifier before cancellation","UnknownIdentifier",parseBody["unknownIdentifier*0"]];
 
+(* Exercise the large flat-result path without executing FORM. Padding also
+   keeps malformed differential cases above the size cutoff; repeated valid
+   factors make them eligible for caching when their grammar permits it. *)
+flatPadding = StringRepeat[" ", 131072];
+flatTail = StringRepeat["+" <> xName, 128];
+flatValues = CalcFormConverter`Private`decodeEntries[parserMapping["Entries"]];
+flatDim = CalcFormConverter`Private`decode[parserMapping["Dimension"]];
+assert["large repeated flat factors",
+  parseBody[StringRiffle[ConstantArray["2*" <> xName <> "^2", 16000], "+"]] === 32000 x^2];
+assert["large flat signed powers and division",
+  parseBody[flatPadding <> "-2^2+24/3/2+" <> xName <> "^-2" <> flatTail] === x^-2 + 128 x];
+assert["large unique factors use compatible fallback",
+  parseBody[StringRiffle[Table[ToString[k] <> "*" <> xName <> "^" <> ToString[k], {k, 12000}], "+"]] ===
+    Sum[k x^k, {k, 12000}]];
+assert["large nested master syntax uses compatible fallback",
+  parseBody[flatPadding <> "cfB0(cfA0(2),3,4)" <> flatTail] === B0[A0[2],3,4] + 128 x];
+Scan[Function[body,
+  assert["flat/general failure agreement: " <> body,
+    Catch[CalcFormConverter`Private`parseResult[flatPadding <> body <> flatTail, flatValues, flatDim],
+      CalcFormConverter`Private`$failureTag] ===
+    Catch[CalcFormConverter`Private`parseGeneralResult[flatPadding <> body <> flatTail, flatValues, flatDim],
+      CalcFormConverter`Private`$failureTag]]
+], {"1/0+cfs999", "cfs999/0", "cfs999^0", "0^0+cfs999", "0*" <> pName,
+    pName <> "." <> qName <> "." <> pName <> ".cfv999",
+    pName <> "." <> qName <> "(cfi999)", "1 2", xName <> "^2^3", "1+"}];
+Scan[Function[code,
+  assert["flat/general whitespace agreement: " <> ToString[code],
+    With[{body = flatPadding <> xName <> FromCharacterCode[code] <> "+1" <> flatTail},
+      Catch[CalcFormConverter`Private`parseResult[body, flatValues, flatDim],
+        CalcFormConverter`Private`$failureTag] ===
+      Catch[CalcFormConverter`Private`parseGeneralResult[body, flatValues, flatDim],
+        CalcFormConverter`Private`$failureTag]]]
+], {9, 10, 133, 160, 8232}];
+Clear[FlatParserTest`x];
+flatEvaluationCount = 0;
+FlatParserTest`x /: Power[FlatParserTest`x, n_Integer] := (flatEvaluationCount++; n + flatEvaluationCount);
+assert["mapped UpValues retain per-occurrence evaluation",
+  CalcFormConverter`Private`parseResult[
+    flatPadding <> StringRiffle[ConstantArray["cfs1^2", 100], "+"],
+    <|"cfs1" -> FlatParserTest`x|>, D] === 5250 && flatEvaluationCount === 100];
+Clear[FlatParserTest`x];
+
 (* Validation still visits unused entries, even when the result is zero. *)
 badEntries=parserMapping["Entries"];
 scalarPosition=First[FirstPosition[Lookup[badEntries,"Name"],xName]];

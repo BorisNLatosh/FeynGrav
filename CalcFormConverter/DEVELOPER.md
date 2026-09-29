@@ -218,3 +218,53 @@ Export was measured separately with four alternating public-export pairs after o
 These observations do not establish a general export improvement; the retained change targets FORM execution. Mapping files were byte-identical in every export comparison. Detailed observations and scripts are in the round-two experiment directory.
 
 Focused verification passed **405 fresh assertions**: 181 core/parser/transaction/installer, 220 FORM export/stage/import, and 4 integration assertions. Loading/namespace isolation and full-bubble metadata checks also passed. New cases exercise prepared internal dummy contractions, free indices, momentum routing, polarization, scalar master functions and denominators, plus large/tiny threshold paths and invalid-signature bypass. The unchanged runtime's 65 passing assertions from the first round were reused, not rerun or counted as fresh checks. The benchmark driver and fixed saved-format fixtures were unchanged. No second optimization hypothesis was pursued after normalization met the target.
+
+
+### Reusing repeated factors in large Wolfram imports
+
+This bounded round uses **clean revision `a5a398f`** as its baseline, including connected stage ordering, prepared FORM factors, export fragment caches and native-call import tokens. It changes Mathematica reconstruction only. The export implementation, generated program/mapping bytes, FORM stage plan and version-one format remain unchanged. The target was at least **1.25x speedup**, equivalent to at least **20% less elapsed time**; this distinction avoids conflating speedup with time reduction.
+
+The initial profile found warm public exports of 0.3966 s (vertex), 0.3511 s (two propagators) and 0.6839 s (bubble), while full-bubble import took 44.80 s. A separate instrumented import took 67.31 s: about 1.91 s in lexical setup and 64.66 s in reconstruction. These unpaired observations identify the dominant stage, not a speedup. The contracted result has no parentheses/native calls, about 965,000 powers and 356,000 vector dots, with extensive factor repetition.
+
+`parseResult` now selects a conservative flat-result path only above 131,072 characters and with more than roughly four occurrences per distinct factor. A full-string grammar permits integers, scalar identifiers, `i_`, simple vector dots and optional signed integer powers, joined by arithmetic operators. Other syntax uses the unchanged `parseGeneralResult`. Possessive regex quantifiers prevent expensive backtracking on long malformed strings. A separate lexical-coverage check preserves the general parser's `WhitespaceCharacter` behavior for Unicode input.
+
+The flat parser lazily reconstructs each distinct factor through `parseGeneralResult`; it never evaluates imported source text. Products, division and sums retain their original evaluation and validation order, including initial unary minus and subtraction of a whole product. Unknown identifiers and undefined arithmetic still fail before later factors are consumed. Every mapping entry is decoded/validated before either result path. Factor caches are local to one invocation. Mapped symbols with `UpValues` bypass factor memoization so their arithmetic is evaluated per occurrence. Thresholds are conservative heuristics, not an optimal crossover model; unique-heavy inputs pay the eligibility/tokenization checks and then fall back.
+
+#### Public-command measurements
+
+Wolfram 15.0.1 on the same laptop; no simultaneous heavy benchmarks, affinity/governor changes, FORM execution or installation. Baseline and candidate were alternated in one kernel after one excluded warmup each. Every public `CalcFormImport` includes file reading, JSON/digest checks, all mapping validation and reconstruction. The original 14,172,390-byte result/mapping were read without modification, and every full result was `SameQ` (145,098 terms).
+
+| Pair | Current baseline | Repeated factors | Speedup |
+| --- | ---: | ---: | ---: |
+| 1 | 63.5085 s | 19.5397 s | 3.25x |
+| 2, candidate first | 50.4844 s | 19.2207 s | 2.63x |
+| 3 | 54.4150 s | 20.2090 s | 2.69x |
+
+The ratio of timing medians is **2.78x** (54.4150/19.5397), a **64.09% wall-time reduction**. Median paired speedup is **2.69x**; every pair exceeds the target. Warmups were 62.4370 and 20.2613 s. A real 505,767-character prefix pilot also returned exact results in four pairs, but those pilot timings preceded the final Unicode/UpValues guards and are not the final speedup claim.
+
+Three-pair public-import controls, each with exact equality:
+
+| Control | Baseline median | Candidate median | Interpretation |
+| --- | ---: | ---: | --- |
+| 30,000 terms, repeated scalar factors | 1.8495 s | 0.8637 s | 2.14x on another eligible shape |
+| 15,000 terms, mostly unique factors | 0.7780 s | 0.7513 s | Fallback; no established gain |
+| 15,000 native components | 0.2709 s | 0.2819 s | General parser; small noisy regression |
+| Small scalar/native/master inputs | 0.0043–0.0046 s | 0.0041–0.0044 s | General parser; too short for precise claims |
+
+The paired control medians and ratios of separate medians can disagree on this noisy host. These controls bound obvious regressions; they do not establish universal improvement. No new export optimization was pursued after import proved dominant.
+
+#### Memory and cold-call caveats
+
+One fresh process per variant, `$HistoryLength = 0`, one full import and no retained reference expression gave peak tracked kernel memory of **988,828,528 bytes baseline versus 869,531,672 bytes candidate**, about 12.1% lower. Both expression hashes matched. Supplemental first-call times were 45.10 versus 16.36 s; the paired campaign above remains the timing evidence. Startup memory was approximately 154 MB in both processes.
+
+`MaxMemoryUsed[]` is a session high-water mark, not OS RSS. In the repeated timing kernel, memory rose across calls in both implementations even after clearing the returned expression, so those cumulative peaks are not per-import memory estimates. In the separate fresh processes, memory after clearing the result was approximately 745 MB versus 292 MB. This round did not isolate all retained kernel state or change memory management. `ByteCount` reported the same 445,618,456 bytes for each expression but can overcount shared subexpressions; it is not a resident-memory measurement. Cache storage grows with distinct factors and their reconstructed values.
+
+The available Wolfram integration supplied the official [memoization workflow](https://reference.wolfram.com/language/workflow/WriteAFunctionThatRemembersComputedValues) and [memory-management documentation](https://reference.wolfram.com/language/tutorial/GlobalAspectsOfWolframSystemSessions). A separate stateless evaluator check confirmed that `Throw` exits before a memoizing assignment stores a failed result. Remote results informed evaluation semantics only; all representative timings used the local kernel and FeynCalc.
+
+#### Rejected candidates and verification
+
+The shortlist stopped after this verified improvement. Caching all successful scalar checks and allocating power-parser mutable state only on operator branches were rejected after four alternating public-import pilot triplets: median baseline 1.7159 s, scalar cache 1.6006 s, branch-local power 1.5591 s. Neither met the target reliably; neither was retained.
+
+The final scratch candidate passed 44 differential valid/malformed/Unicode cases with identical full `Failure` objects, plus a stateful `UpValues` case that retained all 6,000 evaluations. Repository regressions cover large repeated/unique results, nested fallback, failure order, whitespace and per-occurrence arithmetic. Core verification passed **201 assertions** (77 core, 71 parser, 14 transaction, 39 installer). The FORM suite passed **220 assertions** (29 export, 128 stage, 63 import). Separately, the runtime equality change passed **73 assertions**; together the reported checks total **494**, with zero failures. Integration-library tests were not rerun for this importer-only change.
+
+Reproduction artifacts are retained in `/tmp/cfc-wl-perf-20260929`: baseline snapshot, candidate definitions, `full-import-bench.wls`, `controls.wls`, `fresh-memory.wls`, JSON observations and logs. These are temporary development artifacts, not committed benchmark fixtures. The final importer differs from the timed candidate only in integration under the dispatch helper and explanatory comments. The separately added binary-equality runtime handling is not part of these algebraic import timings.

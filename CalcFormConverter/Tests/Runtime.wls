@@ -19,6 +19,22 @@ assert["probe cleanup",Sort[FileNames["calcform-probe-*",$TemporaryDirectory]]==
 
 assert["Greek metric trace",CalcFormCalculate[MTD[\[Mu],\[Nu]] MTD[\[Mu],\[Nu]]]===D];
 
+(* Binary equality uses one residual job and preserves failures as failures. *)
+assert["equality metric trace",CalcFormCalculate[MTD[mu,nu]^2==D]===True];
+assert["equality false trace",CalcFormCalculate[MTD[mu,nu]^2+1==D]===False];
+assert["equality unresolved residual",CalcFormCalculate[MTD[mu,nu]^2==x]===(D-x==0)];
+assert["evaluated booleans need no FORM",Block[{CalcFormConverter`CalcFormCheck},
+ CalcFormConverter`CalcFormCheck[___]:=Throw["unexpected FORM probe"];
+ Catch[{CalcFormCalculate[True],CalcFormCalculate[False]}]]==={True,False}];
+assertFailure["boolean keeps option validation","InvalidOption",CalcFormCalculate[True,FORMThreads->0]];
+assertFailure["chained equality rejected","UnsupportedEquality",CalcFormCalculate[x==y==z]];
+equalityParent=CreateDirectory[FileNameJoin[{root,"equality-job"}]];
+equalityKept=Quiet[CalcFormCalculate[MTD[mu,nu]^2==D,WorkingDirectory->equalityParent,KeepFiles->True],CalcFormCalculate::files];
+equalityJobs=FileNames["calcform-job-*",equalityParent];
+assert["equality retains one residual job",equalityKept===True && Length[equalityJobs]===1 &&
+ CalcFormImport[FileNameJoin[{First[equalityJobs],"job.out"}],FileNameJoin[{First[equalityJobs],"job.map.json"}]]===0];
+assertFailure["equality export failure propagates","ExportFailed",CalcFormCalculate[unknownTensor[x]==y,WorkingDirectory->equalityParent]];
+
 (* Timing and progress must leave the mathematical result unchanged. *)
 events={};
 observed=Block[{CalcFormConverter`Private`reportCalculation},

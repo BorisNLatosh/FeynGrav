@@ -178,12 +178,20 @@ CalcFormConverter`CalcFormCheck[___] := runtimeFailure["InvalidArguments", "Use 
 (* ::Input::Initialization:: *)
 CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
  {limit = OptionValue[TimeConstraint], keep = OptionValue[CalcFormConverter`KeepFiles], check, directory,
-  job, run, result, stage = "Check", retainedFailure,
+  job, run, result, input, equality, stage = "Check", retainedFailure,
   timing = OptionValue[CalcFormConverter`ShowTiming], progress = OptionValue[CalcFormConverter`ShowProgress],
   threads = OptionValue[CalcFormConverter`FORMThreads], announce},
  If[!validTimeLimitQ[limit] || !BooleanQ[keep], Return[runtimeFailure["InvalidOption", "Use a positive TimeConstraint or Infinity, and KeepFiles -> True or False."]]];
  If[!BooleanQ[timing] || !BooleanQ[progress] || !validThreadsQ[threads],
    Return[runtimeFailure["InvalidOption", "ShowTiming and ShowProgress must be True or False; FORMThreads must be a positive integer."]]];
+ (* Equal may already have evaluated before this command receives its argument.
+    Binary equations share one algebraic job: its files contain the residual,
+    and only the returned result is compared with zero. No solver is invoked. *)
+ If[BooleanQ[expression], Return[expression]];
+ equality = Head[expression] === Equal;
+ If[equality && Length[expression] =!= 2,
+   Return[runtimeFailure["UnsupportedEquality", "Use a two-sided equality lhs == rhs; chained equalities are not supported."]]];
+ input = If[equality, expression[[1]] - expression[[2]], expression];
  announce[name_] := (stage = name; If[progress, reportCalculation[<|"Stage" -> name|>]]);
  announce["Check"];
  check = CalcFormConverter`CalcFormCheck[CalcFormConverter`FORMExecutable -> OptionValue[CalcFormConverter`FORMExecutable], CalcFormConverter`FORMThreads -> threads];
@@ -196,7 +204,7 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
  result = CheckAbort[
    Catch[
      announce["Export"];
-     job = CalcFormConverter`CalcFormExport[expression, FileNameJoin[{directory, "job.frm"}],
+     job = CalcFormConverter`CalcFormExport[input, FileNameJoin[{directory, "job.frm"}],
        Dimension -> OptionValue[Dimension], LoopMomenta -> OptionValue[LoopMomenta]];
      If[FailureQ[job], Throw[retainedFailure["ExportFailed", "FORM export failed; job files were retained.", <|"Cause" -> job|>], $failureTag]];
      announce["Execute"];
@@ -214,7 +222,7 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
  If[progress, reportCalculation[<|"Stage" -> If[FailureQ[result], "Failed", "Complete"]|>]];
  If[!FailureQ[result], AbortProtect[
    If[keep || !removeJobDirectory[directory], Message[CalcFormConverter`CalcFormCalculate::files, directory]]]];
- result
+ If[equality && !FailureQ[result], result == 0, result]
 ];
 CalcFormConverter`CalcFormCalculate[___] := runtimeFailure["InvalidArguments", "Use CalcFormCalculate[expression, options]."];
 

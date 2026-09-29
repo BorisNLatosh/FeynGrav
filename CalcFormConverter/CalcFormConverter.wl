@@ -22,7 +22,7 @@ CalcFormConverter`CalcFormImport::usage =
 
 CalcFormConverter`CalcFormCheck::usage = "CalcFormCheck[opts] probes FORM on demand and returns availability, version and diagnostics. Options: FORMExecutable -> Automatic, FORMThreads -> 1, TimeConstraint -> 10.";
 CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[opts] explicitly attempts Debian/Ubuntu installation of missing FORM or TFORM using system authorization, then verifies the requested configuration. FORMThreads -> 1 is the default; values above 1 require TFORM. It is never called automatically.";
-CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress and FORMThreads. Failed jobs are retained.";
+CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. For a binary equality lhs == rhs, it calculates lhs - rhs and compares the imported residual with zero; the result may remain symbolic. True and False are returned directly. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress and FORMThreads. Failed jobs are retained.";
 CalcFormConverter`FORMExecutable::usage = "FORMExecutable selects the FORM executable by name or path; Automatic searches the Wolfram kernel's PATH for form, or tform when FORMThreads > 1.";
 CalcFormConverter`WorkingDirectory::usage = "WorkingDirectory specifies an existing parent directory for unique FORM jobs; Automatic uses the system temporary directory.";
 CalcFormConverter`ShowTiming::usage = "ShowTiming -> True prints FORM process elapsed wall-clock seconds, excluding the availability probe, export and import. Defaults to False; the returned expression is unchanged.";
@@ -565,7 +565,7 @@ CalcFormConverter`CalcFormExport[___] := Failure["InvalidArguments", <|"MessageT
 (* 5. FORM result parsing and FeynCalc reconstruction. Recursive descent recognizes arithmetic,
    native tensor syntax and four reserved master-integral functions only.
    Vector/index tokens have distinct types until converted into Pair objects. *)
-parseResult[text_String, values_Association, dim_] := Module[
+parseGeneralResult[text_String, values_Association, dim_] := Module[
   {tokens, pos = 1, peek, take, expect, atom, power, unary, product, sum,
    scalarValue, entryValue, call, dot, result, tokenPattern, stripped, classes,
    tokenCount, compoundPattern, compoundValue},
@@ -733,6 +733,84 @@ parseResult[text_String, values_Association, dim_] := Module[
   ];
   result
 ];
+
+(* Large contracted FORM outputs often repeat a small set of complete factors.
+   This lexical subset excludes parentheses, calls, unary signs after operators,
+   and chained dots. Everything outside it retains the general parser above.
+   Possessive quantifiers avoid extensive backtracking on long malformed input. *)
+$flatFactorPattern = "(?:cfv[0-9]++\\s*+\\.\\s*+cfv[0-9]++|cfs[0-9]++|cfa[0-9]++|cfd[0-9]++|i_|[0-9]++)(?:\\s*+\\^\\s*+[+-]?+\\s*+[0-9]++)?";
+flatResultQ[text_String] := StringMatchQ[text,
+  RegularExpression["\\s*+[+-]?+\\s*+" <> $flatFactorPattern <> "(?:\\s*+[+*/-]\\s*+" <> $flatFactorPattern <> ")*+\\s*+"]];
+(* The full-string guard establishes alternating factors and operators. It does
+   not validate mapped values: cache misses still use the general parser, lazily
+   in consumption order. Each invocation owns its factor cache and collectors. *)
+parseFlatResult[text_String, values_Association, dim_] := Module[
+  {tokens, count, pos = 1, factor, checked, product, firstSign = 1, result, terms, op, r},
+  tokens = StringCases[text, RegularExpression[$flatFactorPattern <> "|[+*/-]"]];
+  (* Regex whitespace and WhitespaceCharacter need not cover identical Unicode
+     characters. Keep the general parser's lexical coverage check authoritative. *)
+  If[StringReplace[StringJoin[tokens], WhitespaceCharacter -> ""] =!=
+     StringReplace[text, WhitespaceCharacter -> ""],
+    Return[parseGeneralResult[text, values, dim]]
+  ];
+  count = Length[tokens];
+  If[MemberQ[{"+", "-"}, First[tokens]],
+    firstSign = If[First[tokens] === "-", -1, 1];
+    pos++
+  ];
+  (* Require more than roughly four occurrences per distinct factor before
+     paying for memoized general-parser calls. Unique-heavy inputs fall back. *)
+  If[Length[DeleteDuplicates[tokens[[pos ;; ;; 2]]]] > (count - pos + 1)/8,
+    Return[parseGeneralResult[text, values, dim]]
+  ];
+  (* Never evaluate result text as Wolfram source. Throw exits before Set can
+     store a failed reconstruction; successful cached values remain job-local. *)
+  factor[t_] := factor[t] = parseGeneralResult[t, values, dim];
+  checked[x_] := If[!FreeQ[x, _vectorToken | _indexToken],
+    fail["InvalidResult", "A vector or index occurs outside a tensor object."], x];
+  (* Preserve the general parser's evaluation boundaries: the initial unary
+     minus belongs to the first factor, later subtraction negates a whole term,
+     and division checks its right operand before consuming anything later. *)
+  product[sign_] := With[{v = If[sign === -1, -checked[factor[tokens[[pos++]]]], factor[tokens[[pos++]]]]},
+    If[pos > count || !MemberQ[{"*", "/"}, tokens[[pos]]], v,
+      Module[{operation, right, factors},
+        factors = Reap[
+          Sow[checked[v]];
+          While[pos <= count && MemberQ[{"*", "/"}, tokens[[pos]]],
+            operation = tokens[[pos++]];
+            right = checked[factor[tokens[[pos++]]]];
+            If[operation === "/" && right === 0, fail["InvalidResult", "Division by zero."]];
+            Sow[If[operation === "*", right, 1/right]]
+          ]
+        ][[2, 1]];
+        Times @@ factors
+      ]
+    ]
+  ];
+  result = product[firstSign];
+  If[pos <= count,
+    terms = Reap[
+      Sow[checked[result]];
+      While[pos <= count,
+        op = tokens[[pos++]];
+        r = checked[product[1]];
+        Sow[If[op === "+", r, -r]]
+      ]
+    ][[2, 1]];
+    result = Plus @@ terms
+  ];
+  checked[result]
+];
+(* The size and repetition cutoffs are conservative heuristics, not an optimal
+   crossover model. Symbols with UpValues use the general path so user-defined
+   arithmetic is evaluated per occurrence rather than memoized as a factor. *)
+parseResult[text_String, values_Association, dim_] :=
+  If[StringLength[text] >= 131072 &&
+     AllTrue[DeleteDuplicates[Cases[{Values[values], dim}, _Symbol, Infinity, Heads -> True]], UpValues[#] === {} &] &&
+     flatResultQ[text],
+    parseFlatResult[text, values, dim],
+    parseGeneralResult[text, values, dim]
+  ];
 
 (* ::Subsection:: *)
 (*Mapping validation and public importer*)
