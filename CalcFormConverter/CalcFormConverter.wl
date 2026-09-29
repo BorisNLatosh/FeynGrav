@@ -16,9 +16,9 @@ BeginPackage["CalcFormConverter`", {"FeynCalc`"}];
 
 (* 1. Public functions and options. *)
 CalcFormConverter`CalcFormExport::usage =
-"CalcFormExport[expr, file, opts] exports an exact bosonic FeynCalc expression to a complete FORM program and a reversible JSON mapping. Returns an association with InputFile, MappingFile and ResultFile. Options: Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False. No FORM process or integral reduction is performed.";
+  "CalcFormExport[expr, file, opts] exports an exact bosonic FeynCalc expression to a complete FORM program and a reversible JSON mapping. Returns an association with InputFile, MappingFile and ResultFile. Options: Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False. No FORM process or integral reduction is performed.";
 CalcFormConverter`CalcFormImport::usage =
-"CalcFormImport[resultFile, mappingFile] reads the dedicated result of an exported FORM program and reconstructs FeynCalc internal notation. It does not execute Wolfram Language source or run tensor/integral reduction.";
+  "CalcFormImport[resultFile, mappingFile] reads the dedicated result of an exported FORM program and reconstructs FeynCalc internal notation. It does not execute Wolfram Language source or run tensor/integral reduction.";
 
 CalcFormConverter`CalcFormCheck::usage = "CalcFormCheck[opts] probes FORM on demand and returns availability, version and diagnostics. Options: FORMExecutable -> Automatic, FORMThreads -> 1, TimeConstraint -> 10.";
 CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[opts] explicitly attempts Debian/Ubuntu installation of missing FORM or TFORM using system authorization, then verifies the requested configuration. FORMThreads -> 1 is the default; values above 1 require TFORM. It is never called automatically.";
@@ -130,16 +130,22 @@ integerData[s_String] := If[StringMatchQ[s, RegularExpression["-?[0-9]+"]],
 integerData[_] := fail["InvalidMapping", "Expected an integer string."];
 
 (* Only symbol leaves may create a symbol. Heads are selected from $heads;
-   a string from a file is never evaluated as Wolfram Language code. *)
+   a string from a file is never evaluated as Wolfram Language code. Restored
+   symbols and whitelisted heads still undergo normal kernel evaluation;
+   this decoder does not isolate pre-existing symbol definitions. *)
 validSymbolNameQ[s_String] := StringContainsQ[s, "`"] &&
   StringMatchQ[s, RegularExpression["[\\p{L}$][\\p{L}\\p{N}$]*(?:`[\\p{L}$][\\p{L}\\p{N}$]*)+"]];
 validSymbolNameQ[_] := False;
 decode[{"Integer", s_String}] := integerData[s];
 decode[{"Rational", a_String, b_String}] := Module[{den = integerData[b]},
-  If[den == 0, fail["InvalidMapping", "Zero rational denominator."]]; integerData[a]/den];
+  If[den == 0, fail["InvalidMapping", "Zero rational denominator."]];
+  integerData[a]/den
+];
 decode[{"Complex", a_, b_}] := Module[{re = decode[a], im = decode[b]},
-  If[!MatchQ[{re, im}, {( _Integer | _Rational), (_Integer | _Rational)}],
-    fail["InvalidMapping", "Complex coefficients must be exact numbers."]]; re + I im];
+  If[!MatchQ[{re, im}, {(_Integer | _Rational), (_Integer | _Rational)}],
+    fail["InvalidMapping", "Complex coefficients must be exact numbers."]];
+  re + I im
+];
 decode[{"Symbol", s_String}] := If[validSymbolNameQ[s], Symbol[s],
   fail["InvalidMapping", "Invalid fully qualified symbol name."]];
 decode[{"Polarization", p_, phase_, opts___}] := Module[{momentum = decode[p], label = decode[phase], optionData = {opts}},
@@ -203,26 +209,29 @@ scalarQ[x_] := Which[
 (* Local mutable state belongs only to expression traversal. Rendering and
    file writing consume the resulting association and cannot change it. *)
 buildExportData[expression_, requestedDimension_, loops_] := Module[
- {expr, dim, entries = {}, registry = <||>, counters = <||>, macros = {},
-  register, scalar, vector, index, pair, denominator, emit, abbreviation, makeMacro,
-  body, dimensionName, payload, factorExpressions, factorTexts, stageEnds, multiplications = {}},
+  {expr, dim, entries = {}, registry = <||>, counters = <||>, macros = {},
+   register, scalar, vector, index, pair, denominator, emit, abbreviation, makeMacro,
+   body, dimensionName, payload, factorExpressions, factorTexts, stageEnds, multiplications = {}},
   If[!ListQ[loops] || !AllTrue[loops, MatchQ[#, _Symbol] &] || !DuplicateFreeQ[loops],
     fail["InvalidLoopMomenta", "LoopMomenta must be a list of distinct momentum symbols."]];
   expr = FCI[expression];
   dim = chooseDimension[expr, requestedDimension];
 
   register[kind_, value_, extra_: <||>] := With[{key = HoldComplete[kind, value]},
-    (* Structural keys avoid serializing repeated occurrences. Allocate fresh
-       locals only when inserting a new entry into the registry. *)
+    (* HoldComplete preserves the structural key without evaluating its
+       contents again; kind distinguishes the same value in different roles.
+       Only insertion allocates locals and serializes the mapped expression. *)
     If[KeyExistsQ[registry, key], registry[key],
       Module[{name, number, prefix},
-        number = Lookup[counters, kind, 0] + 1; AssociateTo[counters, kind -> number];
+        number = Lookup[counters, kind, 0] + 1;
+        AssociateTo[counters, kind -> number];
         prefix = $kindSpecs[kind]["Prefix"];
         name = prefix <> intString[number];
         AssociateTo[registry, key -> name];
         AppendTo[entries, Join[<|"Name" -> name, "Kind" -> kind, "Expression" -> encode[value]|>, extra]];
         name
-      ]]
+      ]
+    ]
   ];
   makeMacro[s_] := Module[{name = "CFCF" <> intString[Length[macros] + 1]},
     AppendTo[macros, "#define " <> name <> " \"(" <> s <> ")\""];
@@ -231,17 +240,30 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
   scalar[s_Symbol] := If[s === I, "i_", register["Scalar", s]];
   index[LorentzIndex[i_Symbol, ___]] := register["Index", i];
   index[_] := fail["UnsupportedIndex", "Lorentz indices must be symbols."];
+  (* Return coefficient/name pairs for a linear combination. Polarization
+     labels stay atomic vector identities even when their momentum is routed. *)
   vector[Momentum[v_, ___]] := Module[{terms},
     terms = If[Head[v] === Plus, List @@ v, {v}];
-    Map[Function[term, Module[{factors, momenta, coefficients},
-      If[vectorIdentityQ[term], {1, register["Vector", term]},
-      If[Head[term] =!= Times, fail["UnsupportedMomentum", "Momentum routing must be a linear combination with exact rational coefficients."]];
-      factors = List @@ term; momenta = Select[factors, vectorIdentityQ];
-      coefficients = Select[factors, !vectorIdentityQ[#] &];
-      If[Length[momenta] =!= 1 || !AllTrue[coefficients, MatchQ[#, _Integer | _Rational] &],
-        fail["UnsupportedMomentum", "Momentum routing must be a linear combination with exact rational coefficients."]];
-      {Times @@ coefficients, register["Vector", First[momenta]]}]
-    ]], terms]
+    Map[
+      Function[term,
+        Module[{factors, momenta, coefficients},
+          If[vectorIdentityQ[term],
+            {1, register["Vector", term]},
+            If[Head[term] =!= Times,
+              fail["UnsupportedMomentum", "Momentum routing must be a linear combination with exact rational coefficients."]
+            ];
+            factors = List @@ term;
+            momenta = Select[factors, vectorIdentityQ];
+            coefficients = Select[factors, !vectorIdentityQ[#] &];
+            If[Length[momenta] =!= 1 || !AllTrue[coefficients, MatchQ[#, _Integer | _Rational] &],
+              fail["UnsupportedMomentum", "Momentum routing must be a linear combination with exact rational coefficients."]
+            ];
+            {Times @@ coefficients, register["Vector", First[momenta]]}
+          ]
+        ]
+      ],
+      terms
+    ]
   ];
   vector[x_Plus] := Flatten[vector /@ (List @@ x), 1];
   vector[Times[c : (_Integer | _Rational), m_Momentum]] := ({c #[[1]], #[[2]]} & /@ vector[m]);
@@ -261,7 +283,8 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
 
   denominator[pd : PropagatorDenominator[mom_, mass_: 0]] := denominator[pd] = Module[{},
     If[!FreeQ[mom, _Polarization], fail["UnsupportedMomentum", "Propagator routing cannot contain polarization vectors."]];
-    vector[mom]; If[!scalarQ[mass], fail["UnsupportedMass", "Propagator masses must be exact scalar expressions."]];
+    vector[mom];
+    If[!scalarQ[mass], fail["UnsupportedMass", "Propagator masses must be exact scalar expressions."]];
     (* Positive integer powers remain powers of the same identifier. Each
        identifier denotes one ordinary Feynman denominator, including i0. *)
     register["Denominator", FeynAmpDenominator[pd], <|
@@ -289,7 +312,8 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
     True, fail["UnsupportedExpression", "The expression contains an unsupported structure.", <|"Expression" -> HoldForm[x], "Head" -> Head[x]|>]
   ];
 
-  (* 4. FORM program generation: declarations, factors and result output. *)
+  (* Dimension and requested loop vectors enter the registry before expression
+     traversal, fixing their names independently of later staged emission. *)
   dimensionName = If[IntegerQ[dim], intString[dim], scalar[dim]];
   Scan[(register["Vector", #]) &, loops];
   (* A new FORM expression is initially one input term, even when its source
@@ -322,11 +346,13 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
 (* ::Input::Initialization:: *)
 (* Pure text generation: the caller supplies both the template and result path. *)
 renderExport[data_Association, result_String, template_String] := Module[
- {entries = data["Mapping"]["Entries"], declaration, json, digest, program},
+  {entries = data["Mapping"]["Entries"], declaration, json, digest, program},
   declaration[type_] := Module[{names},
     names = Lookup[Select[entries, $kindSpecs[#["Kind"]]["Declaration"] === type &], "Name", {}];
     If[names === {}, "", type <> " " <> StringRiffle[names, ","] <> ";"]
   ];
+  (* The digest binds the exact serialized mapping text. Reformatting JSON
+     after this point would break correspondence with the generated result. *)
   json = ExportString[data["Mapping"], "RawJSON", "Compact" -> True];
   digest = Hash[json, "SHA256", "HexString"];
   program = StringReplace[template, {
@@ -370,46 +396,94 @@ exportCopyFile[source_, target_, overwrite_: False] := Quiet[Check[CopyFile[sour
 exportRenameFile[source_, target_, overwrite_] := Quiet[Check[RenameFile[source, target, OverwriteTarget -> overwrite], $Failed]];
 exportDeleteFile[path_] := !FileExistsQ[path] || TrueQ[Quiet[Check[DeleteFile[path]; True, False]]];
 
+(* Prepare both files before replacing either target. The backups and replaced
+   flags describe this invocation's recoverable changes; this is not a lock or
+   a crash-recovery protocol for concurrent writers. *)
 writeExport[paths_Association, rendered_Association, overwrite_] := Module[
- {targets = Lookup[paths, {"InputFile", "MappingFile"}], contents = Lookup[rendered, {"Program", "MappingJSON"}],
-  staged, backups, existed, replaced = {False, False}, committed = False, cleanup, outcome, result, aborted = False, rollbackFailed = False, recovery = {}, token},
- token = CreateUUID[];
- staged = (# <> "." <> token <> ".tmp") & /@ targets;
- backups = (# <> "." <> token <> ".bak") & /@ targets;
- existed = FileExistsQ /@ targets;
- cleanup[] := Module[{restored = True},
-   If[!committed,
-     Do[If[replaced[[i]],
-       If[existed[[i]],
-         If[!StringQ[exportCopyFile[backups[[i]], targets[[i]], True]], restored = False],
-         If[!exportDeleteFile[targets[[i]]], restored = False]]], {i, Length[targets]}]];
-   Scan[exportDeleteFile, staged];
-   (* A failed restoration must leave the recovery copies available. *)
-   If[restored, Scan[exportDeleteFile, backups],
-     rollbackFailed = True; recovery = Select[backups, FileExistsQ]]
- ];
- result = CheckAbort[Catch[WithCleanup[
-   Do[
-     If[!StringQ[exportWriteText[staged[[i]], contents[[i]]]],
-       fail["WriteFailed", "Cannot stage the FORM program and mapping.", <|"Path" -> staged[[i]]|>]], {i, Length[targets]}];
-   Do[If[existed[[i]],
-     If[!overwrite, fail["FileExists", "An export target already exists."]];
-     If[!StringQ[exportCopyFile[targets[[i]], backups[[i]]]],
-       fail["WriteFailed", "Cannot preserve the existing export before replacement.", <|"Path" -> targets[[i]]|>]]], {i, Length[targets]}];
-   Do[
-     (* Replacement and ownership registration form one abort-protected step. *)
-     AbortProtect[
-       outcome = exportRenameFile[staged[[i]], targets[[i]], overwrite];
-       If[StringQ[outcome], replaced[[i]] = True]];
-     If[!StringQ[outcome], fail["WriteFailed", "Cannot replace the FORM program and mapping; original files were restored.",
-       <|"Path" -> targets[[i]]|>]], {i, Length[targets]}];
-   committed = True;
-   paths,
-   cleanup[]], $failureTag], aborted = True; $Aborted];
- If[rollbackFailed, fail["RollbackFailed", "Export failed and the original files could not all be restored. Recovery copies were retained.",
-   <|"RecoveryFiles" -> recovery, "Targets" -> targets|>]];
- If[aborted, Abort[]];
- result
+  {targets = Lookup[paths, {"InputFile", "MappingFile"}],
+   contents = Lookup[rendered, {"Program", "MappingJSON"}],
+   staged, backups, existed, replaced = {False, False}, committed = False,
+   cleanup, outcome, result, aborted = False, rollbackFailed = False,
+   recovery = {}, token},
+  token = CreateUUID[];
+  staged = (# <> "." <> token <> ".tmp") & /@ targets;
+  backups = (# <> "." <> token <> ".bak") & /@ targets;
+  existed = FileExistsQ /@ targets;
+
+  (* Define cleanup without running it; WithCleanup invokes it on exit. Only
+     targets replaced by this invocation are restored or removed. *)
+  cleanup[] := Module[{restored = True},
+    If[!committed,
+      Do[
+        If[replaced[[i]],
+          If[existed[[i]],
+            If[!StringQ[exportCopyFile[backups[[i]], targets[[i]], True]],
+              restored = False
+            ],
+            If[!exportDeleteFile[targets[[i]]], restored = False]
+          ]
+        ],
+        {i, Length[targets]}
+      ]
+    ];
+    Scan[exportDeleteFile, staged];
+    (* A failed restoration must leave the recovery copies available. *)
+    If[restored,
+      Scan[exportDeleteFile, backups],
+      rollbackFailed = True;
+      recovery = Select[backups, FileExistsQ]
+    ]
+  ];
+
+  (* Cleanup runs on success, a tagged failure, or abort. Record an abort only
+     after cleanup, so rollback failure can report retained recovery files. *)
+  result = CheckAbort[
+    Catch[
+      WithCleanup[
+        Do[
+          If[!StringQ[exportWriteText[staged[[i]], contents[[i]]]],
+            fail["WriteFailed", "Cannot stage the FORM program and mapping.",
+              <|"Path" -> staged[[i]]|>]
+          ],
+          {i, Length[targets]}
+        ];
+        Do[
+          If[existed[[i]],
+            If[!overwrite, fail["FileExists", "An export target already exists."]];
+            If[!StringQ[exportCopyFile[targets[[i]], backups[[i]]]],
+              fail["WriteFailed", "Cannot preserve the existing export before replacement.",
+                <|"Path" -> targets[[i]]|>]
+            ]
+          ],
+          {i, Length[targets]}
+        ];
+        Do[
+          (* Replacement and ownership registration form one abort-protected step. *)
+          AbortProtect[
+            outcome = exportRenameFile[staged[[i]], targets[[i]], overwrite];
+            If[StringQ[outcome], replaced[[i]] = True]
+          ];
+          If[!StringQ[outcome],
+            fail["WriteFailed", "Cannot replace the FORM program and mapping; original files were restored.",
+              <|"Path" -> targets[[i]]|>]
+          ],
+          {i, Length[targets]}
+        ];
+        committed = True;
+        paths,
+        cleanup[]
+      ],
+      $failureTag
+    ],
+    aborted = True;
+    $Aborted
+  ];
+  If[rollbackFailed,
+    fail["RollbackFailed", "Export failed and the original files could not all be restored. Recovery copies were retained.",
+      <|"RecoveryFiles" -> recovery, "Targets" -> targets|>]
+  ];
+  If[aborted, Abort[]];
+  result
 ];
 
 (* ::Subsection:: *)
@@ -417,12 +491,12 @@ writeExport[paths_Association, rendered_Association, overwrite_] := Module[
 
 (* ::Input::Initialization:: *)
 CalcFormConverter`CalcFormExport[expression_, file_String, OptionsPattern[]] := Catch[
- Module[{paths, data, rendered, overwrite = OptionValue[OverwriteTarget]},
-  paths = exportPaths[file, overwrite];
-  data = buildExportData[expression, OptionValue[Dimension], OptionValue[LoopMomenta]];
-  rendered = renderExport[data, paths["ResultFile"], readProgramTemplate[]];
-  writeExport[paths, rendered, overwrite]
- ], $failureTag];
+  Module[{paths, data, rendered, overwrite = OptionValue[OverwriteTarget]},
+    paths = exportPaths[file, overwrite];
+    data = buildExportData[expression, OptionValue[Dimension], OptionValue[LoopMomenta]];
+    rendered = renderExport[data, paths["ResultFile"], readProgramTemplate[]];
+    writeExport[paths, rendered, overwrite]
+  ], $failureTag];
 CalcFormConverter`CalcFormExport[___] := Failure["InvalidArguments", <|"MessageTemplate" -> "Use CalcFormExport[expression, filename, options]."|>];
 
 (* ::Section:: *)
@@ -436,98 +510,172 @@ CalcFormConverter`CalcFormExport[___] := Failure["InvalidArguments", <|"MessageT
    native tensor syntax and four reserved master-integral functions only.
    Vector/index tokens have distinct types until converted into Pair objects. *)
 parseResult[text_String, values_Association, dim_] := Module[
- {tokens, pos = 1, peek, take, expect, atom, power, unary, product, sum,
-  scalarValue, entryValue, call, dot, result, tokenPattern, stripped, classes, tokenCount, compoundPattern, compoundValue},
- (* Only complete component/metric calls form composite tokens. Tokenize the
-    original text so whitespace cannot join identifier fragments. Dots remain
-    ordinary operators to preserve left-to-right validation of invalid chains. *)
- compoundPattern = "(?:cfv[0-9]+\\s*\\(\\s*cfi[0-9]+\\s*\\)|d_\\s*\\(\\s*cfi[0-9]+\\s*,\\s*cfi[0-9]+\\s*\\))";
- tokenPattern = RegularExpression[compoundPattern <> "|[A-Za-z][A-Za-z0-9_]*|[0-9]+|[+*/^(),.\\-]"];
- stripped = StringReplace[text, WhitespaceCharacter -> ""];
- tokens = StringCases[text, tokenPattern];
- If[StringReplace[StringJoin[tokens], WhitespaceCharacter -> ""] =!= stripped || tokens === {}, fail["InvalidResult", "The result contains invalid syntax."]];
- (* Classify each distinct lexeme once rather than matching a regular
-    expression at every occurrence in a large result. *)
- classes = Association[Map[# -> Which[StringMatchQ[#, DigitCharacter ..], 0,
-   StringMatchQ[#, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]], 1,
-   StringMatchQ[#, RegularExpression[compoundPattern]], 3, True, 2] &, DeleteDuplicates[tokens]]];
- (* Decode lazily in parse order, using the same identifier and argument
-    checks as ordinary calls. Cache only successful results within this import. *)
- compoundValue[t_] := compoundValue[t] = With[
-   {parts = StringCases[t, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]]},
-   call[First[parts], entryValue /@ Rest[parts]]];
- (* The sentinel serves lookahead only. take[] and the trailing-token check
-    use the original count, so it can never be consumed as input. *)
- tokenCount = Length[tokens]; tokens = Append[tokens, "END"];
- peek[] := tokens[[pos]];
- take[] := (
-   If[pos > tokenCount, fail["InvalidResult", "Unexpected end of FORM result."]];
-   tokens[[pos++]]);
- expect[t_] := If[take[] =!= t, fail["InvalidResult", "Unexpected token in FORM result."]];
- (* Check types before arithmetic can cancel an invalid vector/index. *)
- scalarValue[x_] := If[!FreeQ[x, _vectorToken | _indexToken],
-   fail["InvalidResult", "A vector or index occurs outside a tensor object."], x];
- entryValue[n_] := Lookup[values, n,
-   fail["UnknownIdentifier", "Unknown identifier in FORM result.", <|"Identifier" -> n|>]];
- call[n_, args_] := Which[
-   n === "d_" && Length[args] == 2 && MatchQ[args, {_indexToken, _indexToken}],
-     Pair[LorentzIndex[args[[1, 1]], dim], LorentzIndex[args[[2, 1]], dim]],
-   KeyExistsQ[values, n] && MatchQ[values[n], _vectorToken] && MatchQ[args, {_indexToken}],
-     Pair[Momentum[values[n][[1]], dim], LorentzIndex[args[[1, 1]], dim]],
-   KeyExistsQ[$mastersByFORM, n] && masterArgumentsQ[$mastersByFORM[n], scalarValue /@ args],
-     $mastersByFORM[n]["Head"] @@ (scalarValue /@ args),
-   True, fail["InvalidResult", "Unsupported function or argument types in FORM result.", <|"Function" -> n|>]
- ];
- dot[a_, b_] := dot[a, b] = If[MatchQ[{a, b}, {_vectorToken, _vectorToken}],
-   Pair[Momentum[a[[1]], dim], Momentum[b[[1]], dim]],
-   fail["InvalidResult", "Dot products require two declared vectors."]];
- (* Allocate mutable locals only on branches that need them; immutable
-    bindings remain local to each recursive invocation. *)
- atom[] := With[{t = take[]},
-   Which[
-     classes[t] === 0, FromDigits[t],
-     classes[t] === 3, compoundValue[t],
-     t === "(", With[{v = sum[]}, expect[")"]; v],
-     classes[t] === 1,
-       If[peek[] === "(", Module[{args = {}}, take[];
-         If[peek[] =!= ")", AppendTo[args, sum[]]; While[peek[] === ",", take[]; AppendTo[args, sum[]]]];
-         expect[")"]; call[t, args]], If[t === "i_", I, entryValue[t]]],
-     True, fail["InvalidResult", "Expected a number, declared symbol or parenthesized expression."]
-   ]
- ];
- power[] := Module[{v = atom[]},
-   While[peek[] === ".", take[]; v = dot[v, atom[]]];
-   If[peek[] === "^", Module[{n, sign = 1, parenthesized = False}, take[];
-     If[peek[] === "(", take[]; parenthesized = True];
-     If[peek[] === "-", take[]; sign = -1, If[peek[] === "+", take[]]];
-     n = take[]; If[!StringMatchQ[n, DigitCharacter ..], fail["InvalidResult", "FORM exponents must be integers."]];
-     If[parenthesized, expect[")"]];
-     If[v === 0 && sign FromDigits[n] <= 0, fail["InvalidResult", "Undefined power of zero."]];
-     v = scalarValue[v]^(sign FromDigits[n])]]; v
- ];
- unary[] := Switch[peek[], "+", take[]; unary[], "-", take[]; -scalarValue[unary[]], _, power[]];
- (* Reap/Sow collects arbitrarily long products and sums without repeatedly
-    copying a growing list. Nested parser calls own their collectors. *)
- product[] := With[{v = unary[]},
-   If[!MemberQ[{"*", "/"}, peek[]], v,
-     Module[{op, r, factors},
-       factors = Reap[
-         Sow[scalarValue[v]];
-         While[MemberQ[{"*", "/"}, peek[]], op = take[]; r = scalarValue[unary[]];
-           If[op === "/" && r === 0, fail["InvalidResult", "Division by zero."]];
-           Sow[If[op === "*", r, 1/r]]]][[2, 1]];
-       Times @@ factors]]];
- sum[] := With[{v = product[]},
-   If[!MemberQ[{"+", "-"}, peek[]], v,
-     Module[{op, r, terms},
-       terms = Reap[
-         Sow[scalarValue[v]];
-         While[MemberQ[{"+", "-"}, peek[]], op = take[]; r = scalarValue[product[]];
-           Sow[If[op === "+", r, -r]]]][[2, 1]];
-       Plus @@ terms]]];
- result = scalarValue[sum[]];
- If[pos <= tokenCount, fail["InvalidResult", "Unexpected trailing tokens in FORM result."]];
- result
+  {tokens, pos = 1, peek, take, expect, atom, power, unary, product, sum,
+   scalarValue, entryValue, call, dot, result, tokenPattern, stripped, classes,
+   tokenCount, compoundPattern, compoundValue},
+  (* Only complete component/metric calls form composite tokens. Tokenize the
+     original text so whitespace cannot join identifier fragments. Dots remain
+     ordinary operators to preserve left-to-right validation of invalid chains. *)
+  compoundPattern = "(?:cfv[0-9]+\\s*\\(\\s*cfi[0-9]+\\s*\\)|d_\\s*\\(\\s*cfi[0-9]+\\s*,\\s*cfi[0-9]+\\s*\\))";
+  tokenPattern = RegularExpression[compoundPattern <> "|[A-Za-z][A-Za-z0-9_]*|[0-9]+|[+*/^(),.\\-]"];
+  stripped = StringReplace[text, WhitespaceCharacter -> ""];
+  tokens = StringCases[text, tokenPattern];
+  If[StringReplace[StringJoin[tokens], WhitespaceCharacter -> ""] =!= stripped || tokens === {}, fail["InvalidResult", "The result contains invalid syntax."]];
+  (* Classify each distinct lexeme once: 0 = integer, 1 = identifier,
+     2 = punctuation, 3 = complete native call. This avoids repeating regular
+     expression matches at every occurrence in a large result. *)
+  classes = Association[
+    Map[# -> Which[
+      StringMatchQ[#, DigitCharacter ..], 0,
+      StringMatchQ[#, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]], 1,
+      StringMatchQ[#, RegularExpression[compoundPattern]], 3,
+      True, 2
+    ] &, DeleteDuplicates[tokens]]
+  ];
+  (* Decode lazily in parse order, using the same identifier and argument
+     checks as ordinary calls. Eager decoding could report a later unknown
+     identifier before an earlier syntax/type error. SetDelayed defines the
+     reader; its inner Set caches only successful results within this import. *)
+  compoundValue[t_] := compoundValue[t] = With[
+    {parts = StringCases[t, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]]},
+    call[First[parts], entryValue /@ Rest[parts]]];
+  (* The sentinel serves lookahead only. take[] and the trailing-token check
+     use the original count, so it can never be consumed as input. *)
+  tokenCount = Length[tokens];
+  tokens = Append[tokens, "END"];
+  peek[] := tokens[[pos]];
+  take[] := (
+    If[pos > tokenCount, fail["InvalidResult", "Unexpected end of FORM result."]];
+    tokens[[pos++]]
+  );
+  expect[t_] := If[take[] =!= t, fail["InvalidResult", "Unexpected token in FORM result."]];
+  (* Check types before arithmetic can cancel an invalid vector/index. *)
+  scalarValue[x_] := If[!FreeQ[x, _vectorToken | _indexToken],
+    fail["InvalidResult", "A vector or index occurs outside a tensor object."], x];
+  entryValue[n_] := Lookup[values, n,
+    fail["UnknownIdentifier", "Unknown identifier in FORM result.", <|"Identifier" -> n|>]];
+  call[n_, args_] := Which[
+    n === "d_" && Length[args] == 2 && MatchQ[args, {_indexToken, _indexToken}],
+      Pair[LorentzIndex[args[[1, 1]], dim], LorentzIndex[args[[2, 1]], dim]],
+    KeyExistsQ[values, n] && MatchQ[values[n], _vectorToken] && MatchQ[args, {_indexToken}],
+      Pair[Momentum[values[n][[1]], dim], LorentzIndex[args[[1, 1]], dim]],
+    KeyExistsQ[$mastersByFORM, n] && masterArgumentsQ[$mastersByFORM[n], scalarValue /@ args],
+      $mastersByFORM[n]["Head"] @@ (scalarValue /@ args),
+    True, fail["InvalidResult", "Unsupported function or argument types in FORM result.", <|"Function" -> n|>]
+  ];
+  (* The cache key is the typed pair of vector values; dim is fixed for this
+     import. A failed dot throws before the inner assignment can store it. *)
+  dot[a_, b_] := dot[a, b] = If[MatchQ[{a, b}, {_vectorToken, _vectorToken}],
+    Pair[Momentum[a[[1]], dim], Momentum[b[[1]], dim]],
+    fail["InvalidResult", "Dot products require two declared vectors."]];
+  (* With binds the consumed token or first operand once. Mutable recursive
+     state belongs to each invocation's Module, never to an outer parser scope. *)
+  atom[] := With[{t = take[]},
+    Which[
+      classes[t] === 0, FromDigits[t],
+      classes[t] === 3, compoundValue[t],
+      t === "(", With[{v = sum[]}, expect[")"]; v],
+      classes[t] === 1,
+        If[peek[] === "(",
+          Module[{args = {}},
+            take[];
+            If[peek[] =!= ")",
+              AppendTo[args, sum[]];
+              While[peek[] === ",",
+                take[];
+                AppendTo[args, sum[]]
+              ]
+            ];
+            expect[")"];
+            call[t, args]
+          ],
+          If[t === "i_", I, entryValue[t]]
+        ],
+      True, fail["InvalidResult", "Expected a number, declared symbol or parenthesized expression."]
+    ]
+  ];
+
+  (* Dot chains are consumed in order before the optional integer exponent.
+     Keep validation interleaved with consumption: a later unknown identifier
+     must not replace the failure already caused by an invalid earlier dot. *)
+  power[] := Module[{v = atom[]},
+    While[peek[] === ".",
+      take[];
+      v = dot[v, atom[]]
+    ];
+    If[peek[] === "^",
+      Module[{n, sign = 1, parenthesized = False},
+        take[];
+        If[peek[] === "(",
+          take[];
+          parenthesized = True
+        ];
+        If[peek[] === "-",
+          take[];
+          sign = -1,
+          If[peek[] === "+", take[]]
+        ];
+        n = take[];
+        If[!StringMatchQ[n, DigitCharacter ..],
+          fail["InvalidResult", "FORM exponents must be integers."]
+        ];
+        If[parenthesized, expect[")"]];
+        If[v === 0 && sign FromDigits[n] <= 0,
+          fail["InvalidResult", "Undefined power of zero."]
+        ];
+        v = scalarValue[v]^(sign FromDigits[n])
+      ]
+    ];
+    v
+  ];
+  unary[] := Switch[peek[],
+    "+", take[]; unary[],
+    "-", take[]; -scalarValue[unary[]],
+    _, power[]
+  ];
+
+  (* Reap/Sow collects arbitrarily long products and sums without repeatedly
+     copying a growing list. Each recursive invocation owns its collector.
+     Validate each operand before Times or Plus can hide a typed token through
+     zero multiplication or cancellation. Division is consumed left to right. *)
+  product[] := With[{v = unary[]},
+    If[!MemberQ[{"*", "/"}, peek[]],
+      v,
+      Module[{op, r, factors},
+        factors = Reap[
+          Sow[scalarValue[v]];
+          While[MemberQ[{"*", "/"}, peek[]],
+            op = take[];
+            r = scalarValue[unary[]];
+            If[op === "/" && r === 0, fail["InvalidResult", "Division by zero."]];
+            Sow[If[op === "*", r, 1/r]]
+          ]
+        ][[2, 1]];
+        Times @@ factors
+      ]
+    ]
+  ];
+  sum[] := With[{v = product[]},
+    If[!MemberQ[{"+", "-"}, peek[]],
+      v,
+      Module[{op, r, terms},
+        terms = Reap[
+          Sow[scalarValue[v]];
+          While[MemberQ[{"+", "-"}, peek[]],
+            op = take[];
+            r = scalarValue[product[]];
+            Sow[If[op === "+", r, -r]]
+          ]
+        ][[2, 1]];
+        Plus @@ terms
+      ]
+    ]
+  ];
+  result = scalarValue[sum[]];
+  If[pos <= tokenCount,
+    fail["InvalidResult", "Unexpected trailing tokens in FORM result."]
+  ];
+  result
 ];
 
 (* ::Subsection:: *)
@@ -535,48 +683,63 @@ parseResult[text_String, values_Association, dim_] := Module[
 
 (* ::Input::Initialization:: *)
 (* Decode and validate every entry once, including entries eliminated by FORM.
-   The job-local dictionary also carries vector/index types for the parser. *)
-decodeEntries[entries_List] := Association[Map[Function[entry, Module[{value = decode[entry["Expression"]]},
-  If[!TrueQ[$kindSpecs[entry["Kind"]]["ValidExpression"][value]],
-    fail["InvalidMapping", "Mapped expression does not match its declared kind."]];
-  entry["Name"] -> Switch[entry["Kind"],
-    "Vector", vectorToken[value], "Index", indexToken[value], _, value]
-]], entries]];
+   The job-local dictionary also carries vector/index types for the parser.
+   Denominator Expression data is authoritative; convenience metadata never
+   overrides it during reconstruction. *)
+decodeEntries[entries_List] := Association[
+  Map[
+    Function[entry,
+      Module[{value = decode[entry["Expression"]]},
+        If[!TrueQ[$kindSpecs[entry["Kind"]]["ValidExpression"][value]],
+          fail["InvalidMapping", "Mapped expression does not match its declared kind."]
+        ];
+        entry["Name"] -> Switch[entry["Kind"],
+          "Vector", vectorToken[value],
+          "Index", indexToken[value],
+          _, value
+        ]
+      ]
+    ],
+    entries
+  ]
+];
 
-(* Validate the result/mapping pair before reconstruction. *)
+(* Validate correspondence and entry names before decoding, then validate
+   every mapped value before parsing the result. The digest detects a mismatched
+   file pair; it does not replace expression or grammar validation. *)
 CalcFormConverter`CalcFormImport[resultFile_String, mappingFile_String] := Catch[
- Module[{json, mapping, text, lines, digest, entries, dim, names, values},
-  json = Quiet[Check[Import[mappingFile, "Text", CharacterEncoding -> "UTF-8"], $Failed]];
-  text = Quiet[Check[Import[resultFile, "Text", CharacterEncoding -> "UTF-8"], $Failed]];
-  If[!StringQ[json] || !StringQ[text], fail["ReadFailed", "Cannot read the result or mapping file."]];
-  (* Older kernels expose RawJSON strings as UTF-8 bytes, while notebook
-     sessions may supply Unicode text. Keep version-one byte-string files
-     readable and retry genuine Unicode through an explicit UTF-8 buffer. *)
-  mapping = Quiet[Check[ImportString[json, "RawJSON"], $Failed]];
-  If[mapping === $Failed,
-    mapping = Quiet[Check[ImportByteArray[ByteArray[ToCharacterCode[json, "UTF-8"]], "RawJSON"], $Failed]]];
-  If[!AssociationQ[mapping] || Lookup[mapping, "Format", None] =!= $formatName ||
-     Lookup[mapping, "Version", None] =!= $formatVersion,
-    fail["InvalidMapping", "Unsupported mapping format or version."]];
-  lines = StringSplit[StringReplace[text, "\r\n" -> "\n"], "\n"];
-  (* Early notebook exports could decode the UTF-8 byte string during
-     writing, after its checksum was calculated. Accept that exact legacy
-     representation too; both checksums still bind the complete mapping. *)
-  digest = Hash[#, "SHA256", "HexString"] & /@
-    {json, FromCharacterCode[ToCharacterCode[json, "UTF-8"]]};
-  If[Length[lines] < 2 || !MemberQ[(resultMarker[] <> " " <> # &) /@ digest, First[lines]],
-    fail["MappingMismatch", "The result does not correspond to this mapping file."]];
-  entries = Lookup[mapping, "Entries", None];
-  If[!ListQ[entries] || !AllTrue[entries, AssociationQ], fail["InvalidMapping", "Invalid mapping entries."]];
-  names = Lookup[entries, "Name", {}];
-  If[!DuplicateFreeQ[names] || !AllTrue[entries,
-     validEntryNameQ[#] &&
-     KeyExistsQ[#, "Expression"] &], fail["InvalidMapping", "Invalid or duplicate mapping identifiers."]];
-  dim = decode[Lookup[mapping, "Dimension", None]];
-  If[!MatchQ[dim, _Symbol | _Integer] || (IntegerQ[dim] && dim < 2) || dim === I, fail["InvalidMapping", "Invalid mapped dimension."]];
-  values = decodeEntries[entries];
-  parseResult[StringRiffle[Rest[lines], "\n"], values, dim]
- ], $failureTag];
+  Module[{json, mapping, text, lines, digest, entries, dim, names, values},
+    json = Quiet[Check[Import[mappingFile, "Text", CharacterEncoding -> "UTF-8"], $Failed]];
+    text = Quiet[Check[Import[resultFile, "Text", CharacterEncoding -> "UTF-8"], $Failed]];
+    If[!StringQ[json] || !StringQ[text], fail["ReadFailed", "Cannot read the result or mapping file."]];
+    (* Older kernels expose RawJSON strings as UTF-8 bytes, while notebook
+       sessions may supply Unicode text. Keep version-one byte-string files
+       readable and retry genuine Unicode through an explicit UTF-8 buffer. *)
+    mapping = Quiet[Check[ImportString[json, "RawJSON"], $Failed]];
+    If[mapping === $Failed,
+      mapping = Quiet[Check[ImportByteArray[ByteArray[ToCharacterCode[json, "UTF-8"]], "RawJSON"], $Failed]]];
+    If[!AssociationQ[mapping] || Lookup[mapping, "Format", None] =!= $formatName ||
+       Lookup[mapping, "Version", None] =!= $formatVersion,
+      fail["InvalidMapping", "Unsupported mapping format or version."]];
+    lines = StringSplit[StringReplace[text, "\r\n" -> "\n"], "\n"];
+    (* Early notebook exports could decode the UTF-8 byte string during
+       writing, after its checksum was calculated. Accept that exact legacy
+       representation too; both checksums still bind the complete mapping. *)
+    digest = Hash[#, "SHA256", "HexString"] & /@
+      {json, FromCharacterCode[ToCharacterCode[json, "UTF-8"]]};
+    If[Length[lines] < 2 || !MemberQ[(resultMarker[] <> " " <> # &) /@ digest, First[lines]],
+      fail["MappingMismatch", "The result does not correspond to this mapping file."]];
+    entries = Lookup[mapping, "Entries", None];
+    If[!ListQ[entries] || !AllTrue[entries, AssociationQ], fail["InvalidMapping", "Invalid mapping entries."]];
+    names = Lookup[entries, "Name", {}];
+    If[!DuplicateFreeQ[names] || !AllTrue[entries,
+       validEntryNameQ[#] &&
+       KeyExistsQ[#, "Expression"] &], fail["InvalidMapping", "Invalid or duplicate mapping identifiers."]];
+    dim = decode[Lookup[mapping, "Dimension", None]];
+    If[!MatchQ[dim, _Symbol | _Integer] || (IntegerQ[dim] && dim < 2) || dim === I, fail["InvalidMapping", "Invalid mapped dimension."]];
+    values = decodeEntries[entries];
+    parseResult[StringRiffle[Rest[lines], "\n"], values, dim]
+  ], $failureTag];
 CalcFormConverter`CalcFormImport[___] := Failure["InvalidArguments", <|"MessageTemplate" -> "Use CalcFormImport[resultFile, mappingFile]."|>];
 
 (* ::Section:: *)
