@@ -11,17 +11,16 @@
 (*Options and runtime support*)
 
 (* ::Input::Initialization:: *)
-Options[CalcFormConverter`CalcFormCheck] = {CalcFormConverter`FORMExecutable -> Automatic, CalcFormConverter`FORMThreads -> 1, TimeConstraint -> 10};
+Options[CalcFormConverter`CalcFormCheck] = {CalcFormConverter`FORMExecutable -> Automatic, CalcFormConverter`FORMThreads -> 1, System`TimeConstraint -> 10};
 Options[CalcFormConverter`CalcFormInstall] = {CalcFormConverter`FORMThreads -> 1};
 Options[CalcFormConverter`CalcFormCalculate] = {
- Dimension -> Automatic, LoopMomenta -> {}, CalcFormConverter`FORMExecutable -> Automatic,
- TimeConstraint -> Infinity, CalcFormConverter`WorkingDirectory -> Automatic, CalcFormConverter`KeepFiles -> False,
+ FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}, CalcFormConverter`FORMExecutable -> Automatic,
+ System`TimeConstraint -> Infinity, CalcFormConverter`WorkingDirectory -> Automatic, CalcFormConverter`KeepFiles -> False,
  CalcFormConverter`ShowTiming -> False, CalcFormConverter`ShowProgress -> False, CalcFormConverter`FORMThreads -> 1
 };
 CalcFormConverter`CalcFormCalculate::files = "FORM job files are retained in `1`.";
 CalcFormConverter`CalcFormInstall::wait = "Installation uses the system authentication agent when required. An active package transaction is allowed to finish before an abort takes effect.";
 
-runtimeFailure[tag_, message_, data_: <||>] := Failure[tag, Join[<|"MessageTemplate" -> message|>, data]];
 validThreadsQ[n_] := IntegerQ[n] && n >= 1;
 formCommand[executable_, source_, threads_] := Join[{executable}, If[threads > 1, {"-w" <> ToString[threads]}, {}], {source}];
 validTimeLimitQ[t_] := t === Infinity || (NumberQ[t] && TrueQ[t > 0]);
@@ -36,7 +35,7 @@ installationGuidance[threads_: 1] := <|
 
 resolveExecutable[requested_] := Module[{name, path, candidates, suffix},
  name = If[requested === Automatic, "form", requested];
- If[!StringQ[name] || name === "", Return[runtimeFailure["InvalidOption", "FORMExecutable must be Automatic or an executable name/path."]]];
+ If[!StringQ[name] || name === "", Return[makeFailure["InvalidOption", "FORMExecutable must be Automatic or an executable name/path."]]];
  If[StringContainsQ[name, {"/", "\\"}],
    path = ExpandFileName[name];
    Return[If[FileExistsQ[path] && !DirectoryQ[path], path, Missing["NotFound", name]]]];
@@ -45,14 +44,20 @@ resolveExecutable[requested_] := Module[{name, path, candidates, suffix},
  suffix = If[$OperatingSystem === "Windows" && FileExtension[name] === "", {name <> ".exe", name}, {name}];
  candidates = Flatten[Table[FileNameJoin[{dir, n}],
    {dir, StringSplit[path, If[$OperatingSystem === "Windows", ";", ":"]]}, {n, suffix}]];
- SelectFirst[ExpandFileName /@ candidates, FileExistsQ[#] && !DirectoryQ[#] &, Missing["NotFound", name]]
+ SelectFirst[ExpandFileName /@ candidates,
+   FileExistsQ[#] && !DirectoryQ[#] &&
+    ($OperatingSystem === "Windows" ||
+      With[{permissions = Quiet[Check[FileInformation[#, "UnixPermissionsCode"], Missing["NotAvailable"]]]},
+       (* 73 is octal 0111: any Unix execute bit; launch still verifies effective ACLs. *)
+       (IntegerQ[permissions] && BitAnd[permissions, 73] =!= 0) ||
+        (StringQ[permissions] && BitAnd[FromDigits[permissions, 8], 73] =!= 0)]) &, Missing["NotFound", name]]
 ];
 
 createJobDirectory[parent_, prefix_] := Module[{base, dir},
  base = If[parent === Automatic, $TemporaryDirectory, parent];
- If[!StringQ[base] || !DirectoryQ[base], Return[runtimeFailure["InvalidDirectory", "WorkingDirectory must be an existing directory or Automatic."]]];
+ If[!StringQ[base] || !DirectoryQ[base], Return[makeFailure["InvalidDirectory", "WorkingDirectory must be an existing directory or Automatic."]]];
  dir = Quiet[Check[CreateDirectory[FileNameJoin[{ExpandFileName[base], prefix <> CreateUUID[]}]], $Failed]];
- If[StringQ[dir], dir, runtimeFailure["WriteFailed", "Cannot create a private FORM job directory."]]
+ If[StringQ[dir], dir, makeFailure["WriteFailed", "Cannot create a private FORM job directory."]]
 ];
 removeJobDirectory[dir_String] := Quiet[Check[DeleteDirectory[dir, DeleteContents -> True]; True, False]];
 
@@ -63,7 +68,13 @@ removeJobDirectory[dir_String] := Quiet[Check[DeleteDirectory[dir, DeleteContent
 (* Own only the process started here. FORM is launched directly, without a shell.
    Keep bounded output tails in memory; complete output goes to the log files. *)
 runtimePause[] := Pause[0.02];
-$progressInterval = 10;
+(* Seconds between progress reports. This affects runtime scheduling only, never
+   accepted syntax or results; retune with long-job cadence and runtime tests. *)
+$runtimeProgressIntervalSeconds = 10;
+(* Maximum characters retained per in-memory log tail. This affects diagnostic
+   buffering only, never accepted syntax or results; retune with failure-log
+   coverage and memory measurements, then rerun the runtime suite. *)
+$runtimeLogTailCharacters = 65536;
 reportCalculation[event_Association] := If[KeyExistsQ[event, "ElapsedSeconds"],
  Print["FORM ", event["Stage"], ": ", ToString[NumberForm[event["ElapsedSeconds"], {12, 2}], OutputForm], " s elapsed (wall clock)."],
  Print["FORM: ", event["Stage"], "."]];
@@ -74,7 +85,7 @@ inspectRuntimeProcess[process_] := <|
 
 runtimeProcess[command_List, directory_String, limit_, cancellable_: True, progress_: False] := Module[
  {process = None, out = None, err = None, outFile, errFile, tails = <|"StandardOutput" -> "", "StandardError" -> ""|>,
-  status = "Completed", exit = Missing["NotExited"], processState = "NotStarted", started = None, elapsed, nextProgress = $progressInterval,
+  status = "Completed", exit = Missing["NotExited"], processState = "NotStarted", started = None, elapsed, nextProgress = $runtimeProgressIntervalSeconds,
   drain, stop, cleanup, execute, messages = {}, ioFailed = False, inspection},
  outFile = FileNameJoin[{directory, "stdout.log"}]; errFile = FileNameJoin[{directory, "stderr.log"}];
  stop[] := If[MatchQ[process, _ProcessObject] && Quiet[ProcessStatus[process]] === "Running", Quiet[KillProcess[process]]];
@@ -84,7 +95,7 @@ runtimeProcess[command_List, directory_String, limit_, cancellable_: True, progr
    If[chunk === $Failed, ioFailed = True];
    If[StringQ[chunk], count += StringLength[chunk];
      If[Quiet[Check[WriteString[stream, chunk]; True, False]] =!= True, ioFailed = True];
-     AssociateTo[tails, channel -> StringTake[tails[channel] <> chunk, -Min[65536, StringLength[tails[channel] <> chunk]]]]]
+     AssociateTo[tails, channel -> StringTake[tails[channel] <> chunk, -Min[$runtimeLogTailCharacters, StringLength[tails[channel] <> chunk]]]]]
  ]], {"StandardOutput", "StandardError"}]; count];
  cleanup[] := WithCleanup[
    If[MatchQ[process, _ProcessObject],
@@ -106,7 +117,7 @@ runtimeProcess[command_List, directory_String, limit_, cancellable_: True, progr
        drain[];
        If[TrueQ[progress] && AbsoluteTime[] - started >= nextProgress,
          reportCalculation[<|"Stage" -> "Execute", "ElapsedSeconds" -> (AbsoluteTime[] - started)|>];
-         nextProgress = AbsoluteTime[] - started + $progressInterval];
+         nextProgress = AbsoluteTime[] - started + $runtimeProgressIntervalSeconds];
        If[ioFailed && cancellable, status = "LogFailed"; Break[]];
        If[limit =!= Infinity && AbsoluteTime[] - started >= limit, status = "TimedOut"; Break[]];
        runtimePause[]];
@@ -157,9 +168,9 @@ runFORMProbe[executable_String, directory_String, limit_, threads_: 1] := Module
 ];
 
 CalcFormConverter`CalcFormCheck[OptionsPattern[]] := Module[
- {limit = OptionValue[TimeConstraint], threads = OptionValue[CalcFormConverter`FORMThreads], executable, directory = None},
- If[!validTimeLimitQ[limit], Return[runtimeFailure["InvalidOption", "TimeConstraint must be positive or Infinity."]]];
- If[!validThreadsQ[threads], Return[runtimeFailure["InvalidOption", "FORMThreads must be a positive integer."]]];
+ {limit = OptionValue[System`TimeConstraint], threads = OptionValue[CalcFormConverter`FORMThreads], executable, directory = None},
+ If[!validTimeLimitQ[limit], Return[makeFailure["InvalidOption", "TimeConstraint must be positive or Infinity."]]];
+ If[!validThreadsQ[threads], Return[makeFailure["InvalidOption", "FORMThreads must be a positive integer."]]];
  executable = resolveExecutable[Replace[OptionValue[CalcFormConverter`FORMExecutable], Automatic :> If[threads > 1, "tform", "form"]]];
  If[FailureQ[executable], Return[executable]];
  If[MissingQ[executable], Return[checkStatus["NotFound", executable, <||>, threads]]];
@@ -170,42 +181,42 @@ CalcFormConverter`CalcFormCheck[OptionsPattern[]] := Module[
      If[StringQ[directory], removeJobDirectory[directory]]],
    checkStatus["Aborted", executable, <||>, threads]]
 ];
-CalcFormConverter`CalcFormCheck[___] := runtimeFailure["InvalidArguments", "Use CalcFormCheck[options]."];
+CalcFormConverter`CalcFormCheck[___] := makeFailure["InvalidArguments", "Use CalcFormCheck[options]."];
 
 (* ::Section:: *)
 (*Complete calculation*)
 
 (* ::Input::Initialization:: *)
 CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
- {limit = OptionValue[TimeConstraint], keep = OptionValue[CalcFormConverter`KeepFiles], check, directory,
+ {limit = OptionValue[System`TimeConstraint], keep = OptionValue[CalcFormConverter`KeepFiles], check, directory,
   job, run, result, input, equality, stage = "Check", retainedFailure,
   timing = OptionValue[CalcFormConverter`ShowTiming], progress = OptionValue[CalcFormConverter`ShowProgress],
   threads = OptionValue[CalcFormConverter`FORMThreads], announce},
- If[!validTimeLimitQ[limit] || !BooleanQ[keep], Return[runtimeFailure["InvalidOption", "Use a positive TimeConstraint or Infinity, and KeepFiles -> True or False."]]];
+ If[!validTimeLimitQ[limit] || !BooleanQ[keep], Return[makeFailure["InvalidOption", "Use a positive TimeConstraint or Infinity, and KeepFiles -> True or False."]]];
  If[!BooleanQ[timing] || !BooleanQ[progress] || !validThreadsQ[threads],
-   Return[runtimeFailure["InvalidOption", "ShowTiming and ShowProgress must be True or False; FORMThreads must be a positive integer."]]];
+   Return[makeFailure["InvalidOption", "ShowTiming and ShowProgress must be True or False; FORMThreads must be a positive integer."]]];
  (* Equal may already have evaluated before this command receives its argument.
     Binary equations share one algebraic job: its files contain the residual,
     and only the returned result is compared with zero. No solver is invoked. *)
  If[BooleanQ[expression], Return[expression]];
  equality = Head[expression] === Equal;
  If[equality && Length[expression] =!= 2,
-   Return[runtimeFailure["UnsupportedEquality", "Use a two-sided equality lhs == rhs; chained equalities are not supported."]]];
+   Return[makeFailure["UnsupportedEquality", "Use a two-sided equality lhs == rhs; chained equalities are not supported."]]];
  input = If[equality, expression[[1]] - expression[[2]], expression];
  announce[name_] := (stage = name; If[progress, reportCalculation[<|"Stage" -> name|>]]);
  announce["Check"];
  check = CalcFormConverter`CalcFormCheck[CalcFormConverter`FORMExecutable -> OptionValue[CalcFormConverter`FORMExecutable], CalcFormConverter`FORMThreads -> threads];
  If[FailureQ[check], announce["Failed"]; Return[check]];
- If[!TrueQ[check["Available"]], If[progress, reportCalculation[<|"Stage" -> "Failed"|>]]; Return[runtimeFailure["FORMUnavailable", "FORM did not pass its availability check.", <|"Stage" -> stage, "Check" -> check|>]]];
+ If[!TrueQ[check["Available"]], If[progress, reportCalculation[<|"Stage" -> "Failed"|>]]; Return[makeFailure["FORMUnavailable", "FORM did not pass its availability check.", <|"Stage" -> stage, "Check" -> check|>]]];
  directory = createJobDirectory[OptionValue[CalcFormConverter`WorkingDirectory], "calcform-job-"];
  If[FailureQ[directory], announce["Failed"]; Return[directory]];
- retainedFailure[tag_, message_, details_: <||>] := runtimeFailure[tag, message,
+ retainedFailure[tag_, message_, details_: <||>] := makeFailure[tag, message,
    Join[<|"Stage" -> stage, "JobDirectory" -> directory, "Executable" -> check["Executable"]|>, details]];
  result = CheckAbort[
    Catch[
      announce["Export"];
      job = CalcFormConverter`CalcFormExport[input, FileNameJoin[{directory, "job.frm"}],
-       Dimension -> OptionValue[Dimension], LoopMomenta -> OptionValue[LoopMomenta]];
+       FeynCalc`Dimension -> OptionValue[FeynCalc`Dimension], FeynCalc`LoopMomenta -> OptionValue[FeynCalc`LoopMomenta]];
      If[FailureQ[job], Throw[retainedFailure["ExportFailed", "FORM export failed; job files were retained.", <|"Cause" -> job|>], $failureTag]];
      announce["Execute"];
      run = runtimeProcess[formCommand[check["Executable"], job["InputFile"], threads], directory, limit, True, progress];
@@ -224,7 +235,7 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
    If[keep || !removeJobDirectory[directory], Message[CalcFormConverter`CalcFormCalculate::files, directory]]]];
  If[equality && !FailureQ[result], result == 0, result]
 ];
-CalcFormConverter`CalcFormCalculate[___] := runtimeFailure["InvalidArguments", "Use CalcFormCalculate[expression, options]."];
+CalcFormConverter`CalcFormCalculate[___] := makeFailure["InvalidArguments", "Use CalcFormCalculate[expression, options]."];
 
 (* ::Section:: *)
 (*Explicit Debian/Ubuntu installation*)
@@ -245,10 +256,10 @@ installationPlatform[] := Module[{linux, text, values, ids, id, root = False, ui
 ];
 installationCommand[platform_Association] := Module[{command},
  If[!TrueQ[platform["Linux"]] || !TrueQ[platform["DebianLike"]] || !StringQ[platform["APT"]],
-   Return[runtimeFailure["UnsupportedInstallation", "Automatic installation is supported on Debian/Ubuntu Linux with apt-get.", installationGuidance[]]]];
+   Return[makeFailure["UnsupportedInstallation", "Automatic installation is supported on Debian/Ubuntu Linux with apt-get.", installationGuidance[]]]];
  command = {platform["APT"], "--no-remove", "-y", "install", "form"};
  If[TrueQ[platform["Root"]], Return[command]];
- If[!StringQ[platform["Pkexec"]], Return[runtimeFailure["AuthorizationUnavailable", "No system authentication helper is available. Install FORM manually.", installationGuidance[]]]];
+ If[!StringQ[platform["Pkexec"]], Return[makeFailure["AuthorizationUnavailable", "No system authentication helper is available. Install FORM manually.", installationGuidance[]]]];
  Join[{platform["Pkexec"], "--disable-internal-agent"}, command]
 ];
 (* Deliberately no timeout and no forced cancellation of a package transaction. *)
@@ -260,27 +271,27 @@ runInstallation[command_List, directory_String] := AbortProtect[Module[{result},
 
 CalcFormConverter`CalcFormInstall[OptionsPattern[]] := Module[
  {threads = OptionValue[CalcFormConverter`FORMThreads], check, command, directory, run, result},
- If[!validThreadsQ[threads], Return[runtimeFailure["InvalidOption", "FORMThreads must be a positive integer."]]];
+ If[!validThreadsQ[threads], Return[makeFailure["InvalidOption", "FORMThreads must be a positive integer."]]];
  check = CalcFormConverter`CalcFormCheck[CalcFormConverter`FORMThreads -> threads];
  If[FailureQ[check], Return[check]];
  If[TrueQ[check["Available"]], Return[check]];
- If[check["Status"] =!= "NotFound", Return[runtimeFailure["FORMUnusable", "The requested FORM/TFORM executable was found but could not be used. Resolve the launch or probe failure before attempting installation.", <|"Check" -> check|>]]];
+ If[check["Status"] =!= "NotFound", Return[makeFailure["FORMUnusable", "The requested FORM/TFORM executable was found but could not be used. Resolve the launch or probe failure before attempting installation.", <|"Check" -> check|>]]];
  command = installationCommand[installationPlatform[]];
- If[FailureQ[command], Return[Failure[command[[1]], Join[command[[2]], installationGuidance[threads]]]]];
+ If[FailureQ[command], Return[makeFailure[command[[1]], command[[2, "MessageTemplate"]], Join[command[[2]], installationGuidance[threads]]]]];
  directory = createJobDirectory[Automatic, "calcform-install-"];
  If[FailureQ[directory], Return[directory]];
  Message[CalcFormConverter`CalcFormInstall::wait];
  result = CheckAbort[
    run = runInstallation[command, directory];
    If[run["Status"] =!= "Completed" || run["ExitCode"] =!= 0,
-     runtimeFailure["InstallationFailed", "FORM installation or system authorization failed. Consult the retained logs or install manually.",
+     makeFailure["InstallationFailed", "FORM installation or system authorization failed. Consult the retained logs or install manually.",
        Join[<|"JobDirectory" -> directory, "Process" -> run|>, installationGuidance[threads]]],
      check = CalcFormConverter`CalcFormCheck[CalcFormConverter`FORMThreads -> threads];
      If[AssociationQ[check] && TrueQ[check["Available"]], removeJobDirectory[directory]; check,
-       runtimeFailure["InstallationVerificationFailed", "The installation command finished, but the requested FORM/TFORM configuration did not pass its availability check.",
+       makeFailure["InstallationVerificationFailed", "The installation command finished, but the requested FORM/TFORM configuration did not pass its availability check.",
          Join[<|"JobDirectory" -> directory, "Check" -> check, "Process" -> run|>, installationGuidance[threads]]]]],
-   runtimeFailure["InstallationInterrupted", "Abort was deferred until the installation process finished. Run CalcFormCheck with the same FORMThreads setting to inspect its result.",
+   makeFailure["InstallationInterrupted", "Abort was deferred until the installation process finished. Run CalcFormCheck with the same FORMThreads setting to inspect its result.",
      Join[<|"JobDirectory" -> directory|>, installationGuidance[threads]]]];
  result
 ];
-CalcFormConverter`CalcFormInstall[___] := runtimeFailure["InvalidArguments", "Use CalcFormInstall[FORMThreads -> n] or CalcFormInstall[]."];
+CalcFormConverter`CalcFormInstall[___] := makeFailure["InvalidArguments", "Use CalcFormInstall[FORMThreads -> n] or CalcFormInstall[]."];

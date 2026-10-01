@@ -56,4 +56,27 @@ Scan[Function[path,CopyFile[path,First[Select[Lookup[old,{"InputFile","MappingFi
 assert["manual recovery possible",pairIntact[]];
 updated=CalcFormExport[y+2,old["InputFile"],OverwriteTarget->True];
 assert["successful replacement leaves no backups",AssociationQ[updated] && noDebris[] && !pairIntact[]];
+
+(* A committed export stays usable when removal of a backup fails. *)
+cleanupResult = Quiet[Block[{CalcFormConverter`Private`exportDeleteFile},
+ CalcFormConverter`Private`exportDeleteFile[path_] := If[StringEndsQ[path,".bak"],False,
+   If[FileExistsQ[path],DeleteFile[path]];True];
+ CalcFormExport[z+3,old["InputFile"],OverwriteTarget->True]],CalcFormExport::cleanup];
+assert["cleanup failure preserves successful paths",AssociationQ[cleanupResult] &&
+ KeyTake[cleanupResult,{"InputFile","MappingFile","ResultFile"}] === old];
+assertFailure["cleanup failure reported","CleanupFailed",cleanupResult["CleanupFailure"]];
+cleanupFiles=cleanupResult["CleanupFailure"][[2]]["RetainedFiles"];
+assert["cleanup lists existing backups",Length[cleanupFiles]===2 && AllTrue[cleanupFiles,FileExistsQ]];
+assert["new mapping committed despite cleanup failure",
+ Import[old["MappingFile"],"RawJSON"]["ExpressionDigest"]===Hash[FCI[z+3],"SHA256","HexString"]];
+Scan[DeleteFile,cleanupFiles];
+(* Failed staging reports debris without replacing the original failure. *)
+cleanupResult=Quiet[Block[{CalcFormConverter`Private`exportWriteText,CalcFormConverter`Private`exportDeleteFile},
+ CalcFormConverter`Private`exportWriteText[path_,text_]:=(Export[path,text,"Text"];$Failed);
+ CalcFormConverter`Private`exportDeleteFile[path_]:=False;
+ CalcFormExport[x,old["InputFile"],OverwriteTarget->True]],CalcFormExport::cleanup];
+assertFailure["staging failure retained","WriteFailed",cleanupResult];
+assert["failed staging cleanup reports retained paths",KeyExistsQ[cleanupResult[[2]],"RetainedFiles"]];
+Scan[If[FileExistsQ[#],DeleteFile[#]]&,cleanupResult[[2]]["RetainedFiles"]];
 finish["Export transactions"];
+

@@ -42,5 +42,8 @@ spaceJob = CalcFormExport[FVD[p,mu]FVD[p,mu],FileNameJoin[{spaceDirectory,"space
 assert["path containing spaces", AssociationQ[spaceJob]];
 If[AssociationQ[spaceJob], AssociateTo[cases,"path_spaces" -> <|"Expected"->FCI[SPD[p]],"Job"->spaceJob|>]];
 
+
+add["letter_like_symbols", \[EmptySet] + 2 \[DottedSquare] + \[FormalA] + \[ScriptA] + \[GothicA]];
+add["letter_like_vector_index", FVD[\[EmptySet],\[DottedSquare]] FVD[p,\[DottedSquare]]];
 saveCases[];
 finish["FORM export"];

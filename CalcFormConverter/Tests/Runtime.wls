@@ -10,6 +10,16 @@ missing=CalcFormCheck[FORMExecutable->FileNameJoin[{root,"missing-form"}]];
 assert["missing distinguished",missing["Status"]==="NotFound"];
 nonexec=CalcFormCheck[FORMExecutable->FileNameJoin[{root,"nonexecutable"}]];
 assert["launch failure distinguished",nonexec["Status"]==="LaunchFailed"];
+If[$OperatingSystem === "Windows", Print["SKIP: PATH executable permission regression is Unix-specific."],
+ pathProbe=CreateDirectory[FileNameJoin[{root,"path-permission-probe"}]];
+ Export[FileNameJoin[{pathProbe,"form"}],"This is not executable.\n","Text"];
+ pathSeparator=If[$OperatingSystem === "Windows",";",":"];
+ originalPath=Environment["PATH"];
+ resolvedFromPath=Block[{Environment},
+   Environment["PATH"] := StringRiffle[{pathProbe,originalPath},pathSeparator];
+   CalcFormConverter`Private`resolveExecutable["form"]];
+ assert["PATH skips non-executable candidate",ExpandFileName[resolvedFromPath]===ExpandFileName[info["Executable"]]];
+];
 assertFailure["invalid probe timeout","InvalidOption",CalcFormCheck[TimeConstraint->0]];
 assertFailure["invalid executable option","InvalidOption",CalcFormCheck[FORMExecutable->42]];
 probeBefore=Sort[FileNames["calcform-probe-*",$TemporaryDirectory]];
@@ -61,7 +71,7 @@ If[StringQ[CalcFormConverter`Private`resolveExecutable["tform"]],
  Print["SKIP: TFORM is not installed."]];
 progressDir=CreateDirectory[FileNameJoin[{root,"progress-timeout"}]];
 events={};
-progressRun=Block[{CalcFormConverter`Private`reportCalculation,CalcFormConverter`Private`$progressInterval=.01},
+progressRun=Block[{CalcFormConverter`Private`reportCalculation,CalcFormConverter`Private`$runtimeProgressIntervalSeconds=.01},
  CalcFormConverter`Private`reportCalculation[event_Association]:=AppendTo[events,event];
  CalcFormConverter`Private`runtimeProcess[{FileNameJoin[{root,"hang"}]},progressDir,.1,True,True]];
 assert["periodic execution progress",Length[events]>0 && AllTrue[events,#["Stage"]==="Execute" && NumberQ[#["ElapsedSeconds"]]&]];
@@ -96,7 +106,7 @@ floodDir=CreateDirectory[FileNameJoin[{root,"flood-logs"}]];
 flood=CalcFormConverter`Private`runtimeProcess[{FileNameJoin[{root,"flood"}]},floodDir,10];
 assert["drain both streams",flood["Status"]==="Completed" && flood["ExitCode"]===0 &&
  FileByteCount[flood["StandardOutputFile"]]>=262144 && FileByteCount[flood["StandardErrorFile"]]>=262144];
-assert["bounded log tails",StringLength[flood["StandardOutput"]]<=65536 && StringLength[flood["StandardError"]]<=65536];
+assert["bounded log tails",StringLength[flood["StandardOutput"]]<=CalcFormConverter`Private`$runtimeLogTailCharacters && StringLength[flood["StandardError"]]<=CalcFormConverter`Private`$runtimeLogTailCharacters];
 
 (* Inject a user abort at the polling boundary, after a real child starts. *)
 abortDir=CreateDirectory[FileNameJoin[{root,"abort-logs"}]];

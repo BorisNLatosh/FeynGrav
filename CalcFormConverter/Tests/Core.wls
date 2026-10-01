@@ -139,4 +139,105 @@ assert["literal Unicode mapping restores Greek indices",CalcFormImport[unicodeRe
 legacyDigest=Hash[FromCharacterCode[ToCharacterCode[unicodeJSON,"UTF-8"]],"SHA256","HexString"];
 Export[unicodeResultFile,"CFC1 "<>legacyDigest<>"\ncfs1\n","Text"];
 assert["legacy notebook Unicode checksum",CalcFormImport[unicodeResultFile,unicodeMapFile]===D];
+(* Denominator convenience metadata is non-authoritative. Mutating only those
+   fields (and recomputing the mapping digest, as any editor must) changes
+   nothing about reconstruction, which reads the identifier's "Expression"
+   alone. This turns the FORMAT.md invariant into an executable contract: if any
+   reconstruction path ever starts trusting the metadata, this test fails.
+   CalcFormExport does not run FORM, so both result files are written here by
+   hand, differing only in which mapping they are checked against. *)
+metadataJob=CalcFormExport[FAD[{l,m}],FileNameJoin[{testDirectory,"metadata.frm"}]];
+metadataMapping=Import[metadataJob["MappingFile"],"RawJSON"];
+metadataEntry=FirstCase[metadataMapping["Entries"],e_Association/;e["Kind"]==="Denominator",Missing["None"]];
+assert["denominator metadata present",AssociationQ[metadataEntry]];
+assert["denominator convenience metadata",
+ KeyTake[metadataEntry,{"Mass","Power","Prescription"}]===
+  <|"Mass"->CalcFormConverter`Private`encode[m],"Power"->1,"Prescription"->"Feynman+i0"|>];
+metadataIdentifier=metadataEntry["Name"];
+metadataUnmutatedJSON=ExportString[metadataMapping,"RawJSON","Compact"->True];
+metadataUnmutatedFile=FileNameJoin[{testDirectory,"metadata-unmutated.map.json"}];
+Export[metadataUnmutatedFile,metadataUnmutatedJSON,"Text",CharacterEncoding->"UTF-8"];
+metadataMapping["Entries"]=metadataMapping["Entries"]/.
+  e_Association/;e["Kind"]==="Denominator":>
+   Join[e,<|"Mass"->{"Integer","999999"},"Power"->42,"Prescription"->"Edited"|>];
+metadataMutatedJSON=ExportString[metadataMapping,"RawJSON","Compact"->True];
+metadataMutatedFile=FileNameJoin[{testDirectory,"metadata-mutated.map.json"}];
+Export[metadataMutatedFile,metadataMutatedJSON,"Text",CharacterEncoding->"UTF-8"];
+metadataResultFile=FileNameJoin[{testDirectory,"metadata-result.out"}];
+Export[metadataResultFile,"CFC1 "<>Hash[metadataUnmutatedJSON,"SHA256","HexString"]<>"\n"<>metadataIdentifier<>"\n","Text"];
+assert["unmutated mapping reconstructs the propagator",
+ CalcFormImport[metadataResultFile,metadataUnmutatedFile]===FCI[FAD[{l,m}]]];
+Export[metadataResultFile,"CFC1 "<>Hash[metadataMutatedJSON,"SHA256","HexString"]<>"\n"<>metadataIdentifier<>"\n","Text"];
+assert["convenience metadata is non-authoritative",
+ CalcFormImport[metadataResultFile,metadataMutatedFile]===FCI[FAD[{l,m}]]];
+(* The renderer, not just the shipped template reader, owns the placeholder
+   contract: a caller-supplied template missing a required slot must fail rather
+   than silently render a program that drops a declaration or directive. *)
+templateData=CalcFormConverter`Private`buildExportData[x+1,Automatic,{}];
+completeTemplate="ok";
+Scan[Function[p,completeTemplate=completeTemplate<>p<>"\n"],
+ CalcFormConverter`Private`$requiredTemplatePlaceholders];
+assert["complete synthetic template renders",
+ AssociationQ[CalcFormConverter`Private`renderExport[templateData,
+  FileNameJoin[{testDirectory,"template.out"}],completeTemplate]]];
+resultWithAt = "result" <> FromCharacterCode[92] <> "@home@.out";
+renderedResultWithAt = CalcFormConverter`Private`renderExport[templateData,
+  resultWithAt, completeTemplate];
+expectedResultWithAt = If[$OperatingSystem === "Windows",
+  StringReplace[resultWithAt, "\\" -> "/"], resultWithAt];
+assert["result paths use platform-appropriate separators and preserve at-signs",
+  StringContainsQ[renderedResultWithAt["Program"], expectedResultWithAt]];
+truncatedTemplate=StringReplace[completeTemplate,"@INDICES@"->""];
+assertFailure["template missing a placeholder is rejected","MissingTemplate",
+ Catch[CalcFormConverter`Private`renderExport[templateData,
+  FileNameJoin[{testDirectory,"template.out"}],truncatedTemplate],
+  CalcFormConverter`Private`$failureTag]];
+unknownTemplate = completeTemplate <> "@UNKNOWN@";
+assertFailure["template unknown placeholder is rejected","MissingTemplate",
+ Catch[CalcFormConverter`Private`renderExport[templateData,
+  FileNameJoin[{testDirectory,"template.out"}],unknownTemplate],
+  CalcFormConverter`Private`$failureTag]];
+
+(* Symbol validates names without interpreting source text. *)
+symbolSideEffect = False;
+Scan[Function[name,
+ assertFailure["reject malformed symbol name " <> name, "InvalidMapping",
+  Catch[CalcFormConverter`Private`decode[{"Symbol", name}],
+   CalcFormConverter`Private`$failureTag]]],
+ {"x", "`x", "Global`", "Global``x", "Global`1x", "Global`x+y",
+  "Global`x;symbolSideEffect=True", "Global`x[1]", "Global`x y"}];
+assert["symbol names never execute source", symbolSideEffect === False];
+Scan[Function[symbol,
+ assert["letter-like symbol round trip " <> SymbolName[symbol],
+  CalcFormConverter`Private`decode[CalcFormConverter`Private`encode[symbol]] === symbol]],
+ {\[EmptySet], \[DottedSquare], \[FormalA], \[Alpha], \[ScriptA], \[GothicA]}];
+
+(* Invalid authoritative denominator data must fail even when unused. *)
+validationJob = CalcFormExport[FAD[{l,m}],FileNameJoin[{testDirectory,"validation.frm"}]];
+validationMapping = Import[validationJob["MappingFile"],"RawJSON"];
+validationMomentum = {"Momentum",{"Symbol","Global`l"},{"Symbol","System`D"}};
+validationNodes = {
+ {"PropagatorDenominator",{"Integer","7"},{"Integer","0"}},
+ {"PropagatorDenominator",{"Momentum",{"Symbol","Global`l"},{"Integer","4"}},{"Integer","0"}},
+ {"PropagatorDenominator",validationMomentum,
+  {"Pair",{"LorentzIndex",{"Symbol","Global`mu"},{"Symbol","System`D"}},
+          {"LorentzIndex",{"Symbol","Global`nu"},{"Symbol","System`D"}}}},
+ {"PropagatorDenominator",{"Momentum",{"Times",{"Symbol","Global`l"},{"Symbol","Global`p"}},
+   {"Symbol","System`D"}},{"Integer","0"}},
+ {"PropagatorDenominator",{"Momentum",{"Polarization",{"Symbol","Global`p"},
+   {"Complex",{"Integer","0"},{"Integer","1"}}},{"Symbol","System`D"}},{"Integer","0"}}
+};
+Do[
+ badValidationMapping = validationMapping;
+ badValidationMapping["Entries"] = Map[If[#["Kind"] === "Denominator",
+   Join[#,<|"Expression" -> {"FeynAmpDenominator",node}|>],#]&,validationMapping["Entries"]];
+ validationJSON=ExportString[badValidationMapping,"RawJSON","Compact"->True];
+ Export[validationJob["MappingFile"],validationJSON,"Text",CharacterEncoding->"UTF-8"];
+ Do[
+  Export[validationJob["ResultFile"],"CFC1 "<>Hash[validationJSON,"SHA256","HexString"]<>"\n"<>body,"Text"];
+  assertFailure["invalid propagator: "<>ToString[node,InputForm]<>" / "<>body,"InvalidMapping",
+   CalcFormImport[validationJob["ResultFile"],validationJob["MappingFile"]]],
+  {body,{"cfd1","0"}}],
+ {node,validationNodes}];
 finish["Core"];
+

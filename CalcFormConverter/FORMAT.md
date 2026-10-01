@@ -53,7 +53,7 @@ A denominator entry's **`Expression` is authoritative for reconstruction**. The 
 - `Dimension`: encoded Lorentz dimension.
 - `Prescription`: `"Feynman+i0"` for ordinary quadratic FeynCalc denominators.
 
-These fields are convenience metadata for a future reducer. The current importer neither uses them to override `Expression` nor checks their consistency. A future consumer must derive its data from `Expression` or validate the redundant metadata before using it. Repeated propagators appear as repeated factors or powers of the identifier in the expression; `Power` is not their total multiplicity in a term or diagram.
+These fields are convenience metadata for a future reducer. The current importer neither uses them to override `Expression` nor checks their consistency. The importer validates the authoritative propagator routing and scalar mass, and checks dimensions within restored expressions against the mapping dimension. These checks also cover unused entries. A future consumer must derive its data from `Expression` or validate the redundant metadata before using it. Repeated propagators appear as repeated factors or powers of the identifier in the expression; `Power` is not their total multiplicity in a term or diagram.
 
 ## Restricted Mathematica expression encoding
 
