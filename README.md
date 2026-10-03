@@ -66,7 +66,7 @@ CalcFormConverter loads automatically with FeynGrav and can also be loaded indep
 | `CalcFormInstall[options]` | Check availability and explicitly attempt installation on supported Debian/Ubuntu systems. |
 | `CalcFormCalculate[expr, options]` | Export, execute FORM/TFORM, import, and return the FeynCalc expression. |
 
-`FORMThreads` selects the worker count for checking, installation, and calculation. `ShowTiming` reports FORM execution wall time; `ShowProgress` reports stages and elapsed execution time. Use `AbsoluteTiming` when measuring the entire Mathematica call. More workers do not guarantee a faster calculation.
+`FORMThreads -> Automatic` is the default for checking, installation, and calculation: it prefers up to eight TFORM workers, capped by the processor count, and falls back to serial FORM when TFORM is missing. Explicit worker counts do not fall back; an explicit executable with automatic threads uses one worker. `ShowTiming` reports FORM execution wall time; `ShowProgress` reports stages and elapsed execution time. Use `AbsoluteTiming` when measuring the entire Mathematica call. More workers do not guarantee a faster calculation.
 
 The converter performs algebra and Lorentz contractions. It does **not** perform loop integration or integral reduction, or supply symmetry factors, integration measures, or normalization conventions. Supporting scalar integral notation does not mean that it evaluates those integrals. Checking and calculating never install software implicitly.
 

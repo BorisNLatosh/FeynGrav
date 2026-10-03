@@ -72,7 +72,7 @@ status = CalcFormCheck[];
 available = AssociationQ[status] && TrueQ[status["Available"]];
 ```
 
-The check association always has `Available`, `Status`, `Executable`, `Version`, `RequestedEngine`, `FORMThreads`, and `InstallationGuidance`. When a probe ran it also reports `ExitCode`, `StandardOutput`, `StandardError`, and `Messages`. `RequestedEngine` describes the requested configuration, not an independent identification of an explicitly chosen binary. `Version` may be `Missing["NotReported"]`. On launch failure, `Messages` includes available Wolfram message identifiers and bounded rendered diagnostic text; `StandardError` remains subprocess output. The text is captured without printing kernel launch messages in the notebook. It may still be empty if Wolfram supplies no diagnostic, and it does not necessarily expose an OS error number. Probe directories are cleaned up; use the returned diagnostic text.
+The check association always has `Available`, `Status`, `Executable`, `Version`, `RequestedEngine`, `FORMThreads`, `RequestedFORMThreads`, `SelectionReason`, and `InstallationGuidance`. When a probe ran it also reports `ExitCode`, `StandardOutput`, `StandardError`, and `Messages`. `RequestedEngine` describes the resolved worker configuration (after automatic fallback), not an independent identification of an explicitly chosen binary. `RequestedFORMThreads` preserves the original option. `Version` may be `Missing["NotReported"]`. On launch failure, `Messages` includes available Wolfram message identifiers and bounded rendered diagnostic text; `StandardError` remains subprocess output. The text is captured without printing kernel launch messages in the notebook. It may still be empty if Wolfram supplies no diagnostic, and it does not necessarily expose an OS error number. Probe directories are cleaned up; use the returned diagnostic text.
 
 | Option | Accepted values | Export default | Check default | Calculate default | Install default |
 | --- | --- | --- | --- | --- | --- |
@@ -80,7 +80,7 @@ The check association always has `Available`, `Status`, `Executable`, `Version`,
 | `LoopMomenta` | List of distinct unassigned symbols | `{}` | — | `{}` | — |
 | `OverwriteTarget` | `True` or `False` | `False` | — | — | — |
 | `FORMExecutable` | `Automatic`, executable name or path | — | `Automatic` | `Automatic` | — |
-| `FORMThreads` | Positive integer worker count | — | `1` | `1` | `1` |
+| `FORMThreads` | Automatic or positive integer worker count | — | `Automatic` | `Automatic` | `Automatic` |
 | `TimeConstraint` | Positive numeric seconds or `Infinity` | — | `10` | `Infinity` | — |
 | `WorkingDirectory` | `Automatic` or existing parent-directory path | — | — | `Automatic` | — |
 | `KeepFiles` | `True` or `False` | — | — | `False` | — |
@@ -146,7 +146,7 @@ status = CalcFormCheck[];
 result = CalcFormCalculate[expression, LoopMomenta -> {l}];
 ```
 
-`CalcFormCheck[FORMExecutable -> Automatic, FORMThreads -> 1, TimeConstraint -> 10]` searches the kernel's `PATH` and runs a small arithmetic probe. An explicit executable path takes precedence. Its association reports `Available`, `Status`, `Executable`, `Version`, `RequestedEngine`, `FORMThreads` and installation guidance, plus process diagnostics when a probe ran. `NotFound` means no executable was found; `LaunchFailed`, `ProbeFailed`, `TimedOut` and `Aborted` distinguish other failures. An available executable with an unrecognized banner has `Version -> Missing["NotReported"]`.
+`CalcFormCheck[FORMExecutable -> Automatic, FORMThreads -> Automatic, TimeConstraint -> 10]` searches the kernel's `PATH` and runs a small arithmetic probe. An explicit executable path takes precedence. Its association reports `Available`, `Status`, `Executable`, `Version`, `RequestedEngine`, `FORMThreads` and installation guidance, plus process diagnostics when a probe ran. `NotFound` means no executable was found; `LaunchFailed`, `ProbeFailed`, `TimedOut` and `Aborted` distinguish other failures. An available executable with an unrecognized banner has `Version -> Missing["NotReported"]`.
 
 ```mathematica
 CalcFormCheck[FORMExecutable -> "/usr/bin/form"]
@@ -159,7 +159,7 @@ result = CalcFormCalculate[expression,
 ];
 ```
 
-Calculation options are `Dimension -> Automatic`, `LoopMomenta -> {}`, `FORMExecutable -> Automatic`, `TimeConstraint -> Infinity`, `WorkingDirectory -> Automatic`, `KeepFiles -> False`, `ShowTiming -> False`, `ShowProgress -> False`, and `FORMThreads -> 1`. The calculation timeout applies to FORM execution; the preceding availability probe has its own ten-second limit. `WorkingDirectory` names an existing parent directory; each call creates its own unique child. `Automatic` uses the system temporary directory. The Mathematica working directory is unchanged.
+Calculation options are `Dimension -> Automatic`, `LoopMomenta -> {}`, `FORMExecutable -> Automatic`, `TimeConstraint -> Infinity`, `WorkingDirectory -> Automatic`, `KeepFiles -> False`, `ShowTiming -> False`, `ShowProgress -> False`, and `FORMThreads -> Automatic`. The calculation timeout applies to FORM execution; the preceding availability probe has its own ten-second limit. `WorkingDirectory` names an existing parent directory; each call creates its own unique child. `Automatic` uses the system temporary directory. The Mathematica working directory is unchanged.
 
 Import reconstructs the expression in the Wolfram kernel, so its time is separate from FORM execution. Assign large results with a trailing semicolon, as in these examples, to avoid the additional cost of formatting and displaying the full expression in a notebook.
 
@@ -211,13 +211,15 @@ The trailing semicolon suppresses display of the large expression. Mathematica's
 
 `ShowProgress` prints the check, export, execution and import stages, followed by completion or failure. During FORM execution it also prints elapsed time every ten seconds. These updates show that the process is still running; they are not a percentage, an estimate of remaining work or counts of processed terms. Long export/import stages retain their stage label without periodic updates.
 
-The default `FORMThreads -> 1` selects ordinary `form`. A positive integer above one selects `tform` from the kernel's PATH and passes `-wN`, requesting N worker threads. The availability probe uses the same worker count. An explicit `FORMExecutable` still takes precedence; with multiple workers, a successful arithmetic probe must also identify TFORM in its banner. Otherwise the check reports `ThreadingUnavailable`, avoiding an ordinary FORM executable silently ignoring the worker request. No fallback or installation occurs when TFORM is missing. `CalcFormCheck[FORMThreads -> 4]` checks this configuration separately.
+The default `FORMThreads -> Automatic` prefers TFORM with `Min[8, $ProcessorCount]` workers. A missing or invalid processor count uses one worker. A one-worker automatic configuration selects serial FORM. If TFORM is missing, automatic selection falls back to serial FORM; an existing TFORM that fails its probe is reported without fallback. Explicit `FORMThreads -> 1` selects serial FORM. Larger explicit integers require TFORM, are not capped, and do not fall back. An explicit `FORMExecutable` with automatic threads uses one worker; request a larger count explicitly to use that executable in parallel. Parallel probes must identify TFORM in the banner, otherwise they report `ThreadingUnavailable`.
+
+The check result records the resolved integer in `FORMThreads`, the original option in `RequestedFORMThreads`, and a `SelectionReason` (`AutomaticTFORM`, `TFORMNotFound`, `SerialProcessorCount`, `ExplicitExecutable`, or `ExplicitThreads`). `ShowProgress -> True` reports the selected executable and worker count, explaining serial fallback. No checking or calculation installs software.
 
 TFORM must be installed separately if your FORM distribution does not include it. See the [official TFORM description](https://www.nikhef.nl/~form/maindir/publications/tform.pdf). Parallelism can reduce execution time, but scaling depends on expression structure, sorting, memory and disk activity. Increasing workers does not accelerate Mathematica export/import. Compare timings on a representative expression before selecting a worker count. The full-bubble measurements in the developer guide compare generated programs at four workers; they do not measure scaling across worker counts.
 
 ### Explicit installation
 
-`CalcFormInstall[FORMThreads -> n]` first checks the requested configuration; the default is `FORMThreads -> 1`. For `n > 1`, both this check and verification after installation use TFORM with the requested worker count. Working ordinary FORM does not prevent installation when TFORM is missing. It leaves a working installation alone and reports an existing but unusable executable without reinstalling it. Only a missing executable triggers an installation attempt.
+`CalcFormInstall[FORMThreads -> n]` first checks the requested configuration; the default is `FORMThreads -> Automatic`, which accepts a working serial fallback without installation. For `n > 1`, both this check and verification after installation use TFORM with the requested worker count. With an explicit `n > 1`, working ordinary FORM does not prevent installation when TFORM is missing. It leaves a working installation alone and reports an existing but unusable executable without reinstalling it. Only a missing executable triggers an installation attempt.
 
 Automatic installation currently supports Debian/Ubuntu Linux with `apt-get`. It runs `apt-get --no-remove -y install form`, using `pkexec --disable-internal-agent` for the system authentication dialog when the current process is not root. The package never collects passwords, changes repositories or launches installation from checking/calculating. The Debian/Ubuntu `form` package supplies both `form` and `tform`; the installation command is the same for either configuration. An active package-manager transaction is allowed to finish before a requested abort takes effect; installation has no calculation timeout.
 

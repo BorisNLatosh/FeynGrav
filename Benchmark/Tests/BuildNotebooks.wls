@@ -1,7 +1,11 @@
 (* Developer utility: regenerate notebooks without evaluating their input cells. *)
 root=DirectoryName[DirectoryName[$InputFileName]];
-input[s_String] := Cell[BoxData[RowBox[Riffle[
- (ToExpression[#,InputForm,Function[e,ToBoxes[Unevaluated[e],StandardForm],HoldAllComplete]]& /@ StringSplit[s,"\n"]),"\[IndentingNewLine]"]]],"Input",InitializationCell->False];
+(* Build the formatting call as literal input boxes: ToBoxes would otherwise
+   consume StandardForm as a typesetting instruction during generation. *)
+input[s_String] := If[StringStartsQ[s,"StandardForm["],
+ input[StringDrop[StringDrop[s,13],-1]] /. BoxData[b_] :> BoxData[RowBox[{"StandardForm","[",b,"]"}]],
+ Cell[BoxData[RowBox[Riffle[
+ (ToExpression[#,InputForm,Function[e,ToBoxes[Unevaluated[e],StandardForm],HoldAllComplete]]& /@ StringSplit[s,"\n"]),"\[IndentingNewLine]"]]],"Input",InitializationCell->False]];
 specs={
  {"01_Overview_and_Quick_Check.nb","Overview","Quick check and total calculation time","Does the converter work here, and what overhead does a small calculation have?","Three small contractions have known answers. Package setup, executable checks and complete calculations are reported separately."},
  {"02_Export.nb","Export","Export to FORM","How does export time depend on expression size and repetition?","Inputs vary repeated and distinct scalar products, propagators and symbols, momentum routing, and factorization. Quick uses 100 and 1,000 entries; Full also uses 5,000. Actual evaluated input sizes are recorded. No FORM process is required."},
@@ -19,11 +23,11 @@ Do[
  Cell["Automatic uses PATH discovery, profile trial counts, and a unique directory under the system temporary directory. Supply absolute executable paths if your desktop kernel has a different PATH. Timeouts are 60 seconds per FORM execution in Quick and 600 in Full; they do not bound export, import or the entire notebook. Worker defaults are capped at the reported processor count; you may explicitly choose other counts.","Text"],
  Cell["3. Prepare inputs and check the environment","Section"],
  input["prepared = BenchmarkPrepare[\""<>sp[[2]]<>"\", config];\nIf[AssociationQ[prepared], prepared[\"SetupSeconds\"] = setupSeconds;];"],
- input["If[AssociationQ[prepared], Dataset[KeyTake[prepared, {\"Environment\", \"Checks\", \"Configuration\", \"SetupSeconds\"}]]]"],
+ input["StandardForm[If[AssociationQ[prepared], Dataset[KeyTake[prepared, {\"Environment\", \"Checks\", \"Configuration\", \"SetupSeconds\"}]]]]"],
  Cell["Preparation constructs inputs and loads any required libraries. Import fixtures are generated at the start of each case in the following cell, before import measurements. Missing executables are recorded and dependent cases are skipped. No installation is attempted.","Text"],
  Cell["4. Run sequential measurements","Section"],Cell["For a new run, evaluate the preparation cell again first. Each prepared run can be executed once; previous reports are preserved.","Text"],input["report = BenchmarkRun[prepared];"],
- Cell["5. Inspect results and validation","Section"],input["BenchmarkSummary[report]"],input["BenchmarkPlot[report]"],
- input["If[AssociationQ[report], Dataset[KeyTake[#, {\"Case\", \"Stage\", \"Workers\", \"Phase\", \"Trial\", \"Seconds\", \"Status\", \"Validation\", \"ValidationMethod\", \"FirstBenchmarkImportInKernel\"}] & /@ report[\"Rows\"]]]"],
+ Cell["5. Inspect results and validation","Section"],input["StandardForm[BenchmarkSummary[report]]"],input["BenchmarkPlot[report]"],
+ input["StandardForm[If[AssociationQ[report], Dataset[KeyTake[#, {\"Case\", \"Stage\", \"Workers\", \"Phase\", \"Trial\", \"Seconds\", \"Status\", \"Validation\", \"ValidationMethod\", \"FirstBenchmarkImportInKernel\"}] & /@ report[\"Rows\"]]]]"],
  Cell["Only successful, verified measured trials enter the timing summary. A single trial is one observation, not a variability estimate. Known small answers are checked algebraically; larger cases are checked for repeatability and agreement across execution paths, not against an independent physics calculation. Baseline means that a comparison result has been recorded but has not yet been matched. Inconclusive and timed-out comparisons are excluded.","Text"],
  Cell["6. Interpret and retain the report","Section"],
  Cell["All timings are wall-clock seconds. First-import and warmup observations remain separate from measured repetitions. A first benchmark import is not necessarily a cold kernel import if you previously used the converter. Setup, validation, fingerprinting and display are outside stage timers. StageSum adds export, execution and import times; Calculate measures the separate public call including its availability check. Initialization, filesystem caches, background load and temperature can affect timings. These observations do not guarantee a speedup on another machine.","Text"],
@@ -31,5 +35,5 @@ Do[
  Cell["The run directory contains report.json, summary.csv and working files. Reports include source hashes and raw observations. The system may remove temporary files later; choose a persistent OutputDirectory before a run if you want to keep results. Cleanup is optional, deletes only successful owned working directories, and retains reports and failure logs.","Text"],
  input["If[TrueQ[cleanupSuccessfulFiles] && AssociationQ[report], BenchmarkCleanup[report]]"]};
  nb=Notebook[cells,StyleDefinitions->"Default.nb",WindowTitle->sp[[3]],WindowSize->{1100,850},CellContext->Notebook,AutoGeneratedPackage->None];
- Export[FileNameJoin[{root,sp[[1]]}],"(* Content-type: application/vnd.wolfram.mathematica *)\n\n(*** Wolfram Notebook File ***)\n(* http://www.wolfram.com/nb *)\n\n"<>ToString[nb,InputForm,PageWidth->100],"Text"];
+ Export[FileNameJoin[{root,sp[[1]]}],"(* Content-type: application/vnd.wolfram.mathematica *)\n\n(*** Wolfram Notebook File ***)\n(* http://www.wolfram.com/nb *)\n\n"<>StringReplace[ToString[nb,InputForm,PageWidth->100], RegularExpression["(?m)[ \t]+$"] -> ""],"Text"];
  Print["Created ",sp[[1]]],{sp,specs}];Quit[];

@@ -29,11 +29,11 @@ CalcFormConverter`CalcFormImport::usage = "CalcFormImport[resultFile, mappingFil
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormCheck::usage = "CalcFormCheck[opts] probes FORM on demand and returns availability, version and diagnostics. Options: FORMExecutable -> Automatic, FORMThreads -> 1, TimeConstraint -> 10.";
+CalcFormConverter`CalcFormCheck::usage = "CalcFormCheck[opts] probes FORM on demand and returns availability, version and diagnostics. Options: FORMExecutable -> Automatic, FORMThreads -> Automatic, TimeConstraint -> 10.";
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[opts] explicitly attempts Debian/Ubuntu installation of missing FORM or TFORM using system authorization, then verifies the requested configuration. FORMThreads -> 1 is the default; values above 1 require TFORM. It is never called automatically.";
+CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[opts] explicitly attempts Debian/Ubuntu installation of missing FORM or TFORM using system authorization, then verifies the requested configuration. FORMThreads -> Automatic prefers up to eight TFORM workers and accepts serial FORM when TFORM is missing; explicit values above 1 require TFORM. It is never called automatically.";
 
 
 (* ::Input::Initialization:: *)
@@ -41,7 +41,7 @@ CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] expo
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`FORMExecutable::usage = "FORMExecutable selects the FORM executable by name or path; Automatic searches the Wolfram kernel's PATH for form, or tform when FORMThreads > 1.";
+CalcFormConverter`FORMExecutable::usage = "FORMExecutable selects the FORM executable by name or path; Automatic searches the kernel PATH according to FORMThreads. An explicit executable with automatic threads runs with one worker.";
 
 
 (* ::Input::Initialization:: *)
@@ -57,7 +57,7 @@ CalcFormConverter`ShowProgress::usage = "ShowProgress -> True prints calculation
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`FORMThreads::usage = "FORMThreads specifies a positive integer worker count for CalcFormCheck, CalcFormInstall and CalcFormCalculate. The default 1 uses ordinary FORM; values above 1 select TFORM with -wN when FORMExecutable is Automatic. Explicit executables must pass a TFORM probe for multiple workers.";
+CalcFormConverter`FORMThreads::usage = "FORMThreads accepts Automatic (default) or a positive integer for CalcFormCheck, CalcFormInstall and CalcFormCalculate. Automatic prefers TFORM with Min[8, $ProcessorCount] workers, falling back to serial FORM only when TFORM is missing. Invalid processor counts use one worker. Explicit executables use one worker with Automatic. Explicit 1 selects serial FORM; larger counts require TFORM without fallback or capping.";
 
 
 (* ::Input::Initialization:: *)

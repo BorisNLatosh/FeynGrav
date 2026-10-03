@@ -229,7 +229,9 @@ BenchmarkRun[run_Association] := Module[
  report=saveReport[run,rows,state];Print["Reports: ",FileNameJoin[{run["Directory"],"report.json"}]];report
 ];
 BenchmarkRun[f_Failure] := f;
-BenchmarkSummary[r_Association] := Dataset[r["Summary"]];
+(* Dataset owns dynamic front-end state. Keep its display in StandardForm even
+   when FeynCalc selects TraditionalForm for mathematical output. *)
+BenchmarkSummary[r_Association] := StandardForm[Dataset[r["Summary"]]];
 BenchmarkSummary[f_Failure] := f;
 BenchmarkPlot[r_Association] := Module[{s=r["Summary"]},If[s==={},"No validated measured trials.",
  BarChart[Lookup[s,"MedianSeconds"],BarOrigin->Left,ChartLabels->(#["Case"]<>" / "<>#["Stage"]<>" / "<>ToString[#["Workers"]]& /@ s),

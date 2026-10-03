@@ -1,7 +1,7 @@
 Get[FileNameJoin[{DirectoryName[$InputFileName],"Common.wl"}]];
 root=testDirectory;
 beforeDirectory=Directory[];
-info=CalcFormCheck[];
+info=CalcFormCheck[FORMThreads->1];
 assert["installed FORM probe",AssociationQ[info] && TrueQ[info["Available"]] && StringQ[info["Version"]]];
 assert["explicit executable",TrueQ[CalcFormCheck[FORMExecutable->info["Executable"]]["Available"]]];
 spaceExecutable=FileNameJoin[{root,"space directory","form executable"}];
@@ -64,6 +64,7 @@ observed=Block[{CalcFormConverter`Private`reportCalculation},
  CalcFormConverter`Private`reportCalculation[event_Association]:=AppendTo[events,event];
  CalcFormCalculate[MTD[\[Mu],\[Nu]]^2,ShowTiming->True,ShowProgress->True]];
 assert["observation preserves result",observed===D];
+assert["selection progress",AnyTrue[events,StringStartsQ[#["Stage"],"Selected "] && StringContainsQ[#["Stage"],"worker(s)"]&]];
 assert["reported stages",Select[Lookup[events,"Stage"],MemberQ[{"Check","Export","Execute","Import","Complete"},#]&]==={"Check","Export","Execute","Import","Complete"}];
 timingEvents=Select[events,KeyExistsQ[#,"ElapsedSeconds"]&];
 assert["execution timing reported",Length[timingEvents]===1 && NumberQ[First[timingEvents]["ElapsedSeconds"]] && First[timingEvents]["ElapsedSeconds"]>=0];
@@ -80,8 +81,19 @@ assert["ordinary FORM cannot silently ignore workers",CalcFormCheck[FORMExecutab
 If[StringQ[CalcFormConverter`Private`resolveExecutable["tform"]],
  threaded=CalcFormCheck[FORMThreads->2];
  assert["TFORM availability and version",TrueQ[threaded["Available"]] && StringQ[threaded["Version"]] && threaded["FORMThreads"]===2];
- assert["TFORM vs serial result",CalcFormCalculate[MTD[\[Mu],\[Nu]] FVD[p-l,\[Mu]] FVD[p,\[Nu]],FORMThreads->2]===CalcFormCalculate[MTD[\[Mu],\[Nu]] FVD[p-l,\[Mu]] FVD[p,\[Nu]]]],
+ assert["TFORM vs serial result",CalcFormCalculate[MTD[\[Mu],\[Nu]] FVD[p-l,\[Mu]] FVD[p,\[Nu]],FORMThreads->2]===CalcFormCalculate[MTD[\[Mu],\[Nu]] FVD[p-l,\[Mu]] FVD[p,\[Nu]],FORMThreads->1]],
  Print["SKIP: TFORM is not installed."]];
+
+automaticInfo=CalcFormCheck[];
+assert["automatic check exposes resolution",automaticInfo["RequestedFORMThreads"]===Automatic && IntegerQ[automaticInfo["FORMThreads"]] && StringQ[automaticInfo["SelectionReason"]]];
+assert["automatic vs serial",CalcFormCalculate[MTD[mu,nu]^2]===CalcFormCalculate[MTD[mu,nu]^2,FORMThreads->1]];
+(* Force fallback discovery but use the real serial executable for both jobs. *)
+fallbackResult=Block[{CalcFormConverter`Private`resolveExecutable,CalcFormConverter`Private`automaticWorkerCount},
+ CalcFormConverter`Private`automaticWorkerCount[]:=8;
+ CalcFormConverter`Private`resolveExecutable[name_]:=If[name==="tform",Missing["NotFound",name],info["Executable"]];
+ CalcFormCalculate[MTD[mu,nu]^2]];
+assert["automatic fallback executes serial command",fallbackResult===D];
+
 progressDir=CreateDirectory[FileNameJoin[{root,"progress-timeout"}]];
 events={};
 progressRun=Block[{CalcFormConverter`Private`reportCalculation,CalcFormConverter`Private`$runtimeProgressIntervalSeconds=.01},
@@ -134,7 +146,7 @@ abortProbe=Block[{CalcFormConverter`Private`runtimePause},
 assert["probe abort handled",abortProbe["Status"]==="Aborted"];
 assert["aborted probe cleanup",Sort[FileNames["calcform-probe-*",$TemporaryDirectory]]===probeBefore];
 abortCalculate=Block[{CalcFormConverter`CalcFormCheck,CalcFormConverter`Private`runtimePause},
- CalcFormConverter`CalcFormCheck[___]:=<|"Available"->True,"Executable"->FileNameJoin[{root,"hang"}]|>;
+ CalcFormConverter`CalcFormCheck[___]:=<|"Available"->True,"Executable"->FileNameJoin[{root,"hang"}],"FORMThreads"->1|>;
  CalcFormConverter`Private`runtimePause[]:=(Pause[.1];Abort[]);
  CalcFormCalculate[2,WorkingDirectory->parent]];
 assertFailure["calculation abort","Aborted",abortCalculate];
@@ -164,7 +176,7 @@ assert["probe acquisition abort handled",probeAcquisition["Status"]==="Aborted"]
 assert["probe directory cleaned after acquisition abort",StringQ[probeAcquired] && !DirectoryQ[probeAcquired]];
 probeAcquired=None;
 probeBeforeFinalize=Block[{CalcFormConverter`Private`runFORMProbe},
- CalcFormConverter`Private`runFORMProbe[_,directory_,_]:=(probeAcquired=directory;Abort[]);
+ CalcFormConverter`Private`runFORMProbe[_,directory_,_,___]:=(probeAcquired=directory;Abort[]);
  CalcFormCheck[]];
 assert["probe body abort handled",probeBeforeFinalize["Status"]==="Aborted" && !DirectoryQ[probeAcquired]];
 throwDir=CreateDirectory[FileNameJoin[{root,"throw-cleanup"}]];

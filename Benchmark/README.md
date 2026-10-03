@@ -60,3 +60,7 @@ Choose a persistent `OutputDirectory` before running if reports should survive s
 Developers can run `Tests/Regression.wls` with a Wolfram kernel for focused regression checks. User benchmarks do not depend on this test file or a command-line launcher.
 
 The developer utility `Tests/BuildNotebooks.wls` regenerates the notebook cells from their shared layout without evaluating benchmark inputs.
+
+Benchmark tables explicitly use `StandardForm` so FeynCalc’s formula formatting does not affect their interactive display. If an already-open notebook retains dynamic-table errors after updating, reopen the saved notebook. `Tests/Display.wls` checks the table wrappers and notebook input syntax without running benchmarks.
+
+Distributed notebooks contain no saved evaluation output and start with an unset profile. Choose `Quick` or `Full` before running. The benchmarks explicitly request serial FORM for their baseline, independently of the converter’s automatic TFORM default. Before regenerating notebooks, preserve any local results you want to keep; the generator replaces the notebook files.

@@ -11,19 +11,21 @@
 (*Options and runtime support*)
 
 (* ::Input::Initialization:: *)
-Options[CalcFormConverter`CalcFormCheck] = {CalcFormConverter`FORMExecutable -> Automatic, CalcFormConverter`FORMThreads -> 1, System`TimeConstraint -> 10};
-Options[CalcFormConverter`CalcFormInstall] = {CalcFormConverter`FORMThreads -> 1};
+Options[CalcFormConverter`CalcFormCheck] = {CalcFormConverter`FORMExecutable -> Automatic, CalcFormConverter`FORMThreads -> Automatic, System`TimeConstraint -> 10};
+Options[CalcFormConverter`CalcFormInstall] = {CalcFormConverter`FORMThreads -> Automatic};
 Options[CalcFormConverter`CalcFormCalculate] = {
  FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}, CalcFormConverter`FORMExecutable -> Automatic,
  System`TimeConstraint -> Infinity, CalcFormConverter`WorkingDirectory -> Automatic, CalcFormConverter`KeepFiles -> False,
- CalcFormConverter`ShowTiming -> False, CalcFormConverter`ShowProgress -> False, CalcFormConverter`FORMThreads -> 1
+ CalcFormConverter`ShowTiming -> False, CalcFormConverter`ShowProgress -> False, CalcFormConverter`FORMThreads -> Automatic
 };
 CalcFormConverter`CalcFormCalculate::files = "FORM job files are retained in `1`.";
 CalcFormConverter`CalcFormInstall::wait = "Installation uses the system authentication agent when required. An active package transaction is allowed to finish before an abort takes effect.";
 
-validThreadsQ[n_] := IntegerQ[n] && n >= 1;
+validThreadsQ[n_] := n === Automatic || (IntegerQ[n] && n >= 1);
 formCommand[executable_, source_, threads_] := Join[{executable}, If[threads > 1, {"-w" <> ToString[threads]}, {}], {source}];
 validTimeLimitQ[t_] := t === Infinity || (NumberQ[t] && TrueQ[t > 0]);
+installationGuidance[Automatic] := Join[installationGuidance[1], <|"RequestedFORMThreads" -> Automatic,
+ "Instructions" -> "Automatic prefers TFORM with up to eight workers and accepts serial FORM when TFORM is missing. On Debian/Ubuntu use the form package; elsewhere obtain FORM from the official project."|>];
 installationGuidance[threads_: 1] := <|
  "RequestedEngine" -> If[threads > 1, "TFORM", "FORM"], "FORMThreads" -> threads,
  "ProjectURL" -> "https://github.com/form-dev/form",
@@ -51,6 +53,19 @@ resolveExecutable[requested_] := Module[{name, path, candidates, suffix},
        (* 73 is octal 0111: any Unix execute bit; launch still verifies effective ACLs. *)
        (IntegerQ[permissions] && BitAnd[permissions, 73] =!= 0) ||
         (StringQ[permissions] && BitAnd[FromDigits[permissions, 8], 73] =!= 0)]) &, Missing["NotFound", name]]
+];
+
+(* Resolve policy once; only concrete worker counts reach probes and commands.
+   An explicit executable keeps serial behavior unless workers are explicit. *)
+automaticWorkerCount[] := If[IntegerQ[$ProcessorCount] && $ProcessorCount >= 1, Min[8, $ProcessorCount], 1];
+selectFORMConfiguration[requested_, workers_] := Module[{n, executable, reason},
+ n = If[workers === Automatic, If[requested === Automatic, automaticWorkerCount[], 1], workers];
+ reason = Which[workers =!= Automatic, "ExplicitThreads", requested =!= Automatic, "ExplicitExecutable", n === 1, "SerialProcessorCount", True, "AutomaticTFORM"];
+ executable = resolveExecutable[If[requested === Automatic, If[n > 1, "tform", "form"], requested]];
+ If[requested === Automatic && workers === Automatic && n > 1 && MissingQ[executable],
+   n = 1; reason = "TFORMNotFound"; executable = resolveExecutable["form"]];
+ If[FailureQ[executable], Return[executable]];
+ <|"Executable" -> executable, "FORMThreads" -> n, "RequestedFORMThreads" -> workers, "SelectionReason" -> reason|>
 ];
 
 createJobDirectory[parent_, prefix_] := Module[{base, dir},
@@ -179,18 +194,20 @@ runFORMProbe[executable_String, directory_String, limit_, threads_: 1] := Module
 ];
 
 CalcFormConverter`CalcFormCheck[OptionsPattern[]] := Module[
- {limit = OptionValue[System`TimeConstraint], threads = OptionValue[CalcFormConverter`FORMThreads], executable, directory = None},
+ {limit = OptionValue[System`TimeConstraint], threads = OptionValue[CalcFormConverter`FORMThreads], executable, selection, result, directory = None},
  If[!validTimeLimitQ[limit], Return[makeFailure["InvalidOption", "TimeConstraint must be positive or Infinity."]]];
- If[!validThreadsQ[threads], Return[makeFailure["InvalidOption", "FORMThreads must be a positive integer."]]];
- executable = resolveExecutable[Replace[OptionValue[CalcFormConverter`FORMExecutable], Automatic :> If[threads > 1, "tform", "form"]]];
- If[FailureQ[executable], Return[executable]];
- If[MissingQ[executable], Return[checkStatus["NotFound", executable, <||>, threads]]];
- CheckAbort[
+ If[!validThreadsQ[threads], Return[makeFailure["InvalidOption", "FORMThreads must be Automatic or a positive integer."]]];
+ selection = selectFORMConfiguration[OptionValue[CalcFormConverter`FORMExecutable], threads];
+ If[FailureQ[selection], Return[selection]];
+ executable = selection["Executable"]; threads = selection["FORMThreads"];
+ If[MissingQ[executable], Return[Join[checkStatus["NotFound", executable, <||>, threads], selection]]];
+ result = CheckAbort[
    WithCleanup[
      directory = createJobDirectory[Automatic, "calcform-probe-"],
      If[FailureQ[directory], directory, If[threads === 1, runFORMProbe[executable, directory, limit], runFORMProbe[executable, directory, limit, threads]]],
      If[StringQ[directory], removeJobDirectory[directory]]],
-   checkStatus["Aborted", executable, <||>, threads]]
+   checkStatus["Aborted", executable, <||>, threads]];
+ If[AssociationQ[result], Join[result, selection], result]
 ];
 CalcFormConverter`CalcFormCheck[___] := makeFailure["InvalidArguments", "Use CalcFormCheck[options]."];
 
@@ -205,7 +222,7 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
   threads = OptionValue[CalcFormConverter`FORMThreads], announce},
  If[!validTimeLimitQ[limit] || !BooleanQ[keep], Return[makeFailure["InvalidOption", "Use a positive TimeConstraint or Infinity, and KeepFiles -> True or False."]]];
  If[!BooleanQ[timing] || !BooleanQ[progress] || !validThreadsQ[threads],
-   Return[makeFailure["InvalidOption", "ShowTiming and ShowProgress must be True or False; FORMThreads must be a positive integer."]]];
+   Return[makeFailure["InvalidOption", "ShowTiming and ShowProgress must be True or False; FORMThreads must be Automatic or a positive integer."]]];
  (* Equal may already have evaluated before this command receives its argument.
     Binary equations share one algebraic job: its files contain the residual,
     and only the returned result is compared with zero. No solver is invoked. *)
@@ -219,6 +236,9 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
  check = CalcFormConverter`CalcFormCheck[CalcFormConverter`FORMExecutable -> OptionValue[CalcFormConverter`FORMExecutable], CalcFormConverter`FORMThreads -> threads];
  If[FailureQ[check], announce["Failed"]; Return[check]];
  If[!TrueQ[check["Available"]], If[progress, reportCalculation[<|"Stage" -> "Failed"|>]]; Return[makeFailure["FORMUnavailable", "FORM did not pass its availability check.", <|"Stage" -> stage, "Check" -> check|>]]];
+ threads = check["FORMThreads"];
+ If[progress, reportCalculation[<|"Stage" -> ("Selected " <> check["Executable"] <> " with " <> ToString[threads] <> " worker(s)" <>
+   If[Lookup[check, "SelectionReason", None] === "TFORMNotFound", " (TFORM missing; using serial FORM)", ""])|>]];
  directory = createJobDirectory[OptionValue[CalcFormConverter`WorkingDirectory], "calcform-job-"];
  If[FailureQ[directory], announce["Failed"]; Return[directory]];
  retainedFailure[tag_, message_, details_: <||>] := makeFailure[tag, message,
@@ -282,7 +302,7 @@ runInstallation[command_List, directory_String] := AbortProtect[Module[{result},
 
 CalcFormConverter`CalcFormInstall[OptionsPattern[]] := Module[
  {threads = OptionValue[CalcFormConverter`FORMThreads], check, command, directory, run, result},
- If[!validThreadsQ[threads], Return[makeFailure["InvalidOption", "FORMThreads must be a positive integer."]]];
+ If[!validThreadsQ[threads], Return[makeFailure["InvalidOption", "FORMThreads must be Automatic or a positive integer."]]];
  check = CalcFormConverter`CalcFormCheck[CalcFormConverter`FORMThreads -> threads];
  If[FailureQ[check], Return[check]];
  If[TrueQ[check["Available"]], Return[check]];
