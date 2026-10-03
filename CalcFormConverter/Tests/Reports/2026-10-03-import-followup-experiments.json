@@ -1,0 +1,966 @@
+{
+  "Date": "2026-10-03",
+  "Outcome": "No additional optimization retained; stopped after two consecutive no-gain candidates. The requested additional 70 percent reduction was not achieved.",
+  "ReferenceBaselineSeconds": 12.994945,
+  "TargetSeconds": 3.8984834999999998,
+  "ProductionCodeUnchanged": true,
+  "SourceSHA256": {
+    "baseline": "feba8c3a854fec1ebea43fb78ac1dce1d1cd7c798fdf5a2094ad9def1cafd321",
+    "profile": "019d8610beac9f897dad1af381ddda1aa4981ef1489cd95697cf10e073ceb00d",
+    "candidate1": "446e8f5c63f4ac8a330d6911c98fc1fc6993ac22f8838ad8af615efaefe091e6",
+    "candidate2": "befda1c21e4e6f50c404c13656bbdb93b34b30a8eaf54fce072239a70147ef5c"
+  },
+  "Fixtures": {
+    "small.out": {
+      "Bytes": 250114,
+      "SHA256": "dd6a54b4f6cd32f9a987bc218b1de18cc6e3235f610c802136fab033ae3f2176"
+    },
+    "mapping.json": {
+      "Bytes": 7718,
+      "SHA256": "74f18b486324a11c70058f0e3f7573169f5d93ae042e491fa7942a4bae5a6d04"
+    },
+    "scalar.out": {
+      "Bytes": 320070,
+      "SHA256": "890112f3801fd266495d278b6a82aa96af56000be43a1f479ae2534eba3a226e"
+    },
+    "partial.out": {
+      "Bytes": 10033002,
+      "SHA256": "24b6ca44fe8e34d4595069a60adaf499069c41daa0244fb616c648cc6106826e"
+    }
+  },
+  "ChronologicalOrder": [
+    "small-baseline",
+    "small-profile",
+    "partial-profile",
+    "small-candidate1",
+    "small-candidate1confirm",
+    "small-baselineconfirm",
+    "small-candidate2"
+  ],
+  "Runs": {
+    "small-baseline": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 6.417801,
+            "KernelBeforeBytes": 152655800,
+            "KernelAfterBytes": 159604344,
+            "KernelReleasedBytes": 158878168,
+            "EvaluationPeakBytes": 16047968,
+            "Start": 4000027119.597322,
+            "End": 4000027126.015154,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.287947,
+            "KernelBeforeBytes": 158879344,
+            "KernelAfterBytes": 162398304,
+            "KernelReleasedBytes": 161672232,
+            "EvaluationPeakBytes": 12618128,
+            "Start": 4000027126.017022,
+            "End": 4000027126.305141,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.291083,
+            "KernelBeforeBytes": 161673280,
+            "KernelAfterBytes": 165715392,
+            "KernelReleasedBytes": 164989256,
+            "EvaluationPeakBytes": 12616816,
+            "Start": 4000027126.314388,
+            "End": 4000027126.605631,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.292064,
+            "KernelBeforeBytes": 164990304,
+            "KernelAfterBytes": 168770360,
+            "KernelReleasedBytes": 168044160,
+            "EvaluationPeakBytes": 12354632,
+            "Start": 4000027126.614727,
+            "End": 4000027126.906816,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.289842,
+            "KernelBeforeBytes": 168045208,
+            "KernelAfterBytes": 171562792,
+            "KernelReleasedBytes": 170893272,
+            "EvaluationPeakBytes": 12092024,
+            "Start": 4000027126.915911,
+            "End": 4000027127.205774,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292868096,
+          "First": 308436992,
+          "Warmup": 310730752,
+          "Measured1": 313155584,
+          "Measured2": 315252736,
+          "Measured2Cleanup": 315645952,
+          "Measured3": 318464000,
+          "Complete": 318312448
+        },
+        "MinimumAvailableMemoryBytes": 10215108608,
+        "WallSeconds": 25.374027473997558,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-next-20261003-143734/small-baseline/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.291083,
+      "RangeSeconds": [
+        0.289842,
+        0.292064
+      ],
+      "ScriptSHA256": "dbdb357b87e3294b340d3d32b543dbfaf784a544ee9a2bcd6e537267c7f97102",
+      "LogSHA256": "0948c1f08fc1d3c38a7458e254d768ea52e8cea19ffc863591347bcb4f352b0f"
+    },
+    "small-profile": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 5.056489,
+            "KernelBeforeBytes": 152658376,
+            "KernelAfterBytes": 159608016,
+            "KernelReleasedBytes": 158881840,
+            "EvaluationPeakBytes": 16049024,
+            "Start": 4000027144.699433,
+            "End": 4000027149.755954,
+            "Stages": [
+              [
+                "EligibilityStart",
+                4000027149.414994,
+                156697936
+              ],
+              [
+                "EligibilityEnd",
+                4000027149.445033,
+                159383264
+              ],
+              [
+                "ReconstructionStart",
+                4000027149.44525,
+                159387064
+              ],
+              [
+                "FinalPlusStart",
+                4000027149.733162,
+                168664296
+              ],
+              [
+                "FinalPlusEnd",
+                4000027149.734658,
+                168679192
+              ],
+              [
+                "FinalCheckEnd",
+                4000027149.75051,
+                168679424
+              ]
+            ]
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.329111,
+            "KernelBeforeBytes": 158883016,
+            "KernelAfterBytes": 162403072,
+            "KernelReleasedBytes": 161677000,
+            "EvaluationPeakBytes": 12619184,
+            "Start": 4000027149.765286,
+            "End": 4000027150.094422,
+            "Stages": [
+              [
+                "EligibilityStart",
+                4000027149.786101,
+                159840408
+              ],
+              [
+                "EligibilityEnd",
+                4000027149.813947,
+                162522920
+              ],
+              [
+                "ReconstructionStart",
+                4000027149.814035,
+                162526512
+              ],
+              [
+                "FinalPlusStart",
+                4000027150.071975,
+                171459096
+              ],
+              [
+                "FinalPlusEnd",
+                4000027150.073313,
+                171473800
+              ],
+              [
+                "FinalCheckEnd",
+                4000027150.088767,
+                171474224
+              ]
+            ]
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.294587,
+            "KernelBeforeBytes": 161678048,
+            "KernelAfterBytes": 165721256,
+            "KernelReleasedBytes": 164995120,
+            "EvaluationPeakBytes": 12617872,
+            "Start": 4000027150.103642,
+            "End": 4000027150.398254,
+            "Stages": [
+              [
+                "EligibilityStart",
+                4000027150.118337,
+                162634288
+              ],
+              [
+                "EligibilityEnd",
+                4000027150.141556,
+                165316736
+              ],
+              [
+                "ReconstructionStart",
+                4000027150.141648,
+                165320248
+              ],
+              [
+                "FinalPlusStart",
+                4000027150.377919,
+                174252816
+              ],
+              [
+                "FinalPlusEnd",
+                4000027150.379139,
+                174267520
+              ],
+              [
+                "FinalCheckEnd",
+                4000027150.393431,
+                174267944
+              ]
+            ]
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.301281,
+            "KernelBeforeBytes": 164996168,
+            "KernelAfterBytes": 168777320,
+            "KernelReleasedBytes": 168051120,
+            "EvaluationPeakBytes": 12355688,
+            "Start": 4000027150.400085,
+            "End": 4000027150.701385,
+            "Stages": [
+              [
+                "EligibilityStart",
+                4000027150.41488,
+                165952240
+              ],
+              [
+                "EligibilityEnd",
+                4000027150.439505,
+                168634688
+              ],
+              [
+                "ReconstructionStart",
+                4000027150.439586,
+                168638200
+              ],
+              [
+                "FinalPlusStart",
+                4000027150.68063,
+                177308752
+              ],
+              [
+                "FinalPlusEnd",
+                4000027150.68197,
+                177323648
+              ],
+              [
+                "FinalCheckEnd",
+                4000027150.696084,
+                177323880
+              ]
+            ]
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.302076,
+            "KernelBeforeBytes": 168052168,
+            "KernelAfterBytes": 171571104,
+            "KernelReleasedBytes": 170901392,
+            "EvaluationPeakBytes": 12093472,
+            "Start": 4000027150.710799,
+            "End": 4000027151.012896,
+            "Stages": [
+              [
+                "EligibilityStart",
+                4000027150.726178,
+                169008288
+              ],
+              [
+                "EligibilityEnd",
+                4000027150.750772,
+                171690736
+              ],
+              [
+                "ReconstructionStart",
+                4000027150.750858,
+                171694248
+              ],
+              [
+                "FinalPlusStart",
+                4000027150.992032,
+                180102336
+              ],
+              [
+                "FinalPlusEnd",
+                4000027150.993413,
+                180117432
+              ],
+              [
+                "FinalCheckEnd",
+                4000027151.007837,
+                180117664
+              ]
+            ]
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292737024,
+          "First": 307826688,
+          "Warmup": 310448128,
+          "Measured1": 313135104,
+          "Measured2": 315822080,
+          "Measured3": 318377984,
+          "SaveResult": 318468096,
+          "Complete": 318156800
+        },
+        "MinimumAvailableMemoryBytes": 10137022464,
+        "WallSeconds": 23.78118738300691,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-next-20261003-143734/small-profile/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.301281,
+      "RangeSeconds": [
+        0.294587,
+        0.302076
+      ],
+      "ScriptSHA256": "96fbfd7c82d7b4e171bffc87300c13308382533b156148a1b235832b6106a28b",
+      "LogSHA256": "452d273be5f8c1f2c84cfa81f7428fa0c65e117a7edc64b263d2536462bfe6d4"
+    },
+    "partial-profile": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 16.9007,
+            "KernelBeforeBytes": 152655424,
+            "KernelAfterBytes": 197181368,
+            "KernelReleasedBytes": 164568992,
+            "EvaluationPeakBytes": 403264296,
+            "Start": 4000027184.033976,
+            "End": 4000027200.934716,
+            "Stages": [
+              [
+                "EligibilityStart",
+                4000027189.436061,
+                190884360
+              ],
+              [
+                "EligibilityEnd",
+                4000027190.583116,
+                300094608
+              ],
+              [
+                "ReconstructionStart",
+                4000027190.583234,
+                300096776
+              ],
+              [
+                "FinalPlusStart",
+                4000027200.042494,
+                554012648
+              ],
+              [
+                "FinalPlusEnd",
+                4000027200.14625,
+                554648880
+              ],
+              [
+                "FinalCheckEnd",
+                4000027200.718063,
+                554649112
+              ]
+            ]
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 14.001565,
+            "KernelBeforeBytes": 164570168,
+            "KernelAfterBytes": 205468352,
+            "KernelReleasedBytes": 172783120,
+            "EvaluationPeakBytes": 399542392,
+            "Start": 4000027200.960744,
+            "End": 4000027214.962342,
+            "Stages": [
+              [
+                "EligibilityStart",
+                4000027201.271941,
+                199717176
+              ],
+              [
+                "EligibilityEnd",
+                4000027202.532134,
+                308908352
+              ],
+              [
+                "ReconstructionStart",
+                4000027202.532273,
+                308910312
+              ],
+              [
+                "FinalPlusStart",
+                4000027214.021583,
+                562205288
+              ],
+              [
+                "FinalPlusEnd",
+                4000027214.151694,
+                562841720
+              ],
+              [
+                "FinalCheckEnd",
+                4000027214.748368,
+                562841952
+              ]
+            ]
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 12.253615,
+            "KernelBeforeBytes": 172784168,
+            "KernelAfterBytes": 213416120,
+            "KernelReleasedBytes": 181838712,
+            "EvaluationPeakBytes": 399257056,
+            "Start": 4000027215.000532,
+            "End": 4000027227.254173,
+            "Stages": [
+              [
+                "EligibilityStart",
+                4000027215.29877,
+                207930016
+              ],
+              [
+                "EligibilityEnd",
+                4000027216.438221,
+                317107064
+              ],
+              [
+                "ReconstructionStart",
+                4000027216.438338,
+                317108960
+              ],
+              [
+                "FinalPlusStart",
+                4000027226.351595,
+                570134152
+              ],
+              [
+                "FinalPlusEnd",
+                4000027226.439916,
+                570770192
+              ],
+              [
+                "FinalCheckEnd",
+                4000027227.039698,
+                570770616
+              ]
+            ]
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 293154816,
+          "First": 712241152,
+          "Warmup": 706150400,
+          "WarmupCleanup": 399450112,
+          "Measured1": 719298560,
+          "SaveResult": 589561856,
+          "Complete": 488652800
+        },
+        "MinimumAvailableMemoryBytes": 9777983488,
+        "WallSeconds": 65.32206278399099,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-next-20261003-143734/partial-profile/run.wls"
+        ]
+      },
+      "MedianSeconds": 12.253615,
+      "RangeSeconds": [
+        12.253615,
+        12.253615
+      ],
+      "ScriptSHA256": "dca66c8739bdc24e4de56fa700e06e6d1dc590c4139e06f72bae2bee151effaf",
+      "LogSHA256": "916d1ff0814e6dba97f8e30044d95ca2a6fef1960486206a88005d73d65b7e8a"
+    },
+    "small-candidate1": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 5.413152,
+            "KernelBeforeBytes": 152659920,
+            "KernelAfterBytes": 162084120,
+            "KernelReleasedBytes": 161358456,
+            "EvaluationPeakBytes": 10416376,
+            "Start": 4000027262.880033,
+            "End": 4000027268.293226,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.271996,
+            "KernelBeforeBytes": 161359568,
+            "KernelAfterBytes": 167557312,
+            "KernelReleasedBytes": 166831560,
+            "EvaluationPeakBytes": 7189656,
+            "Start": 4000027268.302882,
+            "End": 4000027268.575125,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.274602,
+            "KernelBeforeBytes": 166832608,
+            "KernelAfterBytes": 173290600,
+            "KernelReleasedBytes": 172564784,
+            "EvaluationPeakBytes": 7449840,
+            "Start": 4000027268.584468,
+            "End": 4000027268.859311,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.411561,
+            "KernelBeforeBytes": 172565832,
+            "KernelAfterBytes": 179025296,
+            "KernelReleasedBytes": 178299480,
+            "EvaluationPeakBytes": 7451184,
+            "Start": 4000027268.86841,
+            "End": 4000027269.280238,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.420473,
+            "KernelBeforeBytes": 178300528,
+            "KernelAfterBytes": 184497768,
+            "KernelReleasedBytes": 183828504,
+            "EvaluationPeakBytes": 7188960,
+            "Start": 4000027269.289678,
+            "End": 4000027269.710515,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292753408,
+          "First": 303529984,
+          "Warmup": 308117504,
+          "Measured1": 313098240,
+          "Measured2": 318078976,
+          "Measured3": 322994176,
+          "SaveResult": 323280896,
+          "Complete": 323100672
+        },
+        "MinimumAvailableMemoryBytes": 10181058560,
+        "WallSeconds": 31.06175508799788,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-next-20261003-143734/small-candidate1/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.411561,
+      "RangeSeconds": [
+        0.274602,
+        0.420473
+      ],
+      "ScriptSHA256": "766586e9901e4811d9c7f2beda4597bfc90b721a1cc9f7abaccf858e2993c477",
+      "LogSHA256": "da92599b8ff160e3316bd42be9ca29eefc4af74065beaa6f0b885a59656f9100"
+    },
+    "small-candidate1confirm": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 5.031268,
+            "KernelBeforeBytes": 152659952,
+            "KernelAfterBytes": 162084128,
+            "KernelReleasedBytes": 161358464,
+            "EvaluationPeakBytes": 10416352,
+            "Start": 4000027416.272703,
+            "End": 4000027421.304002,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.41699,
+            "KernelBeforeBytes": 161359576,
+            "KernelAfterBytes": 167557320,
+            "KernelReleasedBytes": 166831568,
+            "EvaluationPeakBytes": 7189656,
+            "Start": 4000027421.313331,
+            "End": 4000027421.730617,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.593012,
+            "KernelBeforeBytes": 166832616,
+            "KernelAfterBytes": 173290608,
+            "KernelReleasedBytes": 172564792,
+            "EvaluationPeakBytes": 7449840,
+            "Start": 4000027421.740283,
+            "End": 4000027422.333626,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.407736,
+            "KernelBeforeBytes": 172565840,
+            "KernelAfterBytes": 179025304,
+            "KernelReleasedBytes": 178299488,
+            "EvaluationPeakBytes": 7451184,
+            "Start": 4000027422.343201,
+            "End": 4000027422.751265,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.413389,
+            "KernelBeforeBytes": 178300536,
+            "KernelAfterBytes": 184497776,
+            "KernelReleasedBytes": 183828512,
+            "EvaluationPeakBytes": 7188960,
+            "Start": 4000027422.760758,
+            "End": 4000027423.17445,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292986880,
+          "First": 303677440,
+          "Warmup": 308264960,
+          "WarmupCleanup": 308330496,
+          "Measured1": 312983552,
+          "Measured2": 318226432,
+          "Measured3": 322879488,
+          "SaveResult": 323428352,
+          "Complete": 323248128
+        },
+        "MinimumAvailableMemoryBytes": 9864335360,
+        "WallSeconds": 27.966711158005637,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-next-20261003-143734/small-candidate1confirm/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.413389,
+      "RangeSeconds": [
+        0.407736,
+        0.593012
+      ],
+      "ScriptSHA256": "f171e909e103c88536a8ee035e3f371ad50f7f9864873b0f26cf296b82e00407",
+      "LogSHA256": "7bb65721160f3040c9b2158cec8c90c6c4e9673dee26e2bd26d05627bd285fc1"
+    },
+    "small-baselineconfirm": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 5.38846,
+            "KernelBeforeBytes": 152655888,
+            "KernelAfterBytes": 159604432,
+            "KernelReleasedBytes": 158878256,
+            "EvaluationPeakBytes": 16047968,
+            "Start": 4000027442.405081,
+            "End": 4000027447.793575,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.311641,
+            "KernelBeforeBytes": 158879432,
+            "KernelAfterBytes": 162398392,
+            "KernelReleasedBytes": 161672320,
+            "EvaluationPeakBytes": 12618128,
+            "Start": 4000027447.802815,
+            "End": 4000027448.114696,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.394947,
+            "KernelBeforeBytes": 161673368,
+            "KernelAfterBytes": 165715480,
+            "KernelReleasedBytes": 164989344,
+            "EvaluationPeakBytes": 12616816,
+            "Start": 4000027448.124149,
+            "End": 4000027448.519295,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.328723,
+            "KernelBeforeBytes": 164990392,
+            "KernelAfterBytes": 168770448,
+            "KernelReleasedBytes": 168044248,
+            "EvaluationPeakBytes": 12354632,
+            "Start": 4000027448.520971,
+            "End": 4000027448.849709,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.327766,
+            "KernelBeforeBytes": 168045296,
+            "KernelAfterBytes": 171562880,
+            "KernelReleasedBytes": 170893360,
+            "EvaluationPeakBytes": 12092024,
+            "Start": 4000027448.858885,
+            "End": 4000027449.186679,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292974592,
+          "First": 308461568,
+          "Warmup": 310689792,
+          "Measured1": 313376768,
+          "Measured2": 315408384,
+          "Measured2Cleanup": 315473920,
+          "Measured3": 318619648,
+          "SaveResult": 318644224,
+          "Complete": 318332928
+        },
+        "MinimumAvailableMemoryBytes": 10009681920,
+        "WallSeconds": 25.95952872199996,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-next-20261003-143734/small-baselineconfirm/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.328723,
+      "RangeSeconds": [
+        0.327766,
+        0.394947
+      ],
+      "ScriptSHA256": "d5c6aa7568825df7f1029fcb4e56cf3feab050eb67e95a2b47413dc4da83834b",
+      "LogSHA256": "d97c5a0a27c7d40316f242086069a577c793f6c0f0851a7c742f6e49368118f8"
+    },
+    "small-candidate2": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 5.202576,
+            "KernelBeforeBytes": 152657312,
+            "KernelAfterBytes": 159595264,
+            "KernelReleasedBytes": 158869024,
+            "EvaluationPeakBytes": 16037456,
+            "Start": 4000027536.306844,
+            "End": 4000027541.509457,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.471857,
+            "KernelBeforeBytes": 158870200,
+            "KernelAfterBytes": 162378760,
+            "KernelReleasedBytes": 161652624,
+            "EvaluationPeakBytes": 12607744,
+            "Start": 4000027541.519254,
+            "End": 4000027541.991395,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.473779,
+            "KernelBeforeBytes": 161653672,
+            "KernelAfterBytes": 165685128,
+            "KernelReleasedBytes": 164958992,
+            "EvaluationPeakBytes": 12606240,
+            "Start": 4000027542.000561,
+            "End": 4000027542.474595,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.48673,
+            "KernelBeforeBytes": 164960040,
+            "KernelAfterBytes": 168729568,
+            "KernelReleasedBytes": 168003368,
+            "EvaluationPeakBytes": 12344184,
+            "Start": 4000027542.483904,
+            "End": 4000027542.970657,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.485359,
+            "KernelBeforeBytes": 168004416,
+            "KernelAfterBytes": 171511408,
+            "KernelReleasedBytes": 170841888,
+            "EvaluationPeakBytes": 12081384,
+            "Start": 4000027542.979939,
+            "End": 4000027543.465321,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292990976,
+          "First": 308142080,
+          "Warmup": 310763520,
+          "Measured1": 312795136,
+          "Measured1Cleanup": 312729600,
+          "Measured2": 315875328,
+          "Measured3": 318693376,
+          "SaveResult": 318717952,
+          "Complete": 318406656
+        },
+        "MinimumAvailableMemoryBytes": 9933201408,
+        "WallSeconds": 28.121787112002494,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-next-20261003-143734/small-candidate2/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.485359,
+      "RangeSeconds": [
+        0.473779,
+        0.48673
+      ],
+      "ScriptSHA256": "440202a3976ad4e60c9f86aa45b81492fb1eee3b9a5c5737ba90e2b81a7edf1a",
+      "LogSHA256": "f94dcdfbf0700e33e626110d99d0af30154bda3bac37ae36c27c24ce1ea841bf"
+    }
+  },
+  "ProfileStageBreakdown": {
+    "BeforeEligibility": {
+      "Seconds": 0.29823780059814453,
+      "PercentOfImport": 2.433876048808001
+    },
+    "Eligibility": {
+      "Seconds": 1.139451026916504,
+      "PercentOfImport": 9.298896912596845
+    },
+    "ReconstructionLoop": {
+      "Seconds": 9.913257122039795,
+      "PercentOfImport": 80.90067398102352
+    },
+    "FinalPlus": {
+      "Seconds": 0.08832120895385742,
+      "PercentOfImport": 0.720776758155511
+    },
+    "FinalTypedCheck": {
+      "Seconds": 0.5997819900512695,
+      "PercentOfImport": 4.894735064315873
+    },
+    "AfterFinalCheck": {
+      "Seconds": 0.21447467803955078,
+      "PercentOfImport": 1.7502971820116004
+    }
+  },
+  "SmallProfilerMedianDifferencePercent": 3.5034680829866494,
+  "Candidate1Correctness": {
+    "SameQ": true,
+    "ParserAssertions": 121,
+    "ParserFailures": 0,
+    "ParserLogSHA256": "9b46e4be8ec455d71cb988aae2851d137027a0a651c71016ccee60670e359c9f",
+    "ParserLogText": "Parser: 121 assertions; 0 failures.\n"
+  },
+  "Candidate2Correctness": "Rejected for slower small-fixture timing before differential validation or regression suite.",
+  "Limits": {
+    "SecondsPerPhase": 300,
+    "RSSBytes": 6442450944,
+    "MinimumAvailableBytes": 2147483648,
+    "RSSSampleSeconds": 0.05
+  },
+  "LocalEvidenceDirectory": "/tmp/cfc-import-next-20261003-143734",
+  "ExperimentalSourceDiffs": {
+    "profile": "--- baseline/CalcFormConverter.wl\n+++ profile/CalcFormConverter.wl\n@@ -1476,6 +1476,7 @@\n      If[Quotient[count - start, 2] + 1 < \n         $flatParserMinimumReusePerDistinctFactor Length[distinctFactors], \n     Return[$Failed]];\n+     AppendTo[Global`profileStages, {\"EligibilityEnd\", AbsoluteTime[], MemoryInUse[]}];\n      flatTokenData[tokens, start]\n    ];\n \n@@ -1488,6 +1489,7 @@\n    values_Association, dim_] := Module[\n      {tokens = tokenList, count = Length[tokenList], pos = start,\n        factor, checked, product, firstSign, result, terms, op, r},\n+     AppendTo[Global`profileStages, {\"ReconstructionStart\", AbsoluteTime[], MemoryInUse[]}];\n      firstSign = If[start === 2 && First[tokens] === \"-\", -1, 1];\n      (*Memoize successful general-parser results by factor text within this call. A thrown failure exits before Set stores a value. No result text is evaluated as Wolfram source.*)\n      factor[t_] := factor[t] = parseGeneralResult[t, values, dim];\n@@ -1528,9 +1530,11 @@\n                 Sow[If[op === \"+\", r, -r]]\n               ]\n            ][[2, 1]];\n-        result = Plus @@ terms\n+        AppendTo[Global`profileStages, {\"FinalPlusStart\", AbsoluteTime[], MemoryInUse[]}];\n+        result = Plus @@ terms;\n+        AppendTo[Global`profileStages, {\"FinalPlusEnd\", AbsoluteTime[], MemoryInUse[]}];\n       ];\n-     checked[result]\n+     With[{answer = checked[result]}, AppendTo[Global`profileStages, {\"FinalCheckEnd\", AbsoluteTime[], MemoryInUse[]}]; answer]\n    ];\n \n \n@@ -1546,6 +1550,7 @@\n        Cases[{Values[values], dim}, _Symbol, Infinity, Heads -> True]], \n       UpValues[#] === {} &],\n         (*This is an optional optimization. Local messages or an unevaluated eligibility result must not escape as an apparently successful import. Check does not catch Abort, so user cancellation still propagates.*)\n+        AppendTo[Global`profileStages, {\"EligibilityStart\", AbsoluteTime[], MemoryInUse[]}];\n         prepared = Quiet[Check[prepareFlatResult[text], $Failed]]\n       ];\n      (*Match on the packet type itself: prepareFlatResult returning $Failed (or anything else) routes to the general parser.*)\n",
+    "candidate1": "--- baseline/CalcFormConverter.wl\n+++ candidate1/CalcFormConverter.wl\n@@ -1484,54 +1484,42 @@\n (*Consume the validated token packet without tokenizing again. Reconstruct each distinct factor lazily through the general parser, retaining arithmetic and validation order. parseResult, not this definition alone, supplies fallback for ineligible input.*)\n \n (* ::Input::Initialization:: *)\n-parseFlatResult[flatTokenData[tokenList_List, start_Integer], \n+parseFlatResult[flatTokenData[tokenList_List, start_Integer],\n    values_Association, dim_] := Module[\n-     {tokens = tokenList, count = Length[tokenList], pos = start,\n-       factor, checked, product, firstSign, result, terms, op, r},\n-     firstSign = If[start === 2 && First[tokens] === \"-\", -1, 1];\n-     (*Memoize successful general-parser results by factor text within this call. A thrown failure exits before Set stores a value. No result text is evaluated as Wolfram source.*)\n-     factor[t_] := factor[t] = parseGeneralResult[t, values, dim];\n-     (*Identical typed-token gate as the general parser.*)\n-     checked[x_] := If[! FreeQ[x, _vectorToken | _indexToken],\n-         \n-     throwFailure[\"InvalidResult\", \n-      \"A vector or index occurs outside a tensor object.\"], x];\n-     (*Apply an initial unary minus to the first factor, matching the general parser. Later subtraction negates an entire product. Division validates its right operand before subsequent factors are read.*)\n-     product[sign_] := \n-    With[{v = \n-       If[sign === -1, -checked[factor[tokens[[pos++]]]], \n-        factor[tokens[[pos++]]]]},\n-         If[pos > count || ! MemberQ[{\"*\", \"/\"}, tokens[[pos]]], v,\n-            Module[{operation, right, factors},\n-               factors = Reap[\n-                    Sow[checked[v]];\n-          While[pos <= count && MemberQ[{\"*\", \"/\"}, tokens[[pos]]],\n-                       operation = tokens[[pos++]];\n-                       right = checked[factor[tokens[[pos++]]]];\n-           If[operation === \"/\" && right === 0, \n-            throwFailure[\"InvalidResult\", \"Division by zero.\"]];\n-                       Sow[If[operation === \"*\", right, 1/right]]\n-                     ]\n-                  ][[2, 1]];\n-               Times @@ factors\n-             ]\n-          ]\n-       ];\n-     (*Top level: one product, then +/- chains of products.*)\n-     result = product[firstSign];\n-     If[pos <= count,\n-        terms = Reap[\n-             Sow[checked[result]];\n-             While[pos <= count,\n-                op = tokens[[pos++]];\n-                r = checked[product[1]];\n-                Sow[If[op === \"+\", r, -r]]\n-              ]\n-           ][[2, 1]];\n-        result = Plus @@ terms\n-      ];\n-     checked[result]\n-   ];\n+  {tokens = tokenList, count = Length[tokenList], factor, checked, product,\n+   firstSign, result, terms, separators, ends, starts},\n+  firstSign = If[start === 2 && First[tokens] === \"-\", -1, 1];\n+  factor[t_] := factor[t] = parseGeneralResult[t, values, dim];\n+  checked[x_] := If[!FreeQ[x, _vectorToken | _indexToken],\n+    throwFailure[\"InvalidResult\", \"A vector or index occurs outside a tensor object.\"], x];\n+  (* Eligibility already proved factor/operator alternation. Find additive\n+     boundaries with a native list operation; factor values remain lazy. *)\n+  separators = Flatten[Position[tokens, \"+\" | \"-\", {1}]];\n+  If[start === 2, separators = Rest[separators]];\n+  ends = Append[separators - 1, count];\n+  starts = Prepend[separators + 1, start];\n+  product[from_, through_, sign_] :=\n+    With[{v = If[sign === -1, -checked[factor[tokens[[from]]]], factor[tokens[[from]]]]},\n+      If[from === through, v,\n+        Module[{first = checked[v], factors, operation, right},\n+          factors = Table[\n+            operation = tokens[[k - 1]];\n+            right = checked[factor[tokens[[k]]]];\n+            If[operation === \"/\" && right === 0,\n+              throwFailure[\"InvalidResult\", \"Division by zero.\"]];\n+            If[operation === \"*\", right, 1/right],\n+            {k, from + 2, through, 2}];\n+          Times @@ Prepend[factors, first]]]];\n+  result = product[start, First[ends], firstSign];\n+  If[separators =!= {},\n+    result = checked[result];\n+    terms = Table[\n+      With[{r = checked[product[starts[[k]], ends[[k]], 1]]},\n+        If[tokens[[separators[[k - 1]]]] === \"+\", r, -r]],\n+      {k, 2, Length[ends]}];\n+    result = Plus @@ Prepend[terms, result]];\n+  checked[result]\n+];\n \n \n (* ::Text:: *)\n",
+    "candidate2": "--- baseline/CalcFormConverter.wl\n+++ candidate2/CalcFormConverter.wl\n@@ -1487,10 +1487,12 @@\n parseFlatResult[flatTokenData[tokenList_List, start_Integer], \n    values_Association, dim_] := Module[\n      {tokens = tokenList, count = Length[tokenList], pos = start,\n-       factor, checked, product, firstSign, result, terms, op, r},\n+       factor, factorCache = <||>, checked, product, firstSign, result, terms, op, r},\n      firstSign = If[start === 2 && First[tokens] === \"-\", -1, 1];\n      (*Memoize successful general-parser results by factor text within this call. A thrown failure exits before Set stores a value. No result text is evaluated as Wolfram source.*)\n-     factor[t_] := factor[t] = parseGeneralResult[t, values, dim];\n+     factor[t_] := If[KeyExistsQ[factorCache, t], factorCache[t],\n+       With[{value = parseGeneralResult[t, values, dim]},\n+         AssociateTo[factorCache, t -> value]; value]];\n      (*Identical typed-token gate as the general parser.*)\n      checked[x_] := If[! FreeQ[x, _vectorToken | _indexToken],\n          \n"
+  },
+  "HarnessSHA256": {
+    "/tmp/cfc-import-next-20261003-143734/run_one.py": "4aa39947f1752e6230b022f4b5542a23b46123b59098ee3f63a4da1ec253be8d",
+    "/tmp/cfc-import-next-20261003-143734/validate.py": "5291783521fa65264dbc3ae16d215dca7d2123bf34491436cd3122dad8cbe92a",
+    "/tmp/cfc-tensor-fast-20261003-140233/bench.py": "c6710e6ca4456bf0650899354d7cc148eff3caf4b5f46162299e7fb1e0b7aea7"
+  }
+}

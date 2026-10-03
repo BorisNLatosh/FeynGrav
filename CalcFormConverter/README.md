@@ -49,6 +49,22 @@ Public commands and converter-specific options belong to the `` CalcFormConverte
 | `CalcFormCalculate[expr, opts]` | Reconstructed expression, or Boolean/symbolic equality | Check, export, run, import, then clean up successful job files |
 | `CalcFormInstall[FORMThreads -> n]` | Availability association after a successful check | Check existing installation; explicitly install only a missing requested engine on supported systems, then check again |
 
+### Comparing results
+
+`CalcFormImport` and `CalcFormCalculate` return equivalent algebraic expressions, not a canonical simplified form. In particular, FORM treats inverse composite factors such as `1/(D-1)` as opaque abbreviations. After import, an expression can therefore differ structurally from a FeynCalc reference even when their difference is zero. Neither command automatically calls `Simplify`.
+
+For a manageable scalar or already-contracted tensor example, compare the difference explicitly:
+
+```mathematica
+If[!FailureQ[result],
+  difference = FCI[reference - result];
+  comparison = TimeConstrained[Simplify[difference], 30, $TimedOut];
+  verified = comparison === 0;
+];
+```
+
+Use applicable assumptions when needed. A nonzero or timed-out simplification is inconclusive; it is not by itself evidence of an incorrect result. Substituting a particular dimension checks only that dimension. This comparison can be expensive on large expressions, so apply it deliberately rather than to every imported result.
+
 Conversion and calculation errors return `Failure`. A check that finds missing or unusable FORM normally returns an association with `Available -> False`; invalid options or inability to create a probe directory can instead return `Failure`. Check both cases:
 
 ```mathematica
@@ -56,7 +72,7 @@ status = CalcFormCheck[];
 available = AssociationQ[status] && TrueQ[status["Available"]];
 ```
 
-The check association always has `Available`, `Status`, `Executable`, `Version`, `RequestedEngine`, `FORMThreads`, and `InstallationGuidance`. When a probe ran it also reports `ExitCode`, `StandardOutput`, `StandardError`, and `Messages`. `RequestedEngine` describes the requested configuration, not an independent identification of an explicitly chosen binary. `Version` may be `Missing["NotReported"]`. Probe directories are cleaned up; use the returned diagnostic text.
+The check association always has `Available`, `Status`, `Executable`, `Version`, `RequestedEngine`, `FORMThreads`, and `InstallationGuidance`. When a probe ran it also reports `ExitCode`, `StandardOutput`, `StandardError`, and `Messages`. `RequestedEngine` describes the requested configuration, not an independent identification of an explicitly chosen binary. `Version` may be `Missing["NotReported"]`. On launch failure, `Messages` includes available Wolfram message identifiers and bounded rendered diagnostic text; `StandardError` remains subprocess output. The text is captured without printing kernel launch messages in the notebook. It may still be empty if Wolfram supplies no diagnostic, and it does not necessarily expose an OS error number. Probe directories are cleaned up; use the returned diagnostic text.
 
 | Option | Accepted values | Export default | Check default | Calculate default | Install default |
 | --- | --- | --- | --- | --- | --- |
@@ -165,6 +181,22 @@ result = CalcFormCalculate[expression,
 ```
 
 `ShowTiming` prints elapsed wall-clock seconds for the calculation process, including its final output drain. It excludes the availability probe, export and import. This is elapsed time, not the sum of CPU time across workers. Process diagnostics on failures include `ElapsedSeconds` when execution started. The returned value remains the FeynCalc expression.
+
+The first import in a fresh kernel can take longer than subsequent imports because of initialization in the kernel and its dependencies. Measure the first call separately, then repeat the same saved result/mapping pair to measure subsequent calls:
+
+```mathematica
+firstImportSeconds = First[AbsoluteTiming[
+  result = CalcFormImport[job["ResultFile"], job["MappingFile"]];
+]];
+repeatedImportSeconds = Table[
+  First[AbsoluteTiming[
+    result = CalcFormImport[job["ResultFile"], job["MappingFile"]];
+  ]],
+  {5}
+];
+```
+
+Run this after FORM has produced the result file, check `FailureQ[result]`, and keep the files and symbol definitions unchanged between measurements. Report the first-call time and repeated-call times separately. Do not infer a universal slowdown ratio or attribute it to a particular cache from these timings alone. The converter's identifier and token caches are local to each import.
 
 Use `AbsoluteTiming` to measure the complete call, including the availability check, export, execution and import:
 
@@ -317,7 +349,9 @@ The importer caches decoded identifiers and token classifications, collects sums
 
 Complete native vector-component and metric calls are recognized as single import tokens and decoded lazily through the normal identifier and argument checks. Repeated calls reuse their validated values within that import. Other syntax, including nested arguments and dot chains, keeps the ordinary parser; successful dot reconstruction is cached locally. This preserves error order and avoids repeatedly parsing the same short tensor calls. The measured median paired improvement was about 29.5% across ten full-import comparisons on one retained result; scalar and master-function inputs showed little benefit. Cache memory grows with distinct calls and vector pairs, and peak memory has not been measured.
 
-Large flat results can additionally reuse complete factors within one import. This path accepts a conservative subset of scalar identifiers, integers, vector dots and integer powers; each distinct factor is still reconstructed by the general parser in consumption order. Small inputs, insufficient repetition, nested syntax and mapped symbols with `UpValues` use the general path. Eligibility tokenizes complete factors once, checks coverage and factor/operator order, then passes the same tokens to reconstruction. This avoids the whole-expression regular-expression recursion limit on large outputs. Unexpected eligibility results or messages use the general parser; cancellation still propagates. The 131,072-character threshold and roughly fourfold repetition cutoff are heuristics. They do not change the saved format or generated FORM program.
+Large flat results can additionally reuse complete factors within one import. This path accepts scalar identifiers, integers and vector dots with optional integer powers, plus bare vector-component and metric calls. Tensor powers and nested calls use the general parser. Each distinct factor is still reconstructed by the general parser in consumption order. Tensor reconstruction was already cached there; the additional flat path avoids repeated arithmetic parsing and dispatch. Small inputs, insufficient repetition, nested syntax and mapped symbols with `UpValues` use the general path. Eligibility tokenizes complete factors once, checks coverage and factor/operator order, then passes the same tokens to reconstruction. This avoids the whole-expression regular-expression recursion limit on large outputs. Unexpected eligibility results or messages use the general parser; cancellation still propagates. The 131,072-character threshold and roughly fourfold repetition cutoff are heuristics. They do not change the saved format or generated FORM program.
+
+The 3 October 2026 bare-tensor extension reduced median import time on a retained 10.03 MB partial-bubble result from **30.24 s to 12.99 s (57.0% less time)**. Exact comparisons passed, and the scalar control showed no regression. The [measurement report](Tests/Reports/2026-10-03-tensor-fast-parser.md) records raw timings, process memory, validation costs and limitations; this is a separate comparison from the earlier results below.
 
 Against revision `a5a398f`, three alternating full-import pairs on a retained 14.17 MB, 145,098-term result had medians **54.42 s versus 19.54 s**: **2.78x speedup, or 64.1% less wall time**, with exact equality on every run. This measures import, not FORM or a complete calculation. A separate fresh-kernel comparison measured approximately 989 MB versus 870 MB peak tracked kernel memory; these are not OS resident-memory figures. Repeated-session memory retention and mostly unique inputs still need consideration. Methods, controls and limitations are in the [developer guide](DEVELOPER.md#reusing-repeated-factors-in-large-wolfram-imports).
 

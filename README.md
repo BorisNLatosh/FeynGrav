@@ -11,6 +11,7 @@ Supported models include general relativity, minimally coupled scalar, fermion a
 - [Interaction libraries](#interaction-libraries)
 - [CalcFormConverter](#calcformconverter)
 - [Examples](#examples)
+- [Benchmarks](#benchmarks)
 - [Package structure](#package-structure)
 - [Troubleshooting and support](#troubleshooting-and-support)
 - [Version history](#version-history)
@@ -86,6 +87,10 @@ The [Examples directory](Examples) contains complete notebooks. Run their setup 
 | [Graviton_Scalar_Vertex_at_First_Loop.nb](Examples/Graviton_Scalar_Vertex_at_First_Loop.nb) | A one-loop graviton–scalar vertex calculation. |
 
 The converter's [ScalarBubble.wl](CalcFormConverter/Examples/ScalarBubble.wl) demonstrates manual and automated FORM workflows for a scalar-projected quadratic-gravity bubble. It requires the cubic quadratic-gravity library, loaded with `importQuadraticGravity[1]`, and FORM/TFORM for execution.
+
+## Benchmarks
+
+The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, import and complete CalcFormConverter calls. Select **Quick** or **Full** before running. Inputs and import fixtures are generated locally; no extra tools beyond Mathematica, the package dependencies, and FORM/TFORM are required. Reports include raw timings, validation status and source hashes.
 
 ## Package structure
 

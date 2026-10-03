@@ -1,0 +1,665 @@
+{
+  "Date": "2026-10-03",
+  "Timezone": "Europe/Moscow",
+  "Summary": {
+    "small": {
+      "baseline": {
+        "MedianSeconds": 0.662198,
+        "RangeSeconds": [
+          0.638693,
+          0.702438
+        ]
+      },
+      "candidate": {
+        "MedianSeconds": 0.298672,
+        "RangeSeconds": [
+          0.293282,
+          0.330687
+        ]
+      },
+      "ReductionPercent": 54.896873744710796
+    },
+    "partial": {
+      "candidate": {
+        "MedianSeconds": 12.994945,
+        "RangeSeconds": [
+          12.775178,
+          13.810757
+        ]
+      },
+      "baseline": {
+        "MedianSeconds": 30.236768,
+        "RangeSeconds": [
+          29.96967,
+          30.631674
+        ]
+      },
+      "ReductionPercent": 57.02270493989305
+    },
+    "scalar": {
+      "baseline": {
+        "MedianSeconds": 0.804276,
+        "RangeSeconds": [
+          0.796718,
+          0.814988
+        ]
+      },
+      "candidate": {
+        "MedianSeconds": 0.786896,
+        "RangeSeconds": [
+          0.785741,
+          0.801498
+        ]
+      },
+      "ReductionPercent": 2.1609497237266795
+    }
+  },
+  "SourceHashes": {
+    "baseline": {
+      "CalcFormConverter.wl": "dc82043da4da011f542e510856037bed7cc1cf30f89b6de00cebeaa9e6dbbfae",
+      "FORMRuntime.wl": "565bd8c55162b8900ede3441d33d8f1f0edd9e6c2b358806c9ae591b116003a5"
+    },
+    "candidate": {
+      "CalcFormConverter.wl": "feba8c3a854fec1ebea43fb78ac1dce1d1cd7c798fdf5a2094ad9def1cafd321",
+      "FORMRuntime.wl": "565bd8c55162b8900ede3441d33d8f1f0edd9e6c2b358806c9ae591b116003a5"
+    }
+  },
+  "Fixtures": {
+    "small.out": {
+      "Bytes": 250114,
+      "SHA256": "dd6a54b4f6cd32f9a987bc218b1de18cc6e3235f610c802136fab033ae3f2176"
+    },
+    "mapping.json": {
+      "Bytes": 7718,
+      "SHA256": "74f18b486324a11c70058f0e3f7573169f5d93ae042e491fa7942a4bae5a6d04"
+    },
+    "scalar.out": {
+      "Bytes": 320070,
+      "SHA256": "890112f3801fd266495d278b6a82aa96af56000be43a1f479ae2534eba3a226e"
+    },
+    "partial.out": {
+      "Bytes": 10033002,
+      "SHA256": "24b6ca44fe8e34d4595069a60adaf499069c41daa0244fb616c648cc6106826e"
+    }
+  },
+  "Limits": {
+    "PhaseSeconds": 300,
+    "RSSBytes": 6442450944,
+    "MinimumAvailableBytes": 2147483648,
+    "SamplingSeconds": 0.05
+  },
+  "Cases": {
+    "small": {
+      "baseline": {
+        "Timing": {
+          "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+          "FeynCalcVersion": "10.2.1",
+          "Rows": [
+            {
+              "Phase": "First",
+              "Seconds": 0.909096,
+              "KernelBeforeBytes": 165056536,
+              "KernelAfterBytes": 178862016,
+              "KernelReleasedBytes": 177453512,
+              "EvaluationPeakBytes": 15025080,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            },
+            {
+              "Phase": "Warmup",
+              "Seconds": 0.674855,
+              "KernelBeforeBytes": 177454552,
+              "KernelAfterBytes": 187340328,
+              "KernelReleasedBytes": 185920288,
+              "EvaluationPeakBytes": 11105760,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            },
+            {
+              "Phase": "Measured1",
+              "Seconds": 0.702438,
+              "KernelBeforeBytes": 185921200,
+              "KernelAfterBytes": 196320648,
+              "KernelReleasedBytes": 194904640,
+              "EvaluationPeakBytes": 11625328,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            },
+            {
+              "Phase": "Measured2",
+              "Seconds": 0.662198,
+              "KernelBeforeBytes": 194905552,
+              "KernelAfterBytes": 205311896,
+              "KernelReleasedBytes": 203895232,
+              "EvaluationPeakBytes": 11626416,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            },
+            {
+              "Phase": "Measured3",
+              "Seconds": 0.638693,
+              "KernelBeforeBytes": 203896144,
+              "KernelAfterBytes": 213254792,
+              "KernelReleasedBytes": 211891872,
+              "EvaluationPeakBytes": 10578720,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            }
+          ]
+        },
+        "Process": {
+          "ExitCode": 0,
+          "StopReason": null,
+          "StagePeakRSSBytes": {
+            "setup": 284164096,
+            "First": 304099328,
+            "FirstValidation": 359862272,
+            "Warmup": 314552320,
+            "WarmupValidation": 389189632,
+            "Measured1": 348397568,
+            "Measured1Validation": 397025280,
+            "Measured2": 359866368,
+            "Measured2Validation": 410095616,
+            "Measured3": 367169536,
+            "Measured3Validation": 417304576
+          },
+          "MinimumAvailableMemoryBytes": 10382823424,
+          "WallSeconds": 8.017779415997211,
+          "Command": [
+            "/usr/local/bin/math",
+            "-noinit",
+            "-noprompt",
+            "-script",
+            "/tmp/cfc-tensor-fast-20261003-140233/small-baseline/run.wls"
+          ]
+        }
+      },
+      "candidate": {
+        "Timing": {
+          "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+          "FeynCalcVersion": "10.2.1",
+          "Rows": [
+            {
+              "Phase": "First",
+              "Seconds": 0.534098,
+              "KernelBeforeBytes": 165052704,
+              "KernelAfterBytes": 171999016,
+              "KernelReleasedBytes": 171277560,
+              "EvaluationPeakBytes": 16045696,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            },
+            {
+              "Phase": "Warmup",
+              "Seconds": 0.29573,
+              "KernelBeforeBytes": 171278600,
+              "KernelAfterBytes": 174793088,
+              "KernelReleasedBytes": 174067512,
+              "EvaluationPeakBytes": 12613632,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            },
+            {
+              "Phase": "Measured1",
+              "Seconds": 0.293282,
+              "KernelBeforeBytes": 174068424,
+              "KernelAfterBytes": 177585952,
+              "KernelReleasedBytes": 176860184,
+              "EvaluationPeakBytes": 12616416,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            },
+            {
+              "Phase": "Measured2",
+              "Seconds": 0.330687,
+              "KernelBeforeBytes": 176861096,
+              "KernelAfterBytes": 181165024,
+              "KernelReleasedBytes": 180439320,
+              "EvaluationPeakBytes": 12878552,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            },
+            {
+              "Phase": "Measured3",
+              "Seconds": 0.298672,
+              "KernelBeforeBytes": 180440232,
+              "KernelAfterBytes": 183958016,
+              "KernelReleasedBytes": 183283024,
+              "EvaluationPeakBytes": 12092536,
+              "Hash": "d47cce7c22b46ef45c543f6664725604da48d971032721cf9a237747f5fbdb22",
+              "Leaves": 256305
+            }
+          ]
+        },
+        "Process": {
+          "ExitCode": 0,
+          "StopReason": null,
+          "StagePeakRSSBytes": {
+            "setup": 284078080,
+            "First": 304603136,
+            "FirstValidation": 351920128,
+            "Warmup": 334188544,
+            "WarmupValidation": 380653568,
+            "Measured1": 336416768,
+            "Measured1Validation": 383930368,
+            "Measured2": 339038208,
+            "Measured2Validation": 382554112,
+            "Measured3": 344219648,
+            "Measured3Validation": 391667712,
+            "Complete": 0
+          },
+          "MinimumAvailableMemoryBytes": 10396901376,
+          "WallSeconds": 6.0516592750063865,
+          "Command": [
+            "/usr/local/bin/math",
+            "-noinit",
+            "-noprompt",
+            "-script",
+            "/tmp/cfc-tensor-fast-20261003-140233/small-candidate/run.wls"
+          ]
+        }
+      },
+      "ExactValidation": {
+        "SameQ": true
+      },
+      "ExactValidationProcess": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 298962944
+        },
+        "MinimumAvailableMemoryBytes": 10525450240,
+        "WallSeconds": 3.1777379249979276,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-tensor-fast-20261003-140233/small-validation/run.wls"
+        ]
+      }
+    },
+    "partial": {
+      "baseline": {
+        "Timing": {
+          "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+          "FeynCalcVersion": "10.2.1",
+          "Rows": [
+            {
+              "Phase": "First",
+              "Seconds": 29.488608,
+              "KernelBeforeBytes": 165057320,
+              "KernelAfterBytes": 580147880,
+              "KernelReleasedBytes": 520192016,
+              "EvaluationPeakBytes": 461155696,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            },
+            {
+              "Phase": "Warmup",
+              "Seconds": 28.50112,
+              "KernelBeforeBytes": 520193056,
+              "KernelAfterBytes": 933214008,
+              "KernelReleasedBytes": 872433072,
+              "EvaluationPeakBytes": 459086256,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            },
+            {
+              "Phase": "Measured1",
+              "Seconds": 30.236768,
+              "KernelBeforeBytes": 872433984,
+              "KernelAfterBytes": 1318263080,
+              "KernelReleasedBytes": 1258222216,
+              "EvaluationPeakBytes": 491894016,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            },
+            {
+              "Phase": "Measured2",
+              "Seconds": 30.631674,
+              "KernelBeforeBytes": 1258223128,
+              "KernelAfterBytes": 1636868552,
+              "KernelReleasedBytes": 1576907528,
+              "EvaluationPeakBytes": 424710472,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            },
+            {
+              "Phase": "Measured3",
+              "Seconds": 29.96967,
+              "KernelBeforeBytes": 1576908440,
+              "KernelAfterBytes": 2089858192,
+              "KernelReleasedBytes": 2030914840,
+              "EvaluationPeakBytes": 559053016,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            }
+          ]
+        },
+        "Process": {
+          "ExitCode": 0,
+          "StopReason": null,
+          "StagePeakRSSBytes": {
+            "setup": 284086272,
+            "First": 777449472,
+            "FirstValidation": 3437740032,
+            "Warmup": 1159372800,
+            "WarmupValidation": 3777961984,
+            "Measured1": 1604935680,
+            "Measured1Validation": 4298330112,
+            "Measured2": 1896439808,
+            "Measured2Validation": 4500733952,
+            "Measured3": 2353942528,
+            "Measured3Validation": 4955172864,
+            "Complete": 0
+          },
+          "MinimumAvailableMemoryBytes": 5975347200,
+          "WallSeconds": 216.2512812740024,
+          "Command": [
+            "/usr/local/bin/math",
+            "-noinit",
+            "-noprompt",
+            "-script",
+            "/tmp/cfc-tensor-fast-20261003-140233/partial-baseline/run.wls"
+          ]
+        }
+      },
+      "candidate": {
+        "Timing": {
+          "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+          "FeynCalcVersion": "10.2.1",
+          "Rows": [
+            {
+              "Phase": "First",
+              "Seconds": 12.1576,
+              "KernelBeforeBytes": 165053344,
+              "KernelAfterBytes": 209114256,
+              "KernelReleasedBytes": 176433896,
+              "EvaluationPeakBytes": 403251344,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            },
+            {
+              "Phase": "Warmup",
+              "Seconds": 12.887878,
+              "KernelBeforeBytes": 176434936,
+              "KernelAfterBytes": 217855104,
+              "KernelReleasedBytes": 185170368,
+              "EvaluationPeakBytes": 400064912,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            },
+            {
+              "Phase": "Measured1",
+              "Seconds": 12.775178,
+              "KernelBeforeBytes": 185171216,
+              "KernelAfterBytes": 225801032,
+              "KernelReleasedBytes": 193116872,
+              "EvaluationPeakBytes": 399255128,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            },
+            {
+              "Phase": "Measured2",
+              "Seconds": 12.994945,
+              "KernelBeforeBytes": 193117720,
+              "KernelAfterBytes": 233746344,
+              "KernelReleasedBytes": 201062056,
+              "EvaluationPeakBytes": 399236592,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            },
+            {
+              "Phase": "Measured3",
+              "Seconds": 13.810757,
+              "KernelBeforeBytes": 201062904,
+              "KernelAfterBytes": 241689392,
+              "KernelReleasedBytes": 210112464,
+              "EvaluationPeakBytes": 399218712,
+              "Hash": "72951a1c643f56ed454332feccb563b3adf96f8abebb941dfcabc6cda228f658",
+              "Leaves": 9930773
+            }
+          ]
+        },
+        "Process": {
+          "ExitCode": 0,
+          "StopReason": null,
+          "StagePeakRSSBytes": {
+            "setup": 284164096,
+            "First": 718041088,
+            "FirstValidation": 3064279040,
+            "Warmup": 724660224,
+            "WarmupValidation": 3087335424,
+            "Measured1": 733769728,
+            "Measured1Validation": 3087904768,
+            "Measured2": 741765120,
+            "Measured2Validation": 3111804928,
+            "Measured3": 749826048,
+            "Measured3Validation": 3111800832
+          },
+          "MinimumAvailableMemoryBytes": 7726612480,
+          "WallSeconds": 132.8539153439924,
+          "Command": [
+            "/usr/local/bin/math",
+            "-noinit",
+            "-noprompt",
+            "-script",
+            "/tmp/cfc-tensor-fast-20261003-140233/partial-candidate/run.wls"
+          ]
+        }
+      },
+      "ExactValidation": {
+        "SameQ": true
+      },
+      "ExactValidationProcess": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 822411264
+        },
+        "MinimumAvailableMemoryBytes": 10065870848,
+        "WallSeconds": 15.126008929000818,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-tensor-fast-20261003-140233/partial-validation/run.wls"
+        ]
+      }
+    },
+    "scalar": {
+      "baseline": {
+        "Timing": {
+          "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+          "FeynCalcVersion": "10.2.1",
+          "Rows": [
+            {
+              "Phase": "First",
+              "Seconds": 1.01195,
+              "KernelBeforeBytes": 165056544,
+              "KernelAfterBytes": 168592352,
+              "KernelReleasedBytes": 168596200,
+              "EvaluationPeakBytes": 29029936,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            },
+            {
+              "Phase": "Warmup",
+              "Seconds": 0.809413,
+              "KernelBeforeBytes": 168597240,
+              "KernelAfterBytes": 168712448,
+              "KernelReleasedBytes": 168712240,
+              "EvaluationPeakBytes": 25609680,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            },
+            {
+              "Phase": "Measured1",
+              "Seconds": 0.796718,
+              "KernelBeforeBytes": 168713152,
+              "KernelAfterBytes": 168828504,
+              "KernelReleasedBytes": 168828296,
+              "EvaluationPeakBytes": 25609824,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            },
+            {
+              "Phase": "Measured2",
+              "Seconds": 0.804276,
+              "KernelBeforeBytes": 168829208,
+              "KernelAfterBytes": 168939400,
+              "KernelReleasedBytes": 168939192,
+              "EvaluationPeakBytes": 25604512,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            },
+            {
+              "Phase": "Measured3",
+              "Seconds": 0.814988,
+              "KernelBeforeBytes": 168940104,
+              "KernelAfterBytes": 169054824,
+              "KernelReleasedBytes": 169106008,
+              "EvaluationPeakBytes": 25689528,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            }
+          ]
+        },
+        "Process": {
+          "ExitCode": 0,
+          "StopReason": null,
+          "StagePeakRSSBytes": {
+            "setup": 284192768,
+            "First": 317399040,
+            "Warmup": 319823872,
+            "Measured1": 317595648,
+            "Measured2": 317661184,
+            "Measured3": 320225280
+          },
+          "MinimumAvailableMemoryBytes": 10617806848,
+          "WallSeconds": 7.262597587992786,
+          "Command": [
+            "/usr/local/bin/math",
+            "-noinit",
+            "-noprompt",
+            "-script",
+            "/tmp/cfc-tensor-fast-20261003-140233/scalar-baseline/run.wls"
+          ]
+        }
+      },
+      "candidate": {
+        "Timing": {
+          "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+          "FeynCalcVersion": "10.2.1",
+          "Rows": [
+            {
+              "Phase": "First",
+              "Seconds": 1.188861,
+              "KernelBeforeBytes": 165057368,
+              "KernelAfterBytes": 168593328,
+              "KernelReleasedBytes": 168597176,
+              "EvaluationPeakBytes": 29030024,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            },
+            {
+              "Phase": "Warmup",
+              "Seconds": 0.8507,
+              "KernelBeforeBytes": 168598216,
+              "KernelAfterBytes": 168713424,
+              "KernelReleasedBytes": 168713216,
+              "EvaluationPeakBytes": 25609616,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            },
+            {
+              "Phase": "Measured1",
+              "Seconds": 0.801498,
+              "KernelBeforeBytes": 168714128,
+              "KernelAfterBytes": 168823712,
+              "KernelReleasedBytes": 168823568,
+              "EvaluationPeakBytes": 25609760,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            },
+            {
+              "Phase": "Measured2",
+              "Seconds": 0.786896,
+              "KernelBeforeBytes": 168824480,
+              "KernelAfterBytes": 168939488,
+              "KernelReleasedBytes": 168939280,
+              "EvaluationPeakBytes": 25609264,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            },
+            {
+              "Phase": "Measured3",
+              "Seconds": 0.785741,
+              "KernelBeforeBytes": 168940192,
+              "KernelAfterBytes": 169054912,
+              "KernelReleasedBytes": 169106096,
+              "EvaluationPeakBytes": 25689528,
+              "Hash": "f0785a595554ec084ac67f07221c1d6099cff143796bda85a47ab26a46172c5b",
+              "Leaves": 18
+            }
+          ]
+        },
+        "Process": {
+          "ExitCode": 0,
+          "StopReason": null,
+          "StagePeakRSSBytes": {
+            "setup": 284098560,
+            "First": 315334656,
+            "Warmup": 317366272,
+            "Measured1": 319725568,
+            "Measured2": 317562880,
+            "Measured3": 319594496
+          },
+          "MinimumAvailableMemoryBytes": 10514014208,
+          "WallSeconds": 7.667558429995552,
+          "Command": [
+            "/usr/local/bin/math",
+            "-noinit",
+            "-noprompt",
+            "-script",
+            "/tmp/cfc-tensor-fast-20261003-140233/scalar-candidate/run.wls"
+          ]
+        }
+      },
+      "ExactValidation": {
+        "SameQ": true
+      },
+      "ExactValidationProcess": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 283996160
+        },
+        "MinimumAvailableMemoryBytes": 10589822976,
+        "WallSeconds": 3.026240417995723,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-tensor-fast-20261003-140233/scalar-validation/run.wls"
+        ]
+      }
+    }
+  },
+  "Tests": {
+    "Core": 111,
+    "Parser": 121,
+    "Transactions": 20,
+    "Installer": 39,
+    "FORMExport": 31,
+    "FORMStages": 128,
+    "FORMImport": 65,
+    "Failures": 0,
+    "NewParserAssertions": 39
+  },
+  "LocalHarness": "/tmp/cfc-tensor-fast-20261003-140233/bench.py",
+  "HarnessSHA256": "c6710e6ca4456bf0650899354d7cc148eff3caf4b5f46162299e7fb1e0b7aea7"
+}

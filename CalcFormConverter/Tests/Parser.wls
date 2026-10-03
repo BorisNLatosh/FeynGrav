@@ -116,6 +116,83 @@ assert["mapped UpValues retain per-occurrence evaluation",
     <|"cfs1" -> FlatParserTest`x|>, D] === 5250 && flatEvaluationCount === 100];
 Clear[FlatParserTest`x];
 
+(* Bare tensor factors extend lexical eligibility only. Reconstruction and
+   failures must continue to agree with the general parser. *)
+tensorComponent = pName <> "(" <> muName <> ")";
+tensorMetric = "d_(" <> muName <> "," <> nuName <> ")";
+tensorTail = StringRepeat["+" <> tensorComponent <> "+" <> tensorMetric, 8];
+tensorFast[body_, vals_:flatValues, dimension_:flatDim] :=
+ Block[{CalcFormConverter`Private`$flatParserMinimumCharacters = 0},
+  Catch[CalcFormConverter`Private`parseResult[body, vals, dimension],
+   CalcFormConverter`Private`$failureTag]];
+tensorGeneral[body_, vals_:flatValues, dimension_:flatDim] :=
+ Catch[CalcFormConverter`Private`parseGeneralResult[body, vals, dimension],
+  CalcFormConverter`Private`$failureTag];
+Scan[Function[body, assert["tensor fast/general agreement: " <> body,
+ tensorFast[body <> tensorTail] === tensorGeneral[body <> tensorTail]]], {
+ tensorComponent, "-" <> tensorComponent, "+" <> tensorMetric,
+ "2*" <> tensorComponent <> "*" <> tensorMetric <> "/3",
+ "24/3/2*" <> tensorComponent,
+ pName <> " \t(\n" <> muName <> " )+d_ ( " <> muName <> " , " <> nuName <> " )",
+ "1/0+" <> pName <> "(cfi999)", "0*cfv999(" <> muName <> ")",
+ pName <> "(cfi999)*0", "d_(cfi999," <> nuName <> ")",
+ "d_(" <> pName <> "," <> nuName <> ")", pName <> "(" <> xName <> ")",
+ pName <> "(cfi 1)", pName <> "(" <> muName <> "suffix)",
+ tensorComponent <> " 2", tensorMetric <> "+", "d_(" <> muName <> ",)",
+ tensorComponent <> "^0+cfs999", tensorComponent <> "^2^3"}];
+Scan[Function[ending, assert["tensor powers and nested syntax fall back: " <> ending,
+ Block[{CalcFormConverter`Private`$flatParserMinimumCharacters = 0,
+   CalcFormConverter`Private`parseFlatResult, CalcFormConverter`Private`parseGeneralResult},
+  CalcFormConverter`Private`parseFlatResult[___] := "flat";
+  CalcFormConverter`Private`parseGeneralResult[___] := "general";
+  CalcFormConverter`Private`parseResult[ending <> tensorTail, flatValues, flatDim] === "general"]]],
+ {tensorComponent <> "^2", tensorMetric <> "^-1", pName <> "((" <> muName <> "))"}];
+assert["bare repeated tensor factors select flat parser",
+ Block[{CalcFormConverter`Private`$flatParserMinimumCharacters = 0,
+   CalcFormConverter`Private`parseFlatResult, CalcFormConverter`Private`parseGeneralResult},
+  CalcFormConverter`Private`parseFlatResult[___] := "flat";
+  CalcFormConverter`Private`parseGeneralResult[___] := "general";
+  CalcFormConverter`Private`parseResult[tensorComponent <> tensorTail, flatValues, flatDim] === "flat"]];
+Scan[Function[dimension, assert["tensor dimensions remain local: " <> ToString[dimension],
+ tensorFast[tensorComponent <> tensorTail, flatValues, dimension] ===
+ tensorGeneral[tensorComponent <> tensorTail, flatValues, dimension]]], {4, D, D-4}];
+assert["tensor mapped values remain local between imports",
+ With[{changed = flatValues /. p -> q},
+  tensorFast[tensorComponent <> tensorTail, changed] ===
+  tensorGeneral[tensorComponent <> tensorTail, changed] &&
+  tensorFast[tensorComponent <> tensorTail, changed] =!= tensorFast[tensorComponent <> tensorTail]]];
+Scan[Function[code, assert["tensor Unicode whitespace agreement: " <> ToString[code],
+ With[{body = pName <> FromCharacterCode[code] <> "(" <> muName <> ")" <> tensorTail},
+  tensorFast[body] === tensorGeneral[body]]]], {9, 10, 133, 160, 8232}];
+(* Pair rules can change between imports. Keep these artificial rules local and
+   exercise actual reconstructed heads, independently of mapped-symbol guards. *)
+Internal`InheritedBlock[{Pair},
+ Unprotect[Pair];
+ Pair[Momentum[p, D], Momentum[q, D]] = 7;
+ tensorRuleBody = pName <> "." <> qName <> tensorTail;
+ tensorRuleFirst = tensorFast[tensorRuleBody];
+ assert["tensor mixed scalar-product rule agrees", tensorRuleFirst === tensorGeneral[tensorRuleBody]];
+ Pair[Momentum[p, D], Momentum[q, D]] = 11;
+ assert["scalar-product rule changes are visible next import",
+  tensorFast[tensorRuleBody] === tensorGeneral[tensorRuleBody] &&
+  tensorFast[tensorRuleBody] - tensorRuleFirst === 4];
+];
+
+(* Reconstructed tensor heads need not have inert DownValues. The existing
+   general parser already caches complete calls; preserve that evaluation count. *)
+Internal`InheritedBlock[{Pair},
+ Unprotect[Pair]; DownValues[Pair] = {};
+ Pair[___] := (++tensorHeadEvaluations; tensorHeadValue);
+ tensorHeadEvaluations = 0;
+ tensorHeadFast = tensorFast[tensorComponent <> tensorTail];
+ tensorHeadFastCount = tensorHeadEvaluations;
+ tensorHeadEvaluations = 0;
+ tensorHeadGeneral = tensorGeneral[tensorComponent <> tensorTail];
+ assert["tensor reconstruction evaluation count agrees",
+  tensorHeadFast === tensorHeadGeneral && tensorHeadFastCount === tensorHeadEvaluations &&
+  tensorHeadFastCount === 2];
+];
+
 (* Exercise matcher depth with factors rather than whitespace padding. The
    former whole-result regex warns and rejects this otherwise valid stream.
    Stub reconstruction here: existing tests above compare real parser results. *)

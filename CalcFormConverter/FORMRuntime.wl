@@ -86,7 +86,7 @@ inspectRuntimeProcess[process_] := <|
 runtimeProcess[command_List, directory_String, limit_, cancellable_: True, progress_: False] := Module[
  {process = None, out = None, err = None, outFile, errFile, tails = <|"StandardOutput" -> "", "StandardError" -> ""|>,
   status = "Completed", exit = Missing["NotExited"], processState = "NotStarted", started = None, elapsed, nextProgress = $runtimeProgressIntervalSeconds,
-  drain, stop, cleanup, execute, messages = {}, ioFailed = False, inspection},
+  drain, stop, cleanup, execute, messages = {}, launchText, ioFailed = False, inspection},
  outFile = FileNameJoin[{directory, "stdout.log"}]; errFile = FileNameJoin[{directory, "stderr.log"}];
  stop[] := If[MatchQ[process, _ProcessObject] && Quiet[ProcessStatus[process]] === "Running", Quiet[KillProcess[process]]];
  drain[] := Module[{count = 0}, Scan[Function[channel, Module[{chunk, stream},
@@ -109,7 +109,11 @@ runtimeProcess[command_List, directory_String, limit_, cancellable_: True, progr
    Scan[If[MatchQ[#, _OutputStream], Quiet[Close[#]]] &, {out, err}]];
  execute[] := If[!MatchQ[{out, err}, {_OutputStream, _OutputStream}], status = "LogFailed",
    AbortProtect[
-     process = Block[{$MessageList = {}}, With[{p = Quiet[Check[StartProcess[command, ProcessDirectory -> directory], $Failed]]},
+     (* Redirect kernel launch messages into the existing log instead of suppressing
+        them. Re-enable messages locally even under a caller's Quiet; the redirected
+        stream keeps the notebook quiet while preserving diagnostic information. *)
+     process = Block[{$MessageList = {}, $Messages = {err}},
+       With[{p = Quiet[Check[StartProcess[command, ProcessDirectory -> directory], $Failed], None, All]},
        messages = ToString[#, InputForm] & /@ $MessageList; p]]];
    If[!MatchQ[process, _ProcessObject], status = "LaunchFailed",
      started = AbsoluteTime[];
@@ -131,6 +135,13 @@ runtimeProcess[command_List, directory_String, limit_, cancellable_: True, progr
      If[cancellable, execute[], AbortProtect[execute[]]],
      cleanup[]],
    status = "Aborted"];
+ (* Logs are closed by cleanup before reading the launch diagnostic. Keep the
+    rendered text in the returned object because probe files are deleted later.
+    StandardError remains the subprocess output, not a Wolfram kernel message. *)
+ If[status === "LaunchFailed",
+   launchText = Quiet[Check[StringJoin[ReadList[errFile, Character, $runtimeLogTailCharacters]], ""]];
+   If[StringQ[launchText] && StringLength[StringTrim[launchText]] > 0,
+     AppendTo[messages, StringTrim[launchText]]]];
  If[ioFailed && status === "Completed", status = "LogFailed"];
  elapsed = If[NumberQ[started], AbsoluteTime[] - started, Missing["NotStarted"]];
  Join[<|"Status" -> status, "ElapsedSeconds" -> elapsed, "ExitCode" -> exit, "ProcessStatus" -> processState, "Executable" -> First[command],

@@ -10,6 +10,19 @@ missing=CalcFormCheck[FORMExecutable->FileNameJoin[{root,"missing-form"}]];
 assert["missing distinguished",missing["Status"]==="NotFound"];
 nonexec=CalcFormCheck[FORMExecutable->FileNameJoin[{root,"nonexecutable"}]];
 assert["launch failure distinguished",nonexec["Status"]==="LaunchFailed"];
+assert["launch failure retains rendered diagnostic",AnyTrue[nonexec["Messages"],
+ StringContainsQ[#, "nonexecutable"] &]];
+(* Quiet at the call site must not erase diagnostics; redirection must not leak
+   kernel messages into the caller's message stream. *)
+launchCapturePath=FileNameJoin[{root,"launch-message-capture.log"}];
+launchCapture=OpenWrite[launchCapturePath];
+quietNonexec=Block[{$Messages={launchCapture}},
+ Quiet[CalcFormCheck[FORMExecutable->FileNameJoin[{root,"nonexecutable"}]]]];
+Close[launchCapture];
+assert["quiet launch retains diagnostic",AnyTrue[quietNonexec["Messages"],
+ StringContainsQ[#, "nonexecutable"] &]];
+assert["launch diagnostics do not print",StringTrim[Import[launchCapturePath,"Text"]]===""];
+assert["successful probe has no launch messages",info["Messages"]==={}];
 If[$OperatingSystem === "Windows", Print["SKIP: PATH executable permission regression is Unix-specific."],
  pathProbe=CreateDirectory[FileNameJoin[{root,"path-permission-probe"}]];
  Export[FileNameJoin[{pathProbe,"form"}],"This is not executable.\n","Text"];

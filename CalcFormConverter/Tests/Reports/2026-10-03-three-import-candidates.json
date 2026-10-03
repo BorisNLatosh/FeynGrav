@@ -1,0 +1,629 @@
+{
+  "Date": "2026-10-03",
+  "Outcome": "All three candidate families rejected at the small-fixture stage; no production change retained.",
+  "RetainedIncrementalImprovement": 0,
+  "RetainedCumulativeImprovementThisRound": 0,
+  "InitialBaselineSHA256": "feba8c3a854fec1ebea43fb78ac1dce1d1cd7c798fdf5a2094ad9def1cafd321",
+  "FinalProductionSHA256": "feba8c3a854fec1ebea43fb78ac1dce1d1cd7c798fdf5a2094ad9def1cafd321",
+  "ProductionUnchanged": true,
+  "SourceSHA256": {
+    "baseline": "feba8c3a854fec1ebea43fb78ac1dce1d1cd7c798fdf5a2094ad9def1cafd321",
+    "candidate1": "86a6429e88648e6dbb4822eef2be677c423569d414581eef6f65f59c1b91b09c",
+    "candidate2": "bce15f3bf154d6433cd13b403e67330743af31124bd8f49bb79545f5313a161a",
+    "candidate3a": "a256235085927409de3be5ff80755eb13ab1dd845304fef5f34715754f9481b1",
+    "candidate3b": "d9d566399cf9d325e0bd89b144611b2032b20742f6429ee521b04c05bf08036a",
+    "baselineconfirm": "feba8c3a854fec1ebea43fb78ac1dce1d1cd7c798fdf5a2094ad9def1cafd321"
+  },
+  "MeasuredFixture": "small.out",
+  "FixtureHashes": {
+    "small.out": {
+      "Bytes": 250114,
+      "SHA256": "dd6a54b4f6cd32f9a987bc218b1de18cc6e3235f610c802136fab033ae3f2176"
+    },
+    "mapping.json": {
+      "Bytes": 7718,
+      "SHA256": "74f18b486324a11c70058f0e3f7573169f5d93ae042e491fa7942a4bae5a6d04"
+    },
+    "scalar.out": {
+      "Bytes": 320070,
+      "SHA256": "890112f3801fd266495d278b6a82aa96af56000be43a1f479ae2534eba3a226e"
+    },
+    "partial.out": {
+      "Bytes": 10033002,
+      "SHA256": "24b6ca44fe8e34d4595069a60adaf499069c41daa0244fb616c648cc6106826e"
+    }
+  },
+  "ExecutionOrder": [
+    "baseline",
+    "candidate1",
+    "candidate2",
+    "candidate3a",
+    "candidate3b",
+    "baselineconfirm"
+  ],
+  "Runs": {
+    "baseline": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 5.385659,
+            "KernelBeforeBytes": 152655736,
+            "KernelAfterBytes": 159604280,
+            "KernelReleasedBytes": 158878104,
+            "EvaluationPeakBytes": 16047968,
+            "Start": 4000028741.395278,
+            "End": 4000028746.780969,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.286982,
+            "KernelBeforeBytes": 158879280,
+            "KernelAfterBytes": 162398240,
+            "KernelReleasedBytes": 161672168,
+            "EvaluationPeakBytes": 12618128,
+            "Start": 4000028746.790407,
+            "End": 4000028747.077613,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.293927,
+            "KernelBeforeBytes": 161673216,
+            "KernelAfterBytes": 165715328,
+            "KernelReleasedBytes": 164989192,
+            "EvaluationPeakBytes": 12616816,
+            "Start": 4000028747.086833,
+            "End": 4000028747.381002,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.302058,
+            "KernelBeforeBytes": 164990240,
+            "KernelAfterBytes": 168770296,
+            "KernelReleasedBytes": 168044096,
+            "EvaluationPeakBytes": 12354632,
+            "Start": 4000028747.39059,
+            "End": 4000028747.692671,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.283111,
+            "KernelBeforeBytes": 168045144,
+            "KernelAfterBytes": 171562728,
+            "KernelReleasedBytes": 170893208,
+            "EvaluationPeakBytes": 12092024,
+            "Start": 4000028747.702069,
+            "End": 4000028747.985205,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292941824,
+          "First": 307810304,
+          "Warmup": 310104064,
+          "Measured1": 312725504,
+          "Measured2": 315346944,
+          "Measured2Cleanup": 315281408,
+          "Measured3": 318361600,
+          "SaveResult": 318492672,
+          "Complete": 318357504
+        },
+        "MinimumAvailableMemoryBytes": 10233606144,
+        "WallSeconds": 25.201295318998746,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-three-20261003-150431/small-baseline/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.293927,
+      "RangeSeconds": [
+        0.283111,
+        0.302058
+      ],
+      "MeasuredPeakRSSBytes": 318361600,
+      "ScriptSHA256": "54dd861392638c8a87cb0aa7171ead818519045e30dfa3561703a2bd620db969",
+      "LogSHA256": "73ff559e14a7b8d5ef6e66bb227d2bee68ab3a2f083deefb868b936d6c8ffd74"
+    },
+    "candidate1": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 5.343755,
+            "KernelBeforeBytes": 152658632,
+            "KernelAfterBytes": 159334200,
+            "KernelReleasedBytes": 158608536,
+            "EvaluationPeakBytes": 10864280,
+            "Start": 4000028766.092906,
+            "End": 4000028771.436692,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.288853,
+            "KernelBeforeBytes": 158609712,
+            "KernelAfterBytes": 162129896,
+            "KernelReleasedBytes": 161403824,
+            "EvaluationPeakBytes": 7708384,
+            "Start": 4000028771.446035,
+            "End": 4000028771.735112,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.294166,
+            "KernelBeforeBytes": 161404872,
+            "KernelAfterBytes": 165185992,
+            "KernelReleasedBytes": 164459984,
+            "EvaluationPeakBytes": 7969192,
+            "Start": 4000028771.736829,
+            "End": 4000028772.031221,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.288075,
+            "KernelBeforeBytes": 164461032,
+            "KernelAfterBytes": 168242176,
+            "KernelReleasedBytes": 167516168,
+            "EvaluationPeakBytes": 7969280,
+            "Start": 4000028772.040511,
+            "End": 4000028772.328605,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.290739,
+            "KernelBeforeBytes": 167517216,
+            "KernelAfterBytes": 171036016,
+            "KernelReleasedBytes": 170366688,
+            "EvaluationPeakBytes": 7706736,
+            "Start": 4000028772.330388,
+            "End": 4000028772.621143,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292794368,
+          "First": 303841280,
+          "Warmup": 306200576,
+          "Measured1": 308625408,
+          "Measured2": 311312384,
+          "Measured3": 314130432,
+          "SaveResult": 314392576,
+          "Complete": 314384384
+        },
+        "MinimumAvailableMemoryBytes": 10116567040,
+        "WallSeconds": 24.60225810499105,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-three-20261003-150431/small-candidate1/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.290739,
+      "RangeSeconds": [
+        0.288075,
+        0.294166
+      ],
+      "MeasuredPeakRSSBytes": 314130432,
+      "ScriptSHA256": "cd215d82cf5be2b27eea5307a869611f5da2a078200c66ab15eccb14689957ea",
+      "LogSHA256": "0c4dbc414f86a28aa9a2f9a6b1f843a291d37d2a4316c1236a09a951ed9b0b05"
+    },
+    "candidate2": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 4.953644,
+            "KernelBeforeBytes": 152657648,
+            "KernelAfterBytes": 159607624,
+            "KernelReleasedBytes": 158881448,
+            "EvaluationPeakBytes": 16049392,
+            "Start": 4000029015.3356,
+            "End": 4000029020.289279,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.342419,
+            "KernelBeforeBytes": 158882624,
+            "KernelAfterBytes": 162403088,
+            "KernelReleasedBytes": 161677016,
+            "EvaluationPeakBytes": 12619624,
+            "Start": 4000029020.298536,
+            "End": 4000029020.641176,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.340551,
+            "KernelBeforeBytes": 161678064,
+            "KernelAfterBytes": 165721608,
+            "KernelReleasedBytes": 164995472,
+            "EvaluationPeakBytes": 12618240,
+            "Start": 4000029020.650805,
+            "End": 4000029020.991545,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.341902,
+            "KernelBeforeBytes": 164996520,
+            "KernelAfterBytes": 168778008,
+            "KernelReleasedBytes": 168051808,
+            "EvaluationPeakBytes": 12356056,
+            "Start": 4000029021.000695,
+            "End": 4000029021.342626,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.337048,
+            "KernelBeforeBytes": 168052856,
+            "KernelAfterBytes": 171571936,
+            "KernelReleasedBytes": 170902416,
+            "EvaluationPeakBytes": 12093448,
+            "Start": 4000029021.346477,
+            "End": 4000029021.683551,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292814848,
+          "First": 308092928,
+          "Warmup": 310517760,
+          "Measured1": 313204736,
+          "Measured2": 315891712,
+          "Measured3": 318709760,
+          "SaveResult": 318574592,
+          "Complete": 318279680
+        },
+        "MinimumAvailableMemoryBytes": 10206576640,
+        "WallSeconds": 24.389165417989716,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-three-20261003-150431/small-candidate2/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.340551,
+      "RangeSeconds": [
+        0.337048,
+        0.341902
+      ],
+      "MeasuredPeakRSSBytes": 318709760,
+      "ScriptSHA256": "45977f73fa0c56d94eaf387bca7c7a3cf4eec0bf11e6d2c278b49625d28a091b",
+      "LogSHA256": "c739d4a01dd21ac39d083e4664fef9a6ed3e50c43cad28fea3250d638e0bd07c"
+    },
+    "candidate3a": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 6.682693,
+            "KernelBeforeBytes": 152652960,
+            "KernelAfterBytes": 159602920,
+            "KernelReleasedBytes": 158877320,
+            "EvaluationPeakBytes": 15676496,
+            "Start": 4000029167.077641,
+            "End": 4000029173.760367,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.304769,
+            "KernelBeforeBytes": 158878496,
+            "KernelAfterBytes": 162396232,
+            "KernelReleasedBytes": 161670352,
+            "EvaluationPeakBytes": 12243760,
+            "Start": 4000029173.769573,
+            "End": 4000029174.074361,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.30546,
+            "KernelBeforeBytes": 161671400,
+            "KernelAfterBytes": 165712840,
+            "KernelReleasedBytes": 164986576,
+            "EvaluationPeakBytes": 12243328,
+            "Start": 4000029174.083576,
+            "End": 4000029174.389057,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.305808,
+            "KernelBeforeBytes": 164987624,
+            "KernelAfterBytes": 168766648,
+            "KernelReleasedBytes": 168040704,
+            "EvaluationPeakBytes": 11980520,
+            "Start": 4000029174.39841,
+            "End": 4000029174.704442,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.30373,
+            "KernelBeforeBytes": 168041752,
+            "KernelAfterBytes": 171559024,
+            "KernelReleasedBytes": 170889256,
+            "EvaluationPeakBytes": 11719032,
+            "Start": 4000029174.713592,
+            "End": 4000029175.01735,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292737024,
+          "First": 307720192,
+          "Warmup": 309620736,
+          "Measured1": 312897536,
+          "Measured2": 315650048,
+          "Measured3": 318205952,
+          "SaveResult": 318189568,
+          "Complete": 317894656
+        },
+        "MinimumAvailableMemoryBytes": 10448515072,
+        "WallSeconds": 26.89718063500186,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-three-20261003-150431/small-candidate3a/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.30546,
+      "RangeSeconds": [
+        0.30373,
+        0.305808
+      ],
+      "MeasuredPeakRSSBytes": 318205952,
+      "ScriptSHA256": "ce3e586db36a2c2726e07001df0556d9220dc9025238cc53bea68dcc26428897",
+      "LogSHA256": "15f6d56b52967abffd93c6997688ef465637cec25118282920ad2f5aff732802"
+    },
+    "candidate3b": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 4.965138,
+            "KernelBeforeBytes": 152656392,
+            "KernelAfterBytes": 159605712,
+            "KernelReleasedBytes": 158879536,
+            "EvaluationPeakBytes": 16048680,
+            "Start": 4000029239.006832,
+            "End": 4000029243.972006,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.30635,
+            "KernelBeforeBytes": 158880712,
+            "KernelAfterBytes": 162399672,
+            "KernelReleasedBytes": 161673600,
+            "EvaluationPeakBytes": 12618064,
+            "Start": 4000029243.97446,
+            "End": 4000029244.281099,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.331412,
+            "KernelBeforeBytes": 161674648,
+            "KernelAfterBytes": 165716696,
+            "KernelReleasedBytes": 164990560,
+            "EvaluationPeakBytes": 12616688,
+            "Start": 4000029244.290385,
+            "End": 4000029244.622119,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.347429,
+            "KernelBeforeBytes": 164991608,
+            "KernelAfterBytes": 168771664,
+            "KernelReleasedBytes": 168045464,
+            "EvaluationPeakBytes": 12354568,
+            "Start": 4000029244.631642,
+            "End": 4000029244.979103,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.340267,
+            "KernelBeforeBytes": 168046512,
+            "KernelAfterBytes": 171564096,
+            "KernelReleasedBytes": 170894576,
+            "EvaluationPeakBytes": 12092024,
+            "Start": 4000029244.988614,
+            "End": 4000029245.328909,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292749312,
+          "First": 307822592,
+          "Warmup": 309919744,
+          "Measured1": 312737792,
+          "Measured2": 315490304,
+          "Measured3": 318570496,
+          "SaveResult": 318337024,
+          "Complete": 318042112
+        },
+        "MinimumAvailableMemoryBytes": 10381488128,
+        "WallSeconds": 24.092002477002097,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-three-20261003-150431/small-candidate3b/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.340267,
+      "RangeSeconds": [
+        0.331412,
+        0.347429
+      ],
+      "MeasuredPeakRSSBytes": 318570496,
+      "ScriptSHA256": "011c4aa7f2e3d1509142d36615fd1631a71ca9af7f87954a0100aafc422030e9",
+      "LogSHA256": "03f7843020c2695e0612f2b857cc0a6393491356cac1f68aaa4018f4ce23a29c"
+    },
+    "baselineconfirm": {
+      "Timings": {
+        "Version": "15.0.1 for Linux x86 (64-bit) (July 2, 2026)",
+        "Rows": [
+          {
+            "Phase": "First",
+            "Seconds": 5.331646,
+            "KernelBeforeBytes": 152652992,
+            "KernelAfterBytes": 159600832,
+            "KernelReleasedBytes": 158875040,
+            "EvaluationPeakBytes": 16047584,
+            "Start": 4000029334.959189,
+            "End": 4000029340.290867,
+            "Stages": []
+          },
+          {
+            "Phase": "Warmup",
+            "Seconds": 0.291024,
+            "KernelBeforeBytes": 158876216,
+            "KernelAfterBytes": 162395168,
+            "KernelReleasedBytes": 161669096,
+            "EvaluationPeakBytes": 12618120,
+            "Start": 4000029340.300004,
+            "End": 4000029340.591258,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured1",
+            "Seconds": 0.292747,
+            "KernelBeforeBytes": 161670144,
+            "KernelAfterBytes": 165712192,
+            "KernelReleasedBytes": 164985928,
+            "EvaluationPeakBytes": 12616816,
+            "Start": 4000029340.600459,
+            "End": 4000029340.893461,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured2",
+            "Seconds": 0.306765,
+            "KernelBeforeBytes": 164986976,
+            "KernelAfterBytes": 168767456,
+            "KernelReleasedBytes": 168041320,
+            "EvaluationPeakBytes": 12355056,
+            "Start": 4000029340.902779,
+            "End": 4000029341.209712,
+            "Stages": []
+          },
+          {
+            "Phase": "Measured3",
+            "Seconds": 0.318929,
+            "KernelBeforeBytes": 168042368,
+            "KernelAfterBytes": 171560304,
+            "KernelReleasedBytes": 170890536,
+            "EvaluationPeakBytes": 12092576,
+            "Start": 4000029341.219331,
+            "End": 4000029341.53831,
+            "Stages": []
+          }
+        ]
+      },
+      "Process": {
+        "ExitCode": 0,
+        "StopReason": null,
+        "StagePeakRSSBytes": {
+          "setup": 292777984,
+          "First": 307789824,
+          "Warmup": 310280192,
+          "Measured1": 312967168,
+          "Measured2": 315392000,
+          "Measured3": 318734336,
+          "SaveResult": 318496768,
+          "Complete": 318201856
+        },
+        "MinimumAvailableMemoryBytes": 10458009600,
+        "WallSeconds": 25.643556490002084,
+        "Command": [
+          "/usr/local/bin/math",
+          "-noinit",
+          "-noprompt",
+          "-script",
+          "/tmp/cfc-import-three-20261003-150431/small-baselineconfirm/run.wls"
+        ]
+      },
+      "MedianSeconds": 0.306765,
+      "RangeSeconds": [
+        0.292747,
+        0.318929
+      ],
+      "MeasuredPeakRSSBytes": 318734336,
+      "ScriptSHA256": "30de646cdd8c37c01c89c98ab88e77451eb2b932cbf5f0fc1139b595b971f9af",
+      "LogSHA256": "14fa3113a3af4f72a704636c87b728035e3499a3a0741f17556952201ae27cf1"
+    }
+  },
+  "ExperimentalSourceDiffs": {
+    "candidate1": "--- baseline/CalcFormConverter.wl\n+++ candidate1/CalcFormConverter.wl\n@@ -1486,11 +1486,17 @@\n (* ::Input::Initialization:: *)\n parseFlatResult[flatTokenData[tokenList_List, start_Integer], \n    values_Association, dim_] := Module[\n-     {tokens = tokenList, count = Length[tokenList], pos = start,\n+     {tokens, lexemes, codes, count = Length[tokenList], pos = start,\n        factor, checked, product, firstSign, result, terms, op, r},\n-     firstSign = If[start === 2 && First[tokens] === \"-\", -1, 1];\n+     (* Pure lexical conversion: identifiers remain unchecked until first use. *)\n+     lexemes = DeleteDuplicates[tokenList[[start ;; ;; 2]]];\n+     codes = AssociationThread[Join[{\"+\", \"-\", \"*\", \"/\"}, lexemes],\n+       Join[{-1, -2, -3, -4}, Range[Length[lexemes]]]];\n+     tokens = Lookup[codes, tokenList];\n+     Clear[codes];\n+     firstSign = If[start === 2 && First[tokens] === -2, -1, 1];\n      (*Memoize successful general-parser results by factor text within this call. A thrown failure exits before Set stores a value. No result text is evaluated as Wolfram source.*)\n-     factor[t_] := factor[t] = parseGeneralResult[t, values, dim];\n+     factor[id_Integer] := factor[id] = parseGeneralResult[lexemes[[id]], values, dim];\n      (*Identical typed-token gate as the general parser.*)\n      checked[x_] := If[! FreeQ[x, _vectorToken | _indexToken],\n          \n@@ -1501,16 +1507,16 @@\n     With[{v = \n        If[sign === -1, -checked[factor[tokens[[pos++]]]], \n         factor[tokens[[pos++]]]]},\n-         If[pos > count || ! MemberQ[{\"*\", \"/\"}, tokens[[pos]]], v,\n+         If[pos > count || ! MemberQ[{-3, -4}, tokens[[pos]]], v,\n             Module[{operation, right, factors},\n                factors = Reap[\n                     Sow[checked[v]];\n-          While[pos <= count && MemberQ[{\"*\", \"/\"}, tokens[[pos]]],\n+          While[pos <= count && MemberQ[{-3, -4}, tokens[[pos]]],\n                        operation = tokens[[pos++]];\n                        right = checked[factor[tokens[[pos++]]]];\n-           If[operation === \"/\" && right === 0, \n+           If[operation === -4 && right === 0, \n             throwFailure[\"InvalidResult\", \"Division by zero.\"]];\n-                       Sow[If[operation === \"*\", right, 1/right]]\n+                       Sow[If[operation === -3, right, 1/right]]\n                      ]\n                   ][[2, 1]];\n                Times @@ factors\n@@ -1525,7 +1531,7 @@\n              While[pos <= count,\n                 op = tokens[[pos++]];\n                 r = checked[product[1]];\n-                Sow[If[op === \"+\", r, -r]]\n+                Sow[If[op === -1, r, -r]]\n               ]\n            ][[2, 1]];\n         result = Plus @@ terms\n",
+    "candidate2": "--- baseline/CalcFormConverter.wl\n+++ candidate2/CalcFormConverter.wl\n@@ -1487,7 +1487,7 @@\n parseFlatResult[flatTokenData[tokenList_List, start_Integer], \n    values_Association, dim_] := Module[\n      {tokens = tokenList, count = Length[tokenList], pos = start,\n-       factor, checked, product, firstSign, result, terms, op, r},\n+       factor, checkedFactor, checked, product, firstSign, result, terms, op, r},\n      firstSign = If[start === 2 && First[tokens] === \"-\", -1, 1];\n      (*Memoize successful general-parser results by factor text within this call. A thrown failure exits before Set stores a value. No result text is evaluated as Wolfram source.*)\n      factor[t_] := factor[t] = parseGeneralResult[t, values, dim];\n@@ -1496,10 +1496,16 @@\n          \n      throwFailure[\"InvalidResult\", \n       \"A vector or index occurs outside a tensor object.\"], x];\n+     (* A cached factor is retrieved/evaluated first. Only an actual atomic\n+        number can bypass the repeated deep scan; symbolic values revalidate.\n+        Unevaluated prevents the classification itself from evaluating heads. *)\n+     checkedFactor[t_] := With[{value = factor[t]},\n+       If[AtomQ[Unevaluated[value]] && NumberQ[Unevaluated[value]],\n+         value, checked[value]]];\n      (*Apply an initial unary minus to the first factor, matching the general parser. Later subtraction negates an entire product. Division validates its right operand before subsequent factors are read.*)\n      product[sign_] := \n     With[{v = \n-       If[sign === -1, -checked[factor[tokens[[pos++]]]], \n+       If[sign === -1, -checkedFactor[tokens[[pos++]]], \n         factor[tokens[[pos++]]]]},\n          If[pos > count || ! MemberQ[{\"*\", \"/\"}, tokens[[pos]]], v,\n             Module[{operation, right, factors},\n@@ -1507,7 +1513,7 @@\n                     Sow[checked[v]];\n           While[pos <= count && MemberQ[{\"*\", \"/\"}, tokens[[pos]]],\n                        operation = tokens[[pos++]];\n-                       right = checked[factor[tokens[[pos++]]]];\n+                       right = checkedFactor[tokens[[pos++]]];\n            If[operation === \"/\" && right === 0, \n             throwFailure[\"InvalidResult\", \"Division by zero.\"]];\n                        Sow[If[operation === \"*\", right, 1/right]]\n",
+    "candidate3a": "--- baseline/CalcFormConverter.wl\n+++ candidate3a/CalcFormConverter.wl\n@@ -1621,7 +1621,7 @@\n              Lookup[mapping, \"Version\", None] =!= $formatVersion,\n            throwFailure[\"InvalidMapping\", \"Unsupported mapping format or version.\"]];\n         (*Split the result into lines for the marker check. CRLF is normalized first, since the exporter may have written the file on any platform.*)\n-        lines = StringSplit[StringReplace[text, \"\\r\\n\" -> \"\\n\"], \"\\n\"];\n+        lines = StringSplit[StringTrim[StringReplace[text, \"\\r\\n\" -> \"\\n\"], \"\\n\"], \"\\n\", 2];\n         (*Accept the digest of the exact JSON text or the legacy UTF-8 byte-string representation. This preserves early notebook exports. Both bind the complete mapping; neither authenticates the sender nor proves the FORM calculation.*)\n         digest = Hash[#, \"SHA256\", \"HexString\"] & /@\n             {json, FromCharacterCode[ToCharacterCode[json, \"UTF-8\"]]};\n@@ -1648,7 +1648,7 @@\n         (*Only now decode every mapped value: name -> value, with vectors and indices wrapped in their typed tokens.*)\n         values = decodeEntries[entries, dim];\n         (*Hand the result text (everything after the marker line) to the parser together with the symbol table and dimension.*)\n-        parseResult[StringRiffle[Rest[lines], \"\\n\"], values, dim]\n+        parseResult[Last[lines], values, dim]\n       ], $failureTag];\n \n \n",
+    "candidate3b": "--- baseline/CalcFormConverter.wl\n+++ candidate3b/CalcFormConverter.wl\n@@ -1457,8 +1457,8 @@\n      count = Length[tokens];\n      If[count === 0, Return[$Failed]];\n      (*Check lexical coverage exactly as in the general parser. Tokenize before removing whitespace so separate identifiers cannot be joined accidentally. The comparison uses WhitespaceCharacter on both strings, including Unicode whitespace.*)\n-     If[StringReplace[StringJoin[tokens], WhitespaceCharacter -> \"\"] =!=\n-          StringReplace[text, WhitespaceCharacter -> \"\"], \n+     If[Total[StringLength[tokens]] - Total[StringCount[tokens, WhitespaceCharacter]] =!=\n+          StringLength[text] - StringCount[text, WhitespaceCharacter], \n     Return[$Failed]];\n      (*A leading unary sign is allowed only at the very start.*)\n      start = If[MemberQ[{\"+\", \"-\"}, First[tokens]], 2, 1];\n"
+  },
+  "CorrectnessScope": "Every pilot import returned without Check messages or Failure. No exact baseline/candidate comparison or full regression suite was run because no candidate passed the timing promotion gate. These rejected prototypes are not correctness-certified.",
+  "HeaderSemanticsProbe": {
+    "Script": "Scan[Function[s,Print[InputForm[{s,StringSplit[s,\"\\n\"],StringSplit[s,\"\\n\",2]}]]],{\"h\\nb\\nc\", \"\\nh\\nb\", \"\\n\\nh\\nb\", \"h\\n\\nb\", \"h\\nb\\n\\n\", \"h\\n\\n\", \"h\\n \\n\", \"\\n\\n\", \"h\"}];Quit[];\n",
+    "Output": "InputForm[{h\nb\nc, {h, b, c}, {h, b\nc}}]\nInputForm[{\nh\nb, {h, b}, {, h\nb}}]\nInputForm[{\n\nh\nb, {h, b}, {, \nh\nb}}]\nInputForm[{h\n\nb, {h, , b}, {h, \nb}}]\nInputForm[{h\nb\n\n, {h, b}, {h, b\n\n}}]\nInputForm[{h\n\n, {h}, {h, \n}}]\nInputForm[{h\n \n, {h,  }, {h,  \n}}]\nInputForm[{\n\n, {}, {, \n}}]\nInputForm[{h, {h}, {h}}]\n",
+    "ScriptSHA256": "4a4ffc5671b665521ecb3eb45a058e5f1170ceb40af89299f3aaf0d9675524e4",
+    "LogSHA256": "db9f3b923af46ecccda8675b13c732c7918ed4a211b9bc481d7976b0d0aa53e6"
+  },
+  "Limits": {
+    "SecondsPerPhase": 300,
+    "RSSBytes": 6442450944,
+    "MinimumAvailableBytes": 2147483648,
+    "SampleSeconds": 0.05
+  },
+  "LocalEvidenceDirectory": "/tmp/cfc-import-three-20261003-150431",
+  "HarnessSHA256": {
+    "/tmp/cfc-import-three-20261003-150431/run_one.py": "4aa39947f1752e6230b022f4b5542a23b46123b59098ee3f63a4da1ec253be8d",
+    "/tmp/cfc-tensor-fast-20261003-140233/bench.py": "c6710e6ca4456bf0650899354d7cc148eff3caf4b5f46162299e7fb1e0b7aea7"
+  }
+}
