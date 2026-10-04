@@ -3,3057 +3,186 @@
 (*** Wolfram Notebook File ***)
 (* http://www.wolfram.com/nb *)
 
-(* CreatedBy='Mathematica 13.0' *)
+(* CreatedBy='Wolfram 15.0' *)
 
 (*CacheID: 234*)
 (* Internal cache information:
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
-NotebookDataPosition[       158,          7]
-NotebookDataLength[    135896,       3662]
-NotebookOptionsPosition[    130507,       3581]
-NotebookOutlinePosition[    130903,       3597]
-CellTagsIndexPosition[    130860,       3594]
+NotebookDataPosition[       154,          7]
+NotebookDataLength[     30436,        749]
+NotebookOptionsPosition[     24097,        633]
+NotebookOutlinePosition[     24576,        651]
+CellTagsIndexPosition[     24533,        648]
+WindowTitle->Spin projectors for a symmetric tensor
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
-Cell[TextData[StyleBox["Nieuwenhuizen operators were introduced in \
-[Nieuwenhuizen, Nucl.Phys.B 60 (1973) 478]. \nHere definitions given in \
-[Accioly et al, Int.J.Theor.Phys. 39 (2000) 1599] are used.\nThe operators \
-are defined in d=4. Within FeynGrav the definition is given in arbitrary d. \n\
-Denominators of operators are realised with FAD which is more suitable for \
-loop calculations.\n\[OpenCurlyDoubleQuote]FeynAmpDenominatorExplicit\
-\[CloseCurlyDoubleQuote] converts denominators to the conventional scalar \
-product and makes expressions suitable for tree-level computations.",
- FontWeight->"Bold"]], "Text",
- Editable->False,
- CellChangeTimes->{{3.848120371658104*^9, 3.848120382618054*^9}, {
-   3.848120413888123*^9, 3.848120466795252*^9}, {3.848120565564569*^9, 
-   3.848120631493635*^9}, 3.848451214265108*^9, {3.8799885777992*^9, 
-   3.879988637391491*^9}, {3.924460393872274*^9, 
-   3.9244605057443647`*^9}},ExpressionUUID->"6f8d9b8f-3a2d-4e4b-af81-\
-7c820c7fcf42"],
+
+Cell[CellGroupData[{
+Cell["Spin projectors for a symmetric tensor", "Title",ExpressionUUID->"582b08ad-9aa0-47a1-88b6-599317f8fc86"],
+
+Cell["\<\
+Start here to learn how FeynGrav represents Lorentz indices, momenta and \
+tensor identities. Inspect the five Nieuwenhuizen operators and verify \
+completeness, idempotence and their multiplication rules.\
+\>", "Text",ExpressionUUID->"9210c3a0-bec7-4229-9e19-3b07b0a4039a"],
 
 Cell[CellGroupData[{
 
-Cell[BoxData[
- RowBox[{"<<", "FeynGrav`"}]], "Input",
- Editable->False,
- CellChangeTimes->{{3.846208538808211*^9, 3.846208540873959*^9}, {
-  3.8484752503876257`*^9, 3.8484752553145647`*^9}, {3.8786116206579638`*^9, 
-  3.878611623612268*^9}},
- CellLabel->"In[1]:=",ExpressionUUID->"663d527b-fb35-4f9e-8955-df1534471a9c"],
+Cell["1. Setup and notation", "Section",ExpressionUUID->"f4046281-86df-4483-9d51-c88c6c9a8a5f"],
 
-Cell[CellGroupData[{
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{
-   StyleBox["\<\"FeynCalc \"\>", "Text",
-    StripOnInput->False,
-    FontWeight->Bold], "\[InvisibleSpace]", 
-   StyleBox["\<\"10.0.0 (stable version). For help, use the \"\>", "Text",
-    StripOnInput->False], "\[InvisibleSpace]", 
-   StyleBox[
-    TagBox[
-     ButtonBox[
-      RowBox[{
-       RowBox[{"online", " ", "documentation"}], ","}],
-      BaseStyle->"Hyperlink",
-      ButtonData:>{
-        URL["https://feyncalc.github.io/referenceDev"], None},
-      ButtonNote->"https://feyncalc.github.io/referenceDev"],
-     DisplayForm], "Text",
-    StripOnInput->False], "\[InvisibleSpace]", 
-   StyleBox["\<\" visit the \"\>", "Text",
-    StripOnInput->False], "\[InvisibleSpace]", 
-   StyleBox[
-    TagBox[
-     ButtonBox["forum",
-      BaseStyle->"Hyperlink",
-      ButtonData:>{
-        URL["https://github.com/FeynCalc/feyncalc/discussions"], None},
-      ButtonNote->"https://github.com/FeynCalc/feyncalc/discussions/"],
-     DisplayForm], "Text",
-    StripOnInput->False], "\[InvisibleSpace]", 
-   StyleBox["\<\" and have a look at the supplied \"\>", "Text",
-    StripOnInput->False], "\[InvisibleSpace]", 
-   StyleBox[
-    TagBox[
-     ButtonBox[
-      RowBox[{"examples", "."}],
-      BaseStyle->"Hyperlink",
-      ButtonFunction:>SystemOpen[
-        FileNameJoin[{FeynCalc`$FeynCalcDirectory, "Examples"}]],
-      Evaluator->Automatic,
-      Method->"Preemptive"],
-     DisplayForm], "Text",
-    StripOnInput->False]}],
-  SequenceForm[
-   Style["FeynCalc ", "Text", Bold], 
-   Style["10.0.0 (stable version). For help, use the ", "Text"], 
-   Style[
-    DisplayForm[
-     ButtonBox["online documentation,", ButtonData :> {
-        URL["https://feyncalc.github.io/referenceDev"], None}, BaseStyle -> 
-      "Hyperlink", ButtonNote -> "https://feyncalc.github.io/referenceDev"]], 
-    "Text"], 
-   Style[" visit the ", "Text"], 
-   Style[
-    DisplayForm[
-     ButtonBox["forum", ButtonData :> {
-        URL["https://github.com/FeynCalc/feyncalc/discussions"], None}, 
-      BaseStyle -> "Hyperlink", ButtonNote -> 
-      "https://github.com/FeynCalc/feyncalc/discussions/"]], "Text"], 
-   Style[" and have a look at the supplied ", "Text"], 
-   Style[
-    DisplayForm[
-     ButtonBox[
-     "examples.", BaseStyle -> "Hyperlink", ButtonFunction :> SystemOpen[
-        FileNameJoin[{FeynCalc`$FeynCalcDirectory, "Examples"}]], Evaluator -> 
-      Automatic, Method -> "Preemptive"]], "Text"]],
-  Editable->False]], "Print",
- CellChangeTimes->{3.924555601339147*^9},
- CellLabel->
-  "During evaluation of \
-In[1]:=",ExpressionUUID->"7e58df7f-3765-427a-8b27-e2076024d14a"],
-
-Cell[BoxData[
- StyleBox["\<\"If you use FeynCalc in your research, please evaluate \
-FeynCalcHowToCite[] to learn how to cite this software.\"\>", "Text",
-  StripOnInput->False]], "Print",
- CellChangeTimes->{3.924555601342353*^9},
- CellLabel->
-  "During evaluation of \
-In[1]:=",ExpressionUUID->"f2b43948-d3b9-4533-95cf-412ea8d6e234"],
-
-Cell[BoxData[
- StyleBox["\<\"Please keep in mind that the proper academic attribution of \
-our work is crucial to ensure the future development of this package!\"\>", 
-  "Text",
-  StripOnInput->False,
-  FontSlant->Italic]], "Print",
- CellChangeTimes->{3.924555601343482*^9},
- CellLabel->
-  "During evaluation of \
-In[1]:=",ExpressionUUID->"019b974c-bf1f-46f6-ad7a-97eba39446cb"],
-
-Cell[BoxData[
- StyleBox["\<\"FeynGrav 3.0\"\>",
-  StripOnInput->False,
-  FontSize->16,
-  FontWeight->Bold]], "Print",
- CellChangeTimes->{3.924555601344565*^9},
- CellLabel->
-  "During evaluation of \
-In[1]:=",ExpressionUUID->"ead468fb-d434-4327-b633-e5c05d6f8de4"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{
-   StyleBox["\<\"FeynGrav: \"\>",
-    StripOnInput->False,
-    FontWeight->Bold], "\[InvisibleSpace]", "\<\"Use \"\>", 
-   "\[InvisibleSpace]", 
-   ButtonBox[
-    StyleBox["\<\"FeynGravCommands\"\>",
-     StripOnInput->False,
-     LineColor->RGBColor[0, 0, 1],
-     FrontFaceColor->RGBColor[0, 0, 1],
-     BackFaceColor->RGBColor[0, 0, 1],
-     GraphicsColor->RGBColor[0, 0, 1],
-     FontVariations->{"Underline"->True},
-     FontColor->RGBColor[0, 0, 1]],
-    Appearance->None,
-    ButtonFunction:>FeynGrav`FeynGravCommands[],
-    Evaluator->Automatic,
-    Method->"Preemptive"], 
-   "\[InvisibleSpace]", "\<\" to print the list of all commands.\"\>"}],
-  SequenceForm[
-   Style["FeynGrav: ", Bold], "Use ", 
-   Button[
-    Style["FeynGravCommands", Underlined, 
-     RGBColor[0, 0, 1]], 
-    FeynGrav`FeynGravCommands[], Appearance -> None], 
-   " to print the list of all commands."],
-  Editable->False]], "Print",
- CellChangeTimes->{3.924555601346937*^9},
- CellLabel->
-  "During evaluation of \
-In[1]:=",ExpressionUUID->"de7f8b19-4b38-46b6-ac44-04ba3c8366b5"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{
-   StyleBox["\<\"FeynGrav: \"\>",
-    StripOnInput->False,
-    FontWeight->Bold], 
-   "\[InvisibleSpace]", "\<\"On initialization, the package only imports \
-libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up \
-to the second order. To import additional libraries, use the \\\"import*\\\" \
-command.\"\>"}],
-  SequenceForm[
-   Style["FeynGrav: ", Bold], 
-   "On initialization, the package only imports libraries for matter with \
-spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To \
-import additional libraries, use the \"import*\" command."],
-  Editable->False]], "Print",
- CellChangeTimes->{3.924555601352387*^9},
- CellLabel->
-  "During evaluation of \
-In[1]:=",ExpressionUUID->"b5b1ed1b-2acf-4095-a5ff-64cc154dbe79"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{
-   StyleBox["\<\"FeynGrav: Core publications on FeynGrav are \"\>",
-    StripOnInput->False,
-    FontWeight->Bold], "\[InvisibleSpace]", 
-   TemplateBox[{
-     StyleBox[
-      TemplateBox[{
-       "\"Class.Quant.Grav. 39 (2022) 16, 165006\"", 
-        "https://doi.org/10.1088/1361-6382/ac7e15"}, "HyperlinkURL"], 
-      RGBColor[0, 0, 1], Underlined, StripOnInput -> False], "\", \"", 
-     StyleBox[
-      TemplateBox[{
-       "\"Comput.Phys.Commun. 292 (2023) 108871\"", 
-        "https://doi.org/10.1016/j.cpc.2023.108871"}, "HyperlinkURL"], 
-      RGBColor[0, 0, 1], Underlined, StripOnInput -> False]},
-    "RowDefault"]}],
-  SequenceForm[
-   Style["FeynGrav: Core publications on FeynGrav are ", Bold], 
-   Row[{
-     Style[
-      Hyperlink[
-      "Class.Quant.Grav. 39 (2022) 16, 165006", 
-       "https://doi.org/10.1088/1361-6382/ac7e15"], 
-      RGBColor[0, 0, 1], Underlined], ", ", 
-     Style[
-      Hyperlink[
-      "Comput.Phys.Commun. 292 (2023) 108871", 
-       "https://doi.org/10.1016/j.cpc.2023.108871"], 
-      RGBColor[0, 0, 1], Underlined]}]],
-  Editable->False]], "Print",
- CellChangeTimes->{3.924555601353632*^9},
- CellLabel->
-  "During evaluation of \
-In[1]:=",ExpressionUUID->"fc6baecd-1e30-456d-85a3-b19abd646ee7"]
-}, Open  ]]
-}, Open  ]],
-
-Cell[TextData[StyleBox["Definitions of Nieuwenhuizen operators",
- FontWeight->"Bold"]], "Text",
- Editable->False,
- CellChangeTimes->{{3.8945856752166233`*^9, 
-  3.894585688968961*^9}},ExpressionUUID->"5a66bd94-4441-403e-844e-\
-f3a920220fef"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[{
- RowBox[{"?", "NieuwenhuizenOperator1"}], "\[IndentingNewLine]", 
- RowBox[{"?", "NieuwenhuizenOperator2"}], "\[IndentingNewLine]", 
- RowBox[{"?", "NieuwenhuizenOperator0"}], "\[IndentingNewLine]", 
- RowBox[{"?", "NieuwenhuizenOperator0Bar"}], "\[IndentingNewLine]", 
- RowBox[{"?", "NieuwenhuizenOperator0BarBar"}]}], "Input",
- Editable->False,
- CellChangeTimes->{{3.845692541806636*^9, 3.845692555466442*^9}, {
-  3.848120534761011*^9, 3.848120534940194*^9}},
- CellLabel->"In[2]:=",ExpressionUUID->"1f7c6b05-45c5-41fa-86d7-791eb731fe59"],
-
-Cell[BoxData[
- FormBox[
-  InterpretationBox[
-   StyleBox[
-    FrameBox[
-     DynamicModuleBox[{System`InformationDump`open$$ = False, 
-      System`InformationDump`mouseOver$$ = False}, 
-      PaneSelectorBox[{True->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False,
-              BaseStyle -> None],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta]\
-,p]. Nieuwenhuizen operator (\\!\\(\\*SuperscriptBox[\\(P\\), \
-\\(1\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\[Beta]\\)]\\) \
-= \\!\\(\\*FractionBox[\\(1\\), \\(2\\)]\\)(\\!\\(\\*SubscriptBox[\\(\[Theta]\
-\\), \\(\[Mu]\[Alpha]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \\(\[Nu]\
-\[Beta]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Beta]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Nu]\[Alpha]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Nu]\[Alpha]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Beta]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Nu]\[Beta]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Alpha]\\)]\\)). Here \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \\(\[Mu]\
-\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) - \
-\\!\\(\\*SubscriptBox[\\(p\\), \\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are the standard \
-gauge projectors and \\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Nu]\\)]\\) = \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are projectors \
-orthogonal to \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\).\"\>", "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           PaneBox[
-            TagBox[GridBox[{
-               {
-                StyleBox[
-                 TagBox[
-                  TooltipBox[
-                   StyleBox["\<\" Assignment\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                   "\"OwnValues\"",
-                   TooltipStyle->"TextStyling"],
-                  Annotation[#, "OwnValues", "Tooltip"]& ], "DialogStyle",
-                 StripOnInput->False]},
-               {
-                TemplateBox[{"\"\[ThinSpace]\"", 
-                  GridBox[{{
-                    RowBox[{"NieuwenhuizenOperator1", "=", 
-                    RowBox[{"Function", "[", 
-                    RowBox[{
-                    RowBox[{"{", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "}"}], ",", 
-                    RowBox[{"FeynAmpDenominatorCombine", "[", 
-                    RowBox[{
-                    FractionBox["1", "2"], " ", 
-                    RowBox[{"(", 
-                    RowBox[{
-                    RowBox[{
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Alpha]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjectorBar", "[", 
-                    
-                    RowBox[{"Private`\[Nu]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}]}], "+", 
-                    RowBox[{
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjectorBar", "[", 
-                    
-                    RowBox[{"Private`\[Nu]", ",", "Private`\[Alpha]", ",", 
-                    "Private`k"}], "]"}]}], "+", 
-                    RowBox[{
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Nu]", ",", "Private`\[Alpha]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjectorBar", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}]}], "+", 
-                    RowBox[{
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Nu]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjectorBar", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Alpha]", ",", 
-                    "Private`k"}], "]"}]}]}], ")"}]}], "]"}]}], "]"}]}]}, {
-                    " "}}, GridBoxAlignment -> {"Columns" -> {{Left}}}, 
-                   DefaultBaseStyle -> "Column", 
-                   GridBoxItemSize -> {
-                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
-                 "RowDefault"]}
-              },
-              DefaultBaseStyle->"Column",
-              GridBoxAlignment->{"Columns" -> {{Left}}},
-              
-              GridBoxItemSize->{
-               "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-             "Column"],
-            FrameMargins->{{6, 0}, {3, 6}}], "\<\"\"\>"},
-          {
-           PaneBox[GridBox[{
-              {
-               
-               DynamicModuleBox[{System`InformationDump`open$$ = {
-                False, False, False, False, False, False}}, 
-                StyleBox[GridBox[{
-                   {
-                    TagBox[
-                    TooltipBox[
-                    StyleBox["\<\" Full Name\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                    "\"FullName\"",
-                    TooltipStyle->"TextStyling"],
-                    
-                    Annotation[#, "FullName", 
-                    "Tooltip"]& ], \
-"\<\"Nieuwenhuizen`NieuwenhuizenOperator1\"\>"}
-                  },
-                  AutoDelete->False,
-                  GridBoxAlignment->{"Columns" -> {Right, Left}},
-                  GridBoxDividers->None,
-                  GridBoxItemSize->{"Columns" -> {Automatic, Automatic}},
-                  GridBoxSpacings->{"Columns" -> {
-                    Offset[0.27999999999999997`], {
-                    Offset[0.5599999999999999]}, 
-                    Offset[0.27999999999999997`]}, "Rows" -> {
-                    Offset[0.2], {
-                    Offset[0.8]}, 
-                    Offset[0.2]}}], "DialogStyle",
-                 StripOnInput->False],
-                DynamicModuleValues:>{}]}
-             },
-             DefaultBaseStyle->"Column",
-             GridBoxAlignment->{"Columns" -> {{Left}}},
-             GridBoxDividers->{"Columns" -> {{False}}, "Rows" -> {{False}}},
-             
-             GridBoxItemSize->{
-              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-             GridBoxSpacings->{"Columns" -> {
-                 Offset[0.27999999999999997`], {
-                  Offset[0.5599999999999999]}, 
-                 Offset[0.27999999999999997`]}, "Rows" -> {
-                 Offset[0.2], {
-                  Offset[3.6]}, 
-                 Offset[0.2]}}],
-            FrameMargins->{{6, 6}, {6, 3}}], ""},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpener"]], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpenerHot"]]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, False],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"], False->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta]\
-,p]. Nieuwenhuizen operator (\\!\\(\\*SuperscriptBox[\\(P\\), \
-\\(1\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\[Beta]\\)]\\) \
-= \\!\\(\\*FractionBox[\\(1\\), \\(2\\)]\\)(\\!\\(\\*SubscriptBox[\\(\[Theta]\
-\\), \\(\[Mu]\[Alpha]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \\(\[Nu]\
-\[Beta]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Beta]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Nu]\[Alpha]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Nu]\[Alpha]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Beta]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Nu]\[Beta]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Alpha]\\)]\\)). Here \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \\(\[Mu]\
-\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) - \
-\\!\\(\\*SubscriptBox[\\(p\\), \\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are the standard \
-gauge projectors and \\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Nu]\\)]\\) = \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are projectors \
-orthogonal to \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\).\"\>", "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpener"],
-                ImageSizeCache->{10., {2., 8.}}], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpenerHot"],
-                ImageSizeCache->{10., {2., 8.}}]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, True],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"]}, Dynamic[System`InformationDump`open$$],
-       BaselinePosition->Baseline,
-       FrameMargins->0,
-       ImageSize->Automatic],
-      DynamicModuleValues:>{}],
-     BaseStyle->"InformationGridFrame",
-     StripOnInput->False], "InformationGridPlain",
-    StripOnInput->False],
-   InformationData[<|
-    "ObjectType" -> "Symbol", "Usage" -> 
-     "NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Nieuwenhuizen \
-operator (\!\(\*SuperscriptBox[\(P\), \(1\)]\)\!\(\*SubscriptBox[\()\), \(\
-\[Mu]\[Nu]\[Alpha]\[Beta]\)]\) = \!\(\*FractionBox[\(1\), \
-\(2\)]\)(\!\(\*SubscriptBox[\(\[Theta]\), \
-\(\[Mu]\[Alpha]\)]\)\!\(\*SubscriptBox[\(\[Omega]\), \(\[Nu]\[Beta]\)]\)+\!\(\
-\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Beta]\)]\)\!\(\*SubscriptBox[\(\[Omega]\
-\), \(\[Nu]\[Alpha]\)]\)+\!\(\*SubscriptBox[\(\[Theta]\), \
-\(\[Nu]\[Alpha]\)]\)\!\(\*SubscriptBox[\(\[Omega]\), \(\[Mu]\[Beta]\)]\)+\!\(\
-\*SubscriptBox[\(\[Theta]\), \(\[Nu]\[Beta]\)]\)\!\(\*SubscriptBox[\(\[Omega]\
-\), \(\[Mu]\[Alpha]\)]\)). Here \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\
-\)]\)=\!\(\*SubscriptBox[\(\[Eta]\), \(\[Mu]\[Nu]\)]\) - \
-\!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\
-\!\(\*SuperscriptBox[\(p\), \(2\)]\) are the standard gauge projectors and \!\
-\(\*SubscriptBox[\(\[Omega]\), \(\[Mu]\[Nu]\)]\) = \!\(\*SubscriptBox[\(p\), \
-\(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \
-\(\[Nu]\)]\)/\!\(\*SuperscriptBox[\(p\), \(2\)]\) are projectors orthogonal \
-to \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\).", "Documentation" -> 
-     None, "OwnValues" -> 
-     Information`InformationValueForm[
-      OwnValues, Nieuwenhuizen`NieuwenhuizenOperator1, {
-       Nieuwenhuizen`NieuwenhuizenOperator1 -> 
-        Function[{
-          Private`\[Mu], Private`\[Nu], Private`\[Alpha], Private`\[Beta], 
-           Private`k}, 
-          
-          FeynCalc`FeynAmpDenominatorCombine[(1/2) (
-            Nieuwenhuizen`GaugeProjector[
-              Private`\[Mu], Private`\[Alpha], Private`k] 
-             Nieuwenhuizen`GaugeProjectorBar[
-              Private`\[Nu], Private`\[Beta], Private`k] + 
-            Nieuwenhuizen`GaugeProjector[
-              Private`\[Mu], Private`\[Beta], Private`k] 
-             Nieuwenhuizen`GaugeProjectorBar[
-              Private`\[Nu], Private`\[Alpha], Private`k] + 
-            Nieuwenhuizen`GaugeProjector[
-              Private`\[Nu], Private`\[Alpha], Private`k] 
-             Nieuwenhuizen`GaugeProjectorBar[
-              Private`\[Mu], Private`\[Beta], Private`k] + 
-            Nieuwenhuizen`GaugeProjector[
-              Private`\[Nu], Private`\[Beta], Private`k] 
-             Nieuwenhuizen`GaugeProjectorBar[
-              Private`\[Mu], Private`\[Alpha], Private`k])]]}], "UpValues" -> 
-     None, "DownValues" -> None, "SubValues" -> None, "DefaultValues" -> None,
-      "NValues" -> None, "FormatValues" -> None, "Options" -> None, 
-     "Attributes" -> {}, "FullName" -> 
-     "Nieuwenhuizen`NieuwenhuizenOperator1"|>, False]], 
-  TraditionalForm]], "Output",
- CellChangeTimes->{3.924555602577392*^9},
- CellLabel->"Out[2]=",ExpressionUUID->"2d4bdb2d-007e-436f-b060-220dddde833e"],
-
-Cell[BoxData[
- FormBox[
-  InterpretationBox[
-   StyleBox[
-    FrameBox[
-     DynamicModuleBox[{System`InformationDump`open$$ = False, 
-      System`InformationDump`mouseOver$$ = False}, 
-      PaneSelectorBox[{True->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False,
-              BaseStyle -> None],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta]\
-,p]. Nieuwenhuizen operator (\\!\\(\\*SuperscriptBox[\\(P\\), \
-\\(2\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\[Beta]\\)]\\) \
-= \\!\\(\\*FractionBox[\\(1\\), \\(2\\)]\\)(\\!\\(\\*SubscriptBox[\\(\[Theta]\
-\\), \\(\[Mu]\[Alpha]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \\(\[Nu]\
-\[Beta]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Nu]\[Beta]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Alpha]\\)]\\))-\\!\\(\\*FractionBox[\\(1\\), \
-\\(3\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Alpha]\[Beta]\\)]\\). Here \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) \
-- \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are the standard \
-gauge projectors.\"\>", "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           PaneBox[
-            TagBox[GridBox[{
-               {
-                StyleBox[
-                 TagBox[
-                  TooltipBox[
-                   StyleBox["\<\" Assignment\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                   "\"OwnValues\"",
-                   TooltipStyle->"TextStyling"],
-                  Annotation[#, "OwnValues", "Tooltip"]& ], "DialogStyle",
-                 StripOnInput->False]},
-               {
-                TemplateBox[{"\"\[ThinSpace]\"", 
-                  GridBox[{{
-                    RowBox[{"NieuwenhuizenOperator2", "=", 
-                    RowBox[{"Function", "[", 
-                    RowBox[{
-                    RowBox[{"{", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "}"}], ",", 
-                    RowBox[{"FeynAmpDenominatorCombine", "[", 
-                    RowBox[{
-                    RowBox[{
-                    FractionBox["1", "2"], " ", 
-                    RowBox[{"(", 
-                    RowBox[{
-                    RowBox[{
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Alpha]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Nu]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}]}], "+", 
-                    RowBox[{
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Nu]", ",", "Private`\[Alpha]", ",", 
-                    "Private`k"}], "]"}]}]}], ")"}]}], "-", 
-                    RowBox[{
-                    FractionBox["1", "3"], " ", 
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}]}]}], "]"}]}], "]"}]}]}, {" "}}, 
-                   GridBoxAlignment -> {"Columns" -> {{Left}}}, 
-                   DefaultBaseStyle -> "Column", 
-                   GridBoxItemSize -> {
-                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
-                 "RowDefault"]}
-              },
-              DefaultBaseStyle->"Column",
-              GridBoxAlignment->{"Columns" -> {{Left}}},
-              
-              GridBoxItemSize->{
-               "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-             "Column"],
-            FrameMargins->{{6, 0}, {3, 6}}], "\<\"\"\>"},
-          {
-           PaneBox[GridBox[{
-              {
-               
-               DynamicModuleBox[{System`InformationDump`open$$ = {
-                False, False, False, False, False, False}}, 
-                StyleBox[GridBox[{
-                   {
-                    TagBox[
-                    TooltipBox[
-                    StyleBox["\<\" Full Name\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                    "\"FullName\"",
-                    TooltipStyle->"TextStyling"],
-                    
-                    Annotation[#, "FullName", 
-                    "Tooltip"]& ], \
-"\<\"Nieuwenhuizen`NieuwenhuizenOperator2\"\>"}
-                  },
-                  AutoDelete->False,
-                  GridBoxAlignment->{"Columns" -> {Right, Left}},
-                  GridBoxDividers->None,
-                  GridBoxItemSize->{"Columns" -> {Automatic, Automatic}},
-                  GridBoxSpacings->{"Columns" -> {
-                    Offset[0.27999999999999997`], {
-                    Offset[0.5599999999999999]}, 
-                    Offset[0.27999999999999997`]}, "Rows" -> {
-                    Offset[0.2], {
-                    Offset[0.8]}, 
-                    Offset[0.2]}}], "DialogStyle",
-                 StripOnInput->False],
-                DynamicModuleValues:>{}]}
-             },
-             DefaultBaseStyle->"Column",
-             GridBoxAlignment->{"Columns" -> {{Left}}},
-             GridBoxDividers->{"Columns" -> {{False}}, "Rows" -> {{False}}},
-             
-             GridBoxItemSize->{
-              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-             GridBoxSpacings->{"Columns" -> {
-                 Offset[0.27999999999999997`], {
-                  Offset[0.5599999999999999]}, 
-                 Offset[0.27999999999999997`]}, "Rows" -> {
-                 Offset[0.2], {
-                  Offset[3.6]}, 
-                 Offset[0.2]}}],
-            FrameMargins->{{6, 6}, {6, 3}}], ""},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpener"]], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpenerHot"]]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, False],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"], False->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta]\
-,p]. Nieuwenhuizen operator (\\!\\(\\*SuperscriptBox[\\(P\\), \
-\\(2\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\[Beta]\\)]\\) \
-= \\!\\(\\*FractionBox[\\(1\\), \\(2\\)]\\)(\\!\\(\\*SubscriptBox[\\(\[Theta]\
-\\), \\(\[Mu]\[Alpha]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \\(\[Nu]\
-\[Beta]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Nu]\[Beta]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Alpha]\\)]\\))-\\!\\(\\*FractionBox[\\(1\\), \
-\\(3\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Alpha]\[Beta]\\)]\\). Here \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) \
-- \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are the standard \
-gauge projectors.\"\>", "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpener"],
-                ImageSizeCache->{10., {2., 8.}}], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpenerHot"],
-                ImageSizeCache->{10., {2., 8.}}]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, True],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"]}, Dynamic[System`InformationDump`open$$],
-       BaselinePosition->Baseline,
-       FrameMargins->0,
-       ImageSize->Automatic],
-      DynamicModuleValues:>{}],
-     BaseStyle->"InformationGridFrame",
-     StripOnInput->False], "InformationGridPlain",
-    StripOnInput->False],
-   InformationData[<|
-    "ObjectType" -> "Symbol", "Usage" -> 
-     "NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Nieuwenhuizen \
-operator (\!\(\*SuperscriptBox[\(P\), \(2\)]\)\!\(\*SubscriptBox[\()\), \(\
-\[Mu]\[Nu]\[Alpha]\[Beta]\)]\) = \!\(\*FractionBox[\(1\), \
-\(2\)]\)(\!\(\*SubscriptBox[\(\[Theta]\), \
-\(\[Mu]\[Alpha]\)]\)\!\(\*SubscriptBox[\(\[Theta]\), \(\[Nu]\[Beta]\)]\)+\!\(\
-\*SubscriptBox[\(\[Theta]\), \(\[Nu]\[Beta]\)]\)\!\(\*SubscriptBox[\(\[Theta]\
-\), \(\[Mu]\[Alpha]\)]\))-\!\(\*FractionBox[\(1\), \
-\(3\)]\)\!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)\!\(\*SubscriptBox[\
-\(\[Theta]\), \(\[Alpha]\[Beta]\)]\). Here \!\(\*SubscriptBox[\(\[Theta]\), \
-\(\[Mu]\[Nu]\)]\)=\!\(\*SubscriptBox[\(\[Eta]\), \(\[Mu]\[Nu]\)]\) - \
-\!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\
-\!\(\*SuperscriptBox[\(p\), \(2\)]\) are the standard gauge projectors.", 
-     "Documentation" -> None, "OwnValues" -> 
-     Information`InformationValueForm[
-      OwnValues, Nieuwenhuizen`NieuwenhuizenOperator2, {
-       Nieuwenhuizen`NieuwenhuizenOperator2 -> 
-        Function[{
-          Private`\[Mu], Private`\[Nu], Private`\[Alpha], Private`\[Beta], 
-           Private`k}, 
-          
-          FeynCalc`FeynAmpDenominatorCombine[(1/2) (
-             Nieuwenhuizen`GaugeProjector[
-               Private`\[Mu], Private`\[Alpha], Private`k] 
-              Nieuwenhuizen`GaugeProjector[
-               Private`\[Nu], Private`\[Beta], Private`k] + 
-             Nieuwenhuizen`GaugeProjector[
-               Private`\[Mu], Private`\[Beta], Private`k] 
-              Nieuwenhuizen`GaugeProjector[
-               Private`\[Nu], Private`\[Alpha], Private`k]) - (1/3) 
-           Nieuwenhuizen`GaugeProjector[
-            Private`\[Mu], Private`\[Nu], Private`k] 
-           Nieuwenhuizen`GaugeProjector[
-            Private`\[Alpha], Private`\[Beta], Private`k]]]}], "UpValues" -> 
-     None, "DownValues" -> None, "SubValues" -> None, "DefaultValues" -> None,
-      "NValues" -> None, "FormatValues" -> None, "Options" -> None, 
-     "Attributes" -> {}, "FullName" -> 
-     "Nieuwenhuizen`NieuwenhuizenOperator2"|>, False]], 
-  TraditionalForm]], "Output",
- CellChangeTimes->{3.92455560265104*^9},
- CellLabel->"Out[3]=",ExpressionUUID->"cedb8ce1-cfed-4186-b7a1-e7e8d3b57ed7"],
-
-Cell[BoxData[
- FormBox[
-  InterpretationBox[
-   StyleBox[
-    FrameBox[
-     DynamicModuleBox[{System`InformationDump`open$$ = False, 
-      System`InformationDump`mouseOver$$ = False}, 
-      PaneSelectorBox[{True->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False,
-              BaseStyle -> None],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta]\
-,p]. Nieuwenhuizen operator (\\!\\(\\*SuperscriptBox[\\(P\\), \
-\\(0\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\[Beta]\\)]\\) \
-= \\!\\(\\*FractionBox[\\(1\\), \
-\\(3\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Alpha]\[Beta]\\)]\\). Here \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) \
-- \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are the standard \
-gauge projectors.\"\>", "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           PaneBox[
-            TagBox[GridBox[{
-               {
-                StyleBox[
-                 TagBox[
-                  TooltipBox[
-                   StyleBox["\<\" Assignment\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                   "\"OwnValues\"",
-                   TooltipStyle->"TextStyling"],
-                  Annotation[#, "OwnValues", "Tooltip"]& ], "DialogStyle",
-                 StripOnInput->False]},
-               {
-                TemplateBox[{"\"\[ThinSpace]\"", 
-                  GridBox[{{
-                    RowBox[{"NieuwenhuizenOperator0", "=", 
-                    RowBox[{"Function", "[", 
-                    RowBox[{
-                    RowBox[{"{", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "}"}], ",", 
-                    RowBox[{"FeynAmpDenominatorCombine", "[", 
-                    RowBox[{
-                    FractionBox["1", "3"], " ", 
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}]}], "]"}]}], "]"}]}]}, {" "}}, 
-                   GridBoxAlignment -> {"Columns" -> {{Left}}}, 
-                   DefaultBaseStyle -> "Column", 
-                   GridBoxItemSize -> {
-                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
-                 "RowDefault"]}
-              },
-              DefaultBaseStyle->"Column",
-              GridBoxAlignment->{"Columns" -> {{Left}}},
-              
-              GridBoxItemSize->{
-               "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-             "Column"],
-            FrameMargins->{{6, 0}, {3, 6}}], "\<\"\"\>"},
-          {
-           PaneBox[GridBox[{
-              {
-               
-               DynamicModuleBox[{System`InformationDump`open$$ = {
-                False, False, False, False, False, False}}, 
-                StyleBox[GridBox[{
-                   {
-                    TagBox[
-                    TooltipBox[
-                    StyleBox["\<\" Full Name\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                    "\"FullName\"",
-                    TooltipStyle->"TextStyling"],
-                    
-                    Annotation[#, "FullName", 
-                    "Tooltip"]& ], \
-"\<\"Nieuwenhuizen`NieuwenhuizenOperator0\"\>"}
-                  },
-                  AutoDelete->False,
-                  GridBoxAlignment->{"Columns" -> {Right, Left}},
-                  GridBoxDividers->None,
-                  GridBoxItemSize->{"Columns" -> {Automatic, Automatic}},
-                  GridBoxSpacings->{"Columns" -> {
-                    Offset[0.27999999999999997`], {
-                    Offset[0.5599999999999999]}, 
-                    Offset[0.27999999999999997`]}, "Rows" -> {
-                    Offset[0.2], {
-                    Offset[0.8]}, 
-                    Offset[0.2]}}], "DialogStyle",
-                 StripOnInput->False],
-                DynamicModuleValues:>{}]}
-             },
-             DefaultBaseStyle->"Column",
-             GridBoxAlignment->{"Columns" -> {{Left}}},
-             GridBoxDividers->{"Columns" -> {{False}}, "Rows" -> {{False}}},
-             
-             GridBoxItemSize->{
-              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-             GridBoxSpacings->{"Columns" -> {
-                 Offset[0.27999999999999997`], {
-                  Offset[0.5599999999999999]}, 
-                 Offset[0.27999999999999997`]}, "Rows" -> {
-                 Offset[0.2], {
-                  Offset[3.6]}, 
-                 Offset[0.2]}}],
-            FrameMargins->{{6, 6}, {6, 3}}], ""},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpener"]], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpenerHot"]]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, False],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"], False->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta]\
-,p]. Nieuwenhuizen operator (\\!\\(\\*SuperscriptBox[\\(P\\), \
-\\(0\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\[Beta]\\)]\\) \
-= \\!\\(\\*FractionBox[\\(1\\), \
-\\(3\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Alpha]\[Beta]\\)]\\). Here \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) \
-- \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are the standard \
-gauge projectors.\"\>", "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpener"],
-                ImageSizeCache->{10., {2., 8.}}], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpenerHot"],
-                ImageSizeCache->{10., {2., 8.}}]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, True],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"]}, Dynamic[System`InformationDump`open$$],
-       BaselinePosition->Baseline,
-       FrameMargins->0,
-       ImageSize->Automatic],
-      DynamicModuleValues:>{}],
-     BaseStyle->"InformationGridFrame",
-     StripOnInput->False], "InformationGridPlain",
-    StripOnInput->False],
-   InformationData[<|
-    "ObjectType" -> "Symbol", "Usage" -> 
-     "NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Nieuwenhuizen \
-operator (\!\(\*SuperscriptBox[\(P\), \(0\)]\)\!\(\*SubscriptBox[\()\), \(\
-\[Mu]\[Nu]\[Alpha]\[Beta]\)]\) = \!\(\*FractionBox[\(1\), \
-\(3\)]\)\!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)\!\(\*SubscriptBox[\
-\(\[Theta]\), \(\[Alpha]\[Beta]\)]\). Here \!\(\*SubscriptBox[\(\[Theta]\), \
-\(\[Mu]\[Nu]\)]\)=\!\(\*SubscriptBox[\(\[Eta]\), \(\[Mu]\[Nu]\)]\) - \
-\!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\
-\!\(\*SuperscriptBox[\(p\), \(2\)]\) are the standard gauge projectors.", 
-     "Documentation" -> None, "OwnValues" -> 
-     Information`InformationValueForm[
-      OwnValues, Nieuwenhuizen`NieuwenhuizenOperator0, {
-       Nieuwenhuizen`NieuwenhuizenOperator0 -> 
-        Function[{
-          Private`\[Mu], Private`\[Nu], Private`\[Alpha], Private`\[Beta], 
-           Private`k}, 
-          
-          FeynCalc`FeynAmpDenominatorCombine[(1/3) 
-           Nieuwenhuizen`GaugeProjector[
-            Private`\[Mu], Private`\[Nu], Private`k] 
-           Nieuwenhuizen`GaugeProjector[
-            Private`\[Alpha], Private`\[Beta], Private`k]]]}], "UpValues" -> 
-     None, "DownValues" -> None, "SubValues" -> None, "DefaultValues" -> None,
-      "NValues" -> None, "FormatValues" -> None, "Options" -> None, 
-     "Attributes" -> {}, "FullName" -> 
-     "Nieuwenhuizen`NieuwenhuizenOperator0"|>, False]], 
-  TraditionalForm]], "Output",
- CellChangeTimes->{3.9245556027200947`*^9},
- CellLabel->"Out[4]=",ExpressionUUID->"219ed240-9fe7-44ee-b069-6032da1c2337"],
-
-Cell[BoxData[
- FormBox[
-  InterpretationBox[
-   StyleBox[
-    FrameBox[
-     DynamicModuleBox[{System`InformationDump`open$$ = False, 
-      System`InformationDump`mouseOver$$ = False}, 
-      PaneSelectorBox[{True->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False,
-              BaseStyle -> None],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\
-\[Beta],p]. Nieuwenhuizen operator \
-(\\!\\(\\*OverscriptBox[SuperscriptBox[\\(P\\), \\(0\\)], \
-\\(_\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\[Beta]\\)]\\) \
-=\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Nu]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Alpha]\[Beta]\\)]\\). Here \\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Nu]\\)]\\) = \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are projectors \
-orthogonal to the standard gauge projector \
-\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) \
-- \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\).\"\>", 
-              "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           PaneBox[
-            TagBox[GridBox[{
-               {
-                StyleBox[
-                 TagBox[
-                  TooltipBox[
-                   StyleBox["\<\" Assignment\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                   "\"OwnValues\"",
-                   TooltipStyle->"TextStyling"],
-                  Annotation[#, "OwnValues", "Tooltip"]& ], "DialogStyle",
-                 StripOnInput->False]},
-               {
-                TemplateBox[{"\"\[ThinSpace]\"", 
-                  GridBox[{{
-                    RowBox[{"NieuwenhuizenOperator0Bar", "=", 
-                    RowBox[{"Function", "[", 
-                    RowBox[{
-                    RowBox[{"{", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "}"}], ",", 
-                    RowBox[{"FeynAmpDenominatorCombine", "[", 
-                    RowBox[{
-                    RowBox[{"GaugeProjectorBar", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjectorBar", "[", 
-                    
-                    RowBox[{"Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}]}], "]"}]}], "]"}]}]}, {" "}}, 
-                   GridBoxAlignment -> {"Columns" -> {{Left}}}, 
-                   DefaultBaseStyle -> "Column", 
-                   GridBoxItemSize -> {
-                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
-                 "RowDefault"]}
-              },
-              DefaultBaseStyle->"Column",
-              GridBoxAlignment->{"Columns" -> {{Left}}},
-              GridBoxItemSize->{
-               "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-             "Column"],
-            FrameMargins->{{6, 0}, {3, 6}}], "\<\"\"\>"},
-          {
-           PaneBox[GridBox[{
-              {
-               
-               DynamicModuleBox[{System`InformationDump`open$$ = {
-                False, False, False, False, False, False}}, 
-                StyleBox[GridBox[{
-                   {
-                    TagBox[
-                    TooltipBox[
-                    StyleBox["\<\" Full Name\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                    "\"FullName\"",
-                    TooltipStyle->"TextStyling"],
-                    
-                    Annotation[#, "FullName", 
-                    "Tooltip"]& ], \
-"\<\"Nieuwenhuizen`NieuwenhuizenOperator0Bar\"\>"}
-                  },
-                  AutoDelete->False,
-                  GridBoxAlignment->{"Columns" -> {Right, Left}},
-                  GridBoxDividers->None,
-                  GridBoxItemSize->{"Columns" -> {Automatic, Automatic}},
-                  GridBoxSpacings->{"Columns" -> {
-                    Offset[0.27999999999999997`], {
-                    Offset[0.5599999999999999]}, 
-                    Offset[0.27999999999999997`]}, "Rows" -> {
-                    Offset[0.2], {
-                    Offset[0.8]}, 
-                    Offset[0.2]}}], "DialogStyle",
-                 StripOnInput->False],
-                DynamicModuleValues:>{}]}
-             },
-             DefaultBaseStyle->"Column",
-             GridBoxAlignment->{"Columns" -> {{Left}}},
-             GridBoxDividers->{"Columns" -> {{False}}, "Rows" -> {{False}}},
-             
-             GridBoxItemSize->{
-              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-             GridBoxSpacings->{"Columns" -> {
-                 Offset[0.27999999999999997`], {
-                  Offset[0.5599999999999999]}, 
-                 Offset[0.27999999999999997`]}, "Rows" -> {
-                 Offset[0.2], {
-                  Offset[3.6]}, 
-                 Offset[0.2]}}],
-            FrameMargins->{{6, 6}, {6, 3}}], ""},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpener"]], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpenerHot"]]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, False],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"], False->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\
-\[Beta],p]. Nieuwenhuizen operator \
-(\\!\\(\\*OverscriptBox[SuperscriptBox[\\(P\\), \\(0\\)], \
-\\(_\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\[Beta]\\)]\\) \
-=\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Nu]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Alpha]\[Beta]\\)]\\). Here \\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Nu]\\)]\\) = \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are projectors \
-orthogonal to the standard gauge projector \
-\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) \
-- \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\).\"\>", 
-              "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpener"],
-                ImageSizeCache->{10., {2., 8.}}], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpenerHot"],
-                ImageSizeCache->{10., {2., 8.}}]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, True],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"]}, Dynamic[System`InformationDump`open$$],
-       BaselinePosition->Baseline,
-       FrameMargins->0,
-       ImageSize->Automatic],
-      DynamicModuleValues:>{}],
-     BaseStyle->"InformationGridFrame",
-     StripOnInput->False], "InformationGridPlain",
-    StripOnInput->False],
-   InformationData[<|
-    "ObjectType" -> "Symbol", "Usage" -> 
-     "NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],p]. \
-Nieuwenhuizen operator (\!\(\*OverscriptBox[SuperscriptBox[\(P\), \(0\)], \(_\
-\)]\)\!\(\*SubscriptBox[\()\), \(\[Mu]\[Nu]\[Alpha]\[Beta]\)]\) \
-=\!\(\*SubscriptBox[\(\[Omega]\), \(\[Mu]\[Nu]\)]\)\!\(\*SubscriptBox[\(\
-\[Omega]\), \(\[Alpha]\[Beta]\)]\). Here \!\(\*SubscriptBox[\(\[Omega]\), \(\
-\[Mu]\[Nu]\)]\) = \!\(\*SubscriptBox[\(p\), \
-\(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \
-\(\[Nu]\)]\)/\!\(\*SuperscriptBox[\(p\), \(2\)]\) are projectors orthogonal \
-to the standard gauge projector \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\
-\)]\)=\!\(\*SubscriptBox[\(\[Eta]\), \(\[Mu]\[Nu]\)]\) - \
-\!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\
-\!\(\*SuperscriptBox[\(p\), \(2\)]\).", "Documentation" -> None, "OwnValues" -> 
-     Information`InformationValueForm[
-      OwnValues, Nieuwenhuizen`NieuwenhuizenOperator0Bar, {
-       Nieuwenhuizen`NieuwenhuizenOperator0Bar -> 
-        Function[{
-          Private`\[Mu], Private`\[Nu], Private`\[Alpha], Private`\[Beta], 
-           Private`k}, 
-          FeynCalc`FeynAmpDenominatorCombine[
-          Nieuwenhuizen`GaugeProjectorBar[
-            Private`\[Mu], Private`\[Nu], Private`k] 
-           Nieuwenhuizen`GaugeProjectorBar[
-            Private`\[Alpha], Private`\[Beta], Private`k]]]}], "UpValues" -> 
-     None, "DownValues" -> None, "SubValues" -> None, "DefaultValues" -> None,
-      "NValues" -> None, "FormatValues" -> None, "Options" -> None, 
-     "Attributes" -> {}, "FullName" -> 
-     "Nieuwenhuizen`NieuwenhuizenOperator0Bar"|>, False]], 
-  TraditionalForm]], "Output",
- CellChangeTimes->{3.924555602791835*^9},
- CellLabel->"Out[5]=",ExpressionUUID->"0a8fcdc9-4365-4bd2-89bf-d798b8380c58"],
-
-Cell[BoxData[
- FormBox[
-  InterpretationBox[
-   StyleBox[
-    FrameBox[
-     DynamicModuleBox[{System`InformationDump`open$$ = False, 
-      System`InformationDump`mouseOver$$ = False}, 
-      PaneSelectorBox[{True->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False,
-              BaseStyle -> None],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\
-\[Beta],p]. Nieuwenhuizen operator \
-(\\!\\(\\*OverscriptBox[OverscriptBox[SuperscriptBox[\\(P\\), \\(0\\)], \
-\\(_\\)], \\(_\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\
-\[Beta]\\)]\\) = \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Alpha]\[Beta]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \\(\[Alpha]\
-\[Beta]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \\(\[Mu]\[Nu]\\)]\\). \
-Here \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) \
-- \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are the standard \
-gauge projectors and \\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Nu]\\)]\\) = \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are projectors \
-orthogonal to \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\).\"\>", "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           PaneBox[
-            TagBox[GridBox[{
-               {
-                StyleBox[
-                 TagBox[
-                  TooltipBox[
-                   StyleBox["\<\" Assignment\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                   "\"OwnValues\"",
-                   TooltipStyle->"TextStyling"],
-                  Annotation[#, "OwnValues", "Tooltip"]& ], "DialogStyle",
-                 StripOnInput->False]},
-               {
-                TemplateBox[{"\"\[ThinSpace]\"", 
-                  GridBox[{{
-                    RowBox[{"NieuwenhuizenOperator0BarBar", "=", 
-                    RowBox[{"Function", "[", 
-                    RowBox[{
-                    RowBox[{"{", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "}"}], ",", 
-                    RowBox[{"FeynAmpDenominatorCombine", "[", 
-                    RowBox[{
-                    RowBox[{
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjectorBar", "[", 
-                    
-                    RowBox[{"Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}]}], "+", 
-                    RowBox[{
-                    RowBox[{"GaugeProjectorBar", "[", 
-                    
-                    RowBox[{"Private`\[Mu]", ",", "Private`\[Nu]", ",", 
-                    "Private`k"}], "]"}], " ", 
-                    RowBox[{"GaugeProjector", "[", 
-                    
-                    RowBox[{"Private`\[Alpha]", ",", "Private`\[Beta]", ",", 
-                    "Private`k"}], "]"}]}]}], "]"}]}], "]"}]}]}, {" "}}, 
-                   GridBoxAlignment -> {"Columns" -> {{Left}}}, 
-                   DefaultBaseStyle -> "Column", 
-                   GridBoxItemSize -> {
-                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
-                 "RowDefault"]}
-              },
-              DefaultBaseStyle->"Column",
-              GridBoxAlignment->{"Columns" -> {{Left}}},
-              
-              GridBoxItemSize->{
-               "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-             "Column"],
-            FrameMargins->{{6, 0}, {3, 6}}], "\<\"\"\>"},
-          {
-           PaneBox[GridBox[{
-              {
-               
-               DynamicModuleBox[{System`InformationDump`open$$ = {
-                False, False, False, False, False, False}}, 
-                StyleBox[GridBox[{
-                   {
-                    TagBox[
-                    TooltipBox[
-                    StyleBox["\<\" Full Name\"\>", "InformationRowLabel",
-                    StripOnInput->False],
-                    "\"FullName\"",
-                    TooltipStyle->"TextStyling"],
-                    
-                    Annotation[#, "FullName", 
-                    "Tooltip"]& ], \
-"\<\"Nieuwenhuizen`NieuwenhuizenOperator0BarBar\"\>"}
-                  },
-                  AutoDelete->False,
-                  GridBoxAlignment->{"Columns" -> {Right, Left}},
-                  GridBoxDividers->None,
-                  GridBoxItemSize->{"Columns" -> {Automatic, Automatic}},
-                  GridBoxSpacings->{"Columns" -> {
-                    Offset[0.27999999999999997`], {
-                    Offset[0.5599999999999999]}, 
-                    Offset[0.27999999999999997`]}, "Rows" -> {
-                    Offset[0.2], {
-                    Offset[0.8]}, 
-                    Offset[0.2]}}], "DialogStyle",
-                 StripOnInput->False],
-                DynamicModuleValues:>{}]}
-             },
-             DefaultBaseStyle->"Column",
-             GridBoxAlignment->{"Columns" -> {{Left}}},
-             GridBoxDividers->{"Columns" -> {{False}}, "Rows" -> {{False}}},
-             
-             GridBoxItemSize->{
-              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-             GridBoxSpacings->{"Columns" -> {
-                 Offset[0.27999999999999997`], {
-                  Offset[0.5599999999999999]}, 
-                 Offset[0.27999999999999997`]}, "Rows" -> {
-                 Offset[0.2], {
-                  Offset[3.6]}, 
-                 Offset[0.2]}}],
-            FrameMargins->{{6, 6}, {6, 3}}], ""},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpener"]], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "UpPointerOpenerHot"]]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, False],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"], False->
-       TagBox[GridBox[{
-          {
-           ItemBox[
-            PaneBox[
-             StyleBox[
-              TagBox[
-               TooltipBox[
-                StyleBox["\<\" Symbol\"\>", "InformationRowLabel",
-                 StripOnInput->False],
-                "\"Symbol\"",
-                TooltipStyle->"TextStyling"],
-               Annotation[#, "Symbol", "Tooltip"]& ], "InformationTitleText",
-              StripOnInput->False],
-             FrameMargins->{{4, 0}, {-1, 1}}],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            PaneBox[
-             
-             StyleBox["\<\"NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\
-\[Beta],p]. Nieuwenhuizen operator \
-(\\!\\(\\*OverscriptBox[OverscriptBox[SuperscriptBox[\\(P\\), \\(0\\)], \
-\\(_\\)], \\(_\\)]\\)\\!\\(\\*SubscriptBox[\\()\\), \\(\[Mu]\[Nu]\[Alpha]\
-\[Beta]\\)]\\) = \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Alpha]\[Beta]\\)]\\)+\\!\\(\\*SubscriptBox[\\(\[Theta]\\), \\(\[Alpha]\
-\[Beta]\\)]\\)\\!\\(\\*SubscriptBox[\\(\[Omega]\\), \\(\[Mu]\[Nu]\\)]\\). \
-Here \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\)=\\!\\(\\*SubscriptBox[\\(\[Eta]\\), \\(\[Mu]\[Nu]\\)]\\) \
-- \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are the standard \
-gauge projectors and \\!\\(\\*SubscriptBox[\\(\[Omega]\\), \
-\\(\[Mu]\[Nu]\\)]\\) = \\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Mu]\\)]\\)\\!\\(\\*SubscriptBox[\\(p\\), \
-\\(\[Nu]\\)]\\)/\\!\\(\\*SuperscriptBox[\\(p\\), \\(2\\)]\\) are projectors \
-orthogonal to \\!\\(\\*SubscriptBox[\\(\[Theta]\\), \
-\\(\[Mu]\[Nu]\\)]\\).\"\>", "InformationUsageText",
-              StripOnInput->False,
-              LineSpacing->{1.5, 1.5, 3.}],
-             FrameMargins->{{10, 10}, {8, 10}}],
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False], 
-           ItemBox["\<\"\"\>",
-            BaseStyle->"InformationUsageSubtitleBackground",
-            StripOnInput->False]},
-          {
-           ItemBox[
-            TagBox[
-             ButtonBox[
-              PaneSelectorBox[{False->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpener"],
-                ImageSizeCache->{10., {2., 8.}}], True->
-               
-               DynamicBox[FEPrivate`FrontEndResource[
-                "FEBitmaps", "DownPointerOpenerHot"],
-                ImageSizeCache->{10., {2., 8.}}]}, Dynamic[
-               System`InformationDump`mouseOver$$]],
-              Alignment->Left,
-              Appearance->{"Default" -> None},
-              
-              ButtonFunction:>FEPrivate`Set[
-               System`InformationDump`open$$, True],
-              Evaluator->Automatic,
-              FrameMargins->{{9, 0}, {0, 0}},
-              ImageMargins->0,
-              ImageSize->Full,
-              Method->"Preemptive"],
-             
-             EventHandlerTag[{
-              "MouseEntered" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
-               "MouseExited" :> 
-               FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
-               Method -> "Preemptive", PassEventsDown -> Automatic, 
-               PassEventsUp -> True}]],
-            BaseStyle->"InformationTitleBackground",
-            StripOnInput->False], "\[SpanFromLeft]"}
-         },
-         AutoDelete->False,
-         FrameStyle->Directive[
-           GrayLevel[0.8], 
-           Thickness[Tiny]],
-         GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
-         
-         GridBoxDividers->{
-          "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
-         GridBoxItemSize->{
-          "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
-        "Grid"]}, Dynamic[System`InformationDump`open$$],
-       BaselinePosition->Baseline,
-       FrameMargins->0,
-       ImageSize->Automatic],
-      DynamicModuleValues:>{}],
-     BaseStyle->"InformationGridFrame",
-     StripOnInput->False], "InformationGridPlain",
-    StripOnInput->False],
-   InformationData[<|
-    "ObjectType" -> "Symbol", "Usage" -> 
-     "NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],p]. \
-Nieuwenhuizen operator \
-(\!\(\*OverscriptBox[OverscriptBox[SuperscriptBox[\(P\), \(0\)], \(_\)], \
-\(_\)]\)\!\(\*SubscriptBox[\()\), \(\[Mu]\[Nu]\[Alpha]\[Beta]\)]\) = \
-\!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)\!\(\*SubscriptBox[\(\
-\[Omega]\), \(\[Alpha]\[Beta]\)]\)+\!\(\*SubscriptBox[\(\[Theta]\), \
-\(\[Alpha]\[Beta]\)]\)\!\(\*SubscriptBox[\(\[Omega]\), \(\[Mu]\[Nu]\)]\). \
-Here \!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\)=\!\(\*SubscriptBox[\(\
-\[Eta]\), \(\[Mu]\[Nu]\)]\) - \!\(\*SubscriptBox[\(p\), \
-\(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \
-\(\[Nu]\)]\)/\!\(\*SuperscriptBox[\(p\), \(2\)]\) are the standard gauge \
-projectors and \!\(\*SubscriptBox[\(\[Omega]\), \(\[Mu]\[Nu]\)]\) = \
-\!\(\*SubscriptBox[\(p\), \(\[Mu]\)]\)\!\(\*SubscriptBox[\(p\), \(\[Nu]\)]\)/\
-\!\(\*SuperscriptBox[\(p\), \(2\)]\) are projectors orthogonal to \
-\!\(\*SubscriptBox[\(\[Theta]\), \(\[Mu]\[Nu]\)]\).", "Documentation" -> None,
-      "OwnValues" -> 
-     Information`InformationValueForm[
-      OwnValues, Nieuwenhuizen`NieuwenhuizenOperator0BarBar, {
-       Nieuwenhuizen`NieuwenhuizenOperator0BarBar -> 
-        Function[{
-          Private`\[Mu], Private`\[Nu], Private`\[Alpha], Private`\[Beta], 
-           Private`k}, 
-          FeynCalc`FeynAmpDenominatorCombine[
-          Nieuwenhuizen`GaugeProjector[
-             Private`\[Mu], Private`\[Nu], Private`k] 
-            Nieuwenhuizen`GaugeProjectorBar[
-             Private`\[Alpha], Private`\[Beta], Private`k] + 
-           Nieuwenhuizen`GaugeProjectorBar[
-             Private`\[Mu], Private`\[Nu], Private`k] 
-            Nieuwenhuizen`GaugeProjector[
-             Private`\[Alpha], Private`\[Beta], Private`k]]]}], "UpValues" -> 
-     None, "DownValues" -> None, "SubValues" -> None, "DefaultValues" -> None,
-      "NValues" -> None, "FormatValues" -> None, "Options" -> None, 
-     "Attributes" -> {}, "FullName" -> 
-     "Nieuwenhuizen`NieuwenhuizenOperator0BarBar"|>, False]], 
-  TraditionalForm]], "Output",
- CellChangeTimes->{3.924555602860862*^9},
- CellLabel->"Out[6]=",ExpressionUUID->"6dcce41d-8865-4778-b655-615304420214"]
-}, Open  ]],
-
-Cell[TextData[StyleBox["Explicit expressions",
- FontWeight->"Bold"]], "Text",
- Editable->False,
- CellChangeTimes->{{3.8799887530643663`*^9, 
-  3.879988759696232*^9}},ExpressionUUID->"38a59f11-2db4-47bd-87f8-\
-95dafba590e5"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[{
- RowBox[{"NieuwenhuizenOperator1", "[", 
-  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-  "]"}], "\[IndentingNewLine]", 
- RowBox[{"NieuwenhuizenOperator2", "[", 
-  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-  "]"}], "\[IndentingNewLine]", 
- RowBox[{"NieuwenhuizenOperator0", "[", 
-  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-  "]"}], "\[IndentingNewLine]", 
- RowBox[{"NieuwenhuizenOperator0Bar", "[", 
-  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-  "]"}], "\[IndentingNewLine]", 
- RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
-  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-  "]"}]}], "Input",
- Editable->False,
- CellChangeTimes->{{3.845690636136821*^9, 3.845690641855135*^9}, {
-  3.845690835332171*^9, 3.845690836986188*^9}, {3.845690891819799*^9, 
-  3.845690894492296*^9}, {3.845690967692713*^9, 3.845690974277313*^9}},
- CellLabel->"In[7]:=",ExpressionUUID->"1f573ebf-7be7-45c8-a513-7ee8008d1ae3"],
-
-Cell[BoxData[
- FormBox[
-  RowBox[{
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Beta]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Nu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"2", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "+", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Alpha]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Nu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"2", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "+", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Beta]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Mu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"2", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "+", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Alpha]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Mu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"2", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "-", 
-   FormBox[
-    FractionBox[
-     RowBox[{"2", " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]]}], 
-     SuperscriptBox[
-      RowBox[{"(", 
-       InterpretationBox[
-        SuperscriptBox[
-         FormBox[
-          FormBox["p",
-           TraditionalForm],
-          TraditionalForm], "2"],
-        SequenceForm[
-         FeynCalc`Pair[
-          FeynCalc`Momentum[$CellContext`p, D], 
-          FeynCalc`Momentum[$CellContext`p, D]]],
-        Editable->False], ")"}], "2"]],
-    TraditionalForm]}], TraditionalForm]], "Output",
- CellChangeTimes->{3.924555602930039*^9},
- CellLabel->"Out[7]=",ExpressionUUID->"97b20d2d-071a-4bbd-a109-329b2e89a846"],
-
-Cell[BoxData[
- FormBox[
-  RowBox[{
-   RowBox[{
-    FractionBox["1", "2"], " ", 
-    SuperscriptBox["g", 
-     RowBox[{
-      FormBox[
-       FormBox["\[Alpha]",
-        TraditionalForm],
-       TraditionalForm], 
-      FormBox[
-       FormBox["\[Nu]",
-        TraditionalForm],
-       TraditionalForm]}]], " ", 
-    SuperscriptBox["g", 
-     RowBox[{
-      FormBox[
-       FormBox["\[Beta]",
-        TraditionalForm],
-       TraditionalForm], 
-      FormBox[
-       FormBox["\[Mu]",
-        TraditionalForm],
-       TraditionalForm]}]]}], "+", 
-   RowBox[{
-    FractionBox["1", "2"], " ", 
-    SuperscriptBox["g", 
-     RowBox[{
-      FormBox[
-       FormBox["\[Alpha]",
-        TraditionalForm],
-       TraditionalForm], 
-      FormBox[
-       FormBox["\[Mu]",
-        TraditionalForm],
-       TraditionalForm]}]], " ", 
-    SuperscriptBox["g", 
-     RowBox[{
-      FormBox[
-       FormBox["\[Beta]",
-        TraditionalForm],
-       TraditionalForm], 
-      FormBox[
-       FormBox["\[Nu]",
-        TraditionalForm],
-       TraditionalForm]}]]}], "-", 
-   RowBox[{
-    FractionBox["1", "3"], " ", 
-    SuperscriptBox["g", 
-     RowBox[{
-      FormBox[
-       FormBox["\[Alpha]",
-        TraditionalForm],
-       TraditionalForm], 
-      FormBox[
-       FormBox["\[Beta]",
-        TraditionalForm],
-       TraditionalForm]}]], " ", 
-    SuperscriptBox["g", 
-     RowBox[{
-      FormBox[
-       FormBox["\[Mu]",
-        TraditionalForm],
-       TraditionalForm], 
-      FormBox[
-       FormBox["\[Nu]",
-        TraditionalForm],
-       TraditionalForm]}]]}], "-", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Beta]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Mu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"2", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "+", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Mu]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Nu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"3", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "-", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Beta]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Nu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"2", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "-", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Alpha]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Nu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"2", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "-", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Alpha]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Mu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"2", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "+", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Alpha]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Beta]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"3", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "+", 
-   FormBox[
-    FractionBox[
-     RowBox[{"2", " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]]}], 
-     RowBox[{"3", " ", 
-      SuperscriptBox[
-       RowBox[{"(", 
-        InterpretationBox[
-         SuperscriptBox[
-          FormBox[
-           FormBox["p",
-            TraditionalForm],
-           TraditionalForm], "2"],
-         SequenceForm[
-          FeynCalc`Pair[
-           FeynCalc`Momentum[$CellContext`p, D], 
-           FeynCalc`Momentum[$CellContext`p, D]]],
-         Editable->False], ")"}], "2"]}]],
-    TraditionalForm]}], TraditionalForm]], "Output",
- CellChangeTimes->{3.924555602962696*^9},
- CellLabel->"Out[8]=",ExpressionUUID->"ab7c535d-ccef-4b60-9e34-a3e84b8a89df"],
-
-Cell[BoxData[
- FormBox[
-  RowBox[{
-   RowBox[{
-    FractionBox["1", "3"], " ", 
-    SuperscriptBox["g", 
-     RowBox[{
-      FormBox[
-       FormBox["\[Alpha]",
-        TraditionalForm],
-       TraditionalForm], 
-      FormBox[
-       FormBox["\[Beta]",
-        TraditionalForm],
-       TraditionalForm]}]], " ", 
-    SuperscriptBox["g", 
-     RowBox[{
-      FormBox[
-       FormBox["\[Mu]",
-        TraditionalForm],
-       TraditionalForm], 
-      FormBox[
-       FormBox["\[Nu]",
-        TraditionalForm],
-       TraditionalForm]}]]}], "-", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Mu]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Nu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"3", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "-", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Alpha]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Beta]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     RowBox[{"3", " ", 
-      InterpretationBox[
-       SuperscriptBox[
-        FormBox[
-         FormBox["p",
-          TraditionalForm],
-         TraditionalForm], "2"],
-       SequenceForm[
-        FeynCalc`Pair[
-         FeynCalc`Momentum[$CellContext`p, D], 
-         FeynCalc`Momentum[$CellContext`p, D]]],
-       Editable->False]}]],
-    TraditionalForm], "+", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]]}], 
-     RowBox[{"3", " ", 
-      SuperscriptBox[
-       RowBox[{"(", 
-        InterpretationBox[
-         SuperscriptBox[
-          FormBox[
-           FormBox["p",
-            TraditionalForm],
-           TraditionalForm], "2"],
-         SequenceForm[
-          FeynCalc`Pair[
-           FeynCalc`Momentum[$CellContext`p, D], 
-           FeynCalc`Momentum[$CellContext`p, D]]],
-         Editable->False], ")"}], "2"]}]],
-    TraditionalForm]}], TraditionalForm]], "Output",
- CellChangeTimes->{3.9245556029699697`*^9},
- CellLabel->"Out[9]=",ExpressionUUID->"3b9a4ec0-2e43-4ead-811d-874eaae7e31e"],
-
-Cell[BoxData[
- FormBox[
-  FractionBox[
-   RowBox[{
-    SuperscriptBox[
-     FormBox[
-      FormBox["p",
-       TraditionalForm],
-      TraditionalForm], 
-     FormBox[
-      FormBox["\[Alpha]",
-       TraditionalForm],
-      TraditionalForm]], " ", 
-    SuperscriptBox[
-     FormBox[
-      FormBox["p",
-       TraditionalForm],
-      TraditionalForm], 
-     FormBox[
-      FormBox["\[Beta]",
-       TraditionalForm],
-      TraditionalForm]], " ", 
-    SuperscriptBox[
-     FormBox[
-      FormBox["p",
-       TraditionalForm],
-      TraditionalForm], 
-     FormBox[
-      FormBox["\[Mu]",
-       TraditionalForm],
-      TraditionalForm]], " ", 
-    SuperscriptBox[
-     FormBox[
-      FormBox["p",
-       TraditionalForm],
-      TraditionalForm], 
-     FormBox[
-      FormBox["\[Nu]",
-       TraditionalForm],
-      TraditionalForm]]}], 
-   SuperscriptBox[
-    RowBox[{"(", 
-     InterpretationBox[
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], "2"],
-      SequenceForm[
-       FeynCalc`Pair[
-        FeynCalc`Momentum[$CellContext`p, D], 
-        FeynCalc`Momentum[$CellContext`p, D]]],
-      Editable->False], ")"}], "2"]], TraditionalForm]], "Output",
- CellChangeTimes->{3.924555602973535*^9},
- CellLabel->"Out[10]=",ExpressionUUID->"f6fce41b-be9f-45e8-87c0-3425a7849054"],
-
-Cell[BoxData[
- FormBox[
-  RowBox[{
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Mu]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Nu]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     InterpretationBox[
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], "2"],
-      SequenceForm[
-       FeynCalc`Pair[
-        FeynCalc`Momentum[$CellContext`p, D], 
-        FeynCalc`Momentum[$CellContext`p, D]]],
-      Editable->False]],
-    TraditionalForm], "+", 
-   FormBox[
-    FractionBox[
-     RowBox[{
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox["g", 
-       RowBox[{
-        FormBox[
-         FormBox["\[Alpha]",
-          TraditionalForm],
-         TraditionalForm], 
-        FormBox[
-         FormBox["\[Beta]",
-          TraditionalForm],
-         TraditionalForm]}]]}], 
-     InterpretationBox[
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], "2"],
-      SequenceForm[
-       FeynCalc`Pair[
-        FeynCalc`Momentum[$CellContext`p, D], 
-        FeynCalc`Momentum[$CellContext`p, D]]],
-      Editable->False]],
-    TraditionalForm], "-", 
-   FormBox[
-    FractionBox[
-     RowBox[{"2", " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Alpha]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Beta]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Mu]",
-         TraditionalForm],
-        TraditionalForm]], " ", 
-      SuperscriptBox[
-       FormBox[
-        FormBox["p",
-         TraditionalForm],
-        TraditionalForm], 
-       FormBox[
-        FormBox["\[Nu]",
-         TraditionalForm],
-        TraditionalForm]]}], 
-     SuperscriptBox[
-      RowBox[{"(", 
-       InterpretationBox[
-        SuperscriptBox[
-         FormBox[
-          FormBox["p",
-           TraditionalForm],
-          TraditionalForm], "2"],
-        SequenceForm[
-         FeynCalc`Pair[
-          FeynCalc`Momentum[$CellContext`p, D], 
-          FeynCalc`Momentum[$CellContext`p, D]]],
-        Editable->False], ")"}], "2"]],
-    TraditionalForm]}], TraditionalForm]], "Output",
- CellChangeTimes->{3.924555602976686*^9},
- CellLabel->"Out[11]=",ExpressionUUID->"64b4d867-f72d-4b36-aa56-2c31f033aa79"]
-}, Open  ]],
-
-Cell[TextData[StyleBox["Nieuwenhuizen algebra",
- FontWeight->"Bold"]], "Text",
- Editable->False,
- CellChangeTimes->{{3.894585833748232*^9, 
-  3.894585840020304*^9}},ExpressionUUID->"6dcfbf1a-051c-4ce6-b727-\
-aa26d9bbd1da"],
-
-Cell[TextData[StyleBox["Completeness relation",
- FontWeight->"Bold"]], "Text",
- Editable->False,
- CellChangeTimes->{{3.8799887696162243`*^9, 
-  3.879988779202181*^9}},ExpressionUUID->"a380e160-c040-45b3-b36d-\
-462f38438d82"],
-
-Cell[CellGroupData[{
+Cell["\<\
+Start with a fresh Mathematica kernel and evaluate the input cells from top \
+to bottom (Shift+Enter). Install FeynGrav and its FeynCalc dependency first; \
+see the package README. Opening this notebook executes nothing. A semicolon \
+stores an intermediate result without printing its full expression. Use \
+?FunctionName for help and FeynGravCommands[] to discover the package \
+interface.\
+\>", "Text",ExpressionUUID->"0a53b9d6-5058-4ca2-9933-a1855754ced7"],
 
 Cell[BoxData[
  RowBox[{
+  RowBox[{"<<", "\"\<FeynGrav`\>\""}], ";"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{4.0001010036983223`*^9},
+ CellLabel->"In[1]:=",ExpressionUUID->"139888a2-6dd2-4f87-bed4-9852610a8ce4"],
+
+Cell["\<\
+This notebook requires FORM on the kernel\[CloseCurlyQuote]s PATH. \
+CalcFormCalculate performs bosonic algebra and Lorentz contractions; TFORM is \
+used automatically when available. FeynCalc handles loop reduction and any \
+Dirac or colour algebra before the bosonic coefficients are sent to FORM.\
+\>", "Text",
+ CellChangeTimes->{
+  4.00009044886372*^9},ExpressionUUID->"a1283fc5-f8a8-47bb-886f-568a68325c13"],
+
+Cell["\<\
+FeynGrav supplies the vertex and propagator normalisations, including i and \
+\[Kappa]. The default gravitational gauge parameter is GaugeFixingEpsilon = \
+2. The displayed diagram weights are retained from the original example; the \
+notebook does not derive their combinatorics.\
+\>", "Text",ExpressionUUID->"83a545fb-ab33-49aa-b0d6-fc2d1c6c461a"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["2. Discover the operator interface", "Section",ExpressionUUID->"1e569032-3c53-4f62-8a97-786b8d1c0935"],
+
+Cell["\<\
+The four indices label two symmetric tensor slots; p is the momentum. \
+Evaluate these help queries to see the exact package conventions.\
+\>", "Text",ExpressionUUID->"82e546d8-e4d7-4fb8-964c-479e706f8bb3"],
+
+Cell[BoxData[
+ RowBox[{"Information", "[", 
+  RowBox[{"\"\<NieuwenhuizenOperator1\>\"", ",", 
+   RowBox[{"LongForm", "\[Rule]", "False"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{4.000101016110733*^9},
+ CellLabel->"In[2]:=",ExpressionUUID->"72e150eb-3cc3-4bb7-b4b7-a45704acde27"],
+
+Cell[BoxData[
+ RowBox[{"Information", "[", 
+  RowBox[{"\"\<NieuwenhuizenOperator2\>\"", ",", 
+   RowBox[{"LongForm", "\[Rule]", "False"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellLabel->"In[3]:=",ExpressionUUID->"1b27422d-e0c6-455f-b2b8-b89b1b6ef128"],
+
+Cell[BoxData[
+ RowBox[{"Information", "[", 
+  RowBox[{"\"\<NieuwenhuizenOperator0\>\"", ",", 
+   RowBox[{"LongForm", "\[Rule]", "False"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellLabel->"In[4]:=",ExpressionUUID->"caefb6a5-3856-4d75-b77b-993363db1507"],
+
+Cell[BoxData[
+ RowBox[{"Information", "[", 
+  RowBox[{"\"\<NieuwenhuizenOperator0Bar\>\"", ",", 
+   RowBox[{"LongForm", "\[Rule]", "False"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellLabel->"In[5]:=",ExpressionUUID->"61220477-91c5-4287-8969-a83a56878aad"],
+
+Cell[BoxData[
+ RowBox[{"Information", "[", 
+  RowBox[{"\"\<NieuwenhuizenOperator0BarBar\>\"", ",", 
+   RowBox[{"LongForm", "\[Rule]", "False"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellLabel->"In[6]:=",ExpressionUUID->"511d1254-4313-40a2-a1d9-4d8aa0d5c69c"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3. Inspect the definitions", "Section",ExpressionUUID->"217fdcef-64f4-42b4-ae5a-9a918bcd6a2f"],
+
+Cell["\<\
+The definitions use D-dimensional metrics and propagator denominators. \
+FeynAmpDenominatorExplicit turns a massless denominator into 1/p\.b2. These \
+projectors require non-zero p\.b2; they are not massless external \
+polarisation tensors.\
+\>", "Text",
+ CellChangeTimes->{
+  4.000090459801566*^9},ExpressionUUID->"668973e1-21b4-483a-a49f-\
+6aab424ce840"],
+
+Cell[BoxData[
+ RowBox[{"NieuwenhuizenOperator1", "[", 
+  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
+  "]"}]], "Input",
+ InitializationCell->False,
+ CellLabel->"In[7]:=",ExpressionUUID->"b09bcc2b-d839-46cc-b203-572aa245fd30"],
+
+Cell[BoxData[
+ RowBox[{"NieuwenhuizenOperator2", "[", 
+  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
+  "]"}]], "Input",
+ InitializationCell->False,
+ CellLabel->"In[8]:=",ExpressionUUID->"c2db2ebb-7aa0-4457-91ad-45d9482f755d"],
+
+Cell[BoxData[
+ RowBox[{"NieuwenhuizenOperator0", "[", 
+  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
+  "]"}]], "Input",
+ InitializationCell->False,
+ CellLabel->"In[9]:=",ExpressionUUID->"b85fff12-68c3-4fa5-9b13-7b49a9849fb7"],
+
+Cell[BoxData[
+ RowBox[{"NieuwenhuizenOperator0Bar", "[", 
+  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
+  "]"}]], "Input",
+ InitializationCell->False,
+ CellLabel->"In[10]:=",ExpressionUUID->"500eda66-757c-49db-bdc8-7c92ed71b8da"],
+
+Cell[BoxData[
+ RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
+  RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
+  "]"}]], "Input",
+ InitializationCell->False,
+ CellLabel->"In[11]:=",ExpressionUUID->"6daf24f9-7d98-4743-ab1f-eeb616707897"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["4. Verify the algebra", "Section",ExpressionUUID->"e0cc930c-396c-43d0-b164-5c7ad7ba5a60"],
+
+Cell["\<\
+Repeated Lorentz indices are contracted by CalcFormCalculate. Each check \
+sends the tensor expression to FORM and imports the contracted result into \
+FeynCalc notation.\
+\>", "Text",ExpressionUUID->"5783cdd2-e436-4d4a-bb5a-986bbb849373"],
+
+Cell[CellGroupData[{
+
+Cell["Completeness", "Subsection",ExpressionUUID->"f7a3f46f-61b6-49ff-a60a-fd8373f5e20a"],
+
+Cell["\<\
+The four diagonal projectors sum to the identity on symmetric rank-two \
+tensors. The mixed scalar operator is not included in this sum.\
+\>", "Text",ExpressionUUID->"f4c38e98-fd17-41f0-b5bc-92a879d7594c"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"NieuwenhuizenOperator0", "[", 
@@ -3071,61 +200,38 @@ Cell[BoxData[
     RowBox[{"NieuwenhuizenOperator0Bar", "[", 
      RowBox[{
      "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-     "]"}]}], "==", 
+     "]"}]}], "\[Equal]", 
    RowBox[{
-    FractionBox["1", "2"], 
+    FractionBox["1", "2"], " ", 
     RowBox[{"(", 
      RowBox[{
       RowBox[{
        RowBox[{"MTD", "[", 
-        RowBox[{"\[Mu]", ",", "\[Alpha]"}], "]"}], 
+        RowBox[{"\[Mu]", ",", "\[Alpha]"}], "]"}], " ", 
        RowBox[{"MTD", "[", 
         RowBox[{"\[Nu]", ",", "\[Beta]"}], "]"}]}], "+", 
       RowBox[{
        RowBox[{"MTD", "[", 
-        RowBox[{"\[Mu]", ",", "\[Beta]"}], "]"}], 
+        RowBox[{"\[Mu]", ",", "\[Beta]"}], "]"}], " ", 
        RowBox[{"MTD", "[", 
-        RowBox[{"\[Nu]", ",", "\[Alpha]"}], "]"}]}]}], ")"}]}]}], "//", 
-  "Calc"}]], "Input",
- Editable->False,
- CellChangeTimes->{{3.8799887803546124`*^9, 3.879988829713498*^9}},
- CellLabel->"In[12]:=",ExpressionUUID->"cc477328-edd9-490c-8409-e8fe037350b6"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603012327*^9},
- CellLabel->"Out[12]=",ExpressionUUID->"efefc4f4-277f-46f6-a8de-d36595242237"]
+        RowBox[{"\[Nu]", ",", "\[Alpha]"}], "]"}]}]}], ")"}]}]}], 
+  "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{4.000090494737589*^9, 4.000101029004466*^9},
+ CellLabel->"In[12]:=",ExpressionUUID->"0d94a6c2-4217-4510-a23c-c71e3c6b3d9f"]
 }, Open  ]],
-
-Cell[TextData[{
- StyleBox["Operators ",
-  FontWeight->"Bold"],
- Cell[BoxData[
-  FormBox[
-   RowBox[{
-    SuperscriptBox["P", "0"], ",", 
-    SuperscriptBox["P", "1"], ",", 
-    SuperscriptBox["P", "2"]}], TraditionalForm]],
-  FontWeight->"Bold",ExpressionUUID->"97d861f4-16ad-4cdc-a34e-3b3b72508668"],
- StyleBox[", and ",
-  FontWeight->"Bold"],
- Cell[BoxData[
-  FormBox[
-   OverscriptBox[
-    SuperscriptBox["P", "0"], "_"], TraditionalForm]],
-  FontWeight->"Bold",ExpressionUUID->"b2befde6-e983-44a5-a013-b13606bb2332"],
- StyleBox[" are projectors",
-  FontWeight->"Bold"]
-}], "Text",
- Editable->False,
- CellChangeTimes->{{3.879989327743215*^9, 
-  3.879989373968919*^9}},ExpressionUUID->"b4142528-9ae2-4c29-a33a-\
-21285b765b19"],
 
 Cell[CellGroupData[{
 
-Cell[BoxData[{
- RowBox[{
+Cell["Idempotence", "Subsection",ExpressionUUID->"f563b8ba-278e-4305-8a7d-62cdc204d084"],
+
+Cell["\<\
+Each diagonal projector squares to itself. The following checks explicitly \
+specialize to D = 4, matching the numerical factors used later.\
+\>", "Text",ExpressionUUID->"06ce0e01-d76c-4622-87f5-55a2886bd67f"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3133,18 +239,23 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator0", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator0", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "==", 
+        "]"}]}], "]"}], "\[Equal]", 
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
      RowBox[{"NieuwenhuizenOperator0", "[", 
       RowBox[{
       "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-      "]"}], "]"}]}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+      "]"}], "]"}]}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{4.0000905042064657`*^9, 4.000101036619925*^9},
+ CellLabel->"In[13]:=",ExpressionUUID->"cfc819b3-0c13-4e16-a622-d421fa0d133e"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3152,18 +263,23 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator1", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator1", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "==", 
+        "]"}]}], "]"}], "\[Equal]", 
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
      RowBox[{"NieuwenhuizenOperator1", "[", 
       RowBox[{
       "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-      "]"}], "]"}]}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+      "]"}], "]"}]}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090508510113*^9, 4.000090513516223*^9}},
+ CellLabel->"In[14]:=",ExpressionUUID->"b7291b25-a069-4582-8377-5f5f334b6f21"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3171,18 +287,23 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator2", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator2", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "==", 
+        "]"}]}], "]"}], "\[Equal]", 
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
      RowBox[{"NieuwenhuizenOperator2", "[", 
       RowBox[{
       "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-      "]"}], "]"}]}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+      "]"}], "]"}]}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.0000905178020763`*^9, 4.000090520162808*^9}},
+ CellLabel->"In[15]:=",ExpressionUUID->"02cae272-ef39-4b7b-8a82-fae14bd383ec"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3190,73 +311,33 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator0Bar", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator0Bar", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "==", 
+        "]"}]}], "]"}], "\[Equal]", 
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
      RowBox[{"NieuwenhuizenOperator0Bar", "[", 
       RowBox[{
       "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-      "]"}], "]"}]}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}]}], "Input",
- Editable->False,
- CellChangeTimes->{{3.879989051380122*^9, 3.879989139419426*^9}, {
-  3.879989286153063*^9, 3.879989341312177*^9}, {3.924459661131212*^9, 
-  3.924459661259101*^9}, {3.924460519425488*^9, 3.924460669024171*^9}},
- CellLabel->"In[13]:=",ExpressionUUID->"6118dd98-b283-4507-90ba-c759a3a8070a"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603092791*^9},
- CellLabel->"Out[13]=",ExpressionUUID->"dcc75365-055c-4dae-8f55-846916630d5d"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.9245556031682463`*^9},
- CellLabel->"Out[14]=",ExpressionUUID->"d32d5e4b-daa6-406f-a822-40e62dd3adc6"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603310595*^9},
- CellLabel->"Out[15]=",ExpressionUUID->"00aaf199-a6c5-4d37-bae5-5df3bf3285b6"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603335258*^9},
- CellLabel->"Out[16]=",ExpressionUUID->"6566b41a-6dbf-41a8-a29c-b854bbe5548b"]
+      "]"}], "]"}]}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090524177165*^9, 4.000090527462866*^9}},
+ CellLabel->"In[16]:=",ExpressionUUID->"31221ed0-d7e0-40e1-89c5-0e4f73c5a22f"]
 }, Open  ]],
-
-Cell[TextData[{
- StyleBox["Operators ",
-  FontWeight->"Bold"],
- Cell[BoxData[
-  FormBox[
-   RowBox[{
-    SuperscriptBox["P", "0"], ",", 
-    SuperscriptBox["P", "1"], ",", 
-    SuperscriptBox["P", "2"]}], TraditionalForm]],ExpressionUUID->
-  "4df5a0b2-9739-4f44-90b0-feb417220713"],
- StyleBox[", and ",
-  FontWeight->"Bold"],
- Cell[BoxData[
-  FormBox[
-   OverscriptBox[
-    SuperscriptBox["P", "0"], "_"], TraditionalForm]],ExpressionUUID->
-  "4ca78f82-d524-4eab-8d64-884956cc1121"],
- StyleBox[" are orthogonal to each other",
-  FontWeight->"Bold"]
-}], "Text",
- Editable->False,
- CellChangeTimes->{{3.879989465467243*^9, 
-  3.8799894793315983`*^9}},ExpressionUUID->"289da1ae-258e-49c0-ac59-\
-6c416b2bc71d"],
 
 Cell[CellGroupData[{
 
-Cell[BoxData[{
- RowBox[{
+Cell["Orthogonality", "Subsection",ExpressionUUID->"a39d231f-3e51-4b79-ade3-9dccecc18fca"],
+
+Cell["\<\
+Products of distinct diagonal projectors vanish. Every displayed equality \
+should reduce to True.\
+\>", "Text",ExpressionUUID->"a013b8fd-3b6f-475e-bbf8-2f903b218cea"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3264,13 +345,18 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator0", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator1", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090533514029*^9, 4.0000905346034*^9}},
+ CellLabel->"In[17]:=",ExpressionUUID->"0a12b95c-ec51-4714-94ac-f084826e2c77"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3278,13 +364,18 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator1", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator2", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090539085432*^9, 4.000090539674831*^9}},
+ CellLabel->"In[18]:=",ExpressionUUID->"1b450bb7-8ba0-409b-88f0-1c01475f470f"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3292,13 +383,18 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator2", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator0", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090543396294*^9, 4.0000905444942017`*^9}},
+ CellLabel->"In[19]:=",ExpressionUUID->"210d2b1a-11d4-47e7-af34-a27ecd816842"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3306,13 +402,18 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator0Bar", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator0", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "==", "0"}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090547943392*^9, 4.000090548613117*^9}},
+ CellLabel->"In[20]:=",ExpressionUUID->"4aba4ba8-015f-4fd5-85a3-3fb9496a100a"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3320,13 +421,18 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator0Bar", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator1", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "==", "0"}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090552759943*^9, 4.0000905534295*^9}},
+ CellLabel->"In[21]:=",ExpressionUUID->"04f22fdd-5f3f-4994-9c5b-7505c9677693"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3334,82 +440,28 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator0Bar", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator2", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "==", "0"}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}]}], "Input",
- Editable->False,
- CellChangeTimes->{{3.845691123766811*^9, 3.8456916983909893`*^9}, 
-   3.878612041831651*^9, {3.878612075853351*^9, 3.878612109691761*^9}, {
-   3.879989384409535*^9, 3.87998946069215*^9}, {3.92446070091086*^9, 
-   3.9244607380683813`*^9}},
- CellLabel->"In[17]:=",ExpressionUUID->"cd7878de-7f5e-45b9-99ee-74fc94a43209"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.9245556033992033`*^9},
- CellLabel->"Out[17]=",ExpressionUUID->"1b49dfc0-4b86-40df-9591-ed7a5df11e50"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603472131*^9},
- CellLabel->"Out[18]=",ExpressionUUID->"e7f3da36-c775-4899-8014-4354c3712ffa"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603545225*^9},
- CellLabel->"Out[19]=",ExpressionUUID->"b21a026f-4aad-4827-902a-1d4420deb81e"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603571796*^9},
- CellLabel->"Out[20]=",ExpressionUUID->"8a6316a4-3818-4191-ad99-a90bdae491b4"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603605053*^9},
- CellLabel->"Out[21]=",ExpressionUUID->"aaf3f0c7-ba3b-4d2f-ae78-531403e7e04c"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603644022*^9},
- CellLabel->"Out[22]=",ExpressionUUID->"22c45430-2763-4ab8-aa98-18a6f0d7eb26"]
+        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090557434416*^9, 4.000090558077918*^9}},
+ CellLabel->"In[22]:=",ExpressionUUID->"b0ada934-4cc7-4c63-bf16-55c80282d730"]
 }, Open  ]],
-
-Cell[TextData[{
- StyleBox["Operators ",
-  FontWeight->"Bold"],
- Cell[BoxData[
-  FormBox[
-   SuperscriptBox["P", "1"], TraditionalForm]],
-  FontWeight->"Bold",ExpressionUUID->"121d81c2-daaf-4f9d-b3d2-3cacb6fbfcce"],
- StyleBox[" and ",
-  FontWeight->"Bold"],
- Cell[BoxData[
-  FormBox[
-   SuperscriptBox["P", "0"], TraditionalForm]],
-  FontWeight->"Bold",ExpressionUUID->"ccb982fb-df4f-498f-827a-58633b06e245"],
- StyleBox[" are orthogonal to ",
-  FontWeight->"Bold"],
- Cell[BoxData[
-  FormBox[
-   OverscriptBox[
-    OverscriptBox[
-     SuperscriptBox["P", "0"], "_"], "_"], TraditionalForm]],
-  FontWeight->"Bold",ExpressionUUID->"18eb4dbf-7814-4c41-97a1-364ae35dcd93"]
-}], "Text",
- Editable->False,
- CellChangeTimes->{{3.879989577357585*^9, 3.879989616888136*^9}, {
-  3.8799896554800577`*^9, 
-  3.879989663521096*^9}},ExpressionUUID->"94903747-8b4a-4031-a1eb-\
-2357d4e407e9"],
 
 Cell[CellGroupData[{
 
-Cell[BoxData[{
- RowBox[{
+Cell["Mixed operator and spin 1 or spin 2", "Subsection",ExpressionUUID->"8c110338-af72-483a-887e-c531a43f81e1"],
+
+Cell["\<\
+The mixed scalar operator is orthogonal to the spin-1 and spin-2 sectors. Its \
+name contains 0BarBar; it is not an additional idempotent projector.\
+\>", "Text",ExpressionUUID->"9fd6a7a2-2969-4c50-8ef1-0b08215a08ae"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3417,13 +469,18 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator1", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", 
-   RowBox[{"D", "\[Rule]", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090564270035*^9, 4.000090564885442*^9}},
+ CellLabel->"In[23]:=",ExpressionUUID->"38871db8-ec59-4751-8cc3-35ca19b5bd91"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3431,48 +488,29 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator2", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
-        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", 
-   RowBox[{"D", "\[Rule]", "4"}]}], "//", "Calc"}]}], "Input",
- Editable->False,
- CellChangeTimes->{{3.924460805994565*^9, 3.9244608131660423`*^9}},
- CellLabel->"In[23]:=",ExpressionUUID->"c92ebfe1-ef2b-471e-bb21-98b29f7f706e"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603703783*^9},
- CellLabel->"Out[23]=",ExpressionUUID->"c048cc12-3204-4908-89a0-43d625ddc5ff"],
-
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.9245556037674427`*^9},
- CellLabel->"Out[24]=",ExpressionUUID->"bcc12252-0a31-4772-afd2-3fe2fa461cba"]
+        "]"}]}], "]"}], "\[Equal]", "0"}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.0000905690721483`*^9, 4.000090569774242*^9}},
+ CellLabel->"In[24]:=",ExpressionUUID->"46d84406-5455-4f2f-b8b5-f02719572528"]
 }, Open  ]],
-
-Cell[TextData[{
- StyleBox["The other relations with ",
-  FontWeight->"Bold"],
- Cell[BoxData[
-  FormBox[
-   OverscriptBox[
-    OverscriptBox[
-     SuperscriptBox["P", "0"], "_"], "_"], TraditionalForm]],
-  FontWeight->"Bold",ExpressionUUID->"722013a4-9b83-4c61-abda-376600fe8908"],
- StyleBox[" operator",
-  FontWeight->"Bold"]
-}], "Text",
- Editable->False,
- CellChangeTimes->{{3.8799896389907503`*^9, 
-  3.879989652455481*^9}},ExpressionUUID->"84cf193e-ae61-44c5-a707-\
-42dccdc17a2f"],
 
 Cell[CellGroupData[{
 
-Cell[BoxData[{
- RowBox[{
+Cell["Remaining scalar-sector relations", "Subsection",ExpressionUUID->"89528abf-594b-4180-a7d1-f1458e34dc9d"],
+
+Cell["\<\
+The factor 3 in the squared mixed operator belongs to the four-dimensional \
+specialization. Keep dimension-dependent coefficients if adapting these \
+checks to general D.\
+\>", "Text",ExpressionUUID->"4196486c-3954-41a7-b1ba-49377534ddfb"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3481,7 +519,7 @@ Cell[BoxData[{
        RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
         RowBox[{
         "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-        "]"}], 
+        "]"}], " ", 
        RowBox[{"NieuwenhuizenOperator0", "[", 
         RowBox[{
         "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", 
@@ -3490,7 +528,7 @@ Cell[BoxData[{
        RowBox[{"NieuwenhuizenOperator0", "[", 
         RowBox[{
         "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-        "]"}], 
+        "]"}], " ", 
        RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
         RowBox[{
         "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", 
@@ -3499,9 +537,14 @@ Cell[BoxData[{
      RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
       RowBox[{
       "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-      "]"}], "]"}]}], "/.", 
-   RowBox[{"D", "->", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+      "]"}], "]"}]}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090576955082*^9, 4.000090578970315*^9}},
+ CellLabel->"In[25]:=",ExpressionUUID->"1a657fb1-69eb-4289-80c8-75d36f1b5d90"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3509,14 +552,14 @@ Cell[BoxData[{
       RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
        RowBox[{
        "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-       "]"}], 
+       "]"}], " ", 
       RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
        RowBox[{
        "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}],
         "]"}]}], "]"}], "\[Equal]", 
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
      RowBox[{
-      RowBox[{"3", 
+      RowBox[{"3", " ", 
        RowBox[{"NieuwenhuizenOperator0", "[", 
         RowBox[{
         "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
@@ -3525,9 +568,14 @@ Cell[BoxData[{
        RowBox[{"NieuwenhuizenOperator0Bar", "[", 
         RowBox[{
         "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-        "]"}]}]}], "]"}]}], "/.", 
-   RowBox[{"D", "\[Rule]", "4"}]}], "//", "Calc"}], "\[IndentingNewLine]", 
- RowBox[{
+        "]"}]}]}], "]"}]}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090584616932*^9, 4.000090585922842*^9}},
+ CellLabel->"In[26]:=",ExpressionUUID->"4f429de0-ba48-46ed-a2b8-fc641c4bb451"],
+
+Cell[BoxData[
+ RowBox[{"CalcFormCalculate", "[", 
   RowBox[{
    RowBox[{
     RowBox[{"FeynAmpDenominatorExplicit", "[", 
@@ -3536,7 +584,7 @@ Cell[BoxData[{
        RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
         RowBox[{
         "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-        "]"}], 
+        "]"}], " ", 
        RowBox[{"NieuwenhuizenOperator0Bar", "[", 
         RowBox[{
         "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", 
@@ -3545,7 +593,7 @@ Cell[BoxData[{
        RowBox[{"NieuwenhuizenOperator0Bar", "[", 
         RowBox[{
         "\[Mu]", ",", "\[Nu]", ",", "\[Rho]", ",", "\[Sigma]", ",", "p"}], 
-        "]"}], 
+        "]"}], " ", 
        RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
         RowBox[{
         "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", 
@@ -3554,36 +602,42 @@ Cell[BoxData[{
      RowBox[{"NieuwenhuizenOperator0BarBar", "[", 
       RowBox[{
       "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "p"}], 
-      "]"}], "]"}]}], "/.", 
-   RowBox[{"D", "\[Rule]", "4"}]}], "//", "Calc"}]}], "Input",
- Editable->False,
- CellChangeTimes->{{3.845691123766811*^9, 3.8456916983909893`*^9}, {
-   3.878612041831651*^9, 3.878612058378383*^9}, {3.878612216949111*^9, 
-   3.878612251631482*^9}, 3.879989557353307*^9, {3.879989627544899*^9, 
-   3.879989630535902*^9}, {3.924460819773971*^9, 3.92446086964322*^9}},
- CellLabel->"In[25]:=",ExpressionUUID->"0606fddb-f80e-4ed6-9a12-178a84aff0a4"],
+      "]"}], "]"}]}], "/.", "\[VeryThinSpace]", 
+   RowBox[{"D", "\[Rule]", "4"}]}], "]"}]], "Input",
+ InitializationCell->False,
+ CellChangeTimes->{{4.000090589720957*^9, 4.000090592177574*^9}},
+ CellLabel->"In[27]:=",ExpressionUUID->"94547f61-f239-4895-b750-6ae1ae408e20"]
+}, Open  ]]
+}, Open  ]],
 
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603848063*^9},
- CellLabel->"Out[25]=",ExpressionUUID->"ab48c5df-5ded-477f-b997-52c6f4c01f5c"],
+Cell[CellGroupData[{
 
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603906787*^9},
- CellLabel->"Out[26]=",ExpressionUUID->"8d184906-78a2-40d0-b42e-8e425d5f1e32"],
+Cell["How to adapt this example", "Section",ExpressionUUID->"9db809da-aeea-4cc8-8d54-b2b4f09be7a1"],
 
-Cell[BoxData[
- FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{3.924555603955618*^9},
- CellLabel->"Out[27]=",ExpressionUUID->"a21e1395-4252-4d7d-9fe1-5f60efb765f7"]
+Cell["\<\
+Change one ingredient at a time: a mass, a momentum assignment, or a vertex \
+order. Restart the kernel before rerunning with different kinematics, because \
+scalar-product definitions and assumptions persist in the session. \
+Re-evaluate all dependent cells after a change. Inspect the stored \
+intermediate expressions if a comparison is False or remains unevaluated; do \
+not treat an unresolved expression as a passed check.\
+\>", "Text",ExpressionUUID->"a328abc8-963f-44b4-8aad-68bae7d4466c"],
+
+Cell["\<\
+References: P. van Nieuwenhuizen, Nucl. Phys. B 60 (1973) 478; A. Accioly et \
+al., Int. J. Theor. Phys. 39 (2000) 1599. The algebraic conventions are those \
+of the installed FeynGrav definitions displayed above.\
+\>", "Text",ExpressionUUID->"fec076fc-8fcb-44a4-ba86-c5f151c78ab9"]
+}, Open  ]]
 }, Open  ]]
 },
-WindowSize->{1440, 847},
-WindowMargins->{{0, Automatic}, {Automatic, 0}},
-FrontEndVersion->"14.0 for Mac OS X x86 (64-bit) (December 12, 2023)",
+WindowSize->{1435.5, 851.25},
+WindowMargins->{{-2.25, Automatic}, {Automatic, -22.5}},
+WindowTitle->"Spin projectors for a symmetric tensor",
+CellContext->Notebook,
+FrontEndVersion->"15.0 for Linux x86 (64-bit) (July 2, 2026)",
 StyleDefinitions->"Default.nb",
-ExpressionUUID->"f9a1844f-9f73-43fd-9392-4c60e9b99764"
+ExpressionUUID->"83632f05-cb58-4ad3-a939-8587b7e883df"
 ]
 (* End of Notebook Content *)
 
@@ -3596,75 +650,110 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 987, 15, 127, "Text",ExpressionUUID->"6f8d9b8f-3a2d-4e4b-af81-7c820c7fcf42"],
 Cell[CellGroupData[{
-Cell[1570, 39, 319, 6, 30, "Input",ExpressionUUID->"663d527b-fb35-4f9e-8955-df1534471a9c"],
+Cell[628, 23, 110, 0, 96, "Title",ExpressionUUID->"582b08ad-9aa0-47a1-88b6-599317f8fc86"],
+Cell[741, 25, 284, 4, 33, "Text",ExpressionUUID->"9210c3a0-bec7-4229-9e19-3b07b0a4039a"],
 Cell[CellGroupData[{
-Cell[1914, 49, 2625, 70, 30, "Print",ExpressionUUID->"7e58df7f-3765-427a-8b27-e2076024d14a"],
-Cell[4542, 121, 334, 7, 27, "Print",ExpressionUUID->"f2b43948-d3b9-4533-95cf-412ea8d6e234"],
-Cell[4879, 130, 378, 9, 27, "Print",ExpressionUUID->"019b974c-bf1f-46f6-ad7a-97eba39446cb"],
-Cell[5260, 141, 263, 8, 29, "Print",ExpressionUUID->"ead468fb-d434-4327-b633-e5c05d6f8de4"],
-Cell[5526, 151, 1108, 32, 26, "Print",ExpressionUUID->"de7f8b19-4b38-46b6-ac44-04ba3c8366b5"],
-Cell[6637, 185, 816, 19, 44, "Print",ExpressionUUID->"b5b1ed1b-2acf-4095-a5ff-64cc154dbe79"],
-Cell[7456, 206, 1288, 35, 26, "Print",ExpressionUUID->"fc6baecd-1e30-456d-85a3-b19abd646ee7"]
+Cell[1050, 33, 95, 0, 65, "Section",ExpressionUUID->"f4046281-86df-4483-9d51-c88c6c9a8a5f"],
+Cell[1148, 35, 470, 7, 55, "Text",ExpressionUUID->"0a53b9d6-5058-4ca2-9933-a1855754ced7"],
+Cell[1621, 44, 229, 5, 29, "Input",ExpressionUUID->"139888a2-6dd2-4f87-bed4-9852610a8ce4",
+ InitializationCell->False],
+Cell[1853, 51, 422, 7, 55, "Text",ExpressionUUID->"a1283fc5-f8a8-47bb-886f-568a68325c13"],
+Cell[2278, 60, 359, 5, 55, "Text",ExpressionUUID->"83a545fb-ab33-49aa-b0d6-fc2d1c6c461a"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2674, 70, 108, 0, 65, "Section",ExpressionUUID->"1e569032-3c53-4f62-8a97-786b8d1c0935"],
+Cell[2785, 72, 216, 3, 33, "Text",ExpressionUUID->"82e546d8-e4d7-4fb8-964c-479e706f8bb3"],
+Cell[3004, 77, 305, 6, 29, "Input",ExpressionUUID->"72e150eb-3cc3-4bb7-b4b7-a45704acde27",
+ InitializationCell->False],
+Cell[3312, 85, 263, 5, 29, "Input",ExpressionUUID->"1b27422d-e0c6-455f-b2b8-b89b1b6ef128",
+ InitializationCell->False],
+Cell[3578, 92, 263, 5, 29, "Input",ExpressionUUID->"caefb6a5-3856-4d75-b77b-993363db1507",
+ InitializationCell->False],
+Cell[3844, 99, 266, 5, 29, "Input",ExpressionUUID->"61220477-91c5-4287-8969-a83a56878aad",
+ InitializationCell->False],
+Cell[4113, 106, 269, 5, 29, "Input",ExpressionUUID->"511d1254-4313-40a2-a1d9-4d8aa0d5c69c",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4419, 116, 100, 0, 65, "Section",ExpressionUUID->"217fdcef-64f4-42b4-ae5a-9a918bcd6a2f"],
+Cell[4522, 118, 366, 8, 55, "Text",ExpressionUUID->"668973e1-21b4-483a-a49f-6aab424ce840"],
+Cell[4891, 128, 258, 5, 29, "Input",ExpressionUUID->"b09bcc2b-d839-46cc-b203-572aa245fd30",
+ InitializationCell->False],
+Cell[5152, 135, 258, 5, 29, "Input",ExpressionUUID->"c2db2ebb-7aa0-4457-91ad-45d9482f755d",
+ InitializationCell->False],
+Cell[5413, 142, 258, 5, 29, "Input",ExpressionUUID->"b85fff12-68c3-4fa5-9b13-7b49a9849fb7",
+ InitializationCell->False],
+Cell[5674, 149, 262, 5, 29, "Input",ExpressionUUID->"500eda66-757c-49db-bdc8-7c92ed71b8da",
+ InitializationCell->False],
+Cell[5939, 156, 265, 5, 29, "Input",ExpressionUUID->"6daf24f9-7d98-4743-ab1f-eeb616707897",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6241, 166, 95, 0, 65, "Section",ExpressionUUID->"e0cc930c-396c-43d0-b164-5c7ad7ba5a60"],
+Cell[6339, 168, 249, 4, 33, "Text",ExpressionUUID->"5783cdd2-e436-4d4a-bb5a-986bbb849373"],
+Cell[CellGroupData[{
+Cell[6613, 176, 89, 0, 53, "Subsection",ExpressionUUID->"f7a3f46f-61b6-49ff-a60a-fd8373f5e20a"],
+Cell[6705, 178, 215, 3, 33, "Text",ExpressionUUID->"f4c38e98-fd17-41f0-b5bc-92a879d7594c"],
+Cell[6923, 183, 1331, 37, 70, "Input",ExpressionUUID->"0d94a6c2-4217-4510-a23c-c71e3c6b3d9f",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8291, 225, 88, 0, 53, "Subsection",ExpressionUUID->"f563b8ba-278e-4305-8a7d-62cdc204d084"],
+Cell[8382, 227, 219, 3, 33, "Text",ExpressionUUID->"06ce0e01-d76c-4622-87f5-55a2886bd67f"],
+Cell[8604, 232, 927, 22, 69, "Input",ExpressionUUID->"cfc819b3-0c13-4e16-a622-d421fa0d133e",
+ InitializationCell->False],
+Cell[9534, 256, 927, 22, 69, "Input",ExpressionUUID->"b7291b25-a069-4582-8377-5f5f334b6f21",
+ InitializationCell->False],
+Cell[10464, 280, 929, 22, 69, "Input",ExpressionUUID->"02cae272-ef39-4b7b-8a82-fae14bd383ec",
+ InitializationCell->False],
+Cell[11396, 304, 936, 22, 69, "Input",ExpressionUUID->"31221ed0-d7e0-40e1-89c5-0e4f73c5a22f",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[12369, 331, 90, 0, 53, "Subsection",ExpressionUUID->"a39d231f-3e51-4b79-ade3-9dccecc18fca"],
+Cell[12462, 333, 177, 3, 33, "Text",ExpressionUUID->"a013b8fd-3b6f-475e-bbf8-2f903b218cea"],
+Cell[12642, 338, 726, 17, 29, "Input",ExpressionUUID->"0a12b95c-ec51-4714-94ac-f084826e2c77",
+ InitializationCell->False],
+Cell[13371, 357, 728, 17, 29, "Input",ExpressionUUID->"1b450bb7-8ba0-409b-88f0-1c01475f470f",
+ InitializationCell->False],
+Cell[14102, 376, 730, 17, 29, "Input",ExpressionUUID->"210d2b1a-11d4-47e7-af34-a27ecd816842",
+ InitializationCell->False],
+Cell[14835, 395, 731, 17, 29, "Input",ExpressionUUID->"4aba4ba8-015f-4fd5-85a3-3fb9496a100a",
+ InitializationCell->False],
+Cell[15569, 414, 729, 17, 29, "Input",ExpressionUUID->"04f22fdd-5f3f-4994-9c5b-7505c9677693",
+ InitializationCell->False],
+Cell[16301, 433, 731, 17, 29, "Input",ExpressionUUID->"b0ada934-4cc7-4c63-bf16-55c80282d730",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17069, 455, 112, 0, 53, "Subsection",ExpressionUUID->"8c110338-af72-483a-887e-c531a43f81e1"],
+Cell[17184, 457, 227, 3, 33, "Text",ExpressionUUID->"9fd6a7a2-2969-4c50-8ef1-0b08215a08ae"],
+Cell[17414, 462, 734, 17, 29, "Input",ExpressionUUID->"38871db8-ec59-4751-8cc3-35ca19b5bd91",
+ InitializationCell->False],
+Cell[18151, 481, 736, 17, 29, "Input",ExpressionUUID->"46d84406-5455-4f2f-b8b5-f02719572528",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[18924, 503, 110, 0, 53, "Subsection",ExpressionUUID->"89528abf-594b-4180-a7d1-f1458e34dc9d"],
+Cell[19037, 505, 250, 4, 33, "Text",ExpressionUUID->"4196486c-3954-41a7-b1ba-49377534ddfb"],
+Cell[19290, 511, 1316, 32, 69, "Input",ExpressionUUID->"1a657fb1-69eb-4289-80c8-75d36f1b5d90",
+ InitializationCell->False],
+Cell[20609, 545, 1182, 29, 69, "Input",ExpressionUUID->"4f429de0-ba48-46ed-a2b8-fc641c4bb451",
+ InitializationCell->False],
+Cell[21794, 576, 1322, 32, 69, "Input",ExpressionUUID->"94547f61-f239-4895-b750-6ae1ae408e20",
+ InitializationCell->False]
 }, Open  ]]
 }, Open  ]],
-Cell[8771, 245, 241, 5, 35, "Text",ExpressionUUID->"5a66bd94-4441-403e-844e-f3a920220fef"],
 Cell[CellGroupData[{
-Cell[9037, 254, 551, 9, 115, "Input",ExpressionUUID->"1f7c6b05-45c5-41fa-86d7-791eb731fe59"],
-Cell[9591, 265, 17394, 384, 101, "Output",ExpressionUUID->"2d4bdb2d-007e-436f-b060-220dddde833e"],
-Cell[26988, 651, 15745, 359, 101, "Output",ExpressionUUID->"cedb8ce1-cfed-4186-b7a1-e7e8d3b57ed7"],
-Cell[42736, 1012, 13448, 316, 101, "Output",ExpressionUUID->"219ed240-9fe7-44ee-b069-6032da1c2337"],
-Cell[56187, 1330, 14037, 326, 100, "Output",ExpressionUUID->"0a8fcdc9-4365-4bd2-89bf-d798b8380c58"],
-Cell[70227, 1658, 15347, 349, 103, "Output",ExpressionUUID->"6dcce41d-8865-4778-b655-615304420214"]
-}, Open  ]],
-Cell[85589, 2010, 223, 5, 35, "Text",ExpressionUUID->"38a59f11-2db4-47bd-87f8-95dafba590e5"],
-Cell[CellGroupData[{
-Cell[85837, 2019, 1081, 20, 115, "Input",ExpressionUUID->"1f573ebf-7be7-45c8-a513-7ee8008d1ae3"],
-Cell[86921, 2041, 5862, 233, 59, "Output",ExpressionUUID->"97b20d2d-071a-4bbd-a109-329b2e89a846"],
-Cell[92786, 2276, 9613, 388, 59, "Output",ExpressionUUID->"ab7c535d-ccef-4b60-9e34-a3e84b8a89df"],
-Cell[102402, 2666, 4221, 168, 59, "Output",ExpressionUUID->"3b9a4ec0-2e43-4ead-811d-874eaae7e31e"],
-Cell[106626, 2836, 1340, 54, 59, "Output",ExpressionUUID->"f6fce41b-be9f-45e8-87c0-3425a7849054"],
-Cell[107969, 2892, 3607, 143, 59, "Output",ExpressionUUID->"64b4d867-f72d-4b36-aa56-2c31f033aa79"]
-}, Open  ]],
-Cell[111591, 3038, 222, 5, 35, "Text",ExpressionUUID->"6dcfbf1a-051c-4ce6-b727-aa26d9bbd1da"],
-Cell[111816, 3045, 224, 5, 35, "Text",ExpressionUUID->"a380e160-c040-45b3-b36d-462f38438d82"],
-Cell[CellGroupData[{
-Cell[112065, 3054, 1287, 37, 69, "Input",ExpressionUUID->"cc477328-edd9-490c-8409-e8fe037350b6"],
-Cell[113355, 3093, 180, 3, 30, "Output",ExpressionUUID->"efefc4f4-277f-46f6-a8de-d36595242237"]
-}, Open  ]],
-Cell[113550, 3099, 728, 23, 38, "Text",ExpressionUUID->"b4142528-9ae2-4c29-a33a-21285b765b19"],
-Cell[CellGroupData[{
-Cell[114303, 3126, 3125, 81, 178, "Input",ExpressionUUID->"6118dd98-b283-4507-90ba-c759a3a8070a"],
-Cell[117431, 3209, 180, 3, 30, "Output",ExpressionUUID->"dcc75365-055c-4dae-8f55-846916630d5d"],
-Cell[117614, 3214, 182, 3, 30, "Output",ExpressionUUID->"d32d5e4b-daa6-406f-a822-40e62dd3adc6"],
-Cell[117799, 3219, 180, 3, 30, "Output",ExpressionUUID->"00aaf199-a6c5-4d37-bae5-5df3bf3285b6"],
-Cell[117982, 3224, 180, 3, 30, "Output",ExpressionUUID->"6566b41a-6dbf-41a8-a29c-b854bbe5548b"]
-}, Open  ]],
-Cell[118177, 3230, 706, 23, 38, "Text",ExpressionUUID->"289da1ae-258e-49c0-ac59-6c416b2bc71d"],
-Cell[CellGroupData[{
-Cell[118908, 3257, 3383, 90, 136, "Input",ExpressionUUID->"cd7878de-7f5e-45b9-99ee-74fc94a43209"],
-Cell[122294, 3349, 182, 3, 30, "Output",ExpressionUUID->"1b49dfc0-4b86-40df-9591-ed7a5df11e50"],
-Cell[122479, 3354, 180, 3, 30, "Output",ExpressionUUID->"e7f3da36-c775-4899-8014-4354c3712ffa"],
-Cell[122662, 3359, 180, 3, 30, "Output",ExpressionUUID->"b21a026f-4aad-4827-902a-1d4420deb81e"],
-Cell[122845, 3364, 180, 3, 30, "Output",ExpressionUUID->"8a6316a4-3818-4191-ad99-a90bdae491b4"],
-Cell[123028, 3369, 180, 3, 30, "Output",ExpressionUUID->"aaf3f0c7-ba3b-4d2f-ae78-531403e7e04c"],
-Cell[123211, 3374, 180, 3, 30, "Output",ExpressionUUID->"22c45430-2763-4ab8-aa98-18a6f0d7eb26"]
-}, Open  ]],
-Cell[123406, 3380, 873, 26, 42, "Text",ExpressionUUID->"94903747-8b4a-4031-a1eb-2357d4e407e9"],
-Cell[CellGroupData[{
-Cell[124304, 3410, 1206, 31, 52, "Input",ExpressionUUID->"c92ebfe1-ef2b-471e-bb21-98b29f7f706e"],
-Cell[125513, 3443, 180, 3, 30, "Output",ExpressionUUID->"c048cc12-3204-4908-89a0-43d625ddc5ff"],
-Cell[125696, 3448, 182, 3, 30, "Output",ExpressionUUID->"bcc12252-0a31-4772-afd2-3fe2fa461cba"]
-}, Open  ]],
-Cell[125893, 3454, 483, 15, 42, "Text",ExpressionUUID->"84cf193e-ae61-44c5-a707-42dccdc17a2f"],
-Cell[CellGroupData[{
-Cell[126401, 3473, 3541, 90, 178, "Input",ExpressionUUID->"0606fddb-f80e-4ed6-9a12-178a84aff0a4"],
-Cell[129945, 3565, 180, 3, 30, "Output",ExpressionUUID->"ab48c5df-5ded-477f-b997-52c6f4c01f5c"],
-Cell[130128, 3570, 180, 3, 30, "Output",ExpressionUUID->"8d184906-78a2-40d0-b42e-8e425d5f1e32"],
-Cell[130311, 3575, 180, 3, 53, "Output",ExpressionUUID->"a21e1395-4252-4d7d-9fe1-5f60efb765f7"]
+Cell[23165, 614, 99, 0, 65, "Section",ExpressionUUID->"9db809da-aeea-4cc8-8d54-b2b4f09be7a1"],
+Cell[23267, 616, 507, 7, 55, "Text",ExpressionUUID->"a328abc8-963f-44b4-8aad-68bae7d4466c"],
+Cell[23777, 625, 292, 4, 33, "Text",ExpressionUUID->"fec076fc-8fcb-44a4-ba86-c5f151c78ab9"]
+}, Open  ]]
 }, Open  ]]
 }
 ]
 *)
+
+(* End of internal cache information *)
 
