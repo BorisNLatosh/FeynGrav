@@ -25,13 +25,21 @@
 *)
 
 
+(* Shared validation is loaded by absolute path without changing Directory[]. *)
+With[{validationFile = FileNameJoin[{DirectoryName[$InputFileName], "RuleValidation.wl"}]},
+    Block[{$ContextPath = $ContextPath}, Needs["RuleValidation`", validationFile]]
+];
+
 BeginPackage["Calc`",{"FeynCalc`"}];
 
 
-Calc`Calc::usage = 
+Calc`Calc::usage =
 "Calc[exp] performs several simplifications that involve Contract, DiracSimplify, SUNSimplify, DotSimplify, EpsEvaluate, ExpandScalarProduct and Expand2. The chain is applied repeatedly, and the fixed point is returned. \
 The options Assumptions and PowerExpand are accepted for compatibility with FeynCalc's Calc; they had an effect only through the legacy PowerSimplify step and are inert here.";
 
+
+
+(* Structural failures are returned as values; callers should use FailureQ. *)
 
 Begin["`Private`"];
 
@@ -42,17 +50,28 @@ Clear[Calc`Calc];
 Options[Calc`Calc] = { Assumptions -> True, PowerExpand -> True };
 
 
-Calc`Calc[expr_, OptionsPattern[]] :=
+Calc`Calc[expr_, opts:OptionsPattern[]] :=
+    RuleValidation`RuleCall[Calc`Calc[expr, opts], {},
 	FixedPoint[
 		Function[exp,
-			Expand2 @ ExpandScalarProduct @ DotSimplify @ DiracSimplify @ EpsEvaluate @
-			Contract @ DiracSimplify @ Contract @ Explicit @
-			(SUNSimplify[#,Explicit -> False]&) @ exp
+			Fold[RuleValidation`RuleRequire[#2[#1]] &, exp,
+                {(SUNSimplify[#, Explicit -> False] &), Explicit, Contract,
+                 DiracSimplify, Contract, EpsEvaluate, DiracSimplify,
+                 DotSimplify, ExpandScalarProduct, Expand2}]
 		],
 		expr,
 		5
-	];
+	], False];
 
+
+
+
+(* Unsupported arities fail before any calculation. *)
+
+
+Calc`Calc[arguments___] /; Length[{arguments}] == 0 ||
+    !AllTrue[Rest[{arguments}], MatchQ[#, _Rule | _RuleDelayed | {(_Rule | _RuleDelayed)...}] &] :=
+    RuleValidation`RuleArityFailure["Calc`Calc", {arguments}, {1}];
 
 End[];
 

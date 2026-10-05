@@ -1,103 +1,122 @@
 (* ::Package:: *)
 
+(* Shared validation is loaded by absolute path without changing Directory[]. *)
+With[{validationFile = FileNameJoin[{DirectoryName[$InputFileName], "RuleValidation.wl"}]},
+    Block[{$ContextPath = $ContextPath}, Needs["RuleValidation`", validationFile]]
+];
+
 BeginPackage["indexArraySymmetrization`"];
 
 
-indexArraySymmetrization::usage = 
+indexArraySymmetrization::usage =
 "indexArraySymmetrization[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\)] \
 returns all index arrays obtained by permuting adjacent index pairs \
-and independently swapping indices within each pair.";
+and independently swapping indices within each pair. The list length must be a multiple of two; otherwise the function returns Failure[\"InvalidIndexArrayLength\", ...].";
 
 
-indexArraySymmetrization3::usage = 
+indexArraySymmetrization3::usage =
 "indexArraySymmetrization3[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\),\!\(\*SubscriptBox[\(k\), \(n\)]\)] \
 returns all index arrays obtained by permuting adjacent index triplets and swapping \
-the first two entries within each triplet.";
+the first two entries within each triplet. The list length must be a multiple of three; otherwise the function returns Failure[\"InvalidIndexArrayLength\", ...].";
 
 
-Begin["Private`"];
+(* Keep helpers and memoised definitions local to this rule package. *)
+
+(* Structural failures are returned as values; callers should use FailureQ. *)
+indexArraySymmetrization::usage = indexArraySymmetrization::usage <> " Supported signatures: indexArraySymmetrization[indexArray]; argument 1: flat list, block size 2, length 0 to Infinity." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+indexArraySymmetrization3::usage = indexArraySymmetrization3::usage <> " Supported signatures: indexArraySymmetrization3[indexArray]; argument 1: flat list, block size 3, length 0 to Infinity." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+
+Begin["`Private`"];
 
 
-ClearAll[indexArraySymmetrization];
+Clear[indexArraySymmetrization];
 
 (*
 	The input indexArray is a flat list of the form
 	{mu1, nu1, mu2, nu2, ..., mun, nun}.
-	
+
 	The function returns all arrays obtained by:
 	1. permuting the index pairs,
 	2. independently swapping the two indices inside each pair.
-	
+
 	Each output is returned in the same flat-list format.
 *)
 
-indexArraySymmetrization[indexArray_List] := 
-	indexArraySymmetrization[indexArray] =
-		Module[{pairs, perms},
+indexArraySymmetrization[indexArray_] :=
+    RuleValidation`RuleCall[
+        indexArraySymmetrization[indexArray],
+        {{1, "Array", 2, 0, Infinity}},
+        (
+Module[{pairs, perms},
 			(*
 				The empty input has exactly one symmetrized arrangement:
 				the empty list itself.
 			*)
 			If[indexArray === {},
 				{{}},
-				
+
 				(*
 					Split the flat input into adjacent pairs:
 					{{mu1, nu1}, {mu2, nu2}, ..., {mun, nun}}.
 					The symmetry acts on these pairs as blocks.
 				*)
-				
+
 				pairs = Partition[indexArray, 2];
-				
+
 				(*
 					Generate all permutations of the pair list.
 					This accounts for the symmetry under permutations of pairs.
 				*)
-				
+
 				perms = Permutations[pairs];
-				
+
 				(*
 					For each permutation of pairs:
 					- Reverse /@ # swaps the two indices inside every pair,
-					- Transpose[{#, Reverse /@ #}] forms, for each pair, 
+					- Transpose[{#, Reverse /@ #}] forms, for each pair,
 						the two allowed orientations,
 					- Tuples[...] enumerates all independent choices of
 						original or swapped orientation for every pair,
 					- Flatten /@ ... converts each resulting list of pairs
 						back to the flat-list output format.
-						
+
 					The outer loop over pair permutations is parallelized.
 					Method -> "CoarsestGrained" is used because different
 					permutations lead to branches of similar cost.
 				*)
-				Flatten[
-					ParallelMap[
+				Flatten[RuleValidation`RuleRequire[
+					RuleValidation`RuleParallelMap[
 						(Flatten /@ Tuples[Transpose[{#, Reverse /@ #}]]) &,
 						perms,
 						Method -> "CoarsestGrained"
-					],
+					]],
 					1
 				]
 			]
-		];
+		]
+        ), True
+    ];
 
 
-ClearAll[indexArraySymmetrization3];
+Clear[indexArraySymmetrization3];
 
 (*
 	The input indexArray is a flat list of the form
 	{mu1, nu1, k1, mu2, nu2, k2, ..., mun, nun, kn}.
-	
+
 	The function returns all arrays obtained by:
 	1. permuting the index triplets,
 	2. independently swapping the first two indices inside each triplet.
-	
+
 	Each output is returned in the same flat-list format.
 *)
 
-indexArraySymmetrization3[indexArray_List] := 
-	indexArraySymmetrization3[indexArray] =
-		Module[{triplets, perms},
+indexArraySymmetrization3[indexArray_] :=
+    RuleValidation`RuleCall[
+        indexArraySymmetrization3[indexArray],
+        {{1, "Array", 3, 0, Infinity}},
+        (
+Module[{triplets, perms},
 			(*
 				The empty input has exactly one symmetrized arrangement:
 				the empty list itself.
@@ -124,25 +143,36 @@ indexArraySymmetrization3[indexArray_List] :=
 						original or swapped orientation for every triplet,
 					- Flatten /@ ... converts each resulting list of triplets
 						back to the flat-list output format.
-						
+
 					The outer loop over triplet permutations is parallelized.
 					Method -> "CoarsestGrained" is used because different
 					permutations lead to branches of similar cost.
 				*)
-				Flatten[
-					ParallelMap[
+				Flatten[RuleValidation`RuleRequire[
+					RuleValidation`RuleParallelMap[
 						Module[{swapped},
 							swapped = #[[All, {2, 1, 3}]];
 							Flatten /@ Tuples[Transpose[{#, swapped}]]
 						] &,
 						perms,
 						Method -> "CoarsestGrained"
-					],
+					]],
 					1
 				]
 			]
-		];
+		]
+        ), True
+    ];
 
+
+
+
+(* Unsupported arities fail before any calculation. *)
+indexArraySymmetrization[arguments___] /; !MemberQ[{1}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[indexArraySymmetrization] <> SymbolName[indexArraySymmetrization], {arguments}, {1}];
+
+indexArraySymmetrization3[arguments___] /; !MemberQ[{1}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[indexArraySymmetrization3] <> SymbolName[indexArraySymmetrization3], {arguments}, {1}];
 
 End[];
 

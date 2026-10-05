@@ -111,8 +111,28 @@
 *)
 
 
-SetDirectory[DirectoryName[$InputFileName]];
 
+
+(* Resolve sibling dependencies before nested loads change $InputFileName.
+   Keep the caller's working directory and context search path unchanged. *)
+With[{rulesDirectory = DirectoryName[$InputFileName]},
+    Block[{$ContextPath = $ContextPath},
+        Scan[
+            Needs[#[[1]], FileNameJoin[{rulesDirectory, #[[2]]}]] &,
+            {
+                {"CTensorGeneral`", "CTensorGeneral.wl"},
+                {"CETensor`", "CETensor.wl"},
+                {"ETensor`", "ETensor.wl"}
+            }
+        ]
+    ]
+];
+
+
+(* Shared validation is loaded by absolute path without changing Directory[]. *)
+With[{validationFile = FileNameJoin[{DirectoryName[$InputFileName], "RuleValidation.wl"}]},
+    Block[{$ContextPath = $ContextPath}, Needs["RuleValidation`", validationFile]]
+];
 
 BeginPackage[
     "GravitonFermionVertex`",
@@ -158,7 +178,13 @@ The function evaluates the graviton-symmetric uncontracted vertex and then \
 applies Contract to perform Lorentz-index contractions.";
 
 
-Begin["Private`"];
+(* Keep helpers and memoised definitions local to this rule package. *)
+
+(* Structural failures are returned as values; callers should use FailureQ. *)
+GravitonFermionVertexUncontracted::usage = GravitonFermionVertexUncontracted::usage <> " Supported signatures: GravitonFermionVertexUncontracted[indexArray, p1, p2, mass]; argument 1: flat list, block size 3, length 0 to Infinity; argument 2: symbolic expression (not a list or association); argument 3: symbolic expression (not a list or association); argument 4: symbolic expression (not a list or association)." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+GravitonFermionVertex::usage = GravitonFermionVertex::usage <> " Supported signatures: GravitonFermionVertex[indexArray, p1, p2, mass]; argument 1: flat list, block size 3, length 0 to Infinity; argument 2: symbolic expression (not a list or association); argument 3: symbolic expression (not a list or association); argument 4: symbolic expression (not a list or association)." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+
+Begin["`Private`"];
 
 
 (* ---------------------------------------------------------------------- *)
@@ -182,10 +208,16 @@ Clear[TakeLorentzIndices];
         {rho1, sigma1, ..., rhon, sigman}.
 *)
 
-TakeLorentzIndices[indexArray_List] :=
-    Flatten[
+TakeLorentzIndices[indexArray_] :=
+    RuleValidation`RuleCall[
+        TakeLorentzIndices[indexArray],
+        {{1, "Array", 3, 0, Infinity}},
+        (
+Flatten[RuleValidation`RuleRequire[
         (Take[#, 2] &) /@
             Partition[indexArray, 3]
+    ]]
+        ), False
     ];
 
 
@@ -196,8 +228,14 @@ Clear[TakeLorenzIndices];
     Backward-compatible spelling used in older FeynGrav files.
 *)
 
-TakeLorenzIndices[indexArray_List] :=
-    TakeLorentzIndices[indexArray];
+TakeLorenzIndices[indexArray_] :=
+    RuleValidation`RuleCall[
+        TakeLorenzIndices[indexArray],
+        {{1, "Array", 3, 0, Infinity}},
+        (
+RuleValidation`RuleRequire[TakeLorentzIndices[indexArray]]
+        ), False
+    ];
 
 
 Clear[TakeMomenta];
@@ -216,12 +254,18 @@ Clear[TakeMomenta];
         {k1, ..., kn}.
 *)
 
-TakeMomenta[indexArray_List] :=
-    If[
+TakeMomenta[indexArray_] :=
+    RuleValidation`RuleCall[
+        TakeMomenta[indexArray],
+        {{1, "Array", 3, 0, Infinity}},
+        (
+If[
         indexArray === {},
         {},
         (#[[3]] &) /@
             Partition[indexArray, 3]
+    ]
+        ), False
     ];
 
 
@@ -247,8 +291,14 @@ Clear[GravitonFermionVertexGravitonLegs];
     Lorentz indices and momenta separately.
 *)
 
-GravitonFermionVertexGravitonLegs[indexArray_List] :=
-    Partition[indexArray, 3];
+GravitonFermionVertexGravitonLegs[indexArray_] :=
+    RuleValidation`RuleCall[
+        GravitonFermionVertexGravitonLegs[indexArray],
+        {{1, "Array", 3, 0, Infinity}},
+        (
+Partition[indexArray, 3]
+        ), False
+    ];
 
 
 Clear[GravitonFermionVertexPermutedIndexArrays];
@@ -274,12 +324,17 @@ Clear[GravitonFermionVertexPermutedIndexArrays];
     graviton-symmetric vertex.
 *)
 
-GravitonFermionVertexPermutedIndexArrays[indexArray_List] :=
-    GravitonFermionVertexPermutedIndexArrays[indexArray] =
-        Flatten /@
+GravitonFermionVertexPermutedIndexArrays[indexArray_] :=
+    RuleValidation`RuleCall[
+        GravitonFermionVertexPermutedIndexArrays[indexArray],
+        {{1, "Array", 3, 0, Infinity}},
+        (
+Flatten /@
             Permutations[
-                GravitonFermionVertexGravitonLegs[indexArray]
-            ];
+                RuleValidation`RuleRequire[GravitonFermionVertexGravitonLegs[indexArray]]
+            ]
+        ), True
+    ];
 
 
 (* ---------------------------------------------------------------------- *)
@@ -316,10 +371,13 @@ Clear[GravitonFermionVertexKineticMassOrderedUncontracted];
 *)
 
 GravitonFermionVertexKineticMassOrderedUncontracted[indexArray_, p1_, p2_, mass_] :=
-    GravitonFermionVertexKineticMassOrderedUncontracted[indexArray, p1, p2, mass] =
-        Module[{lorentzIndexArray, numberOfGravitons, mu, m},
+    RuleValidation`RuleCall[
+        GravitonFermionVertexKineticMassOrderedUncontracted[indexArray, p1, p2, mass],
+        {{1, "Array", 3, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}},
+        (
+Module[{lorentzIndexArray, numberOfGravitons, mu, m},
 
-            lorentzIndexArray = TakeLorentzIndices[indexArray];
+            lorentzIndexArray = RuleValidation`RuleRequire[TakeLorentzIndices[indexArray]];
             numberOfGravitons = Length[indexArray]/3;
 
             mu = Unique["mu"];
@@ -329,21 +387,23 @@ GravitonFermionVertexKineticMassOrderedUncontracted[indexArray_, p1_, p2_, mass_
                 I Global`\[Kappa]^numberOfGravitons
                 (
                     1/2
-                    CETensor[
+                    RuleValidation`RuleRequire[CETensor[
                         {mu, m},
                         lorentzIndexArray
-                    ]
+                    ]]
                     GAD[m]
                     FVD[p2 - p1, mu]
 
                     - mass
-                    CTensorGeneral[
+                    RuleValidation`RuleRequire[CTensorGeneral[
                         {},
                         lorentzIndexArray
-                    ]
+                    ]]
                 )
             ) // ExpandScalarProduct // Expand // FeynCalcInternal
-        ];
+        ]
+        ), True
+    ];
 
 
 (* ---------------------------------------------------------------------- *)
@@ -376,8 +436,11 @@ Clear[GravitonFermionVertexSpinConnectionOrderedUncontracted];
 *)
 
 GravitonFermionVertexSpinConnectionOrderedUncontracted[indexArray_, p1_, p2_, mass_] :=
-    GravitonFermionVertexSpinConnectionOrderedUncontracted[indexArray, p1, p2, mass] =
-        Module[
+    RuleValidation`RuleCall[
+        GravitonFermionVertexSpinConnectionOrderedUncontracted[indexArray, p1, p2, mass],
+        {{1, "Array", 3, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}},
+        (
+Module[
             {
                 lorentzIndexArray,
                 momentaArray,
@@ -386,8 +449,8 @@ GravitonFermionVertexSpinConnectionOrderedUncontracted[indexArray_, p1_, p2_, ma
                 a, b, m
             },
 
-            lorentzIndexArray = TakeLorentzIndices[indexArray];
-            momentaArray = TakeMomenta[indexArray];
+            lorentzIndexArray = RuleValidation`RuleRequire[TakeLorentzIndices[indexArray]];
+            momentaArray = RuleValidation`RuleRequire[TakeMomenta[indexArray]];
             numberOfGravitons = Length[indexArray]/3;
 
             alpha = Unique["alpha"];
@@ -408,18 +471,18 @@ GravitonFermionVertexSpinConnectionOrderedUncontracted[indexArray_, p1_, p2_, ma
                         1/8
                         Sum[
                             FVD[
-                                Total[Take[momentaArray, s]],
+                                Total[RuleValidation`RuleRequire[Take[momentaArray, s]]],
                                 alpha
                             ]
-                            ETensor[
+                            RuleValidation`RuleRequire[ETensor[
                                 {beta, m},
                                 Take[lorentzIndexArray, 2 s]
-                            ]
-                            CETensor[
+                            ]]
+                            RuleValidation`RuleRequire[CETensor[
                                 {alpha, a},
                                 {beta, b},
                                 Drop[lorentzIndexArray, 2 s]
-                            ]
+                            ]]
                             (
                                 GAD[a, m, b] - GAD[b, m, a]
                             ),
@@ -428,7 +491,9 @@ GravitonFermionVertexSpinConnectionOrderedUncontracted[indexArray_, p1_, p2_, ma
                     )
                 ) // ExpandScalarProduct // Expand // FeynCalcInternal
             ]
-        ];
+        ]
+        ), True
+    ];
 
 
 (* ---------------------------------------------------------------------- *)
@@ -449,24 +514,29 @@ Clear[GravitonFermionVertexOrderedUncontracted];
 *)
 
 GravitonFermionVertexOrderedUncontracted[indexArray_, p1_, p2_, mass_] :=
-    GravitonFermionVertexOrderedUncontracted[indexArray, p1, p2, mass] =
+    RuleValidation`RuleCall[
+        GravitonFermionVertexOrderedUncontracted[indexArray, p1, p2, mass],
+        {{1, "Array", 3, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}},
         (
-            GravitonFermionVertexKineticMassOrderedUncontracted[
+(
+            RuleValidation`RuleRequire[GravitonFermionVertexKineticMassOrderedUncontracted[
                 indexArray,
                 p1,
                 p2,
                 mass
-            ]
+            ]]
 
             +
 
-            GravitonFermionVertexSpinConnectionOrderedUncontracted[
+            RuleValidation`RuleRequire[GravitonFermionVertexSpinConnectionOrderedUncontracted[
                 indexArray,
                 p1,
                 p2,
                 mass
-            ]
-        ) // ExpandScalarProduct // Expand // FeynCalcInternal;
+            ]]
+        ) // ExpandScalarProduct // Expand // FeynCalcInternal
+        ), True
+    ];
 
 
 (* ---------------------------------------------------------------------- *)
@@ -490,20 +560,25 @@ Clear[GravitonFermionVertexUncontracted];
 *)
 
 GravitonFermionVertexUncontracted[indexArray_, p1_, p2_, mass_] :=
-    GravitonFermionVertexUncontracted[indexArray, p1, p2, mass] =
+    RuleValidation`RuleCall[
+        GravitonFermionVertexUncontracted[indexArray, p1, p2, mass],
+        {{1, "Array", 3, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}},
         (
-            Total[
-                Map[
-                    GravitonFermionVertexOrderedUncontracted[
+(
+            Total[RuleValidation`RuleRequire[
+                RuleValidation`RuleRequire[Map[
+                    RuleValidation`RuleRequire[GravitonFermionVertexOrderedUncontracted[
                         #,
                         p1,
                         p2,
                         mass
-                    ] &,
-                    GravitonFermionVertexPermutedIndexArrays[indexArray]
-                ]
-            ]
-        ) // ExpandScalarProduct // Expand // FeynCalcInternal;
+                    ]] &,
+                    RuleValidation`RuleRequire[GravitonFermionVertexPermutedIndexArrays[indexArray]]
+                ]]
+            ]]
+        ) // ExpandScalarProduct // Expand // FeynCalcInternal
+        ), True
+    ];
 
 
 (* ---------------------------------------------------------------------- *)
@@ -523,20 +598,58 @@ Clear[GravitonFermionVertex];
 *)
 
 GravitonFermionVertex[indexArray_, p1_, p2_, mass_] :=
-    GravitonFermionVertex[indexArray, p1, p2, mass] =
+    RuleValidation`RuleCall[
+        GravitonFermionVertex[indexArray, p1, p2, mass],
+        {{1, "Array", 3, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}},
         (
-            GravitonFermionVertexUncontracted[
+(
+            RuleValidation`RuleRequire[GravitonFermionVertexUncontracted[
                 indexArray,
                 p1,
                 p2,
                 mass
-            ]
+            ]]
             // Contract
             // ExpandScalarProduct
             // Expand
             // FeynCalcInternal
-        );
+        )
+        ), True
+    ];
 
+
+
+
+(* Unsupported arities fail before any calculation. *)
+GravitonFermionVertex[arguments___] /; !MemberQ[{4}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[GravitonFermionVertex] <> SymbolName[GravitonFermionVertex], {arguments}, {4}];
+
+GravitonFermionVertexGravitonLegs[arguments___] /; !MemberQ[{1}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[GravitonFermionVertexGravitonLegs] <> SymbolName[GravitonFermionVertexGravitonLegs], {arguments}, {1}];
+
+GravitonFermionVertexKineticMassOrderedUncontracted[arguments___] /; !MemberQ[{4}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[GravitonFermionVertexKineticMassOrderedUncontracted] <> SymbolName[GravitonFermionVertexKineticMassOrderedUncontracted], {arguments}, {4}];
+
+GravitonFermionVertexOrderedUncontracted[arguments___] /; !MemberQ[{4}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[GravitonFermionVertexOrderedUncontracted] <> SymbolName[GravitonFermionVertexOrderedUncontracted], {arguments}, {4}];
+
+GravitonFermionVertexPermutedIndexArrays[arguments___] /; !MemberQ[{1}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[GravitonFermionVertexPermutedIndexArrays] <> SymbolName[GravitonFermionVertexPermutedIndexArrays], {arguments}, {1}];
+
+GravitonFermionVertexSpinConnectionOrderedUncontracted[arguments___] /; !MemberQ[{4}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[GravitonFermionVertexSpinConnectionOrderedUncontracted] <> SymbolName[GravitonFermionVertexSpinConnectionOrderedUncontracted], {arguments}, {4}];
+
+GravitonFermionVertexUncontracted[arguments___] /; !MemberQ[{4}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[GravitonFermionVertexUncontracted] <> SymbolName[GravitonFermionVertexUncontracted], {arguments}, {4}];
+
+TakeLorentzIndices[arguments___] /; !MemberQ[{1}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[TakeLorentzIndices] <> SymbolName[TakeLorentzIndices], {arguments}, {1}];
+
+TakeLorenzIndices[arguments___] /; !MemberQ[{1}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[TakeLorenzIndices] <> SymbolName[TakeLorenzIndices], {arguments}, {1}];
+
+TakeMomenta[arguments___] /; !MemberQ[{1}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[TakeMomenta] <> SymbolName[TakeMomenta], {arguments}, {1}];
 
 End[];
 

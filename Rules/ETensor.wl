@@ -57,8 +57,27 @@
 *)
 
 
-SetDirectory[DirectoryName[$InputFileName]];
 
+
+(* Resolve sibling dependencies before nested loads change $InputFileName.
+   Keep the caller's working directory and context search path unchanged. *)
+With[{rulesDirectory = DirectoryName[$InputFileName]},
+    Block[{$ContextPath = $ContextPath},
+        Scan[
+            Needs[#[[1]], FileNameJoin[{rulesDirectory, #[[2]]}]] &,
+            {
+                {"ITensor`", "ITensor.wl"},
+                {"indexArraySymmetrization`", "indexArraySymmetrization.wl"}
+            }
+        ]
+    ]
+];
+
+
+(* Shared validation is loaded by absolute path without changing Directory[]. *)
+With[{validationFile = FileNameJoin[{DirectoryName[$InputFileName], "RuleValidation.wl"}]},
+    Block[{$ContextPath = $ContextPath}, Needs["RuleValidation`", validationFile]]
+];
 
 BeginPackage["ETensor`",{"FeynCalc`","ITensor`","indexArraySymmetrization`"}];
 
@@ -88,14 +107,23 @@ pair.  The external indices beta and m are kept fixed and are not included in \
 the symmetrisation.";
 
 
-Begin["Private`"];
+(* Keep helpers and memoised definitions local to this rule package. *)
+
+(* Structural failures are returned as values; callers should use FailureQ. *)
+ETensorPlain::usage = ETensorPlain::usage <> " Supported signatures: ETensorPlain[indexArrayExternal, indexArrayInternal]; argument 1: flat list, block size 1, length 2 to 2; argument 2: flat list, block size 2, length 0 to Infinity." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+ETensor::usage = ETensor::usage <> " Supported signatures: ETensor[indexArrayExternal, indexArrayInternal]; argument 1: flat list, block size 1, length 2 to 2; argument 2: flat list, block size 2, length 0 to Infinity." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+
+Begin["`Private`"];
 
 
 Clear[ETensorPlain];
 
-ETensorPlain[indexArrayExternal : {_, _}, indexArrayInternal_List] :=
-    ETensorPlain[indexArrayExternal, indexArrayInternal] =
-        Module[{beta, m, lambda, tau, n},
+ETensorPlain[indexArrayExternal_, indexArrayInternal_] :=
+    RuleValidation`RuleCall[
+        ETensorPlain[indexArrayExternal, indexArrayInternal],
+        {{1, "Array", 1, 2, 2}, {2, "Array", 2, 0, Infinity}},
+        (
+Module[{beta, m, lambda, tau, n},
 
             {beta, m} = indexArrayExternal;
             n = Length[indexArrayInternal]/2;
@@ -104,47 +132,63 @@ ETensorPlain[indexArrayExternal : {_, _}, indexArrayInternal_List] :=
             tau = Unique["tau"];
 
             Expand[
-                Contract[
+                RuleValidation`RuleRequire[Contract[
                     Binomial[1/2, n] *
                     MTD[beta, lambda] *
                     MTD[m, tau] *
-                    ITensorPlain[
+                    RuleValidation`RuleRequire[ITensorPlain[
                         Join[
                             {lambda, tau},
                             indexArrayInternal
                         ]
-                    ]
-                ]
+                    ]]
+                ]]
             ]
-        ];
+        ]
+        ), True
+    ];
 
 
 Clear[ETensor];
 
-ETensor[indexArrayExternal : {_, _}, indexArrayInternal_List] :=
-    ETensor[indexArrayExternal, indexArrayInternal] =
-        Module[{n},
+ETensor[indexArrayExternal_, indexArrayInternal_] :=
+    RuleValidation`RuleCall[
+        ETensor[indexArrayExternal, indexArrayInternal],
+        {{1, "Array", 1, 2, 2}, {2, "Array", 2, 0, Infinity}},
+        (
+Module[{n},
 
             n = Length[indexArrayInternal]/2;
 
             If[
                 indexArrayInternal === {},
 
-                ETensorPlain[indexArrayExternal, indexArrayInternal],
+                RuleValidation`RuleRequire[ETensorPlain[indexArrayExternal, indexArrayInternal]],
 
                 Expand[
                     1/Power[2, n] *
                     1/Factorial[n] *
-                    Total[
-                        Map[
-                            ETensorPlain[indexArrayExternal, #] &,
-                            indexArraySymmetrization[indexArrayInternal]
-                        ]
-                    ]
+                    Total[RuleValidation`RuleRequire[
+                        RuleValidation`RuleRequire[Map[
+                            RuleValidation`RuleRequire[ETensorPlain[indexArrayExternal, #]] &,
+                            RuleValidation`RuleRequire[indexArraySymmetrization[indexArrayInternal]]
+                        ]]
+                    ]]
                 ]
             ]
-        ];
+        ]
+        ), True
+    ];
 
+
+
+
+(* Unsupported arities fail before any calculation. *)
+ETensor[arguments___] /; !MemberQ[{2}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[ETensor] <> SymbolName[ETensor], {arguments}, {2}];
+
+ETensorPlain[arguments___] /; !MemberQ[{2}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[ETensorPlain] <> SymbolName[ETensorPlain], {arguments}, {2}];
 
 End[];
 

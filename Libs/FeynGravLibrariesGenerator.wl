@@ -284,15 +284,10 @@ With[
         ];
 
         (*
-            Restore the current working directory to Libs.
-
-            This is essential.  Some imported rule packages may change the
-            current directory as a side effect.  The Check* and Generate*
-            procedures below use relative file names, so they must run with
-            Libs as the current working directory.
-
-            Without this line, commands such as CheckGravitonScalars may find
-            no files and therefore print nothing.
+            Keep the generator's output directory explicit after loading its
+            dependencies. Rule packages preserve the caller's working directory;
+            the generator deliberately uses Libs for its relative Check* and
+            Generate* file operations.
         *)
         SetDirectory[generatorDirectory];
     ];
@@ -909,12 +904,35 @@ FORMCodeCleanUp[filePath_, np_, nk_] :=
             theText
         },
 
-        (* Remove Mathematica package contexts that FORM cannot parse. *)
+        (* Give rule-private symbols distinct FORM prefixes: removing only
+           "Private`" would leave invalid backticks, while removing the whole
+           context would merge dummy indices belonging to different packages.
+           Keep the legacy generator-context replacements below. *)
         Export[
             filePath,
             StringReplace[
                 Import[filePath, "Text"],
                 {
+                    "CETensor`Private`" -> "fgr1x",
+                    "CTensorGeneral`Private`" -> "fgr2x",
+                    "ETensor`Private`" -> "fgr3x",
+                    "GammaTensor`Private`" -> "fgr4x",
+                    "GravitonAxionVectorVertex`Private`" -> "fgr5x",
+                    "GravitonFermionVertex`Private`" -> "fgr6x",
+                    "GravitonSUNYM`Private`" -> "fgr7x",
+                    "GravitonScalarVertex`Private`" -> "fgr8x",
+                    "GravitonVectorVertex`Private`" -> "fgr9x",
+                    "GravitonVertex`Private`" -> "fgr10x",
+                    "HorndeskiG2`Private`" -> "fgr11x",
+                    "HorndeskiG3`Private`" -> "fgr12x",
+                    "HorndeskiG4`Private`" -> "fgr13x",
+                    "HorndeskiG5`Private`" -> "fgr14x",
+                    "ITensor`Private`" -> "fgr15x",
+                    "MTDWrapper`Private`" -> "fgr16x",
+                    "Nieuwenhuizen`Private`" -> "fgr17x",
+                    "QuadraticGravityVertex`Private`" -> "fgr18x",
+                    "ScalarGaussBonnet`Private`" -> "fgr19x",
+                    "indexArraySymmetrization`Private`" -> "fgr20x",
                     "Private`" -> "",
                     "FeynGrav`" -> "",
                     "FeynCalc`FeynCalc2FORM`" -> ""

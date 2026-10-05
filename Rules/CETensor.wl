@@ -156,8 +156,28 @@
 *)
 
 
-SetDirectory[DirectoryName[$InputFileName]];
 
+
+(* Resolve sibling dependencies before nested loads change $InputFileName.
+   Keep the caller's working directory and context search path unchanged. *)
+With[{rulesDirectory = DirectoryName[$InputFileName]},
+    Block[{$ContextPath = $ContextPath},
+        Scan[
+            Needs[#[[1]], FileNameJoin[{rulesDirectory, #[[2]]}]] &,
+            {
+                {"ITensor`", "ITensor.wl"},
+                {"CTensorGeneral`", "CTensorGeneral.wl"},
+                {"indexArraySymmetrization`", "indexArraySymmetrization.wl"}
+            }
+        ]
+    ]
+];
+
+
+(* Shared validation is loaded by absolute path without changing Directory[]. *)
+With[{validationFile = FileNameJoin[{DirectoryName[$InputFileName], "RuleValidation.wl"}]},
+    Block[{$ContextPath = $ContextPath}, Needs["RuleValidation`", validationFile]]
+];
 
 BeginPackage[
     "CETensor`",
@@ -195,7 +215,13 @@ and permutations of the pairs.  The external vierbein index pairs {\[Mu], m} \
 and {\[Nu], n} are not included in the symmetrisation.";
 
 
-Begin["Private`"];
+(* Keep helpers and memoised definitions local to this rule package. *)
+
+(* Structural failures are returned as values; callers should use FailureQ. *)
+CETensorPlain::usage = CETensorPlain::usage <> " Supported signatures: CETensorPlain[indexArrayExternal, indexArrayInternal]; argument 1: flat list, block size 1, length 2 to 2; argument 2: flat list, block size 2, length 0 to Infinity; CETensorPlain[indexArrayExternal1, indexArrayExternal2, indexArrayInternal]; argument 1: flat list, block size 1, length 2 to 2; argument 2: flat list, block size 1, length 2 to 2; argument 3: flat list, block size 2, length 0 to Infinity." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+CETensor::usage = CETensor::usage <> " Supported signatures: CETensor[indexArrayExternal, indexArrayInternal]; argument 1: flat list, block size 1, length 2 to 2; argument 2: flat list, block size 2, length 0 to Infinity; CETensor[indexArrayExternal1, indexArrayExternal2, indexArrayInternal]; argument 1: flat list, block size 1, length 2 to 2; argument 2: flat list, block size 1, length 2 to 2; argument 3: flat list, block size 2, length 0 to Infinity." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+
+Begin["`Private`"];
 
 
 (* Auxiliary index-array tools *)
@@ -233,8 +259,12 @@ Begin["Private`"];
 
 Clear[CETensorIndexBlock];
 
-CETensorIndexBlock[indexArray_List, firstPair_Integer, numberOfPairs_Integer] :=
-    If[
+CETensorIndexBlock[indexArray_, firstPair_, numberOfPairs_] :=
+    RuleValidation`RuleCall[
+        CETensorIndexBlock[indexArray, firstPair, numberOfPairs],
+        {{1, "Array", 2, 0, Infinity}, {2, "Integer", 0}, {3, "Integer", 0}, {0, "Supported", numberOfPairs == 0 || firstPair + numberOfPairs <= Length[indexArray]/2, "The requested pair slice exceeds the input array."}},
+        (
+If[
         numberOfPairs == 0,
         {},
         Take[
@@ -244,6 +274,8 @@ CETensorIndexBlock[indexArray_List, firstPair_Integer, numberOfPairs_Integer] :=
                 2*(firstPair + numberOfPairs)
             }
         ]
+    ]
+        ), False
     ];
 
 
@@ -266,9 +298,12 @@ Clear[EInverseTensorPlain];
     This is a private auxiliary function.  It is not exported.
 *)
 
-EInverseTensorPlain[indexArrayExternal : {_, _}, indexArrayInternal_List] :=
-    EInverseTensorPlain[indexArrayExternal, indexArrayInternal] =
-        Module[{mu, m, tau, numberOfPairs},
+EInverseTensorPlain[indexArrayExternal_, indexArrayInternal_] :=
+    RuleValidation`RuleCall[
+        EInverseTensorPlain[indexArrayExternal, indexArrayInternal],
+        {{1, "Array", 1, 2, 2}, {2, "Array", 2, 0, Infinity}},
+        (
+Module[{mu, m, tau, numberOfPairs},
 
             {mu, m} = indexArrayExternal;
             numberOfPairs = Length[indexArrayInternal]/2;
@@ -276,18 +311,20 @@ EInverseTensorPlain[indexArrayExternal : {_, _}, indexArrayInternal_List] :=
             tau = Unique["tau"];
 
             Expand[
-                Contract[
+                RuleValidation`RuleRequire[Contract[
                     Binomial[-1/2, numberOfPairs] *
                     MTD[m, tau] *
-                    ITensorPlain[
+                    RuleValidation`RuleRequire[ITensorPlain[
                         Join[
                             {mu, tau},
                             indexArrayInternal
                         ]
-                    ]
-                ]
+                    ]]
+                ]]
             ]
-        ];
+        ]
+        ), True
+    ];
 
 
 (* CETensorPlain *)
@@ -306,26 +343,31 @@ Clear[CETensorPlain];
     (e^mu)_m in all ordered ways.
 *)
 
-CETensorPlain[indexArrayExternal : {_, _}, indexArrayInternal_List] :=
-    CETensorPlain[indexArrayExternal, indexArrayInternal] =
-        Module[{numberOfPairs},
+CETensorPlain[indexArrayExternal_, indexArrayInternal_] :=
+    RuleValidation`RuleCall[
+        CETensorPlain[indexArrayExternal, indexArrayInternal],
+        {{1, "Array", 1, 2, 2}, {2, "Array", 2, 0, Infinity}},
+        (
+Module[{numberOfPairs},
 
             numberOfPairs = Length[indexArrayInternal]/2;
 
             Expand[
                 Sum[
-                    CTensorPlainGeneral[
+                    RuleValidation`RuleRequire[CTensorPlainGeneral[
                         {},
-                        CETensorIndexBlock[indexArrayInternal, 0, p]
-                    ] *
-                    EInverseTensorPlain[
+                        RuleValidation`RuleRequire[CETensorIndexBlock[indexArrayInternal, 0, p]]
+                    ]] *
+                    RuleValidation`RuleRequire[EInverseTensorPlain[
                         indexArrayExternal,
-                        CETensorIndexBlock[indexArrayInternal, p, numberOfPairs - p]
-                    ],
+                        RuleValidation`RuleRequire[CETensorIndexBlock[indexArrayInternal, p, numberOfPairs - p]]
+                    ]],
                     {p, 0, numberOfPairs}
                 ]
             ]
-        ];
+        ]
+        ), True
+    ];
 
 
 (*
@@ -339,39 +381,40 @@ CETensorPlain[indexArrayExternal : {_, _}, indexArrayInternal_List] :=
     (e^mu)_m, and (e^nu)_n in all ordered ways.
 *)
 
-CETensorPlain[
-    indexArrayExternal1 : {_, _},
-    indexArrayExternal2 : {_, _},
-    indexArrayInternal_List
-] :=
-    CETensorPlain[indexArrayExternal1, indexArrayExternal2, indexArrayInternal] =
-        Module[{numberOfPairs},
+CETensorPlain[indexArrayExternal1_, indexArrayExternal2_, indexArrayInternal_] :=
+    RuleValidation`RuleCall[
+        CETensorPlain[indexArrayExternal1, indexArrayExternal2, indexArrayInternal],
+        {{1, "Array", 1, 2, 2}, {2, "Array", 1, 2, 2}, {3, "Array", 2, 0, Infinity}},
+        (
+Module[{numberOfPairs},
 
             numberOfPairs = Length[indexArrayInternal]/2;
 
             Expand[
                 Sum[
-                    CTensorPlainGeneral[
+                    RuleValidation`RuleRequire[CTensorPlainGeneral[
                         {},
-                        CETensorIndexBlock[indexArrayInternal, 0, p]
-                    ] *
-                    EInverseTensorPlain[
+                        RuleValidation`RuleRequire[CETensorIndexBlock[indexArrayInternal, 0, p]]
+                    ]] *
+                    RuleValidation`RuleRequire[EInverseTensorPlain[
                         indexArrayExternal1,
-                        CETensorIndexBlock[indexArrayInternal, p, q]
-                    ] *
-                    EInverseTensorPlain[
+                        RuleValidation`RuleRequire[CETensorIndexBlock[indexArrayInternal, p, q]]
+                    ]] *
+                    RuleValidation`RuleRequire[EInverseTensorPlain[
                         indexArrayExternal2,
-                        CETensorIndexBlock[
+                        RuleValidation`RuleRequire[CETensorIndexBlock[
                             indexArrayInternal,
                             p + q,
                             numberOfPairs - p - q
-                        ]
-                    ],
+                        ]]
+                    ]],
                     {p, 0, numberOfPairs},
                     {q, 0, numberOfPairs - p}
                 ]
             ]
-        ];
+        ]
+        ), True
+    ];
 
 
 (* CETensor *)
@@ -389,29 +432,34 @@ Clear[CETensor];
     The symmetrisation acts only on the perturbation index pairs.
 *)
 
-CETensor[indexArrayExternal : {_, _}, indexArrayInternal_List] :=
-    CETensor[indexArrayExternal, indexArrayInternal] =
-        Module[{numberOfPairs},
+CETensor[indexArrayExternal_, indexArrayInternal_] :=
+    RuleValidation`RuleCall[
+        CETensor[indexArrayExternal, indexArrayInternal],
+        {{1, "Array", 1, 2, 2}, {2, "Array", 2, 0, Infinity}},
+        (
+Module[{numberOfPairs},
 
             numberOfPairs = Length[indexArrayInternal]/2;
 
             If[
                 indexArrayInternal === {},
 
-                CETensorPlain[indexArrayExternal, indexArrayInternal],
+                RuleValidation`RuleRequire[CETensorPlain[indexArrayExternal, indexArrayInternal]],
 
                 Expand[
                     1/Power[2, numberOfPairs] *
                     1/Factorial[numberOfPairs] *
-                    Total[
-                        Map[
-                            CETensorPlain[indexArrayExternal, #] &,
-                            indexArraySymmetrization[indexArrayInternal]
-                        ]
-                    ]
+                    Total[RuleValidation`RuleRequire[
+                        RuleValidation`RuleRequire[Map[
+                            RuleValidation`RuleRequire[CETensorPlain[indexArrayExternal, #]] &,
+                            RuleValidation`RuleRequire[indexArraySymmetrization[indexArrayInternal]]
+                        ]]
+                    ]]
                 ]
             ]
-        ];
+        ]
+        ), True
+    ];
 
 
 (*
@@ -425,38 +473,54 @@ CETensor[indexArrayExternal : {_, _}, indexArrayInternal_List] :=
     The external vierbein index pairs are kept fixed.
 *)
 
-CETensor[
-    indexArrayExternal1 : {_, _},
-    indexArrayExternal2 : {_, _},
-    indexArrayInternal_List
-] :=
-    CETensor[indexArrayExternal1, indexArrayExternal2, indexArrayInternal] =
-        Module[{numberOfPairs},
+CETensor[indexArrayExternal1_, indexArrayExternal2_, indexArrayInternal_] :=
+    RuleValidation`RuleCall[
+        CETensor[indexArrayExternal1, indexArrayExternal2, indexArrayInternal],
+        {{1, "Array", 1, 2, 2}, {2, "Array", 1, 2, 2}, {3, "Array", 2, 0, Infinity}},
+        (
+Module[{numberOfPairs},
 
             numberOfPairs = Length[indexArrayInternal]/2;
 
             If[
                 indexArrayInternal === {},
 
-                CETensorPlain[
+                RuleValidation`RuleRequire[CETensorPlain[
                     indexArrayExternal1,
                     indexArrayExternal2,
                     indexArrayInternal
-                ],
+                ]],
 
                 Expand[
                     1/Power[2, numberOfPairs] *
                     1/Factorial[numberOfPairs] *
-                    Total[
-                        Map[
-                            CETensorPlain[indexArrayExternal1, indexArrayExternal2, #] &,
-                            indexArraySymmetrization[indexArrayInternal]
-                        ]
-                    ]
+                    Total[RuleValidation`RuleRequire[
+                        RuleValidation`RuleRequire[Map[
+                            RuleValidation`RuleRequire[CETensorPlain[indexArrayExternal1, indexArrayExternal2, #]] &,
+                            RuleValidation`RuleRequire[indexArraySymmetrization[indexArrayInternal]]
+                        ]]
+                    ]]
                 ]
             ]
-        ];
+        ]
+        ), True
+    ];
 
+
+
+
+(* Unsupported arities fail before any calculation. *)
+CETensor[arguments___] /; !MemberQ[{2,3}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[CETensor] <> SymbolName[CETensor], {arguments}, {2,3}];
+
+CETensorIndexBlock[arguments___] /; !MemberQ[{3}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[CETensorIndexBlock] <> SymbolName[CETensorIndexBlock], {arguments}, {3}];
+
+CETensorPlain[arguments___] /; !MemberQ[{2,3}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[CETensorPlain] <> SymbolName[CETensorPlain], {arguments}, {2,3}];
+
+EInverseTensorPlain[arguments___] /; !MemberQ[{2}, Length[{arguments}]] :=
+    RuleValidation`RuleArityFailure[Context[EInverseTensorPlain] <> SymbolName[EInverseTensorPlain], {arguments}, {2}];
 
 End[];
 
