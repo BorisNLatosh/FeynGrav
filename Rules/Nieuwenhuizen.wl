@@ -1,6 +1,9 @@
 (* ::Package:: *)
 
-BeginPackage["Nieuwenhuizen`",{"Calc`","FeynCalc`"}];
+BeginPackage["Nieuwenhuizen`",{"FeynCalc`"}];
+
+
+Needs["CalcFormConverter`", FileNameJoin[{DirectoryName[$InputFileName], "../CalcFormConverter", "CalcFormConverter.wl"}]];
 
 
 GaugeProjector::usage = 
@@ -71,13 +74,13 @@ NieuwenhuizenOperator = {z1,z2,z0,z0b,z0bb,\[Mu],\[Nu],\[Alpha],\[Beta],k}|->z1 
 NieuwenhuizenOperatorInverse = {z1,z2,z0,z0b,z0bb,\[Mu],\[Nu],\[Alpha],\[Beta],k}|->1/z1 NieuwenhuizenOperator1[\[Mu],\[Nu],\[Alpha],\[Beta],k]+1/z2 NieuwenhuizenOperator2[\[Mu],\[Nu],\[Alpha],\[Beta],k]+1/z2 (((D-4)(z0 z0b -3 z0bb^2)-(D-7)z2 z0b)/((D-1)(z0 z0b -3 z0bb^2)-(D-4)z2 z0b)) NieuwenhuizenOperator0[\[Mu],\[Nu],\[Alpha],\[Beta],k]+((D-1)z0-(D-4)z2)/((D-1)(z0 z0b -3 z0bb^2)-(D-4)z2 z0b) NieuwenhuizenOperator0Bar[\[Mu],\[Nu],\[Alpha],\[Beta],k]-(3 z0bb)/((D-1)(z0 z0b -3 z0bb^2)-(D-4)z2 z0b) NieuwenhuizenOperator0BarBar[\[Mu],\[Nu],\[Alpha],\[Beta],k]//FeynAmpDenominatorCombine;
 
 
-NieuwenhuizenSymmetryCheck[T_,m_,n_,a_,b_,p_] := TrueQ[Calc[T-(T/.{m->n,n->m})]==0]&&TrueQ[Calc[T-(T/.{a->b,b->a})]==0]&&TrueQ[Calc[T-(T/.{m->a,n->b,a->m,b->n})]==0];
+NieuwenhuizenSymmetryCheck[T_,m_,n_,a_,b_,p_] := TrueQ[CalcFormCalculate[T-(T/.{m->n,n->m})]==0]&&TrueQ[CalcFormCalculate[T-(T/.{a->b,b->a})]==0]&&TrueQ[CalcFormCalculate[T-(T/.{m->a,n->b,a->m,b->n})]==0];
 
 
 NieuwenhuizenOperatorExpansion[T_,m_,n_,a_,b_,p_] := 
 	If[
 		NieuwenhuizenSymmetryCheck[T,m,n,a,b,p],
-		SolveValues[  #==0&/@Coefficient[ Calc[FeynAmpDenominatorExplicit[T-NieuwenhuizenOperator[z1,z2,z0,zb,zbb,m,n,a,b,p]]] ,Calc[{MTD[m,n]MTD[a,b],MTD[m,a]MTD[n,b],MTD[m,n]FVD[p,a]FVD[p,b],MTD[m,a]FVD[p,n]FVD[p,b],FVD[p,m]FVD[p,n]FVD[p,a]FVD[p,b]}]]  ,{z1,z2,z0,zb,zbb} ][[1]]  ,
+		SolveValues[  #==0&/@Coefficient[ CalcFormCalculate[FeynAmpDenominatorExplicit[T-NieuwenhuizenOperator[z1,z2,z0,zb,zbb,m,n,a,b,p]]] ,FCI[{MTD[m,n]MTD[a,b],MTD[m,a]MTD[n,b],MTD[m,n]FVD[p,a]FVD[p,b],MTD[m,a]FVD[p,n]FVD[p,b],FVD[p,m]FVD[p,n]FVD[p,a]FVD[p,b]}]]  ,{z1,z2,z0,zb,zbb} ][[1]]  ,
 		Print["The tensor does not admits symmetries required to be expanded by the Nieuwenhuizen operators!"]
 	] ; 
 

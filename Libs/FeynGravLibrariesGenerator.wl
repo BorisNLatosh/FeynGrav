@@ -1582,7 +1582,7 @@ GenerateGravitonSUNYMSpecific[n_Integer?Positive] := Module[{filePath,theTimingV
 	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
 	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
 	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[p1],SUNIndex[p2],SUNIndex[p3]]","syFC3"->"SUNIndex[p1]","syFC4"->"SUNIndex[p2]","syFC5"->"SUNIndex[p3]"} ], "Text"];
+	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[a3]]","syFC3"->"SUNIndex[a1]","syFC4"->"SUNIndex[a2]","syFC5"->"SUNIndex[a3]"} ], "Text"];
 
 	Print["Graviton-gluon-YM ghost vertex is generated for n="<>ToString[n]<>"."];
 

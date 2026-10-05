@@ -40,8 +40,8 @@ fullBubble[] := partialBubble[] QuadraticGravityVertex[{al,be,-p,a2,b2,l,i2,j2,p
 treeAmplitude[] := GravitonVertex[mu1,nu1,p1,mu2,nu2,p2,al1,be1,-p1-p2] *
  FeynAmpDenominatorExplicit[GravitonPropagator[al1,be1,al2,be2,p1+p2]] *
  GravitonVertex[mu3,nu3,p3,mu4,nu4,p4,al2,be2,p1+p2] *
- PolarizationTensor[mu1,nu1,p1] PolarizationTensor[mu2,nu2,p2] *
- ComplexConjugate[PolarizationTensor[mu3,nu3,p3] PolarizationTensor[mu4,nu4,p4]];
+ PolarizationTensorD[p1,mu1,nu1] PolarizationTensorD[p2,mu2,nu2] *
+ ComplexConjugate[PolarizationTensorD[p3,mu3,nu3] PolarizationTensorD[p4,mu4,nu4]];
 physicalCase[id_] := case[id, Switch[id,
  "vertex-trace",external[mu,nu] QuadraticGravityVertex[{mu,nu,p,a,b,-l,c,d,l-p},m0,m2] MTD[a,b] MTD[c,d],
  "partial-bubble",partialBubble[], "full-bubble",fullBubble[], "tree-amplitude",treeAmplitude[]],

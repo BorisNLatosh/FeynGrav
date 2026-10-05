@@ -3,7 +3,7 @@
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
-(* Function to display initialization messages for FeynGrav package. *)
+(* Function to display initialisation messages for FeynGrav package. *)
 
 
 DisplayInitializationMessages[] := Module[{},
@@ -17,7 +17,7 @@ DisplayInitializationMessages[] := Module[{},
         " to print the list of all commands."];
 
   Print[Style["FeynGrav: ", Bold], 
-        "On initialization, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the \"import*\" command."];
+        "On initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the \"import*\" command."];
 
   Print[Style["FeynGrav: Core publications on FeynGrav are ", Bold], 
       Row[{Style[Hyperlink["Class.Quant.Grav. 39 (2022) 16, 165006", 
@@ -36,22 +36,18 @@ DisplayInitializationMessages[] := Module[{},
 ];
 
 
-(* Ensure the package is initialized only once. *)
+(* Ensure the package is initialised only once. *)
 
 
-If[!ValueQ[FeynGravInitialized],
-  DisplayInitializationMessages[];
-  FeynGravInitialized = True;
-];
-
-
-(* The package imports its own implementation of Calc. FeynCalc 10.2 and later do not provide Calc by default. The import precedes the imports of the rules that use Calc. *)
-
-
-Needs["Calc`",DirectoryName[$InputFileName]<>"Rules/Calc.wl"];
+If[!TrueQ[FeynGravInitialized], DisplayInitializationMessages[]];
+(* A reload must also complete its required imports before reporting success. *)
+FeynGravInitialized = False;
+FeynGravInitialized::init = "Initialisation failed for `1`. Inspect the returned Failure for details.";
 
 
 (* Standalone bosonic FeynCalc/FORM conversion; loading never runs FORM. *)
+
+
 Needs["CalcFormConverter`", FileNameJoin[{DirectoryName[$InputFileName], "CalcFormConverter", "CalcFormConverter.wl"}]];
 
 
@@ -94,7 +90,7 @@ GravitonFermionVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptB
 (* Vectors. *)
 
 
-ProcaPropagator::usage = "ProcaPropagator[\[Mu],\[Nu],p,m]. Propagator of a massive vector field. Here p is the momenutm of the vector momentum; \[Mu] and \[Nu] are Lorentz inices of the vector; m is the mass of the vector.";
+ProcaPropagator::usage = "ProcaPropagator[\[Mu],\[Nu],p,m]. Propagator of a massive vector field. Here p is the vector momentum; \[Mu] and \[Nu] are Lorentz indices of the vector; m is the mass of the vector.";
 
 
 GravitonMassiveVectorVertex::usage = 
@@ -104,7 +100,7 @@ GravitonMassiveVectorVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*Subs
 
 
 GravitonVectorVertex::usage = 
-"GravitonVectorVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(k\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\), \!\(\*SubscriptBox[\(k\), \(n\)]\)}, \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\)] gives the vertex describing the coupling of n gravitons to a massless vector field. The gauge-fixing parameter for the vector field is GaugeFixingEpsilonVector. It is set to -1 during package initialization, so the returned expression is evaluated with this default value unless the parameter is changed. The first argument is a flat list of graviton line parameters. Each graviton line is specified by a triple {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\), \!\(\*SubscriptBox[\(k\), \(i\)]\)}, where \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\) and \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are the Lorentz indices of the graviton and \!\(\*SubscriptBox[\(k\), \(i\)]\) is its momentum. The arguments \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\) and \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\) are the Lorentz indices of the vector lines, while \!\(\*SubscriptBox[\(p\), \(1\)]\) and \!\(\*SubscriptBox[\(p\), \(2\)]\) are their incoming momenta. All momenta are incoming.
+"GravitonVectorVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(k\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\), \!\(\*SubscriptBox[\(k\), \(n\)]\)}, \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\)] gives the vertex describing the coupling of n gravitons to a massless vector field. The gauge-fixing parameter for the vector field is GaugeFixingEpsilonVector. It is set to -1 during package initialisation, so the returned expression is evaluated with this default value unless the parameter is changed. The first argument is a flat list of graviton line parameters. Each graviton line is specified by a triple {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\), \!\(\*SubscriptBox[\(k\), \(i\)]\)}, where \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\) and \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are the Lorentz indices of the graviton and \!\(\*SubscriptBox[\(k\), \(i\)]\) is its momentum. The arguments \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\) and \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\) are the Lorentz indices of the vector lines, while \!\(\*SubscriptBox[\(p\), \(1\)]\) and \!\(\*SubscriptBox[\(p\), \(2\)]\) are their incoming momenta. All momenta are incoming.
 GravitonVectorVertex[{\[Rho], \[Sigma], k}, \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\)]
 GravitonVectorVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(k\), \(1\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(2\)]\), \!\(\*SubscriptBox[\(k\), \(2\)]\)}, \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\)]";
 
@@ -119,7 +115,7 @@ GravitonVectorGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*Subscr
 
 
 GravitonGluonVertex::usage = 
-"GravitonGluonVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(k\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\), \!\(\*SubscriptBox[\(k\), \(n\)]\)}, \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(p\), \(l\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(l\)]\), \!\(\*SubscriptBox[\(a\), \(l\)]\)] gives the vertex describing the coupling of n gravitons to the SU(N) Yang-Mills gluon sector. It describes vertices with l = 2, 3, or 4 gluon lines. The Yang-Mills gauge-fixing parameter is GaugeFixingEpsilonSUNYM. It is set to -1 during package initialization, so the returned expression is evaluated with this default value unless the parameter is changed. The first argument is a flat list of graviton line parameters. Each graviton line is specified by a triple {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\), \!\(\*SubscriptBox[\(k\), \(i\)]\)}, where \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\) and \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are the Lorentz indices of the graviton and \!\(\*SubscriptBox[\(k\), \(i\)]\) is its momentum. The remaining arguments are grouped into gluon line triples {\!\(\*SubscriptBox[\(p\), \(i\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\), \!\(\*SubscriptBox[\(a\), \(i\)]\)}, where \!\(\*SubscriptBox[\(p\), \(i\)]\) is the incoming momentum, \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) is the Lorentz index, and \!\(\*SubscriptBox[\(a\), \(i\)]\) is the colour index of the i-th gluon line. All momenta are incoming.
+"GravitonGluonVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(k\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\), \!\(\*SubscriptBox[\(k\), \(n\)]\)}, \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(p\), \(l\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(l\)]\), \!\(\*SubscriptBox[\(a\), \(l\)]\)] gives the vertex describing the coupling of n gravitons to the SU(N) Yang-Mills gluon sector. It describes vertices with l = 2, 3, or 4 gluon lines. The Yang-Mills gauge-fixing parameter is GaugeFixingEpsilonSUNYM. It is set to -1 during package initialisation, so the returned expression is evaluated with this default value unless the parameter is changed. The first argument is a flat list of graviton line parameters. Each graviton line is specified by a triple {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\), \!\(\*SubscriptBox[\(k\), \(i\)]\)}, where \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\) and \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are the Lorentz indices of the graviton and \!\(\*SubscriptBox[\(k\), \(i\)]\) is its momentum. The remaining arguments are grouped into gluon line triples {\!\(\*SubscriptBox[\(p\), \(i\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\), \!\(\*SubscriptBox[\(a\), \(i\)]\)}, where \!\(\*SubscriptBox[\(p\), \(i\)]\) is the incoming momentum, \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) is the Lorentz index, and \!\(\*SubscriptBox[\(a\), \(i\)]\) is the colour index of the i-th gluon line. All momenta are incoming.
 GravitonGluonVertex[{\[Rho], \[Sigma], k}, \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(a\), \(2\)]\)]
 GravitonGluonVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(k\), \(1\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(2\)]\), \!\(\*SubscriptBox[\(k\), \(2\)]\)}, \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(a\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(3\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(3\)]\), \!\(\*SubscriptBox[\(a\), \(3\)]\)]";
 
@@ -137,21 +133,21 @@ GravitonYMGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptB
 
 
 GravitonGluonGhostVertex::usage =
-"GravitonGluonGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)}, \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(a\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(3\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(3\)]\), \!\(\*SubscriptBox[\(a\), \(3\)]\)] gives the vertex describing the coupling of n gravitons to the Yang-Mills ghost-gluon interaction. The first argument is a flat list of graviton line parameters. Each graviton line is specified by a pair {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)}, where \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\) and \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are the Lorentz indices of the graviton. The remaining arguments follow the FeynCalc ordering for the ghost-gluon vertex and are grouped into triples {\!\(\*SubscriptBox[\(p\), \(i\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\), \!\(\*SubscriptBox[\(a\), \(i\)]\)}. Here \!\(\*SubscriptBox[\(p\), \(i\)]\) are incoming momenta, \!\(\*SubscriptBox[\(a\), \(i\)]\) are colour indices, and \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) are the Lorentz-index slots used by the FeynCalc convention. The first triple corresponds to the gluon line.
-GravitonGluonGhostVertex[{\[Rho], \[Sigma]}, \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(a\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(3\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(3\)]\), \!\(\*SubscriptBox[\(a\), \(3\)]\)]
-GravitonGluonGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(2\)]\)}, \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(a\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(3\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(3\)]\), \!\(\*SubscriptBox[\(a\), \(3\)]\)]";
+"GravitonGluonGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\)}, \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(a\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(3\)]\), \!\(\*SubscriptBox[\(a\), \(3\)]\), \!\(\*SubscriptBox[\(p\), \(3\)]\)] gives the vertex describing the coupling of n gravitons to the Yang-Mills ghost-gluon interaction. The first argument is a flat list of graviton line parameters. Each graviton line is specified by a pair {\!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)}, where \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\) and \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\) are the Lorentz indices of the graviton. The remaining arguments follow the FeynGrav interface and are grouped into flat triples {\!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\), \!\(\*SubscriptBox[\(a\), \(i\)]\), \!\(\*SubscriptBox[\(p\), \(i\)]\)}. Here \!\(\*SubscriptBox[\(p\), \(i\)]\) are incoming momenta, \!\(\*SubscriptBox[\(a\), \(i\)]\) are colour indices, and \!\(\*SubscriptBox[\(\[Lambda]\), \(i\)]\) are the Lorentz-index slots used by the FeynCalc convention. The first triple corresponds to the gluon line, the second to the incoming ghost field and the third to the outgoing ghost field, with all momenta taken as incoming. Only the first Lorentz-index slot is used; the ghost slots are placeholders.
+GravitonGluonGhostVertex[{\[Rho], \[Sigma]}, \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(a\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(3\)]\), \!\(\*SubscriptBox[\(a\), \(3\)]\), \!\(\*SubscriptBox[\(p\), \(3\)]\)]
+GravitonGluonGhostVertex[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(2\)]\)}, \!\(\*SubscriptBox[\(\[Lambda]\), \(1\)]\), \!\(\*SubscriptBox[\(a\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(2\)]\), \!\(\*SubscriptBox[\(a\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Lambda]\), \(3\)]\), \!\(\*SubscriptBox[\(a\), \(3\)]\), \!\(\*SubscriptBox[\(p\), \(3\)]\)]";
 
 
 (* General Relativity. *)
 
 
-GravitonPropagator::usage = "GravitonPropagator[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Graviton propagator. The gauge fixing parameter is already fixed and enters the expression. Here \[Mu],\[Nu],\[Alpha], and \[Beta] are Lorentz indices; p is the graviton momentum. The expression uses FAD function from FeynCalc, so it is more suitable for loop calculations.";
+GravitonPropagator::usage = "GravitonPropagator[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Graviton propagator. The gauge-fixing parameter is GaugeFixingEpsilon, initialised to 2 when FeynGrav loads. The propagator uses its current value when called. Here \[Mu],\[Nu],\[Alpha], and \[Beta] are Lorentz indices; p is the graviton momentum. The expression uses the FAD function from FeynCalc, so it is more suitable for loop calculations.";
 
 
 GhostVectorPropagator::usage = "GhostVectorPropagator[\[Mu],\[Nu],p]. Propagator for the vector Faddeev-Popov ghost from the gravitational sector."
 
 
-GhostVectorPropagatorHD::usage = "GhostVectorPropagatorHD[\[Mu],\[Nu],p]. Propagator for the vector Faddeev-Popov ghost for the quadratic gravity with the higher derivative gauge fixing term."
+GhostVectorPropagatorHD::usage = "GhostVectorPropagatorHD[\[Mu],\[Nu],p]. Propagator for the vector Faddeev-Popov ghost in quadratic gravity with the higher-derivative gauge-fixing term. This propagator depends on GaugeFixingEpsilonHD0 and GaugeFixingEpsilonHD1, which are left symbolic when FeynGrav loads. It uses their current values when called."
 
 
 GravitonVertex::usage =
@@ -165,20 +161,20 @@ GravitonGhostVertex::usage =
 
 
 GravitonGhostVertexHD::usage =
-"GravitonGhostVertexHD[\[Rho], \[Sigma], k, \[Mu], \!\(\*SubscriptBox[\(p\), \(1\)]\), \[Nu], \!\(\*SubscriptBox[\(p\), \(2\)]\)] gives the vertex describing the coupling of one graviton to the Faddeev\[Dash]Popov ghost in quadratic gravity with the higher-derivative gauge-fixing term, obtained via the BRST formalism. The arguments \[Rho], \[Sigma], and k specify the graviton line, where \[Rho] and \[Sigma] are the Lorentz indices and k is the momentum. The arguments \[Mu] and \!\(\*SubscriptBox[\(p\), \(1\)]\) specify the ghost line, while \[Nu] and \!\(\*SubscriptBox[\(p\), \(2\)]\) specify the antighost line. All momenta are incoming. The higher-derivative gauge-fixing parameters are GaugeFixingEpsilonHD, GaugeFixingEpsilonHD0, and GaugeFixingEpsilonHD1.";
+"GravitonGhostVertexHD[\[Rho], \[Sigma], k, \[Mu], \!\(\*SubscriptBox[\(p\), \(1\)]\), \[Nu], \!\(\*SubscriptBox[\(p\), \(2\)]\)] gives the vertex describing the coupling of one graviton to the Faddeev\[Dash]Popov ghost in quadratic gravity with the higher-derivative gauge-fixing term, obtained via the BRST formalism. The arguments \[Rho], \[Sigma], and k specify the graviton line, where \[Rho] and \[Sigma] are the Lorentz indices and k is the momentum. The arguments \[Mu] and \!\(\*SubscriptBox[\(p\), \(1\)]\) specify the ghost line, while \[Nu] and \!\(\*SubscriptBox[\(p\), \(2\)]\) specify the antighost line. All momenta are incoming. This vertex depends on GaugeFixingEpsilonHD0 and GaugeFixingEpsilonHD1, which are left symbolic when FeynGrav loads. The overall parameter GaugeFixingEpsilonHD does not enter this vertex.";
 
 
 (* Massive gravity propagator. *)
 
 
-GravitonPropagatorMassive::usage = "GravitonPropagatorMassive[\[Mu],\[Nu],\[Alpha],\[Beta],p,m]. Massive graviton propagator. Here \[Mu],\[Nu],\[Alpha], and \[Beta] are Lorentz indices; p is the graviton momentum; m is the graviton mass. The expression uses FAD function from FeynCalc, so it is more suitable for loop calculations.";
+GravitonPropagatorMassive::usage = "GravitonPropagatorMassive[\[Mu],\[Nu],\[Alpha],\[Beta],p,m]. Massive graviton propagator. Here \[Mu],\[Nu],\[Alpha], and \[Beta] are Lorentz indices; p is the graviton momentum; m is the graviton mass. The expression uses the FAD function from FeynCalc, so it is more suitable for loop calculations.";
 
 
 (* Cheung-Remmen variables *)
 
 
-GravitonPropagatorCR::usage = "GravitonPropagatorCR[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Propagator for \[GothicH] perturbations in Cheung-Remmen variables. The gauge fixing parameter is already fixed and enters the expression. Here \[Mu],\[Nu],\[Alpha], and \[Beta] are Lorentz indices; p is the perturbation's momentum. The expression uses FAD function from FeynCalc, so it is more suitable for loop calculations.";
-GravitonPropagatorAuxiliaryCR::usage = "GravitonPropagatorAuxiliaryCR[\[Lambda]1,\[Mu]1,\[Nu]1,\[Lambda]2,\[Mu]2,\[Nu]2]. Propagator for the auxliary field B in Cheung-Temmen variables. The field is not a gauge invariant and does not contain a guage fixing parameters. The field is auxiliary, so the propagator has no momenta.";
+GravitonPropagatorCR::usage = "GravitonPropagatorCR[\[Mu],\[Nu],\[Alpha],\[Beta],p]. Propagator for \[GothicH] perturbations in Cheung-Remmen variables. The gauge-fixing parameter is GaugeFixingEpsilonCR, initialised to -1/2 when FeynGrav loads. The propagator uses its current value when called. Here \[Mu],\[Nu],\[Alpha], and \[Beta] are Lorentz indices; p is the perturbation's momentum. The expression uses the FAD function from FeynCalc, so it is more suitable for loop calculations.";
+GravitonPropagatorAuxiliaryCR::usage = "GravitonPropagatorAuxiliaryCR[\[Lambda]1,\[Mu]1,\[Nu]1,\[Lambda]2,\[Mu]2,\[Nu]2]. Propagator for the auxiliary field B in Cheung-Remmen variables. The propagator is independent of momentum and contains no gauge-fixing parameters.";
 
 
 GravitonVertexCRhhh::usage =
@@ -190,22 +186,22 @@ GravitonVertexCRBhh::usage =
 
 
 GravitonVertexCRBBh::usage =
-"GravitonVertexCRBBh[\!\(\*SubscriptBox[\(\[Alpha]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Alpha]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(2\)]\), \[Mu], \[Nu]] gives the cubic interaction vertex for two Cheung-Remmen auxiliary fields and one Cheung-Remmen metric perturbation in general relativity. The first six arguments are grouped into auxiliary-field triples {\!\(\*SubscriptBox[\(\[Alpha]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)}, specifying the auxiliary-field lines \!\(\*SuperscriptBox[\(B\), SubscriptBox[\(\[Alpha]\), \(i\)]]\)\!\(\*SubscriptBox[\(\), \(SubscriptBox[\(\[Rho]\), \(i\)] SubscriptBox[\(\[Sigma]\), \(i\)]\)]\). The arguments \[Mu] and \[Nu] are the Lorentz indices of the Cheung-Remmen metric perturbation.";
+"GravitonVertexCRBBh[\!\(\*SubscriptBox[\(\[Alpha]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Alpha]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(2\)]\), \[Mu], \[Nu]] gives the cubic interaction vertex for two Cheung-Remmen auxiliary fields and one Cheung-Remmen metric perturbation in general relativity. The first six arguments are grouped into auxiliary-field triples {\!\(\*SubscriptBox[\(\[Alpha]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)}, specifying the auxiliary-field lines \!\(\*SubsuperscriptBox[\(B\), RowBox[{SubscriptBox[\(\[Rho]\), \(i\)], SubscriptBox[\(\[Sigma]\), \(i\)]}], SubscriptBox[\(\[Alpha]\), \(i\)]]\). The arguments \[Mu] and \[Nu] are the Lorentz indices of the Cheung-Remmen metric perturbation.";
 
 
-(* Polarization vectors in D-dimensions*)
+(* Polarisation vectors in D dimensions *)
 
 
-PolarizationVectorD::usage = "PolarizationVectorD[p, mu] denotes a D-dimensional polarisation vector with momentum p and Lorentz index mu. PolarizationVectorD[p, mu, I] is equivalent to the two-argument form; PolarizationVectorD[p, mu, -I] denotes the complex-conjugated vector. The labels I and -I are not multiplicative factors. The option Transversality -> True imposes p\[CenterDot]\[CurlyEpsilon](p) = 0; its default is False. The momentum p must be a standalone symbol. The result is returned in FeynCalc's internal notation.";
+PolarizationVectorD::usage = "PolarizationVectorD[p, mu] denotes a D-dimensional polarisation vector with momentum p and Lorentz index mu. PolarizationVectorD[p, mu, I] is equivalent to the two-argument form; PolarizationVectorD[p, mu, -I] denotes the complex-conjugated vector. The labels I and -I are not multiplicative factors or helicity labels. The option Transversality -> True imposes p\[CenterDot]\[CurlyEpsilon](p) = 0; its default is False. The momentum p and Lorentz index mu must be standalone symbols. The command does not impose a mass-shell condition or a polarisation normalisation. The result is returned in FeynCalc's internal notation.";
 
 
 (* Polarisation tensors. *)
 
 
-PolarizationTensor::usage = "PolarizationTensor[p, mu, nu] constructs the four-dimensional factorised polarisation tensor \[CurlyEpsilon]^mu(p) \[CurlyEpsilon]^nu(p). PolarizationTensor[p, mu, nu, I] is equivalent to the three-argument form; PolarizationTensor[p, mu, nu, -I] constructs its complex conjugate. The labels I and -I are not multiplicative factors or helicity labels. The option Transversality -> True imposes p\[CenterDot]\[CurlyEpsilon](p) = 0; its default is False. The tensor represents a physical massless spin-2 polarisation when the underlying vector is transverse and null, \[CurlyEpsilon](p)\[CenterDot]\[CurlyEpsilon](p) = 0. Tracelessness and normalisation are not imposed by this command. The momentum and Lorentz indices must be symbols. The result is returned in FeynCalc's internal notation.";
+PolarizationTensor::usage = "PolarizationTensor[p, mu, nu] constructs the four-dimensional factorised polarisation tensor \[CurlyEpsilon]^mu(p) \[CurlyEpsilon]^nu(p). PolarizationTensor[p, mu, nu, I] is equivalent to the three-argument form; PolarizationTensor[p, mu, nu, -I] constructs its complex conjugate. The labels I and -I are not multiplicative factors or helicity labels. The option Transversality -> True imposes p\[CenterDot]\[CurlyEpsilon](p) = 0; its default is False. For a nonzero massless on-shell momentum satisfying p^2 = 0, this factorised tensor is transverse and traceless when the underlying vector is transverse and null, \[CurlyEpsilon](p)\[CenterDot]\[CurlyEpsilon](p) = 0. The command does not impose p^2 = 0, the null-vector condition, or normalisation; Transversality -> True imposes only p\[CenterDot]\[CurlyEpsilon](p) = 0. The momentum and Lorentz indices must be symbols. The result is returned in FeynCalc's internal notation.";
 
 
-PolarizationTensorD::usage = "PolarizationTensorD[p, mu, nu] constructs the D-dimensional factorised polarisation tensor \[CurlyEpsilon]^mu(p) \[CurlyEpsilon]^nu(p). PolarizationTensorD[p, mu, nu, I] is equivalent to the three-argument form; PolarizationTensorD[p, mu, nu, -I] constructs its complex conjugate. The labels I and -I are not multiplicative factors or helicity labels. The option Transversality -> True imposes p\[CenterDot]\[CurlyEpsilon](p) = 0; its default is False. The tensor represents a physical massless spin-2 polarisation when the underlying vector is transverse and null, \[CurlyEpsilon](p)\[CenterDot]\[CurlyEpsilon](p) = 0. Tracelessness and normalisation are not imposed by this command. This construction does not supply a complete D-dimensional polarisation basis. The momentum and Lorentz indices must be symbols. The result is returned in FeynCalc's internal notation.";
+PolarizationTensorD::usage = "PolarizationTensorD[p, mu, nu] constructs the D-dimensional factorised polarisation tensor \[CurlyEpsilon]^mu(p) \[CurlyEpsilon]^nu(p). PolarizationTensorD[p, mu, nu, I] is equivalent to the three-argument form; PolarizationTensorD[p, mu, nu, -I] constructs its complex conjugate. The labels I and -I are not multiplicative factors or helicity labels. The option Transversality -> True imposes p\[CenterDot]\[CurlyEpsilon](p) = 0; its default is False. For a nonzero massless on-shell momentum satisfying p^2 = 0, this factorised tensor is transverse and traceless when the underlying vector is transverse and null, \[CurlyEpsilon](p)\[CenterDot]\[CurlyEpsilon](p) = 0. The command does not impose p^2 = 0, the null-vector condition, or normalisation; Transversality -> True imposes only p\[CenterDot]\[CurlyEpsilon](p) = 0. This construction does not supply a complete D-dimensional polarisation basis. The momentum and Lorentz indices must be symbols. The result is returned in FeynCalc's internal notation.";
 
 
 (* Axion-like interaction with a single scalar field. *)
@@ -256,49 +252,53 @@ ScalarGaussBonnet[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\
 (* Quadratic gravity. *)
 
 
-QuadraticGravityPropagator::usage = "QuadraticGravityPropagator[\[Mu],\[Nu],\[Alpha],\[Beta],p,\!\(\*SubscriptBox[\(m\), \(0\)]\),\!\(\*SubscriptBox[\(m\), \(2\)]\)]. Graviton propagator within quadratic gravity. The gauge fixing parameter is already fixed and enters the expression. Here \[Mu], \[Nu], \[Alpha], and \[Beta] are Lorentz indices; p is the momentuml; \!\(\*SubscriptBox[\(m\), \(0\)]\) is the mass of the scalar mode; \!\(\*SubscriptBox[\(m\), \(2\)]\) is the mass of spin-2 ghost mode. The expression uses FAD function from FeynCalc, so it is more suitable for loop calculations.";
+QuadraticGravityPropagator::usage = "QuadraticGravityPropagator[\[Mu],\[Nu],\[Alpha],\[Beta],p,\!\(\*SubscriptBox[\(m\), \(0\)]\),\!\(\*SubscriptBox[\(m\), \(2\)]\)]. Graviton propagator within quadratic gravity. The gauge-fixing parameter is GaugeFixingEpsilon, initialised to 2 when FeynGrav loads. The propagator uses its current value when called. Here \[Mu], \[Nu], \[Alpha], and \[Beta] are Lorentz indices; p is the momentum; \!\(\*SubscriptBox[\(m\), \(0\)]\) is the parameter equal to the scalar pole mass in four dimensions; \!\(\*SubscriptBox[\(m\), \(2\)]\) is the mass of the spin-2 ghost mode. The expression uses the FAD function from FeynCalc, so it is more suitable for loop calculations. In D dimensions, the scalar pole mass squared is 3 (D - 2) m0^2 m2^2 / ((D - 4) m0^2 + 2 (D - 1) m2^2), where m0 and m2 denote the two mass arguments.";
 
 
-QuadraticGravityPropagatorHD::usage = "QuadraticGravityPropagatorHD[\[Mu],\[Nu],\[Alpha],\[Beta],p,\!\(\*SubscriptBox[\(m\), \(0\)]\),\!\(\*SubscriptBox[\(m\), \(2\)]\)]. Graviton propagator within quadratic gravity with the higher derivative gauge fixing term. The gauge fixing parameter is already fixed and enters the expression. Here \[Mu], \[Nu], \[Alpha], and \[Beta] are Lorentz indices; p is the momentuml; \!\(\*SubscriptBox[\(m\), \(0\)]\) is the mass of the scalar mode; \!\(\*SubscriptBox[\(m\), \(2\)]\) is the mass of spin-2 ghost mode. The expression uses FAD function from FeynCalc, so it is more suitable for loop calculations.";
+QuadraticGravityPropagatorHD::usage = "QuadraticGravityPropagatorHD[\[Mu],\[Nu],\[Alpha],\[Beta],p,\!\(\*SubscriptBox[\(m\), \(0\)]\),\!\(\*SubscriptBox[\(m\), \(2\)]\)]. Graviton propagator within quadratic gravity with the higher-derivative gauge-fixing term. The gauge-fixing parameters are GaugeFixingEpsilonHD, GaugeFixingEpsilonHD0 and GaugeFixingEpsilonHD1. They are left symbolic when FeynGrav loads. The propagator uses their current values when called. Here \[Mu], \[Nu], \[Alpha], and \[Beta] are Lorentz indices; p is the momentum; \!\(\*SubscriptBox[\(m\), \(0\)]\) is the parameter equal to the scalar pole mass in four dimensions; \!\(\*SubscriptBox[\(m\), \(2\)]\) is the mass of the spin-2 ghost mode. The expression uses the FAD function from FeynCalc, so it is more suitable for loop calculations. In D dimensions, the scalar pole mass squared is 3 (D - 2) m0^2 m2^2 / ((D - 4) m0^2 + 2 (D - 1) m2^2), where m0 and m2 denote the two mass arguments.";
 
 
 QuadraticGravityVertex::usage = 
-"QuadraticGravityVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\), \!\(\*SubscriptBox[\(p\), \(n\)]\)}, \!\(\*SubscriptBox[\(m\), \(0\)]\), \!\(\*SubscriptBox[\(m\), \(2\)]\)] gives the n-graviton self-interaction vertex in quadratic gravity for n \!\(\*FormBox[\"\\[GreaterEqual]\", TraditionalForm]\) 3. The first argument is a flat list of graviton line parameters. Each graviton line is specified by a triple {\!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\), \!\(\*SubscriptBox[\(p\), \(i\)]\)}, where \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\) and \!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are the Lorentz indices and \!\(\*SubscriptBox[\(p\), \(i\)]\) is the momentum. All momenta are incoming. The parameter \!\(\*SubscriptBox[\(m\), \(0\)]\) is the mass of the scalar mode, and \!\(\*SubscriptBox[\(m\), \(2\)]\) is the mass of the massive spin-2 ghost mode.
+"QuadraticGravityVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \[Ellipsis], \!\(\*SubscriptBox[\(\[Mu]\), \(n\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(n\)]\), \!\(\*SubscriptBox[\(p\), \(n\)]\)}, \!\(\*SubscriptBox[\(m\), \(0\)]\), \!\(\*SubscriptBox[\(m\), \(2\)]\)] gives the n-graviton self-interaction vertex in quadratic gravity for n \!\(\*FormBox[\"\\[GreaterEqual]\", TraditionalForm]\) 3. The first argument is a flat list of graviton line parameters. Each graviton line is specified by a triple {\!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\), \!\(\*SubscriptBox[\(p\), \(i\)]\)}, where \!\(\*SubscriptBox[\(\[Mu]\), \(i\)]\) and \!\(\*SubscriptBox[\(\[Nu]\), \(i\)]\) are the Lorentz indices and \!\(\*SubscriptBox[\(p\), \(i\)]\) is the momentum. All momenta are incoming. The parameter \!\(\*SubscriptBox[\(m\), \(0\)]\) is the parameter equal to the scalar pole mass in four dimensions, and \!\(\*SubscriptBox[\(m\), \(2\)]\) is the mass of the massive spin-2 ghost mode.
 QuadraticGravityVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\), \!\(\*SubscriptBox[\(p\), \(3\)]\)}, \!\(\*SubscriptBox[\(m\), \(0\)]\), \!\(\*SubscriptBox[\(m\), \(2\)]\)]
 QuadraticGravityVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(1\)]\), \!\(\*SubscriptBox[\(p\), \(1\)]\), \!\(\*SubscriptBox[\(\[Mu]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(2\)]\), \!\(\*SubscriptBox[\(p\), \(2\)]\), \!\(\*SubscriptBox[\(\[Mu]\), \(3\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(3\)]\), \!\(\*SubscriptBox[\(p\), \(3\)]\), \!\(\*SubscriptBox[\(\[Mu]\), \(4\)]\), \!\(\*SubscriptBox[\(\[Nu]\), \(4\)]\), \!\(\*SubscriptBox[\(p\), \(4\)]\)}, \!\(\*SubscriptBox[\(m\), \(0\)]\), \!\(\*SubscriptBox[\(m\), \(2\)]\)]";
 
 
 (* Procedures that import libraries. *)
 
+FeynGrav`printOutput::usage = "printOutput is a Boolean option for the FeynGrav library importers. printOutput -> True prints import diagnostics; the default False suppresses them. It does not change the imported expressions. A non-Boolean resolved value returns Failure before loading any libraries. The legacy option Private`printOutput remains accepted; an explicitly supplied public printOutput option takes precedence.";
 
-importGravitons::usage = "importGravitons[n]. The command imports libraries for graviton vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importScalars::usage = "importScalars[n]. The command imports libraries for the scalar field kinetic and potential term vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importFermions::usage = "importFermions[n]. The command imports libraries for the Dirac fermion vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importVectors::usage = "importVectors[n]. The command imports libraries for vector vertices up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importSUNYM::usage = "importSUNYM[n]. The command imports libraries for SU(N) Yang-Mills theory up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importAxionVectorVertex::usage = "importAxionVectorVertex[n]. The command imports libraries axion-like coupling to a single vector field up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importQuadraticGravity::usage = "importQuadraticGravity[n]. The command imports libraries for quadratic gravity up to order n. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importHorndeskiG2::usage = "importHorndeskiG2. The command imports all exisiting libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(2\)]\) vertices. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importHorndeskiG3::usage = "importHorndeskiG3. The command imports all exisiting libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(3\)]\) vertices. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importHorndeskiG4::usage = "importHorndeskiG4. The command imports all exisiting libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(4\)]\) vertices. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importHorndeskiG5::usage = "importHorndeskiG5. The command imports all exisiting libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(5\)]\) vertices. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
-importScalarGaussBonnet::usage "importScalarGaussBonnet[n]. The command imports libraries for Scalar-Gauss-Bonnet vertices up to order n\[GreaterEqual]2. If a library does not exist up to order n, the command imports the maximal existing order. The command has a single boolean option \"printOutput\", which allows the printing of the output.";
 
+importGravitons::usage = "importGravitons[n] imports the graviton self-interaction libraries through coupling order n, corresponding to vertices with up to n + 2 graviton legs. importGravitons[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importScalars::usage = "importScalars[n] imports the scalar kinetic and potential vertex libraries with up to n attached gravitons. importScalars[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importFermions::usage = "importFermions[n] imports the Dirac fermion vertex libraries with up to n attached gravitons. importFermions[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importVectors::usage = "importVectors[n] imports the massive-vector, massless-vector and vector-ghost vertex libraries with up to n attached gravitons. importVectors[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importSUNYM::usage = "importSUNYM[n] imports the SU(N) Yang-Mills vertex libraries with up to n attached gravitons. importSUNYM[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importAxionVectorVertex::usage = "importAxionVectorVertex[n] imports the axion-like scalar-vector-vector vertex libraries with up to n attached gravitons. importAxionVectorVertex[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importQuadraticGravity::usage = "importQuadraticGravity[n] imports the quadratic-gravity self-interaction libraries through coupling order n, corresponding to vertices with up to n + 2 graviton legs. importQuadraticGravity[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importHorndeskiG2::usage = "importHorndeskiG2[] imports all available Horndeski G2 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importHorndeskiG3::usage = "importHorndeskiG3[] imports all available Horndeski G3 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importHorndeskiG4::usage = "importHorndeskiG4[] imports all available Horndeski G4 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importHorndeskiG5::usage = "importHorndeskiG5[] imports all available Horndeski G5 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+importScalarGaussBonnet::usage = "importScalarGaussBonnet[n] imports scalar-Gauss-Bonnet vertices with 2 through n graviton legs. importScalarGaussBonnet[] uses n = 2. The requested order must be an integer at least 2 and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence.";
+
+
+FeynGravCommands::usage = "FeynGravCommands[] prints the list of public calculation and library-import commands.";
 
 (* The list of commands. *)
 
 
-FeynGravCommands := Print[
+FeynGravCommands[] := Print[
   Style[
     StringRiffle[
       {
-        "GravitonPropagator", "GravitonPropagatorMassive", "GravitonVertex", "GravitonGhostVertex", "PolarizationTensor", "GhostVectorPropagator",
+        "GravitonPropagator", "GravitonPropagatorMassive", "GravitonVertex", "GravitonGhostVertex", "PolarizationVectorD", "PolarizationTensor", "PolarizationTensorD", "GhostVectorPropagator",
         "GravitonPropagatorCR","GravitonPropagatorAuxiliaryCR","GravitonVertexCRhhh","GravitonVertexCRBhh","GravitonVertexCRBBh",
         "ScalarPropagator", "GravitonScalarVertex", "GravitonScalarPotentialVertex", "GravitonFermionVertex",
         "ProcaPropagator", "GravitonMassiveVectorVertex", "GravitonVectorVertex", "GravitonVectorGhostVertex",
         "GravitonGluonVertex", "GravitonGluonGhostVertex", "GravitonYMGhostVertex", "GravitonQuarkGluonVertex",
         "GravitonAxionVectorVertex",
-        "HorndeskiG2", "HorndeskiG3", "HorndeskiG4", "HorndeskiG5", "importScalarGaussBonnet",
+        "HorndeskiG2", "HorndeskiG3", "HorndeskiG4", "HorndeskiG5", "ScalarGaussBonnet", "importScalarGaussBonnet",
         "QuadraticGravityPropagator","QuadraticGravityPropagatorHD","GravitonGhostVertexHD","QuadraticGravityVertex","GhostVectorPropagatorHD",
         "importGravitons", "importScalars", "importFermions", "importVectors", "importSUNYM",
         "importHorndeskiG2", "importHorndeskiG3", "importHorndeskiG4", "importHorndeskiG5",
@@ -312,7 +312,21 @@ FeynGravCommands := Print[
 ];
 
 
-(* Gauge fixing parameters. *)
+(* Gauge-fixing parameters. *)
+
+FeynGrav`GaugeFixingEpsilon::usage = "GaugeFixingEpsilon is the gravitational gauge-fixing parameter used by GravitonPropagator and QuadraticGravityPropagator. It is initialised to 2 when FeynGrav loads. These propagators use its current value when called.";
+
+FeynGrav`GaugeFixingEpsilonCR::usage = "GaugeFixingEpsilonCR is the gauge-fixing parameter used by GravitonPropagatorCR in Cheung-Remmen variables. It is initialised to -1/2 when FeynGrav loads. The propagator uses its current value when called.";
+
+FeynGrav`GaugeFixingEpsilonHD::usage = "GaugeFixingEpsilonHD is the overall gauge-fixing parameter in the higher-derivative gauge contribution to QuadraticGravityPropagatorHD. It is left symbolic when FeynGrav loads. It does not enter GhostVectorPropagatorHD or GravitonGhostVertexHD.";
+
+FeynGrav`GaugeFixingEpsilonHD0::usage = "GaugeFixingEpsilonHD0 is a coefficient of the higher-derivative gauge-fixing operator in quadratic gravity. It enters QuadraticGravityPropagatorHD, GhostVectorPropagatorHD and GravitonGhostVertexHD. It is left symbolic when FeynGrav loads.";
+
+FeynGrav`GaugeFixingEpsilonHD1::usage = "GaugeFixingEpsilonHD1 is a coefficient of the higher-derivative gauge-fixing operator in quadratic gravity. It enters QuadraticGravityPropagatorHD, GhostVectorPropagatorHD and GravitonGhostVertexHD. On the flat background, it represents the combination of the two longitudinal coefficients after the second is set to zero in the package convention. It is left symbolic when FeynGrav loads.";
+
+FeynGrav`GaugeFixingEpsilonVector::usage = "GaugeFixingEpsilonVector is the gauge-fixing parameter in the massless-vector vertex libraries used by GravitonVectorVertex. It is initialised to -1 when FeynGrav loads. Set its desired value before importing the libraries with importVectors; changing it afterwards does not restore symbolic dependence already replaced during import.";
+
+FeynGrav`GaugeFixingEpsilonSUNYM::usage = "GaugeFixingEpsilonSUNYM is the gauge-fixing parameter in the SU(N) Yang-Mills vertex libraries. It is initialised to -1 when FeynGrav loads. Set its desired value before importing the libraries with importSUNYM; changing it afterwards does not restore symbolic dependence already replaced during import.";
 
 
 FormatValues[FeynGrav`GaugeFixingEpsilon] = {HoldPattern[MakeBoxes[FeynGrav`GaugeFixingEpsilon,TraditionalForm]]:>SubscriptBox["\[CurlyEpsilon]","Gravity"]} ;
@@ -328,10 +342,10 @@ FeynGrav`GaugeFixingEpsilon = 2;
 (* Gauge-fixing parameter for the gravitational field in the conventional de Donder-type gauge used for general relativity and conventional quadratic gravity; the default value 2 gives the simplest graviton propagator. See FeynGrav 2.0, Eq. (75), and FeynGrav 4.0, Sec. 4. *)
 
 FeynGrav`GaugeFixingEpsilonHD =. ;
-(* Main gauge-fixing parameter \[CurlyEpsilon] for the higher-derivative gauge-fixing term in quadratic gravity; it is intentionally left unspecified at initialization. See FeynGrav 4.0, Sec. 4. *)
+(* Main gauge-fixing parameter \[CurlyEpsilon] for the higher-derivative gauge-fixing term in quadratic gravity; it is intentionally left unspecified at initialisation. See FeynGrav 4.0, Sec. 4. *)
 
 FeynGrav`GaugeFixingEpsilonHD0 =. ;
-(* Higher-derivative quadratic-gravity gauge-fixing parameter \[CurlyEpsilon]0; it enters the higher-derivative gauge-fixing operator and is intentionally left unspecified at initialization. See FeynGrav 4.0, Sec. 4. *)
+(* Higher-derivative quadratic-gravity gauge-fixing parameter \[CurlyEpsilon]0; it enters the higher-derivative gauge-fixing operator and is intentionally left unspecified at initialisation. See FeynGrav 4.0, Sec. 4. *)
 
 FeynGrav`GaugeFixingEpsilonHD1 =. ;
 (* Higher-derivative quadratic-gravity gauge-fixing parameter \[CurlyEpsilon]1; on the flat background \[CurlyEpsilon]1 and \[CurlyEpsilon]2 enter only through their sum, so FeynGrav sets \[CurlyEpsilon]2 = 0 and keeps \[CurlyEpsilon]1 as GaugeFixingEpsilonHD1. See FeynGrav 4.0, Sec. 4. *)
@@ -352,7 +366,7 @@ FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 \[Kappa] =. ;
 
 
-Begin["Private`"];
+Begin["`Private`"];
 
 
 (* Dummy arrays *)
@@ -374,251 +388,371 @@ DummyArrayMomentaKVariables = n |-> Flatten[{ToExpression["m"<>ToString[#]<>"_"]
 packageDirectory = DirectoryName[$InputFileName];
 
 
-(* Cheung-Remmen variabless *)
+(* Cheung-Remmen variables *)
 
 
 GravitonPropagatorCR[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := I FAD[p] NieuwenhuizenOperatorInverse[-(1/2) 1/FeynGrav`GaugeFixingEpsilonCR,1,(D-5)/(D-2),-((D-1)/(D-2) +1/FeynGrav`GaugeFixingEpsilonCR),-(1/(D-2)),\[Mu],\[Nu],\[Alpha],\[Beta],p] //FeynAmpDenominatorCombine//Simplify ;
 
 
-GravitonPropagatorAuxiliaryCR[\[Lambda]1_,\[Mu]1_,\[Nu]1_,\[Lambda]2_,\[Mu]2_,\[Nu]2_] := I \[Kappa]^(2-D) ( MTD[\[Lambda]1,\[Nu]2] MTD[\[Lambda]2,\[Nu]1] MTD[\[Mu]1,\[Mu]2]+MTD[\[Lambda]1,\[Mu]2] MTD[\[Lambda]2,\[Nu]1] MTD[\[Mu]1,\[Nu]2]+MTD[\[Lambda]1,\[Nu]2] MTD[\[Lambda]2,\[Mu]1] MTD[\[Mu]2,\[Nu]1]+MTD[\[Lambda]1,\[Mu]2] MTD[\[Lambda]2,\[Mu]1] MTD[\[Nu]1,\[Nu]2]+(MTD[\[Lambda]1,\[Mu]1] MTD[\[Lambda]2,\[Mu]2] MTD[\[Nu]1,\[Nu]2])/(1-D)+(MTD[\[Lambda]1,\[Mu]1] MTD[\[Lambda]2,\[Nu]2] MTD[\[Mu]2,\[Nu]1])/(1-D)+(MTD[\[Lambda]1,\[Nu]1] MTD[\[Lambda]2,\[Nu]2] MTD[\[Mu]1,\[Mu]2])/(1-D)+(MTD[\[Lambda]1,\[Nu]1] MTD[\[Lambda]2,\[Mu]2] MTD[\[Mu]1,\[Nu]2])/(1-D) )//Calc;
+GravitonPropagatorAuxiliaryCR[\[Lambda]1_,\[Mu]1_,\[Nu]1_,\[Lambda]2_,\[Mu]2_,\[Nu]2_] := I \[Kappa]^(2-D) ( MTD[\[Lambda]1,\[Nu]2] MTD[\[Lambda]2,\[Nu]1] MTD[\[Mu]1,\[Mu]2]+MTD[\[Lambda]1,\[Mu]2] MTD[\[Lambda]2,\[Nu]1] MTD[\[Mu]1,\[Nu]2]+MTD[\[Lambda]1,\[Nu]2] MTD[\[Lambda]2,\[Mu]1] MTD[\[Mu]2,\[Nu]1]+MTD[\[Lambda]1,\[Mu]2] MTD[\[Lambda]2,\[Mu]1] MTD[\[Nu]1,\[Nu]2]+(MTD[\[Lambda]1,\[Mu]1] MTD[\[Lambda]2,\[Mu]2] MTD[\[Nu]1,\[Nu]2])/(1-D)+(MTD[\[Lambda]1,\[Mu]1] MTD[\[Lambda]2,\[Nu]2] MTD[\[Mu]2,\[Nu]1])/(1-D)+(MTD[\[Lambda]1,\[Nu]1] MTD[\[Lambda]2,\[Nu]2] MTD[\[Mu]1,\[Mu]2])/(1-D)+(MTD[\[Lambda]1,\[Nu]1] MTD[\[Lambda]2,\[Mu]2] MTD[\[Mu]1,\[Nu]2])/(1-D) );
 
 
-GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_] =FVD[p1,\[Mu]2]FVD[p2,\[Mu]1]MTD[\[Mu]3,\[Nu]1]MTD[\[Nu]3,\[Nu]2]+1/2 FVD[p1,\[Mu]2]FVD[p3,\[Nu]2](MTD[\[Mu]1,\[Mu]3]MTD[\[Nu]1,\[Nu]3]-1/(D-2) MTD[\[Mu]1,\[Nu]1]MTD[\[Mu]3,\[Nu]3])-SPD[p1,p2](MTD[\[Nu]1,\[Mu]2]MTD[\[Nu]2,\[Mu]3]MTD[\[Nu]3,\[Mu]1]- 1/(D-2) MTD[\[Mu]1,\[Nu]1]MTD[\[Mu]2,\[Nu]3]MTD[\[Mu]3,\[Nu]2])//Calc;
+GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_] =FVD[p1,\[Mu]2]FVD[p2,\[Mu]1]MTD[\[Mu]3,\[Nu]1]MTD[\[Nu]3,\[Nu]2]+1/2 FVD[p1,\[Mu]2]FVD[p3,\[Nu]2](MTD[\[Mu]1,\[Mu]3]MTD[\[Nu]1,\[Nu]3]-1/(D-2) MTD[\[Mu]1,\[Nu]1]MTD[\[Mu]3,\[Nu]3])-SPD[p1,p2](MTD[\[Nu]1,\[Mu]2]MTD[\[Nu]2,\[Mu]3]MTD[\[Nu]3,\[Mu]1]- 1/(D-2) MTD[\[Mu]1,\[Nu]1]MTD[\[Mu]2,\[Nu]3]MTD[\[Mu]3,\[Nu]2]);
 GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=1/2 (GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]+GravitonVertexCRhhh[\[Nu]1,\[Mu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]);
 GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=1/2 (GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]+GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Nu]2,\[Mu]2,p2,\[Mu]3,\[Nu]3,p3]);
 GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=1/2 (GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]+GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Nu]3,\[Mu]3,p3]);
-GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=\[Kappa]^(5-D) Total[GravitonVertexCRhhh@@@Flatten/@Permutations[Partition[{\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3},3]]]//Calc;
+GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=\[Kappa]^(5-D) Total[GravitonVertexCRhhh@@@Flatten/@Permutations[Partition[{\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3},3]]];
 
 
 GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_] = -1/4 (FVD[p1,\[Alpha]]MTD[\[Rho],\[Mu]1]MTD[\[Sigma],\[Mu]2]MTD[\[Nu]1,\[Nu]2]- FVD[p1,\[Rho]](MTD[\[Alpha],\[Mu]1]MTD[\[Sigma],\[Mu]2]MTD[\[Nu]1,\[Nu]2]-1/(D-2) MTD[\[Alpha],\[Mu]2]MTD[\[Sigma],\[Nu]2]MTD[\[Mu]1,\[Nu]1])+FVD[p1,\[Mu]2](MTD[\[Alpha],\[Mu]1]MTD[\[Sigma],\[Nu]1]MTD[\[Rho],\[Nu]2]-1/(D-2) MTD[\[Alpha],\[Sigma]]MTD[\[Mu]1,\[Nu]1]MTD[\[Nu]2,\[Rho]]));
 GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Sigma],\[Rho],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2];
 GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Nu]1,\[Mu]1,p1,\[Mu]2,\[Nu]2,p2];
 GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Nu]2,\[Mu]2,p2];
-GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=-I \[Kappa]^(4-D) (GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]2,\[Nu]2,p2,\[Mu]1,\[Nu]1,p1])//Calc;
+GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=-I \[Kappa]^(4-D) (GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]2,\[Nu]2,p2,\[Mu]1,\[Nu]1,p1]);
 
 
-GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=1/8 (- (MTD[\[Alpha]1,\[Rho]2]MTD[\[Alpha]2,\[Rho]1]-1/(D-1) MTD[\[Alpha]1,\[Rho]1]MTD[\[Alpha]2,\[Rho]2])MTD[\[Mu],\[Sigma]1]MTD[\[Nu],\[Sigma]2])//Calc;
+GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=1/8 (- (MTD[\[Alpha]1,\[Rho]2]MTD[\[Alpha]2,\[Rho]1]-1/(D-1) MTD[\[Alpha]1,\[Rho]1]MTD[\[Alpha]2,\[Rho]2])MTD[\[Mu],\[Sigma]1]MTD[\[Nu],\[Sigma]2]);
 GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]1,\[Sigma]1,\[Rho]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]];
 GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Sigma]2,\[Rho]2,\[Mu],\[Nu]];
 GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Nu],\[Mu]];
-GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=\[Kappa]^(3-D) (GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]2,\[Rho]2,\[Sigma]2,\[Alpha]1,\[Rho]1,\[Sigma]1,\[Mu],\[Nu]])//Calc;
+GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=\[Kappa]^(3-D) (GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]2,\[Rho]2,\[Sigma]2,\[Alpha]1,\[Rho]1,\[Sigma]1,\[Mu],\[Nu]]);
 
 
 (* Graviton sector *)
 
 
-Options[importGravitons] = { printOutput -> False};
+(* Resolve the public printing option, retaining existing calls and SetOptions
+   settings that use Private`printOutput. An explicit public option wins. *)
+importPrintOutput[head_, opts_List] := Module[{rules, public, legacy, resolved},
+    rules = Flatten[opts];
+    (* Select exact symbols: OptionValue can match option names across contexts. *)
+    public = Last[First[Select[Join[rules, Options[head]],
+        First[#] === FeynGrav`printOutput &]]];
 
-importGravitons[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+    legacy = Last[First[Select[Join[rules, Options[head]],
+        First[#] === Private`printOutput &]]];
+    resolved = If[MemberQ[First /@ rules, FeynGrav`printOutput], public,
+        If[legacy === Automatic, public, legacy]];
+    If[resolved === True || resolved === False, resolved,
+        Failure["InvalidPrintOutput", <|"MessageTemplate" -> "The resolved printOutput option must be True or False.",
+            "Value" -> resolved|>]]
+];
+
+(* Library imports are transactional: Block restores the old definitions on
+   failure or abort. Only completely prepared DownValues are installed. *)
+SetAttributes[importTransaction, HoldAll];
+importTransaction[targets_List, body_] := Module[{outcome, definitions},
+    (* Parse library symbols and dynamically constructed patterns in the same
+       package context, independently of the caller's current context. *)
+    outcome = Block[{$Context = "FeynGrav`Private`",
+        $ContextPath = {"FeynGrav`", "FeynCalc`", "System`"}}, Block[targets,
+        Catch[
+            Check[body; definitions = DownValues /@ targets; Null,
+                Failure["LibraryImportFailed", <|"MessageTemplate" -> "Library import failed; existing definitions were preserved."|>]],
+            "FeynGravLibraryImport"
+        ]
+    ]];
+    If[FailureQ[outcome], Return[outcome]];
+    If[MemberQ[definitions, {}], Return[Failure["MissingLibrary", <|"MessageTemplate" -> "No definitions were prepared for a required library family; existing definitions were preserved."|>]]];
+    AbortProtect[MapThread[(DownValues[#1] = #2) &, {targets, definitions}]];
+    Null
+];
+
+importLibraryRead[path_String] := Module[{value},
+    If[!FileExistsQ[path], Throw[
+        Failure["MissingLibrary", <|"MessageTemplate" -> "A required library is missing; existing definitions were preserved.", "File" -> path|>],
+        "FeynGravLibraryImport"]];
+    value = Check[Get[path], $Failed];
+    If[value === $Failed || value === $Aborted || FailureQ[value], Throw[
+        Failure["LibraryReadFailed", <|"MessageTemplate" -> "A library could not be read; existing definitions were preserved.", "File" -> path|>],
+        "FeynGravLibraryImport"]];
+    value
+];
+
+(* Only canonical integer filenames are libraries. Ignore backups, FORM sources
+   and other neighbouring files; never evaluate filename text as Wolfram code. *)
+importLibraryIndices[family_String, arity_Integer] := Module[{names, pattern, indices},
+    pattern = RegularExpression[family <> "_" <>
+        If[arity === 1, "[1-9][0-9]*", "(0|[1-9][0-9]*)_(0|[1-9][0-9]*)_[1-9][0-9]*"]];
+    names = Select[FileNames[family <> "_*", FileNameJoin[{packageDirectory, "Libs"}]],
+        FileType[#] === File && StringMatchQ[FileNameTake[#], pattern] &];
+    If[names === {}, Throw[Failure["MissingLibrary", <|
+        "MessageTemplate" -> "No valid libraries were found for a required family.",
+        "Family" -> family|>], "FeynGravLibraryImport"]];
+    indices = Sort[(FromDigits /@ Rest[StringSplit[FileNameTake[#], "_"]]) & /@ names];
+    (* Check every discovered file before a Horndeski importer clears definitions. *)
+    If[!And @@ (FileExistsQ /@ names), Throw[Failure["MissingLibrary", <|
+        "MessageTemplate" -> "A discovered library is no longer available.",
+        "Family" -> family|>], "FeynGravLibraryImport"]];
+    indices
+];
+
+importAvailableOrder[requested_Integer, families_List, first_Integer] := Module[
+    {orders, last, missing},
+    orders = Flatten[importLibraryIndices[#, 1]] & /@ families;
+    last = Min[requested, Sequence @@ (Max /@ orders)];
+    missing = Flatten[MapThread[
+        Function[{family, available},
+            FileNameJoin[{packageDirectory, "Libs", family <> "_" <> ToString[#]}] & /@
+                Complement[Range[first, last], available]], {families, orders}]];
+    If[last < first || missing =!= {}, Throw[Failure["MissingLibrary", <|
+        "MessageTemplate" -> "The requested library range is incomplete; existing definitions were preserved.",
+        "Files" -> missing, "FirstOrder" -> first, "LastOrder" -> last|>],
+        "FeynGravLibraryImport"]];
+    last
+];
+
+Options[importGravitons] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+
+importGravitons[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
+	importTransaction[{GravitonVertex},
+	With[{printing = importPrintOutput[importGravitons, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
-	nImport = Min[ nExternal, Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVertex_*", packageDirectory]]] ];
+	nImport = importAvailableOrder[nExternal, {"GravitonVertex"}, 1];
 	
-	If[OptionValue[printOutput], 
-		Print["Graviton vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVertex_*", packageDirectory]]],"."];
+	If[printing,
+		Print["Graviton vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonVertex", 1]]],"."];
 		Print["Libraries will be imported up to the order ",nImport,"."];
 	];
 
 	Clear[GravitonVertex];
 	
 	Map[
-		(Evaluate[GravitonVertex[Sequence@@DummyArrayMomentaVariables[#+2]]] = Get[packageDirectory<>"Libs/GravitonVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonVertex[Sequence@@DummyArrayMomentaVariables[#+2]]] = importLibraryRead[packageDirectory<>"Libs/GravitonVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Graviton vertices imported up to order ",nImport,"."]
 	];
+	]
+	]
 ];
 
 Clear[GravitonGhostVertex];
 
-GravitonGhostVertex = {\[Rho],\[Sigma],k,\[Mu],p1,\[Nu],p2} |->  I ( (FeynGrav`\[Kappa])/2 ) FVD[p2,\[Lambda]] ( MTD[\[Nu],\[Alpha]]MTD[\[Lambda],\[Beta]] + MTD[\[Nu],\[Beta]]MTD[\[Lambda],\[Alpha]] - MTD[\[Nu],\[Lambda]]MTD[\[Alpha],\[Beta]] ) ( FVD[p1,\[Alpha]](1/2)(MTD[\[Beta],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Beta],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[p1,\[Beta]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Alpha],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[k,\[Mu]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Beta],\[Sigma]] + MTD[\[Beta],\[Rho]]MTD[\[Alpha],\[Sigma]]) ) //Expand//Calc ;
+GravitonGhostVertex = {\[Rho],\[Sigma],k,\[Mu],p1,\[Nu],p2} |->  I ( (FeynGrav`\[Kappa])/2 ) FVD[p2,\[Lambda]] ( MTD[\[Nu],\[Alpha]]MTD[\[Lambda],\[Beta]] + MTD[\[Nu],\[Beta]]MTD[\[Lambda],\[Alpha]] - MTD[\[Nu],\[Lambda]]MTD[\[Alpha],\[Beta]] ) ( FVD[p1,\[Alpha]](1/2)(MTD[\[Beta],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Beta],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[p1,\[Beta]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Alpha],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[k,\[Mu]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Beta],\[Sigma]] + MTD[\[Beta],\[Rho]]MTD[\[Alpha],\[Sigma]]) ) //Contract ;
 
 
 (* Scalar sector *)
 
 
-Options[importScalars] = { printOutput -> False};
+Options[importScalars] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importScalars[nExternal_ : 2, OptionsPattern[] ] := Block[{nImport},
+importScalars[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Block[{nImport},
+	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
+	importTransaction[{GravitonScalarVertex,GravitonScalarPotentialVertex},
+	With[{printing = importPrintOutput[importScalars, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
-	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonScalarVertex_*", packageDirectory]]],Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonScalarPotentialVertex_*", packageDirectory]]]];
+	nImport = importAvailableOrder[nExternal, {"GravitonScalarVertex", "GravitonScalarPotentialVertex"}, 1];
 	
-	If[OptionValue[printOutput], 
-		Print["Graviton-scalar vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonScalarVertex_*", packageDirectory]]],"."];
-		Print["Graviton-scalar potential vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonScalarPotentialVertex_*", packageDirectory]]],"."];
+	If[printing,
+		Print["Graviton-scalar vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonScalarVertex", 1]]],"."];
+		Print["Graviton-scalar potential vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonScalarPotentialVertex", 1]]],"."];
 		Print["Libraries will be imported up to the order ",nImport,"."];
 	];
 
 	Clear[GravitonScalarVertex,GravitonScalarPotentialVertex];
 	
 	Map[
-		(Evaluate[ GravitonScalarVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["p2_"],ToExpression["m_"] ]] = Get[packageDirectory<>"Libs/GravitonScalarVertex_"<>ToString[#]])&,
+		(Evaluate[ GravitonScalarVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["p2_"],ToExpression["m_"] ]] = importLibraryRead[packageDirectory<>"Libs/GravitonScalarVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonScalarPotentialVertex[DummyArrayVariables[#],ToExpression["\[Lambda]_"]]] = Get[packageDirectory<>"Libs/GravitonScalarPotentialVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonScalarPotentialVertex[DummyArrayVariables[#],ToExpression["\[Lambda]_"]]] = importLibraryRead[packageDirectory<>"Libs/GravitonScalarPotentialVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Graviton-scalar vertices imported up to order ",nImport,"."]
 	];
+	]
+	]
 ];
 
 
 (* Fermion sector *)
 
 
-Options[importFermions] = { printOutput -> False};
+Options[importFermions] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importFermions[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+importFermions[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
+	importTransaction[{GravitonFermionVertex},
+	With[{printing = importPrintOutput[importFermions, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
-	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFermionVertex*", packageDirectory]]]];
+	nImport = importAvailableOrder[nExternal, {"GravitonFermionVertex"}, 1];
 	
-	If[OptionValue[printOutput], 
-		Print["Graviton-Dirac fermion vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFermionVertex_*",packageDirectory]]],"."];
-		Print["Libraries will be imported up to the order ",Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFermionVertex*",packageDirectory]]]],"."];
+	If[printing,
+		Print["Graviton-Dirac fermion vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonFermionVertex", 1]]],"."];
+		Print["Libraries will be imported up to the order ",Min[nExternal,Max[Flatten[importLibraryIndices["GravitonFermionVertex", 1]]]],"."];
 	];
 
 	Clear[GravitonFermionVertex];
 	
 	Map[
-		(Evaluate[GravitonFermionVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["p2_"],ToExpression["m_"]]] = Get[packageDirectory<>"Libs/GravitonFermionVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonFermionVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["p2_"],ToExpression["m_"]]] = importLibraryRead[packageDirectory<>"Libs/GravitonFermionVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Graviton-Dirac fermion vertices imported up to order ",nImport,"."]
 	];
+	]
+	]
 ];
 
 
 (* Vector sector *)
 
 
-Options[importVectors] = { printOutput -> False};
+Options[importVectors] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importVectors[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+importVectors[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
+	importTransaction[{GravitonMassiveVectorVertex,GravitonVectorVertex,GravitonVectorGhostVertex},
+	With[{printing = importPrintOutput[importVectors, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
-	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonMassiveVectorVertex_*",packageDirectory]]],Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVectorVertex_*",packageDirectory]]],Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVectorGhostVertex_*",packageDirectory]]]];
+	nImport = importAvailableOrder[nExternal, {"GravitonMassiveVectorVertex", "GravitonVectorVertex", "GravitonVectorGhostVertex"}, 1];
 	
-	If[OptionValue[printOutput], 
-		Print["Graviton-massive vector vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonMassiveVectorVertex_*",packageDirectory]]],"."];
-		Print["Graviton-massless vector vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVectorVertex_*",packageDirectory]]],"."];
-		Print["Graviton-vector ghost vertices vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonVectorGhostVertex_*",packageDirectory]]],"."];
+	If[printing,
+		Print["Graviton-massive vector vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonMassiveVectorVertex", 1]]],"."];
+		Print["Graviton-massless vector vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonVectorVertex", 1]]],"."];
+		Print["Graviton-vector ghost vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonVectorGhostVertex", 1]]],"."];
 		Print["Libraries will be imported up to the order ",nImport,"."];
 	];
 
 	Clear[GravitonMassiveVectorVertex,GravitonVectorVertex,GravitonVectorGhostVertex];
 	
 	Map[
-		(Evaluate[GravitonMassiveVectorVertex[DummyArrayVariables[#],ToExpression["\[Lambda]1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["p2_"],ToExpression["m_"]]] = Get[packageDirectory<>"Libs/GravitonMassiveVectorVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonMassiveVectorVertex[DummyArrayVariables[#],ToExpression["\[Lambda]1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["p2_"],ToExpression["m_"]]] = importLibraryRead[packageDirectory<>"Libs/GravitonMassiveVectorVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonVectorVertex[DummyArrayMomentaKVariables[#],ToExpression["\[Lambda]1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["p2_"]]] = Get[packageDirectory<>"Libs/GravitonVectorVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonVectorVertex[DummyArrayMomentaKVariables[#],ToExpression["\[Lambda]1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["p2_"]]] = importLibraryRead[packageDirectory<>"Libs/GravitonVectorVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonVectorGhostVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["p2_"]]] = Get[packageDirectory<>"Libs/GravitonVectorGhostVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonVectorGhostVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["p2_"]]] = importLibraryRead[packageDirectory<>"Libs/GravitonVectorGhostVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Graviton-vector vertices imported up to order ",nImport,"."]
 	];
+	]
+	]
 ];
 
 
 (* SU(N) Yang-Mills sector *)
 
 
-Options[importSUNYM] = { printOutput -> False};
+Options[importSUNYM] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importSUNYM[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+importSUNYM[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
+	importTransaction[{GravitonGluonVertex,GravitonQuarkGluonVertex,GravitonYMGhostVertex,GravitonGluonGhostVertex},
+	With[{printing = importPrintOutput[importSUNYM, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
-	nImport = Min[ nExternal, Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGluonVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonThreeGluonVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFourGluonVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonQuarkGluonVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonYMGhostVertex_*",packageDirectory]]], Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGluonGhostVertex_*",packageDirectory]]] ];
+	nImport = importAvailableOrder[nExternal, {"GravitonGluonVertex", "GravitonThreeGluonVertex", "GravitonFourGluonVertex", "GravitonQuarkGluonVertex", "GravitonYMGhostVertex", "GravitonGluonGhostVertex"}, 1];
 	
-	If[OptionValue[printOutput], 
-		Print["Graviton-gluon-gluon vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGluonVertex_*", packageDirectory]]],"."];
-		Print["Graviton-gluon-gluon-gluon vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonThreeGluonVertex_*", packageDirectory]]],"."];
-		Print["Graviton-gluon-gluon-gluon-gluon vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonFourGluonVertex_*", packageDirectory]]],"."];
-		Print["Graviton-quark-quark-gluon vector vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonQuarkGluonVertex_*", packageDirectory]]],"."];
-		Print["Graviton-(Yang-Mills)ghost vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonYMGhostVertex_*", packageDirectory]]],"."];
-		Print["Graviton-gluon-(Yang-Mills)ghost vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonGluonGhostVertex_*", packageDirectory]]],"."];
+	If[printing,
+		Print["Graviton-gluon-gluon vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonGluonVertex", 1]]],"."];
+		Print["Graviton-gluon-gluon-gluon vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonThreeGluonVertex", 1]]],"."];
+		Print["Graviton-gluon-gluon-gluon-gluon vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonFourGluonVertex", 1]]],"."];
+		Print["Graviton-quark-quark-gluon vector vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonQuarkGluonVertex", 1]]],"."];
+		Print["Graviton-(Yang-Mills)ghost vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonYMGhostVertex", 1]]],"."];
+		Print["Graviton-gluon-(Yang-Mills)ghost vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonGluonGhostVertex", 1]]],"."];
 		Print["Libraries will be imported up to the order ",nImport,"."];
 	];
 
 	Clear[GravitonGluonVertex,GravitonQuarkGluonVertex,GravitonYMGhostVertex,GravitonGluonGhostVertex];
 	
 	Map[
-		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"]]] = Get[packageDirectory<>"Libs/GravitonGluonVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"]]] = importLibraryRead[packageDirectory<>"Libs/GravitonGluonVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"],ToExpression["p3_"],ToExpression["\[Lambda]3_"],ToExpression["a3_"]]] = Get[packageDirectory<>"Libs/GravitonThreeGluonVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"],ToExpression["p3_"],ToExpression["\[Lambda]3_"],ToExpression["a3_"]]] = importLibraryRead[packageDirectory<>"Libs/GravitonThreeGluonVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"],ToExpression["p3_"],ToExpression["\[Lambda]3_"],ToExpression["a3_"],ToExpression["p4_"],ToExpression["\[Lambda]4_"],ToExpression["a4_"]]] = Get[packageDirectory<>"Libs/GravitonFourGluonVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonGluonVertex[DummyArrayMomentaKVariables[#],ToExpression["p1_"],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"],ToExpression["p3_"],ToExpression["\[Lambda]3_"],ToExpression["a3_"],ToExpression["p4_"],ToExpression["\[Lambda]4_"],ToExpression["a4_"]]] = importLibraryRead[packageDirectory<>"Libs/GravitonFourGluonVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonQuarkGluonVertex[DummyArrayVariables[#],ToExpression["\[Lambda]_"],a_ ]] = Get[packageDirectory<>"Libs/GravitonQuarkGluonVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonQuarkGluonVertex[DummyArrayVariables[#],ToExpression["\[Lambda]_"],a_ ]] = importLibraryRead[packageDirectory<>"Libs/GravitonQuarkGluonVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonYMGhostVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["a2_"] ]] = Get[packageDirectory<>"Libs/GravitonYMGhostVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonYMGhostVertex[DummyArrayVariables[#],ToExpression["p1_"],ToExpression["a1_"],ToExpression["p2_"],ToExpression["a2_"] ]] = importLibraryRead[packageDirectory<>"Libs/GravitonYMGhostVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	Map[
-		(Evaluate[GravitonGluonGhostVertex[DummyArrayVariables[#],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"],ToExpression["p2_"],ToExpression["\[Lambda]3_"],ToExpression["a3_"],ToExpression["p3_"]  ]] = Get[packageDirectory<>"Libs/GravitonGluonGhostVertex_"<>ToString[#]])&,
+		(Evaluate[GravitonGluonGhostVertex[DummyArrayVariables[#],ToExpression["\[Lambda]1_"],ToExpression["a1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["a2_"],ToExpression["p2_"],ToExpression["\[Lambda]3_"],ToExpression["a3_"],ToExpression["p3_"]  ]] = importLibraryRead[packageDirectory<>"Libs/GravitonGluonGhostVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Graviton-SU(N) Yang-Mills vertices imported up to order ",nImport,"."]
 	];
+	]
+	]
 ];
 
 
 (* Graviton-Scalar Axion-Single Vector Sector *)
 
 
-Options[importAxionVectorVertex] = { printOutput -> False};
+Options[importAxionVectorVertex] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importAxionVectorVertex[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+importAxionVectorVertex[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
+	importTransaction[{GravitonAxionVectorVertex},
+	With[{printing = importPrintOutput[importAxionVectorVertex, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
-	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonAxionVectorVertex_*",packageDirectory]]]];
+	nImport = importAvailableOrder[nExternal, {"GravitonAxionVectorVertex"}, 1];
 	
-	If[OptionValue[printOutput], 
-		Print["Axion-Vector vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/GravitonAxionVectorVertex_*",packageDirectory]]],"."];
+	If[printing,
+		Print["Axion-Vector vertices exist up to order ",Max[Flatten[importLibraryIndices["GravitonAxionVectorVertex", 1]]],"."];
 		Print["Libraries will be imported up to the order ",nImport,"."];
 	];
 
 	Clear[GravitonAxionVectorVertex];
 	
 	Map[
-		(Evaluate[GravitonAxionVectorVertex[DummyArrayVariables[#],ToExpression["\[Lambda]1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["p2_"],ToExpression["\[CapitalTheta]_"]]  ] = Get[packageDirectory<>"Libs/GravitonAxionVectorVertex_"<>ToString[#]];)&,
+		(Evaluate[GravitonAxionVectorVertex[DummyArrayVariables[#],ToExpression["\[Lambda]1_"],ToExpression["p1_"],ToExpression["\[Lambda]2_"],ToExpression["p2_"],ToExpression["\[CapitalTheta]_"]]  ] = importLibraryRead[packageDirectory<>"Libs/GravitonAxionVectorVertex_"<>ToString[#]];)&,
 		Range[nImport] 
 	];
 	
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Axion-Vector vertices imported up to order ",nImport,"."]
 	];
+	]
+	]
 ];
 
 
 (* Horndeski G2 *)
 
 
-Options[importHorndeskiG2] = { printOutput -> False};
+Options[importHorndeskiG2] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importHorndeskiG2[OptionsPattern[] ] := Block[{indexArray},
+importHorndeskiG2[opts : OptionsPattern[] ] := Block[{indexArray},
+	importTransaction[{HorndeskiG2},
+	With[{printing = importPrintOutput[importHorndeskiG2, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
-	indexArray =Flatten[ Map[ToExpression ,StringCases[FileNames["Libs/HorndeskiG2_*",packageDirectory], "HorndeskiG2_"~~a_~~"_" ~~b_~~"_"~~n_-> {a,b,n} ], {3}] ,1];
-	If[ OptionValue[printOutput],
+	indexArray = importLibraryIndices["HorndeskiG2", 3];
+	If[ printing,
 		Print["Libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(2\)]\) interaction (\!\(\*SqrtBox[\(-g\)]\)\!\(\*SuperscriptBox[\(\[Phi]\), \(a\)]\)\!\(\*SuperscriptBox[\(X\), \(b\)]\))=\[ScriptCapitalO](\!\(\*SuperscriptBox[\(\[Kappa]\), \(n\)]\)) exist for :"];
 		Map[ Print["a = ",#[[1]],", b = ",#[[2]],", n = ",#[[3]]," ."]&, indexArray];
 		Print["Import all of them."];
@@ -626,24 +760,29 @@ importHorndeskiG2[OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG2];
 	Map[
-		(HorndeskiG2[DummyArrayVariables[#[[3]]],DummyMomentaVariables[#[[1]] + 2 #[[2]]], #[[2]], ToExpression["Private`\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG2_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG2[DummyArrayVariables[#[[3]]],DummyMomentaVariables[#[[1]] + 2 #[[2]]], #[[2]], ToExpression["FeynGrav`Private`\[Lambda]_"]] = \[Lambda] importLibraryRead[ packageDirectory<>"Libs/HorndeskiG2_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Import is done."];
 	];
+	]
+	]
 ];
 
 
 (* Horndeski G3 *)
 
 
-Options[importHorndeskiG3] = { printOutput -> False};
+Options[importHorndeskiG3] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importHorndeskiG3[ OptionsPattern[] ] := Block[{indexArray},
+importHorndeskiG3[ opts : OptionsPattern[] ] := Block[{indexArray},
+	importTransaction[{HorndeskiG3},
+	With[{printing = importPrintOutput[importHorndeskiG3, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
-	indexArray =Flatten[ Map[ToExpression ,StringCases[FileNames["Libs/HorndeskiG3_*",packageDirectory], "HorndeskiG3_"~~a_~~"_" ~~b_~~"_"~~n_-> {a,b,n} ], {3}] ,1];
-	If[ OptionValue[printOutput],
+	indexArray = importLibraryIndices["HorndeskiG3", 3];
+	If[ printing,
 		Print["Libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(3\)]\) interaction (\!\(\*SqrtBox[\(-g\)]\)\!\(\*SuperscriptBox[\(\[Phi]\), \(a\)]\)\!\(\*SuperscriptBox[\(X\), \(b\)] \[Square]\[Phi]\))=\[ScriptCapitalO](\!\(\*SuperscriptBox[\(\[Kappa]\), \(n\)]\)) exist for :"];
 		Map[ Print["a = ",#[[1]],", b = ",#[[2]],", n = ",#[[3]]," ."]&, indexArray];
 		Print["Import all of them."];
@@ -651,24 +790,29 @@ importHorndeskiG3[ OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG3];
 	Map[
-		(HorndeskiG3[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]+1],#[[2]],ToExpression["Private`\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG3_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG3[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]+1],#[[2]],ToExpression["FeynGrav`Private`\[Lambda]_"]] = \[Lambda] importLibraryRead[ packageDirectory<>"Libs/HorndeskiG3_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Import is done."];
 	];
+	]
+	]
 ];
 
 
 (* Horndeski G4 *)
 
 
-Options[importHorndeskiG4] = { printOutput -> False};
+Options[importHorndeskiG4] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importHorndeskiG4[ OptionsPattern[] ] := Block[{indexArray},
+importHorndeskiG4[ opts : OptionsPattern[] ] := Block[{indexArray},
+	importTransaction[{HorndeskiG4},
+	With[{printing = importPrintOutput[importHorndeskiG4, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
-	indexArray =Flatten[ Map[ToExpression ,StringCases[FileNames["Libs/HorndeskiG4_*",packageDirectory], "HorndeskiG4_"~~a_~~"_" ~~b_~~"_"~~n_-> {a,b,n} ], {3}] ,1];
-	If[ OptionValue[printOutput],
+	indexArray = importLibraryIndices["HorndeskiG4", 3];
+	If[ printing,
 		Print["Libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(4\)]\) interaction ( \!\(\*SqrtBox[\(-g\)]\) R \!\(\*SuperscriptBox[\(\[Phi]\), \(a\)]\) \!\(\*SuperscriptBox[\(X\), \(b\)]\))=\[ScriptCapitalO](\!\(\*SuperscriptBox[\(\[Kappa]\), \(n\)]\)) exist for :"];
 		Map[ Print["a = ",#[[1]],", b = ",#[[2]],", n = ",#[[3]]," ."]&, indexArray];
 		Print["Import all of them."];
@@ -676,24 +820,29 @@ importHorndeskiG4[ OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG4];
 	Map[
-		(HorndeskiG4[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]],#[[2]],ToExpression["Private`\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG4_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG4[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2*#[[2]]],#[[2]],ToExpression["FeynGrav`Private`\[Lambda]_"]] = \[Lambda] importLibraryRead[ packageDirectory<>"Libs/HorndeskiG4_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Import is done."];
 	];
+	]
+	]
 ];
 
 
 (* Horndeski G5 *)
 
 
-Options[importHorndeskiG5] = { printOutput -> False};
+Options[importHorndeskiG5] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importHorndeskiG5[ OptionsPattern[] ] := Block[{indexArray},
+importHorndeskiG5[ opts : OptionsPattern[] ] := Block[{indexArray},
+	importTransaction[{HorndeskiG5},
+	With[{printing = importPrintOutput[importHorndeskiG5, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
-	indexArray =Flatten[ Map[ToExpression ,StringCases[FileNames["Libs/HorndeskiG5_*",packageDirectory], "HorndeskiG5_"~~a_~~"_" ~~b_~~"_"~~n_-> {a,b,n} ], {3}] ,1];
-	If[ OptionValue[printOutput],
+	indexArray = importLibraryIndices["HorndeskiG5", 3];
+	If[ printing,
 		Print["Libraries for Horndeski \!\(\*SubscriptBox[\(G\), \(5\)]\) interaction ( \!\(\*SqrtBox[\(-g\)]\) \!\(\*SuperscriptBox[\(G\), \(\[Mu]\[Nu]\)]\)\!\(\*SubscriptBox[\(\[Del]\), \(\[Mu]\[Nu]\)]\)\[Phi] \!\(\*SuperscriptBox[\(\[Phi]\), \(a\)]\) \!\(\*SuperscriptBox[\(X\), \(b\)]\))=\[ScriptCapitalO](\!\(\*SuperscriptBox[\(\[Kappa]\), \(n\)]\)) exist for :"];
 		Map[ Print["a = ",#[[1]],", b = ",#[[2]],", n = ",#[[3]]," ."]&, indexArray];
 		Print["Import all of them."];
@@ -701,70 +850,84 @@ importHorndeskiG5[ OptionsPattern[] ] := Block[{indexArray},
 	
 	Clear[HorndeskiG5];
 	Map[
-		(HorndeskiG5[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2 #[[2]]],#[[2]],ToExpression["Private`\[Lambda]_"]] = \[Lambda] Get[ packageDirectory<>"Libs/HorndeskiG5_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
+		(HorndeskiG5[DummyArrayMomentaKVariables[#[[3]]],DummyMomentaVariables[#[[1]]+2 #[[2]]+1],#[[2]],ToExpression["FeynGrav`Private`\[Lambda]_"]] = \[Lambda] importLibraryRead[ packageDirectory<>"Libs/HorndeskiG5_"<>ToString[#[[1]]]<>"_"<>ToString[#[[2]]]<>"_"<>ToString[#[[3]]] ])&,
 		indexArray
 	];
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Import is done."];
 	];
+	]
+	]
 ];
 
 
 (* Scalar-Gauss-Bonnet *)
 
 
-Options[importScalarGaussBonnet] = { printOutput -> False};
+Options[importScalarGaussBonnet] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importScalarGaussBonnet[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+importScalarGaussBonnet[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+	If[!IntegerQ[nExternal] || nExternal < 2, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 2.", "Order" -> nExternal|>]]];
+	importTransaction[{ScalarGaussBonnet},
+	With[{printing = importPrintOutput[importScalarGaussBonnet, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
-	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/ScalarGaussBonnet_*", packageDirectory]]]];
+	nImport = importAvailableOrder[nExternal, {"ScalarGaussBonnet"}, 2];
 	
-	If[OptionValue[printOutput], 
-		Print["Scalar-Gauss-Bonnet vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/ScalarGaussBonnet_*",packageDirectory]]],"."];
-		Print["Libraries will be imported up to the order ",Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/ScalarGaussBonnet*",packageDirectory]]]],"."];
+	If[printing,
+		Print["Scalar-Gauss-Bonnet vertices exist up to order ",Max[Flatten[importLibraryIndices["ScalarGaussBonnet", 1]]],"."];
+		Print["Libraries will be imported up to the order ",Min[nExternal,Max[Flatten[importLibraryIndices["ScalarGaussBonnet", 1]]]],"."];
 	];
 
 	Clear[ScalarGaussBonnet];
 	
 	Map[
-		(Evaluate[ScalarGaussBonnet[DummyArrayMomentaKVariables[#],ToExpression["Private`g_"]]] = g Get[packageDirectory<>"Libs/ScalarGaussBonnet_"<>ToString[#]])&,
+		(Evaluate[ScalarGaussBonnet[DummyArrayMomentaKVariables[#],ToExpression["FeynGrav`Private`g_"]]] = g importLibraryRead[packageDirectory<>"Libs/ScalarGaussBonnet_"<>ToString[#]])&,
 		Range[2,nImport] 
 	];
 	
-	If[OptionValue[printOutput],
-		Print["Scalar-Gauss-Bonnet fermion vertices imported up to order ",nImport,"."]
+	If[printing,
+		Print["Scalar-Gauss-Bonnet vertices imported up to order ",nImport,"."]
 	];
+	]
+	]
 ];
 
 
 (* Quadratic gravity *)
 
 
-Options[importQuadraticGravity] = { printOutput -> False};
+Options[importQuadraticGravity] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
 
-importQuadraticGravity[nExternal_ : 2, OptionsPattern[] ] := Module[{nImport},
+importQuadraticGravity[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
+	importTransaction[{QuadraticGravityVertex},
+	With[{printing = importPrintOutput[importQuadraticGravity, {opts}]},
+	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
-	nImport = Min[nExternal,Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/QuadraticGravityVertex_*",packageDirectory]]]];
+	nImport = importAvailableOrder[nExternal, {"QuadraticGravityVertex"}, 1];
 	
-	If[OptionValue[printOutput], 
-		Print["Quadratic gravity vertices exist up to order ",Max[Map[ ToExpression[Last[Characters[#]]] &, FileNames["Libs/QuadraticGravityVertex_*",packageDirectory]]],"."];
+	If[printing,
+		Print["Quadratic gravity vertices exist up to order ",Max[Flatten[importLibraryIndices["QuadraticGravityVertex", 1]]],"."];
 		Print["Libraries will be imported up to the order ",nImport,"."];
 	];
 
 	Clear[QuadraticGravityVertex];
 	
 	Map[
-		(Evaluate[QuadraticGravityVertex[DummyArrayMomentaVariables[#+2],ToExpression["\[GothicM]0_"],ToExpression["\[GothicM]2_"]]] = Get[packageDirectory<>"Libs/QuadraticGravityVertex_"<>ToString[#]])&,
+		(Evaluate[QuadraticGravityVertex[DummyArrayMomentaVariables[#+2],ToExpression["\[GothicM]0_"],ToExpression["\[GothicM]2_"]]] = importLibraryRead[packageDirectory<>"Libs/QuadraticGravityVertex_"<>ToString[#]])&,
 		Range[nImport] 
 	];
 	
-	If[OptionValue[printOutput],
+	If[printing,
 		Print["Quadratic gravity vertices imported up to order ",nImport,"."]
 	];
+	]
+	]
 ];
 
 
-GravitonGhostVertexHD = {\[Rho],\[Sigma],k,\[Mu],p1,\[Nu],p2} |->  I ( (FeynGrav`\[Kappa])/2 ) (MTD[\[Lambda],\[Alpha]]MTD[\[Tau],\[Beta]]+MTD[\[Lambda],\[Beta]]MTD[\[Tau],\[Alpha]]-MTD[\[Lambda],\[Tau]]MTD[\[Alpha],\[Beta]]) ( FeynGrav`GaugeFixingEpsilonHD0 MTD[\[Nu],\[Lambda]]SPD[p1,p1] + FeynGrav`GaugeFixingEpsilonHD1 FVD[p1,\[Nu]]FVD[p1,\[Lambda]]  ) FVD[p1,\[Tau]] ( FVD[p1,\[Alpha]](1/2)(MTD[\[Beta],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Beta],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[p1,\[Beta]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Alpha],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[k,\[Mu]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Beta],\[Sigma]] + MTD[\[Beta],\[Rho]]MTD[\[Alpha],\[Sigma]]) ) //Expand//Calc ;
+GravitonGhostVertexHD = {\[Rho],\[Sigma],k,\[Mu],p1,\[Nu],p2} |->  I ( (FeynGrav`\[Kappa])/2 ) (MTD[\[Lambda],\[Alpha]]MTD[\[Tau],\[Beta]]+MTD[\[Lambda],\[Beta]]MTD[\[Tau],\[Alpha]]-MTD[\[Lambda],\[Tau]]MTD[\[Alpha],\[Beta]]) ( FeynGrav`GaugeFixingEpsilonHD0 MTD[\[Nu],\[Lambda]]SPD[p1,p1] + FeynGrav`GaugeFixingEpsilonHD1 FVD[p1,\[Nu]]FVD[p1,\[Lambda]]  ) FVD[p1,\[Tau]] ( FVD[p1,\[Alpha]](1/2)(MTD[\[Beta],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Beta],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[p1,\[Beta]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Mu],\[Sigma]]+MTD[\[Alpha],\[Sigma]]MTD[\[Mu],\[Rho]]) + FVD[k,\[Mu]](1/2)(MTD[\[Alpha],\[Rho]]MTD[\[Beta],\[Sigma]] + MTD[\[Beta],\[Rho]]MTD[\[Alpha],\[Sigma]]) ) //Contract;
 
 
 (* Propagators *)
@@ -791,17 +954,19 @@ QuadraticGravityPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= Gravit
 QuadraticGravityPropagatorHD[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= NieuwenhuizenOperator[0,1, (D-5)/(D-2) , -(D-1)/(D-2) , -1/(D-2),\[Mu],\[Nu],\[Alpha],\[Beta],p](I)FAD[p] - NieuwenhuizenOperator[0,1, (D-4)/(D-1) , 0,0,\[Mu],\[Nu],\[Alpha],\[Beta],p](I)FAD[{p,m2}] - FeynGrav`GaugeFixingEpsilonHD NieuwenhuizenOperator[1/(2 FeynGrav`GaugeFixingEpsilonHD0),0,0, 1/(FeynGrav`GaugeFixingEpsilonHD0+FeynGrav`GaugeFixingEpsilonHD1) ,0,\[Mu],\[Nu],\[Alpha],\[Beta],p](I)FAD[p,p] +1/(D-2) NieuwenhuizenOperator[0,0,3/(D-1),(D-1),1,\[Mu],\[Nu],\[Alpha],\[Beta],p](I)FAD[{p, Sqrt[3(D-2)m0^2 m2^2/(  (D-4) m0^2 + 2(D-1)m2^2 )]}];
 
 
-GhostVectorPropagatorHD[\[Mu]_,\[Nu]_,p_] := 1/(FeynGrav`GaugeFixingEpsilonHD0)( MTD[\[Mu],\[Nu]] - (FeynGrav`GaugeFixingEpsilonHD1)/(FeynGrav`GaugeFixingEpsilonHD0+FeynGrav`GaugeFixingEpsilonHD1)FVD[p,\[Mu]]FVD[p,\[Nu]]  ) (I)FAD[p,p];
+(* FeynGrav 4.0, Eq. (46), with epsilon2 = 0: the longitudinal
+   projector carries an additional massless denominator 1/p^2. *)
+GhostVectorPropagatorHD[\[Mu]_,\[Nu]_,p_] := 1/(FeynGrav`GaugeFixingEpsilonHD0)( MTD[\[Mu],\[Nu]] - (FeynGrav`GaugeFixingEpsilonHD1)/(FeynGrav`GaugeFixingEpsilonHD0+FeynGrav`GaugeFixingEpsilonHD1)FVD[p,\[Mu]]FVD[p,\[Nu]] FAD[p] ) (I)FAD[p,p];
 
 
-(* Polarization vectors in D-dimensions*)
+(* Polarisation vectors in D dimensions *)
 
 
 Options[PolarizationVectorD] = {Transversality -> False};
 
-PolarizationVectorD[p_Symbol,mu_Symbol,phase : (I | -I) : I,OptionsPattern[]] := 
-	Pair[ 
-		Momentum[Polarization[p, phase,Transversality -> OptionValue[Transversality]],D],
+PolarizationVectorD[p_Symbol, mu_Symbol,phase : (I | -I) : I,opts : OptionsPattern[]] :=
+	Pair[
+		Momentum[Polarization[p, phase, opts], D],
 		LorentzIndex[mu, D]
 	];
 
@@ -815,20 +980,29 @@ Options[PolarizationTensor] = {Transversality -> False};
 Options[PolarizationTensorD] = {Transversality -> False};
 
 
-PolarizationTensorD[p_Symbol,mu_Symbol,nu_Symbol,phase : (I | -I) : I,OptionsPattern[]] :=
-	PolarizationVectorD[p, mu, phase,Transversality -> OptionValue[Transversality]] PolarizationVectorD[p, nu, phase,Transversality -> OptionValue[Transversality]];
+PolarizationTensorD[p_Symbol,mu_Symbol,nu_Symbol,phase : (I | -I) : I,opts : OptionsPattern[]] :=
+	PolarizationVectorD[p, mu, phase,opts] PolarizationVectorD[p, nu, phase,opts];
 
 
-PolarizationTensor[p_Symbol, mu_Symbol, nu_Symbol,phase : (I | -I) : I,OptionsPattern[]] :=
+PolarizationTensor[p_Symbol, mu_Symbol, nu_Symbol,phase : (I | -I) : I,opts : OptionsPattern[]] :=
 	ChangeDimension[
-		PolarizationTensorD[p, mu, nu, phase,Transversality -> OptionValue[Transversality]
-	],4];
+		PolarizationTensorD[p, mu, nu, phase,opts]
+	,4];
 
 
-importGravitons[2];
-importScalars[2];
-importFermions[2];
-importVectors[2];
+(* Retain and report initial import failures instead of discarding them. *)
+initializationResult = Module[{results, failed},
+    results = Association @@ Map[Function[head, SymbolName[head] -> head[2]],
+        {importGravitons, importScalars, importFermions, importVectors}];
+    failed = Select[results, FailureQ];
+    If[Length[failed] > 0,
+        Message[FeynGravInitialized::init, StringRiffle[Keys[failed], ", "]];
+        Failure["InitializationFailed", <|"MessageTemplate" -> "Required FeynGrav libraries could not be imported.",
+            "Failures" -> failed|>],
+        FeynGravInitialized = True;
+        Null
+    ]
+];
 
 
 End[];
@@ -845,3 +1019,7 @@ AppendTo[$ContextPath, "Nieuwenhuizen`"];
 
 (* Keep converter commands visible after closing the FeynGrav context. *)
 If[!MemberQ[$ContextPath, "CalcFormConverter`"], AppendTo[$ContextPath, "CalcFormConverter`"]];
+
+
+(* Get returns the diagnostic when required imports fail. *)
+FeynGrav`Private`initializationResult
