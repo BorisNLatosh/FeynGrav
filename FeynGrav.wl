@@ -193,11 +193,19 @@ GravitonVertexCRBBh::usage =
 "GravitonVertexCRBBh[\!\(\*SubscriptBox[\(\[Alpha]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\), \!\(\*SubscriptBox[\(\[Alpha]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(2\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(2\)]\), \[Mu], \[Nu]] gives the cubic interaction vertex for two Cheung-Remmen auxiliary fields and one Cheung-Remmen metric perturbation in general relativity. The first six arguments are grouped into auxiliary-field triples {\!\(\*SubscriptBox[\(\[Alpha]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Rho]\), \(i\)]\), \!\(\*SubscriptBox[\(\[Sigma]\), \(i\)]\)}, specifying the auxiliary-field lines \!\(\*SuperscriptBox[\(B\), SubscriptBox[\(\[Alpha]\), \(i\)]]\)\!\(\*SubscriptBox[\(\), \(SubscriptBox[\(\[Rho]\), \(i\)] SubscriptBox[\(\[Sigma]\), \(i\)]\)]\). The arguments \[Mu] and \[Nu] are the Lorentz indices of the Cheung-Remmen metric perturbation.";
 
 
+(* Polarization vectors in D-dimensions*)
+
+
+PolarizationVectorD::usage = "PolarizationVectorD[p, mu] denotes a D-dimensional polarisation vector with momentum p and Lorentz index mu. PolarizationVectorD[p, mu, I] is equivalent to the two-argument form; PolarizationVectorD[p, mu, -I] denotes the complex-conjugated vector. The labels I and -I are not multiplicative factors. The option Transversality -> True imposes p\[CenterDot]\[CurlyEpsilon](p) = 0; its default is False. The momentum p must be a standalone symbol. The result is returned in FeynCalc's internal notation.";
+
+
 (* Polarisation tensors. *)
 
 
-PolarizationTensor::usage = "PolarizationTensor[\[Mu],\[Nu],p]. Polarization tensor for gravity in D dimensions. The tensor is constructed from the standard polarization vectors. This definition is neither traceless nor transverse.";
-SetPolarizationTensor::usage = "The command ensures that the graviton polarization tensor is both traceless and transverse.";
+PolarizationTensor::usage = "PolarizationTensor[p, mu, nu] constructs the four-dimensional factorised polarisation tensor \[CurlyEpsilon]^mu(p) \[CurlyEpsilon]^nu(p). PolarizationTensor[p, mu, nu, I] is equivalent to the three-argument form; PolarizationTensor[p, mu, nu, -I] constructs its complex conjugate. The labels I and -I are not multiplicative factors or helicity labels. The option Transversality -> True imposes p\[CenterDot]\[CurlyEpsilon](p) = 0; its default is False. The tensor represents a physical massless spin-2 polarisation when the underlying vector is transverse and null, \[CurlyEpsilon](p)\[CenterDot]\[CurlyEpsilon](p) = 0. Tracelessness and normalisation are not imposed by this command. The momentum and Lorentz indices must be symbols. The result is returned in FeynCalc's internal notation.";
+
+
+PolarizationTensorD::usage = "PolarizationTensorD[p, mu, nu] constructs the D-dimensional factorised polarisation tensor \[CurlyEpsilon]^mu(p) \[CurlyEpsilon]^nu(p). PolarizationTensorD[p, mu, nu, I] is equivalent to the three-argument form; PolarizationTensorD[p, mu, nu, -I] constructs its complex conjugate. The labels I and -I are not multiplicative factors or helicity labels. The option Transversality -> True imposes p\[CenterDot]\[CurlyEpsilon](p) = 0; its default is False. The tensor represents a physical massless spin-2 polarisation when the underlying vector is transverse and null, \[CurlyEpsilon](p)\[CenterDot]\[CurlyEpsilon](p) = 0. Tracelessness and normalisation are not imposed by this command. This construction does not supply a complete D-dimensional polarisation basis. The momentum and Lorentz indices must be symbols. The result is returned in FeynCalc's internal notation.";
 
 
 (* Axion-like interaction with a single scalar field. *)
@@ -284,7 +292,7 @@ FeynGravCommands := Print[
   Style[
     StringRiffle[
       {
-        "GravitonPropagator", "GravitonPropagatorMassive", "GravitonVertex", "GravitonGhostVertex", "PolarizationTensor", "SetPolarizationTensor","GhostVectorPropagator",
+        "GravitonPropagator", "GravitonPropagatorMassive", "GravitonVertex", "GravitonGhostVertex", "PolarizationTensor", "GhostVectorPropagator",
         "GravitonPropagatorCR","GravitonPropagatorAuxiliaryCR","GravitonVertexCRhhh","GravitonVertexCRBhh","GravitonVertexCRBBh",
         "ScalarPropagator", "GravitonScalarVertex", "GravitonScalarPotentialVertex", "GravitonFermionVertex",
         "ProcaPropagator", "GravitonMassiveVectorVertex", "GravitonVectorVertex", "GravitonVectorGhostVertex",
@@ -786,16 +794,35 @@ QuadraticGravityPropagatorHD[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m0_,m2_]:= Nieu
 GhostVectorPropagatorHD[\[Mu]_,\[Nu]_,p_] := 1/(FeynGrav`GaugeFixingEpsilonHD0)( MTD[\[Mu],\[Nu]] - (FeynGrav`GaugeFixingEpsilonHD1)/(FeynGrav`GaugeFixingEpsilonHD0+FeynGrav`GaugeFixingEpsilonHD1)FVD[p,\[Mu]]FVD[p,\[Nu]]  ) (I)FAD[p,p];
 
 
+(* Polarization vectors in D-dimensions*)
+
+
+Options[PolarizationVectorD] = {Transversality -> False};
+
+PolarizationVectorD[p_Symbol,mu_Symbol,phase : (I | -I) : I,OptionsPattern[]] := 
+	Pair[ 
+		Momentum[Polarization[p, phase,Transversality -> OptionValue[Transversality]],D],
+		LorentzIndex[mu, D]
+	];
+
+
 (* Polarisation tensors *)
 
 
-PolarizationTensor[\[Mu]_,\[Nu]_,p_] = Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Mu],D]]Pair[Momentum[Polarization[p,I],D],LorentzIndex[\[Nu],D]];
-SetPolarizationTensor := Module[{},
-	Pair[Momentum[Polarization[x_,I],D],Momentum[Polarization[x_,I],D]]=0;
-	Pair[Momentum[Polarization[x_,I]],Momentum[Polarization[x_,I]]]=0;
-	Pair[Momentum[Polarization[x_,I],D],Momentum[x_,D]]=0;
-	Pair[Momentum[Polarization[x_,I]],Momentum[x_]]=0;
-];
+Options[PolarizationTensor] = {Transversality -> False};
+
+
+Options[PolarizationTensorD] = {Transversality -> False};
+
+
+PolarizationTensorD[p_Symbol,mu_Symbol,nu_Symbol,phase : (I | -I) : I,OptionsPattern[]] :=
+	PolarizationVectorD[p, mu, phase,Transversality -> OptionValue[Transversality]] PolarizationVectorD[p, nu, phase,Transversality -> OptionValue[Transversality]];
+
+
+PolarizationTensor[p_Symbol, mu_Symbol, nu_Symbol,phase : (I | -I) : I,OptionsPattern[]] :=
+	ChangeDimension[
+		PolarizationTensorD[p, mu, nu, phase,Transversality -> OptionValue[Transversality]
+	],4];
 
 
 importGravitons[2];
