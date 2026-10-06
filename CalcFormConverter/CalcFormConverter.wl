@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*Bosonic FeynCalc \[LeftRightArrow] FORM conversion. Runtime definitions load separately. Scalar abbreviations and propagators remain opaque to FORM in version 1. The mapping is JSON data, not executable Wolfram Language source.*)
+(*FeynCalc \[LeftRightArrow] FORM conversion with optional ordinary Dirac algebra. Runtime definitions load separately. Scalar abbreviations and propagators remain opaque to FORM in version 1. The mapping is JSON data, not executable Wolfram Language source.*)
 
 
 (* ::Section:: *)
@@ -21,11 +21,15 @@ BeginPackage["CalcFormConverter`", {"FeynCalc`"}];
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormExport::usage ="CalcFormExport[expr, file, opts] exports an exact bosonic FeynCalc expression to a complete FORM program and a reversible JSON mapping. Returns an association with InputFile, MappingFile and ResultFile. Options: Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False. No FORM process or integral reduction is performed.";
+CalcFormConverter`CalcFormExport::usage ="CalcFormExport[expr, file, opts] exports an exact supported FeynCalc expression, including ordinary Dirac words, SU(N) colour structures and traces and rank-four single-space Lorentz Eps tensors, to a complete FORM program and a reversible JSON mapping. Returns an association with InputFile, MappingFile and ResultFile. Options: Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. The generated program simplifies ordinary open chains and evaluates explicit DiracTrace expressions; DiracAlgebra -> False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour expressions; False preserves them and unevaluated SUNTrace. No FORM process or integral reduction is performed.";
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormImport::usage = "CalcFormImport[resultFile, mappingFile] reads the dedicated result of an exported FORM program and reconstructs FeynCalc internal notation. It does not execute Wolfram Language source or run tensor/integral reduction.";
+CalcFormConverter`ColourAlgebra::usage = "ColourAlgebra selects SU(N) reduction (True or Automatic) or preservation (False).";
+
+CalcFormConverter`DiracAlgebra::usage = "DiracAlgebra selects ordinary open-chain simplification and explicit trace evaluation in FORM (Automatic), or translation only (False).";
+
+CalcFormConverter`CalcFormImport::usage = "CalcFormImport[resultFile, mappingFile] reads the dedicated result of an exported FORM program and reconstructs FeynCalc internal notation. It does not execute Wolfram Language source or run tensor/integral reduction. Epsilon results require the exported $LeviCivitaSign setting. Versions one through five are supported. Version-four results distinguish processed open chains from preserved explicit traces; import performs scalar Casimir presentation for processed colour jobs but no Dirac or colour tensor reduction.";
 
 
 (* ::Input::Initialization:: *)
@@ -37,7 +41,7 @@ CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[opts] explicitly att
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. For a binary equality lhs == rhs, it calculates lhs - rhs and compares the imported residual with zero; the result may remain symbolic. True and False are returned directly. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress and FORMThreads. Failed jobs are retained.";
+CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. For a binary equality lhs == rhs, it calculates lhs - rhs and compares the imported residual with zero; the result may remain symbolic. True and False are returned directly. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress, FORMThreads, DiracAlgebra and ColourAlgebra. Failed jobs are retained. DiracAlgebra -> Automatic simplifies ordinary open chains and evaluates explicit DiracTrace expressions; False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour structures; False preserves colour objects and unevaluated SUNTrace.";
 
 
 (* ::Input::Initialization:: *)
@@ -100,7 +104,10 @@ $formatVersion = 1;
 (*resultMarker[] builds the result-header marker, currently "CFC1". The template also includes it when writing the result. The JSON mapping stores Format and Version separately. SetDelayed (:=) reads $formatVersion when the helper is called.*)
 
 (* ::Input::Initialization:: *)
-resultMarker[] := "CFC" <> IntegerString[$formatVersion];
+resultMarker[version_ : $formatVersion] := "CFC" <> IntegerString[version];
+
+(* Bound only during import; legacy jobs cannot introduce epsilon calls. *)
+$epsilonImportFactor = None;
 
 
 (* ::Text:: *)
@@ -139,7 +146,8 @@ Options[CalcFormConverter`CalcFormExport] = {
     (*FeynCalc owns these two option symbols. Qualifying them preserves their historical identity while making it independent of context.*)
     FeynCalc`Dimension -> Automatic,
     FeynCalc`LoopMomenta -> {},
-    System`OverwriteTarget -> False
+    System`OverwriteTarget -> False,
+    CalcFormConverter`DiracAlgebra -> Automatic, CalcFormConverter`ColourAlgebra -> True
 };
 
 
@@ -553,6 +561,7 @@ scalarQ[x_] := Which[
 	MatchQ[{Re[x], Im[x]}, {(_Integer | _Rational), (_Integer | _Rational)}],
 	(*Accept scalar symbols except indeterminate or infinite quantities. Pi and E remain mapped symbols. The imaginary unit I has head Complex and is handled by the exact-complex branch above.*)
 	Head[x] === Symbol, ! MemberQ[{Indeterminate, Infinity, ComplexInfinity}, x],
+    Head[x] === SMP, namedCouplingQ[x],
 	(*Accept scalar products of supported linear momenta. Direct scalar products are emitted as native FORM vector dots; scalar products inside an opaque abbreviation remain in that abbreviation's mapping definition.*)
 	MatchQ[x, Pair[_Momentum, _Momentum]], AllTrue[List @@ x, linearMomentumQ],
 	(*Compound exact expressions: a Plus (sum of scalars) or Times (product of scalars, including the coefficient times scalar case) is scalar if ALL of its arguments are scalars. This is the recursion that walks sums and products to their leaves, and it is also what lets e.g. Times[2, Pair[...]] be handled.*)
@@ -602,6 +611,7 @@ consistentMappedDimensionQ[x_, dim_] := AllTrue[
 (* ::Input::Initialization:: *)
 stageIndexSignatures[stages_List] := Module[{counts, signatures},
 	(*Leaf case: a Lorentz contraction. Counts all LorentzIndex objects at any depth, then KeySort gives a canonical key order so signatures from different stages are directly comparable with SameQ. The definition memoizes via counts[p] = ... so the same subexpression is only analysed once.*)
+	counts[p_Eps] := counts[p] = KeySort[Counts[Cases[p, _LorentzIndex, Infinity]]];
 	counts[p_Pair] := 
 		counts[p] = KeySort[Counts[Cases[p, _LorentzIndex, Infinity]]];
 		(*Sum: every term must have the SAME index signature, otherwise the sum is index-ambiguous and the whole planner is abandoned ($Failed). If they all agree, the signature of any one term is the signature of the sum.*)
@@ -670,8 +680,8 @@ $stagePreparationMinimumLeaves = 1024;
 (*Normalize with FCI, validate the input, allocate mapping entries and serialize FORM expression pieces. Registry state and caches are local to this call. The helper performs no file I/O or FORM execution, but its result depends on package specifications and the receiving kernel's definitions.*)
 
 (* ::Input::Initialization:: *)
-buildExportData[expression_, requestedDimension_, loops_] := Module[
-	{expr, dim, entries = {}, registry = <||>, counters = <||>, 
+buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour_:False] := Block[{$caMode = If[colour === True, Automatic, colour], $caActive = False, $caImplicit = False, $caNamespace = "", $caEndpoints = {}, $daMode = algebra, $daTraceLines = {}, $daNextLine = 1}, Module[
+	{expr, originalDigest, hasDiracColour, hasDiracProcessing, hasColour, hasColourFormat, hasMatrixWords = False, dim, hasEpsilon, epsilonSign, epsilon, epsilonSlot, entries = {}, registry = <||>, counters = <||>,
 	macros = {},
 	register, scalar, vector, index, pair, denominator, emit, 
 	abbreviation, makeMacro,body, dimensionName, payload, factorExpressions, factorTexts, 
@@ -683,9 +693,24 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
 		throwFailure["InvalidLoopMomenta", 
 		"LoopMomenta must be a list of distinct momentum symbols."]];
 	(*FCI converts supported external shortcuts to FeynCalc internal notation before structural inspection. It is not a tensor contraction or integral-reduction step.*)
+    If[!MemberQ[{Automatic, False}, algebra], throwFailure["InvalidOption", "DiracAlgebra must be Automatic or False."]];
+	If[!MemberQ[{True, Automatic, False}, colour], throwFailure["InvalidOption", "ColourAlgebra must be True, Automatic or False."]];
 	expr = FCI[expression];
+    hasEpsilon = !FreeQ[expr, _Eps];
+    epsilonSign = $LeviCivitaSign;
+    If[hasEpsilon && !MemberQ[{-1, 1, -I, I}, epsilonSign],
+        throwFailure["UnsupportedEpsilonConvention", "Unsupported $LeviCivitaSign value."]];
 	(*Resolve/infer the dimension now, so it is fixed before names and entries are allocated.*)
 	dim = chooseDimension[expr, requestedDimension];
+    hasDiracColour = diracColourQ[expr];
+    hasColour = caVocabularyQ[expr];
+    $caActive = MemberQ[{True, Automatic}, colour] && hasColour;
+    hasColourFormat = $caActive || !FreeQ[expr, SUNTrace];
+    hasDiracProcessing = !FreeQ[expr, DiracTrace] || (algebra === Automatic && !FreeQ[expr, DiracGamma]);
+    originalDigest = Hash[expr, "SHA256", "HexString"];
+    If[hasDiracColour, expr = dcNormalize[expr];
+        hasMatrixWords = !FreeQ[expr, _dcDiracWord | _dcColourWord | _daTrace]];
+    If[$caActive, expr = caPrepare[expr, originalDigest]];
 	(*register[kind, value, extra]: THE allocator and the only place identifiers are minted and mapping entries appended. Returns the existing name if this exact (kind, value) was seen before, so identical objects map to one identifier.*)
 	register[kind_, value_, extra_ : <||>] := With[{key = HoldComplete[kind, value]},
 	(*HoldComplete preserves the structural key without evaluating its contents again; kind distinguishes the same value in different roles. Only insertion allocates locals and serializes the mapped expression.*)
@@ -755,6 +780,18 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
 		pair[p] = Module[{va = vector[a], vb = vector[b]},
 		"(" <> StringRiffle[Flatten[Table["(" <> emit[u[[1]] v[[1]]] <> "*" <> u[[2]] <> "." <> v[[2]] <> ")",{u, va}, {v, vb}]], "+"] <> ")"];
 	pair[_] := throwFailure["UnsupportedPair", "Only Lorentz metrics, momentum components and scalar products are supported."];
+    (* Expand only linear routing inside epsilon slots, preserving their order. *)
+    epsilonSlot[a_LorentzIndex] := {{1, index[a]}};
+    epsilonSlot[a_Momentum] := vector[a];
+    epsilonSlot[_] := throwFailure["UnsupportedEpsilon", "Epsilon slots must be Lorentz indices or momenta."];
+    (* FORM contracts the raw square positively; -I sign supplies FeynCalc's -sign^2. *)
+    epsilon[x_Eps] := epsilon[x] = Module[{terms},
+        If[Length[x] =!= 4, throwFailure["UnsupportedEpsilon", "Only rank-four Lorentz epsilon tensors are supported."]];
+        terms = Tuples[epsilonSlot /@ (List @@ x)];
+        If[terms === {}, Return["0"]];
+        "(" <> StringRiffle[("(" <> emit[-I epsilonSign Times @@ #[[All, 1]]] <>
+            "*e_(" <> StringRiffle[#[[All, 2]], ","] <> "))") & /@ terms, "+"] <> ")"
+    ];
 	(*denominator: one ordinary propagator denominator identifier.*)
 	denominator[pd : PropagatorDenominator[mom_, mass_ : 0]] := 
 		denominator[pd] = Module[{},
@@ -795,6 +832,7 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
 		Head[x] === Times, "(" <> StringRiffle[emit /@ (List @@ x), "*"] <> ")",
 		(*Lorentz contractions.*)
 		Head[x] === Pair, pair[x],
+        Head[x] === Eps, epsilon[x],
 		(*A product of propagator denominators.*)
 		Head[x] === FeynAmpDenominator, "(" <> StringRiffle[denominator /@ (List @@ x), "*"] <> ")",
 		(*Non-negative integer powers, plus negative powers of a plain symbol, stay as explicit powers of the emitted base.*)
@@ -807,11 +845,13 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
 		(*Anything else is a hard failure carrying the offending expression unevaluated.*)
 		True, throwFailure["UnsupportedExpression", "The expression contains an unsupported structure.", <|"Expression" -> HoldForm[x], "Head" -> Head[x]|>]
 	];
+    If[hasDiracColour, dcConfigureEmitter[emit, vector, index, register]];
+    If[hasColourFormat, caConfigureEmitter[emit, register]];
 	(*Dimension name and the requested loop vectors are registered BEFORE expression traversal, so their identifiers are fixed independently of anything emitted later. This is what makes identifier numbering stable across runs/plans.*)
 	dimensionName = If[IntegerQ[dim], intString[dim], scalar[dim]];
 	Scan[(register["Vector", #]) &, loops];
 	(*Stage a top-level product with at least two immediate Plus factors. First serialize all factors in their original traversal order below; only then choose the multiplication order. Other factor types may occur in the same product.*)
-	If[Head[expr] === Times && Count[List @@ expr, _Plus] >= 2,
+	If[!hasColourFormat && !hasEpsilon && !hasMatrixWords && Head[expr] === Times && Count[List @@ expr, _Plus] >= 2,
 		factorExpressions = List @@ expr;
 		factorTexts = emit /@ factorExpressions;
 		(*Find the positions of the top-level sums: each marks the end of a "stage" of the serialized product.*)
@@ -838,11 +878,16 @@ buildExportData[expression_, requestedDimension_, loops_] := Module[
         (*Not a product-of-sums: just emit the expression.*)
         body = emit[expr]];
         (*Record the format, version, fingerprint of the FCI-normalized input, dimension, loop-momentum metadata, processing label and ordered entries. ExpressionDigest helps distinguish different exports but is not independently checked against a saved input. TensorAlgebraOnly means algebra and Lorentz contractions, without integral reduction.*)
-        payload = <|"Format" -> $formatName, "Version" -> $formatVersion, "ExpressionDigest" -> Hash[expr, "SHA256", "HexString"],
-        "Dimension" -> encode[dim], "LoopMomenta" -> (encode /@ loops), "Processing" -> "TensorAlgebraOnly", "Entries" -> entries|>;
+        payload = <|"Format" -> $formatName, "Version" -> If[hasColourFormat, 5, If[hasDiracProcessing, 4, If[hasDiracColour, 3, If[hasEpsilon, 2, $formatVersion]]]], "ExpressionDigest" -> originalDigest,
+        "Dimension" -> encode[dim], "LoopMomenta" -> (encode /@ loops), "Processing" -> If[$caActive, If[hasDiracProcessing && algebra === Automatic, "LorentzDiracAndColourAlgebra", "LorentzAndColourAlgebra"], If[hasDiracProcessing && algebra === Automatic, "LorentzAndDiracAlgebra", "TensorAlgebraOnly"]], "Entries" -> entries|>;
+        If[hasEpsilon, AssociateTo[payload, "EpsilonConvention" -> <|
+            "Sign" -> encode[epsilonSign], "ExportFactor" -> encode[-I epsilonSign]|>]];
+        If[hasDiracColour, AssociateTo[payload, {"DiracSpinLine" -> 1, "EpsilonPresent" -> hasEpsilon}]];
+        If[hasDiracProcessing || hasColourFormat, AssociateTo[payload, daMetadata[algebra, entries]]];
+        If[hasColourFormat, AssociateTo[payload, caMetadata[entries]]];
         (*Single return value consumed by rendering and file writing: the dimension's FORM name, the body expression text, the remaining multiplication stages, the #define macros, the hoisted stage preparations, and the mapping payload.*)
         <|"DimensionName" -> dimensionName, "Body" -> body, "Multiplications" -> multiplications,"Factors" -> macros, "Preparations" -> preparations, "Mapping" -> payload|>
-   ];
+   ]];
 
 
 (* ::Subsection:: *)
@@ -886,13 +931,13 @@ renderExport[data_Association, result_String, template_String] :=
      digest = Hash[json, "SHA256", "HexString"];
      (*Fill the template. StringReplace with a list of -> rules is a single simultaneous pass, so placeholder text introduced by one replacement cannot be re-scanned and substituted by another -- important, since replacement values (expressions, paths) could in principle contain "@" sequences.*)
      program = StringReplace[template, {
-          (*Format version, taken from the header's $formatVersion.*)
-          "@FORMATVERSION@" -> IntegerString[$formatVersion], 
+          (*Use the version selected for this expression: epsilon jobs use version two.*)
+          "@FORMATVERSION@" -> IntegerString[data["Mapping"]["Version"]],
           (*The "CFC<n>" artifact marker from the header.*)
-      "@RESULTMARKER@" -> resultMarker[],
+      "@RESULTMARKER@" -> resultMarker[data["Mapping"]["Version"]],
           (*Declare the FORM functions for the masters (A0..D0). The names come from $masterSpecByFORMName, i.e. the "FORMName" fields of the spec table -- again, no name is hard-coded here.*)
           "@FUNCTIONS@" -> 
-       "CFunctions " <> StringRiffle[Keys[$masterSpecByFORMName], ","] <> ";",
+       "CFunctions " <> StringRiffle[Keys[$masterSpecByFORMName], ","] <> ";" <> daDeclarations[data] <> caDeclarations[data],
           (*Declarations grouped by class, driven by $kindSpecs. Note "Symbols" covers Scalars, Abbreviations and Denominators -- they share a FORM class by design.*)
           "@SCALARS@" -> declaration["Symbols"], 
       "@DIMENSION@" -> data["DimensionName"],
@@ -915,7 +960,7 @@ renderExport[data_Association, result_String, template_String] :=
           (*Remaining multiplication stages: each is ".sort" then "Multiply <stage>;", i.e. the planned order becomes the order of FORM operations.*)
           "@MULTIPLICATIONS@" -> 
        StringJoin[(".sort\nMultiply " <> # <> ";\n") & /@ 
-         data["Multiplications"]],
+         data["Multiplications"]] <> caProcessing[data] <> If[KeyExistsQ[data["Mapping"], "EpsilonConvention"], "contract 0;\n", ""] <> daProcessing[data],
           (*The result path. Windows backslashes are normalized because FORM expects forward slashes there; Unix paths are preserved literally, including backslashes. Quoting is the template's job.*)
           "@RESULT@" -> If[$OperatingSystem === "Windows", 
              StringReplace[result, "\\" -> "/"], result], 
@@ -1192,7 +1237,7 @@ CalcFormConverter`CalcFormExport[expression_, file_String,
         (*Step 2: build the export data. Note the ORDER: the whole expression is converted/validated BEFORE any file is touched, so an unsupported expression aborts with the filesystem still untouched. Also note that only here are Dimension and LoopMomenta read -- after the cheap path validation.*)
         data = 
      buildExportData[expression, OptionValue[FeynCalc`Dimension], 
-      OptionValue[FeynCalc`LoopMomenta]];
+      OptionValue[FeynCalc`LoopMomenta], OptionValue[CalcFormConverter`DiracAlgebra], OptionValue[CalcFormConverter`ColourAlgebra]];
         (*Step 3: render the FORM program. readProgramTemplate[] does the one piece of file I/O this stage needs (reading the template); the result path comes from paths, so the .out filename is fixed before the program text is generated.*)
         rendered = 
      renderExport[data, paths["ResultFile"], readProgramTemplate[]];
@@ -1219,7 +1264,7 @@ CalcFormConverter`CalcFormExport[___] :=
 
 
 (* ::Text:: *)
-(*Section 5: FORM result parsing and FeynCalc reconstruction. A recursive-descent parser reads FORM's output text back into Wolfram expressions. It recognizes arithmetic, FORM's native tensor syntax (d_(i,j) metrics and p_(i) components), and the four reserved master-integral functions -- nothing else. Key design choice stated in the header: vector and index tokens keep DISTINCT types until they are converted into Pair objects, so a misplaced index is caught before arithmetic can hide it.*)
+(*Section 5: FORM result parsing and FeynCalc reconstruction. A recursive-descent parser reads FORM's output text back into Wolfram expressions. It recognizes arithmetic, FORM's native tensor syntax (d_(i,j) metrics and p_(i) components), the reserved master-integral functions, epsilon tensors and version-three gamma words. Key design choice stated in the header: vector and index tokens keep DISTINCT types until they are converted into Pair objects, so a misplaced index is caught before arithmetic can hide it.*)
 
 (* ::Input::Initialization:: *)
 parseGeneralResult[text_String, values_Association, dim_] := Module[
@@ -1271,7 +1316,7 @@ s*,\\s*cfi[0-9]+\\s*\\))";
     If[take[] =!= t, 
      throwFailure["InvalidResult", "Unexpected token in FORM result."]];
      (*Type gate for every scalar-arithmetic position. A raw vectorToken/indexToken must never reach Times/Plus, because arithmetic (or a zero factor, or cancellation) could hide an invalid use. The check is FreeQ over the whole subtree, so it also catches tokens nested inside derived structures.*)
-     scalarValue[x_] := If[! FreeQ[x, _vectorToken | _indexToken],
+     scalarValue[x_] := If[! FreeQ[x, _vectorToken | _indexToken | _caAToken | _caFToken],
          
      throwFailure["InvalidResult", 
       "A vector or index occurs outside a tensor object."], x];
@@ -1282,6 +1327,12 @@ s*,\\s*cfi[0-9]+\\s*\\))";
       "Unknown identifier in FORM result.", <|"Identifier" -> n|>]];
      (*call[n, args]: resolve a function application. The Which is an exact whitelist of accepted (name, argument-type) shapes: d_ with two index tokens -> metric Pair a DECLARED VECTOR name with one index token -> momentum component, i.e. Pair[Momentum[v, dim], LorentzIndex[i, dim]] a master FORM name whose arguments pass -> the master masterArgumentsQ (arity + scalar-ness) head applied Anything else is an unsupported function or a type error.*)
      call[n_, args_] := Which[
+     MemberQ[{"cfcCT", "cfcCTr", "cfcCF", "cfcCD"}, n] || (n === "d_" && !FreeQ[args, _caAToken | _caFToken]), caCall[n, args],
+     MemberQ[{"g_", "gi_"}, n], dcGammaCall[n, args, dim],
+     n === "e_" && $epsilonImportFactor =!= None && Length[args] === 4 &&
+       AllTrue[args, MatchQ[#, _indexToken | _vectorToken] &],
+       (Eps @@ (args /. {indexToken[x_] :> LorentzIndex[x, dim],
+           vectorToken[x_] :> Momentum[x, dim]}))/$epsilonImportFactor,
          
      n === "d_" && Length[args] == 2 && 
       MatchQ[args, {_indexToken, _indexToken}],
@@ -1368,7 +1419,8 @@ expression."]
                If[v === 0 && sign FromDigits[n] <= 0,
                   throwFailure["InvalidResult", "Undefined power of zero."]
                 ];
-               v = scalarValue[v]^(sign FromDigits[n])
+               v = If[$diracImportLine === None, scalarValue[v]^(sign FromDigits[n]),
+                   dcResultPower[scalarValue[v], sign FromDigits[n]]]
              ]
           ];
          v
@@ -1392,10 +1444,10 @@ expression."]
                        r = scalarValue[unary[]];
            If[op === "/" && r === 0, 
             throwFailure["InvalidResult", "Division by zero."]];
-                       Sow[If[op === "*", r, 1/r]]
+                       Sow[If[op === "*", r, If[$diracImportLine === None, 1/r, dcResultPower[r, -1]]]]
                      ]
                   ][[2, 1]];
-               Times @@ factors
+               If[$diracImportLine === None, Times @@ factors, dcResultProduct[factors]]
              ]
           ]
        ];
@@ -1580,6 +1632,9 @@ decodeEntries[entries_List, dim_:Automatic] := Association[
               entry["Name"] -> Switch[entry["Kind"],
                   "Vector", vectorToken[value],
                   "Index", indexToken[value],
+                  "ColourWord", colourWordToken[value[[1]]],
+                  "ColourAdjointIndex", caAToken[value],
+                  "ColourFundamentalIndex", caFToken[value],
                   _, value
                 ]
             ]
@@ -1615,10 +1670,10 @@ CalcFormConverter`CalcFormImport[resultFile_String,
       Quiet[Check[
         ImportByteArray[ByteArray[ToCharacterCode[json, "UTF-8"]], 
          "RawJSON"], $Failed]]];
-        (*Identity gate: it must be an association, must declare this format name and this exact format version. Note =!= is used so a version stored as a string or a real is not accepted by accident; and Lookup with a None default handles a missing key without a message.*)
+        (*Identity gate: it must be an association, must declare this format name and a supported integer format version; and Lookup with a None default handles a missing key without a message.*)
         If[! AssociationQ[mapping] || 
       Lookup[mapping, "Format", None] =!= $formatName ||
-             Lookup[mapping, "Version", None] =!= $formatVersion,
+             !MemberQ[{1, 2, 3, 4, 5}, Lookup[mapping, "Version", None]],
            throwFailure["InvalidMapping", "Unsupported mapping format or version."]];
         (*Split the result into lines for the marker check. CRLF is normalized first, since the exporter may have written the file on any platform.*)
         lines = StringSplit[StringReplace[text, "\r\n" -> "\n"], "\n"];
@@ -1627,7 +1682,7 @@ CalcFormConverter`CalcFormImport[resultFile_String,
             {json, FromCharacterCode[ToCharacterCode[json, "UTF-8"]]};
         If[
      Length[lines] < 2 || ! 
-       MemberQ[(resultMarker[] <> " " <> # &) /@ digest, First[lines]],
+       MemberQ[(resultMarker[mapping["Version"]] <> " " <> # &) /@ digest, First[lines]],
            throwFailure["MappingMismatch", 
       "The result does not correspond to this mapping file."]];
         (*Structural validation of the entries list BEFORE any value is decoded.*)
@@ -1635,6 +1690,11 @@ CalcFormConverter`CalcFormImport[resultFile_String,
         If[! ListQ[entries] || ! AllTrue[entries, AssociationQ], 
      throwFailure["InvalidMapping", "Invalid mapping entries."]];
         (*Identifier validation: every entry must have a name that obeys validEntryNameQ (kind prefix + digits), names must be unique, and every entry must carry an "Expression" key to decode. Note Lookup threads over the list of associations with a {} default, so a missing "Name" surfaces as Missing here rather than as a message.*)
+        If[mapping["Version"] < 3 && AnyTrue[entries,
+            MemberQ[{"ColourTensor", "ColourWord", "NamedCoupling"}, Lookup[#, "Kind", None]] &],
+            throwFailure["InvalidMapping", "Dirac/colour entries require version three."]];
+        If[mapping["Version"] < 5 && AnyTrue[entries, MemberQ[$caKinds, Lookup[#, "Kind", None]] &],
+            throwFailure["InvalidMapping", "New colour entries require version five."]];
         names = Lookup[entries, "Name", {}];
         If[! DuplicateFreeQ[names] || ! AllTrue[entries,
                validEntryNameQ[#] &&
@@ -1648,7 +1708,36 @@ CalcFormConverter`CalcFormImport[resultFile_String,
         (*Only now decode every mapped value: name -> value, with vectors and indices wrapped in their typed tokens.*)
         values = decodeEntries[entries, dim];
         (*Hand the result text (everything after the marker line) to the parser together with the symbol table and dimension.*)
-        parseResult[StringRiffle[Rest[lines], "\n"], values, dim]
+        Block[{$caImport = <||>, $epsilonImportFactor = None, $diracImportLine = None, $daImportLines = <||>, $daImportMode = False},
+            If[mapping["Version"] >= 3,
+                If[!MemberQ[{True, False}, Lookup[mapping, "EpsilonPresent", None]] ||
+                    Lookup[mapping, "EpsilonPresent", None] =!= KeyExistsQ[mapping, "EpsilonConvention"],
+                    throwFailure["InvalidMapping", "Invalid version-three epsilon metadata."]];
+                If[Lookup[mapping, "DiracSpinLine", None] =!= 1,
+                    throwFailure["InvalidMapping", "Invalid reserved Dirac spin line."]];
+                $diracImportLine = 1
+            ];
+            If[mapping["Version"] === 2 || (mapping["Version"] >= 3 && KeyExistsQ[mapping, "EpsilonConvention"]),
+                With[{convention = Lookup[mapping, "EpsilonConvention", <||>]},
+                    If[!AssociationQ[convention], throwFailure["InvalidMapping", "Invalid epsilon convention."]];
+                    With[{sign = decode[Lookup[convention, "Sign", None]],
+                          factor = decode[Lookup[convention, "ExportFactor", None]]},
+                        If[!MemberQ[{-1, 1, -I, I}, sign] || factor =!= -I sign,
+                            throwFailure["InvalidMapping", "Invalid epsilon convention or translation factor."]];
+                        If[sign =!= $LeviCivitaSign,
+                            throwFailure["EpsilonConventionMismatch", "The current $LeviCivitaSign differs from the exported convention."]];
+                        $epsilonImportFactor = factor
+                    ]
+                ]
+            ];
+            If[mapping["Version"] >= 4, daValidateMetadata[mapping, entries]];
+            If[mapping["Version"] === 5, caValidateMetadata[mapping, entries]];
+            If[$diracImportLine === None,
+                parseResult[StringRiffle[Rest[lines], "\n"], values, dim],
+                With[{prepared = caPrepareResult[StringRiffle[Rest[lines], "\n"], values]},
+                    dcReconstruct[caReconstruct[parseGeneralResult[prepared[[1]], prepared[[2]], dim]]]]
+            ]
+        ]
       ], $failureTag];
 
 
@@ -1662,13 +1751,16 @@ CalcFormConverter`CalcFormImport[___] :=
 
 
 (* ::Section:: *)
-(*Load runtime definitions without executing processes*)
+(*Load companion definitions without executing processes*)
 
 
 (* ::Text:: *)
-(*Load the companion runtime definitions from the same directory as this package. $moduleDirectory was computed in the header with DirectoryName[$InputFileName], so this resolves relative to the FILE rather than to Directory[] (the current working directory) -- which is what makes the package relocatable and independent of how the caller's session happens to be positioned.*)
+(*Load the private Dirac/colour and runtime definitions from the same directory as this package. $moduleDirectory was computed in the header with DirectoryName[$InputFileName], so this resolves relative to the FILE rather than to Directory[] (the current working directory) -- which is what makes the package relocatable and independent of how the caller's session happens to be positioned.*)
 
 (* ::Input::Initialization:: *)
+Get[FileNameJoin[{$moduleDirectory, "DiracColour.wl"}]];
+Get[FileNameJoin[{$moduleDirectory, "DiracAlgebra.wl"}]];
+Get[FileNameJoin[{$moduleDirectory, "ColourAlgebra.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "FORMRuntime.wl"}]];
 
 

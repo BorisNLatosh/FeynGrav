@@ -28,13 +28,13 @@ The scalar ranges overlap; its 2.16% median difference is not claimed as an impr
 
 RSS was sampled every 50 ms and may miss brief peaks. The table takes the largest RSS sample during the three measured import phases, including memory retained from earlier calls. Kernel retention is measured after clearing the result, relative to before the first import; it includes persistent library/parser state and untimed validation effects, not an isolated allocation attribution. Raw per-call counters are retained in JSON.
 
-Validation is separate: partial-bubble validation-phase RSS reached about 4.62 GiB for the baseline and 2.90 GiB for the candidate. Hashing, leaf counting and WXF serialization are outside import timers. Separate exact comparison has its own process record. These measurements do not establish the cause of the previous Full-suite OOM.
+Validation is separate: partial-bubble validation-phase RSS reached about 4.62 GiB for the baseline and 2.90 GiB for the candidate. Hashing, leaf counting and WXF serialisation are outside import timers. Separate exact comparison has its own process record. These measurements do not establish the cause of the previous Full-suite OOM.
 
 ## Method and provenance
 
 - Wolfram 15.0.1 for Linux x86 (64-bit), FeynCalc 10.2.1. No FORM calculations were rerun. Baseline and candidate source snapshots were immutable during measurements; source and fixture SHA-256 hashes are in the JSON report.
 - One fresh kernel per implementation per fixture. Each performed one separately recorded first import, one warmup, then three measured imports. Execution order was baseline/candidate for the subset, candidate/baseline for the partial bubble, baseline/candidate for the scalar control. These are three within-kernel samples, not three independent kernel-pair replicates.
-- Public `CalcFormImport` alone was timed with `AbsoluteTiming`; `MaxMemoryUsed` wrapped the timing expression. `$HistoryLength=0`. Hashing, `LeafCount`, output serialization and comparisons were outside timers; results were cleared between calls. The same result/mapping bytes were used by both versions.
+- Public `CalcFormImport` alone was timed with `AbsoluteTiming`; `MaxMemoryUsed` wrapped the timing expression. `$HistoryLength=0`. Hashing, `LeafCount`, output serialisation and comparisons were outside timers; results were cleared between calls. The same result/mapping bytes were used by both versions.
 - Exact `SameQ` was checked in a separate kernel on trusted WXF results emitted by the two implementations. Every repeated import also had the same SHA-256 expression fingerprint. The 10 MB result had 9,930,773 leaves.
 - The small fixture takes complete initial terms from the retained output, cutting at the first top-level additive boundary after 250,000 body characters. The scalar control repeats `2*cfs2^2/3*cfa1` 20,000 times, using the same mapping. Fixture creation preceded timing.
 - Enforced limits: 300 seconds per phase, 6 GiB kernel-process RSS, at least 2 GiB system available memory. Monitoring covered preparation, import and validation; no limit was hit and all processes exited zero. No simultaneous benchmark kernels ran.

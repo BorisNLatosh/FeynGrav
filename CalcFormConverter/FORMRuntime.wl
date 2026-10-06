@@ -14,7 +14,7 @@
 Options[CalcFormConverter`CalcFormCheck] = {CalcFormConverter`FORMExecutable -> Automatic, CalcFormConverter`FORMThreads -> Automatic, System`TimeConstraint -> 10};
 Options[CalcFormConverter`CalcFormInstall] = {CalcFormConverter`FORMThreads -> Automatic};
 Options[CalcFormConverter`CalcFormCalculate] = {
- FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}, CalcFormConverter`FORMExecutable -> Automatic,
+ CalcFormConverter`ColourAlgebra -> True, CalcFormConverter`DiracAlgebra -> Automatic, FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}, CalcFormConverter`FORMExecutable -> Automatic,
  System`TimeConstraint -> Infinity, CalcFormConverter`WorkingDirectory -> Automatic, CalcFormConverter`KeepFiles -> False,
  CalcFormConverter`ShowTiming -> False, CalcFormConverter`ShowProgress -> False, CalcFormConverter`FORMThreads -> Automatic
 };
@@ -247,7 +247,9 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
    Catch[
      announce["Export"];
      job = CalcFormConverter`CalcFormExport[input, FileNameJoin[{directory, "job.frm"}],
-       FeynCalc`Dimension -> OptionValue[FeynCalc`Dimension], FeynCalc`LoopMomenta -> OptionValue[FeynCalc`LoopMomenta]];
+       FeynCalc`Dimension -> OptionValue[FeynCalc`Dimension], FeynCalc`LoopMomenta -> OptionValue[FeynCalc`LoopMomenta],
+       CalcFormConverter`DiracAlgebra -> OptionValue[CalcFormConverter`DiracAlgebra],
+       CalcFormConverter`ColourAlgebra -> OptionValue[CalcFormConverter`ColourAlgebra]];
      If[FailureQ[job], Throw[retainedFailure["ExportFailed", "FORM export failed; job files were retained.", <|"Cause" -> job|>], $failureTag]];
      announce["Execute"];
      run = runtimeProcess[formCommand[check["Executable"], job["InputFile"], threads], directory, limit, True, progress];

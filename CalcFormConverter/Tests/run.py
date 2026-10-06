@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Converter and runtime tests. Installation is always mocked."""
+import hashlib
 import argparse
 import os
 from pathlib import Path
@@ -42,8 +43,13 @@ def main():
                 run_kernel('Installer')
                 continue
             if suite == 'runtime':
+                check_colour_reference(here, work, form)
                 prepare_runtime(work, form)
                 run_kernel('Runtime')
+                run_kernel('Epsilon')
+                run_kernel('DiracColour')
+                run_kernel('DiracAlgebra')
+                run_kernel('ColourAlgebra')
                 continue
             run_kernel('Export' if suite == 'form' else 'GravityExport')
             if suite == 'form':
@@ -56,9 +62,31 @@ def main():
             run_kernel('Import')
             if suite == 'integration':
                 run_kernel('Loading')
+                run_kernel('DiracColourRules')
+                run_kernel('ColourRules')
                 # The full bubble is exported only after smaller jobs have run.
                 run_kernel('BubbleExport')
     print('All selected converter tests passed.')
+
+
+def check_colour_reference(here, work, form):
+    """Check the pinned unchanged procedure without downloads or installation."""
+    reference = here.parent / 'ThirdParty' / 'FORMColour' / 'SUn.prc'
+    assert hashlib.sha256(reference.read_bytes()).hexdigest() == (
+        '05548386b1e5a2872224a78bad6a424fb13f812ee6ab35d89d1c77a32f7034c3')
+    engines = [(form, [])]
+    tform = shutil.which('tform')
+    if tform:
+        engines.append((tform, ['-w2']))
+    for executable, args in engines:
+        subprocess.run([executable, *args, '-q', '-D',
+                        'CFCSUNFILE=' + str(reference),
+                        str(here / 'ColourPreflight' / 'ColourProcedure.frm')],
+                       cwd=work, check=True, timeout=60)
+        actual = (work / 'ColourProcedure.out').read_bytes()
+        expected = (here / 'ColourPreflight' / 'Expected.out').read_bytes()
+        if actual != expected:
+            raise SystemExit('Unchanged colour procedure output differs from the fixture.')
 
 
 def prepare_runtime(work, form):

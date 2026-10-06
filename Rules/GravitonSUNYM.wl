@@ -198,7 +198,7 @@ GravitonQuarkGluonVertexUncontracted[indexArray1_, indexArray2_] :=
         GravitonQuarkGluonVertexUncontracted[indexArray1, indexArray2],
         {{1, "Array", 2, 0, Infinity}, {2, "Array", 1, 2, 2}},
         (
-RuleValidation`RuleRequire[CETensor[{indexArray2[[1]],\[ScriptM]},indexArray1]] QuarkGluonVertex[\[ScriptM],indexArray2[[2]],Explicit->True] /.{DiracGamma[LorentzIndex[x_,D],D]->GA[x],SMP["g_s"]->gsCoupling}
+RuleValidation`RuleRequire[CETensor[{indexArray2[[1]],\[ScriptM]},indexArray1]] QuarkGluonVertex[\[ScriptM],indexArray2[[2]],Explicit->True]
         ), True
     ];
 

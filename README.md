@@ -1,11 +1,12 @@
 # FeynGrav
 
-FeynGrav is a Wolfram Mathematica package that implements gravitational Feynman rules in the FeynCalc framework. It provides propagators, interaction vertices, polarization tensors, and tools for working with the Nieuwenhuizen operators.
+FeynGrav is a Wolfram Mathematica package that implements gravitational Feynman rules in the FeynCalc framework. It provides propagators, interaction vertices, polarisation tensors, and tools for working with the Nieuwenhuizen operators.
 
-Supported models include general relativity, minimally coupled scalar, fermion and vector fields, SU(N) Yang–Mills theory, Horndeski interactions, axion-like couplings, and quadratic gravity. The package also includes a massive-gravity propagator and Cheung–Remmen variables for general relativity. The CalcFormConverter module sends supported bosonic tensor expressions to FORM for algebra and Lorentz contractions, then reconstructs the results in FeynCalc notation.
+Supported models include general relativity, minimally coupled scalar, fermion and vector fields, SU(N) Yang–Mills theory, Horndeski interactions, axion-like couplings, and quadratic gravity. The package also includes a massive-gravity propagator and Cheung–Remmen variables for general relativity. The CalcFormConverter module sends supported Lorentz tensors, rank-four epsilon tensors, ordinary Dirac chains and traces, and fundamental SU(N) colour expressions to FORM, then reconstructs the results in FeynCalc notation.
 
 ## Contents
 
+- [Documentation index](Documentation/README.md) and [function reference](Documentation/Reference.md)
 - [Requirements](#requirements)
 - [Installation and help](#installation-and-help)
 - [Interaction libraries](#interaction-libraries)
@@ -15,13 +16,13 @@ Supported models include general relativity, minimally coupled scalar, fermion a
 - [Package structure](#package-structure)
 - [Troubleshooting and support](#troubleshooting-and-support)
 - [Version history](#version-history)
-- [Citations and license](#citations-and-license)
+- [Citations and licence](#citations-and-licence)
 
 ## Requirements
 
-- **FeynCalc 10.2.1 or newer.** Version 10.2.1 moved legacy functions, including the native `Calc`, out of the core package. FeynGrav supplies its own implementation in [Rules/Calc.wl](Rules/Calc.wl); FeynCalcLegacy is not required. See the [FeynCalc 10.2.1 release](https://github.com/FeynCalc/feyncalc/releases/tag/Release-10_2_1) and [installation instructions](https://feyncalc.github.io/).
+- **FeynCalc 10.2.1 or newer.** Version 10.2.1 moved legacy functions, including the native `Calc`, out of the core package. FeynGrav does not require `Calc` or FeynCalcLegacy. See the [FeynCalc 10.2.1 release](https://github.com/FeynCalc/feyncalc/releases/tag/Release-10_2_1) and [installation instructions](https://feyncalc.github.io/).
 - **Wolfram Mathematica / Wolfram Language 12.2 or newer.** The current branch uses language features introduced in 12.2, including [WithCleanup](https://reference.wolfram.com/language/ref/WithCleanup.html). Use a Wolfram version also supported by your chosen FeynCalc release. Development verification was performed with Wolfram 15.0.1 and FeynCalc 10.2.1; the full range of older Wolfram versions has not been tested.
-- **FORM is optional for ordinary FeynGrav use.** Loading the package and exporting or importing FORM files do not require a FORM installation. Executing those files requires FORM; parallel execution with `FORMThreads > 1` requires TFORM. The converter has been tested with FORM/TFORM 4.3. The separate library generator requires FORM 4.2 or newer. Obtain executables from the [FORM project](https://github.com/form-dev/form) or your distribution's packages.
+- **FORM is optional for ordinary FeynGrav use.** Loading the package and exporting or importing FORM files do not require a FORM installation. Executing those files requires FORM; parallel execution with `FORMThreads > 1` requires TFORM. The converter has been tested with FORM/TFORM 4.3. The library generator uses the same converter runtime; compatibility with earlier FORM versions has not been established by the current verification. Obtain executables from the [FORM project](https://github.com/form-dev/form) or your distribution's packages.
 
 ## Installation and help
 
@@ -39,13 +40,14 @@ Use `FeynGravCommands[]` to list available commands. Mathematica's `?FunctionNam
 
 ## Interaction libraries
 
-At initialization, FeynGrav calls `importGravitons[2]`, `importScalars[2]`, `importFermions[2]`, and `importVectors[2]`. Additional sectors and higher orders must be loaded explicitly.
+At initialisation, FeynGrav calls `importGravitons[2]`, `importScalars[2]`, `importFermions[2]`, and `importVectors[2]`. Additional sectors and higher orders must be loaded explicitly.
 
 | Commands | Meaning of the requested order `n` |
 | --- | --- |
 | `importGravitons[n]`, `importQuadraticGravity[n]` | Load vertex libraries through order `n`; order `n` supplies a vertex with `n + 2` graviton legs. |
 | `importScalars[n]`, `importFermions[n]`, `importVectors[n]` | Load matter vertices with up to `n` graviton legs. |
 | `importSUNYM[n]`, `importAxionVectorVertex[n]` | Load the corresponding matter interactions with up to `n` graviton legs. |
+| `importScalarGaussBonnet[n]` | Load vertices with 2 through `n` graviton legs; the flat-background interaction begins at two. |
 | `importHorndeskiG2[]` through `importHorndeskiG5[]` | Load all available libraries for the selected Horndeski sector. |
 
 The order-limited import commands load up to the available order when the requested maximum is higher than the installed libraries. They read local files; they do not download missing libraries. Use their `printOutput -> True` option to report available and imported orders. Consult each command's usage message for its interface.
@@ -56,7 +58,7 @@ The [library generator](Libs/FeynGravLibrariesGenerator.wl) is a separate develo
 
 ## CalcFormConverter
 
-CalcFormConverter loads automatically with FeynGrav and can also be loaded independently. It supports exact bosonic tensor algebra, supported polarization vectors, ordinary quadratic propagators, and scalar `A0` through `D0` functions.
+CalcFormConverter loads automatically with FeynGrav and can also be loaded independently. It supports exact Lorentz tensors and polarisation vectors, rank-four single-space epsilon tensors, ordinary Dirac chains and traces, fundamental SU(N) colour tensors and traces, ordinary quadratic propagators, and scalar `A0` through `D0` notation. Supported Dirac and colour processing are enabled by default. External spinors, gamma-five, mixed Lorentz spaces and general Lie groups remain outside this interface.
 
 | Command | Purpose |
 | --- | --- |
@@ -68,7 +70,7 @@ CalcFormConverter loads automatically with FeynGrav and can also be loaded indep
 
 `FORMThreads -> Automatic` is the default for checking, installation, and calculation: it prefers up to eight TFORM workers, capped by the processor count, and falls back to serial FORM when TFORM is missing. Explicit worker counts do not fall back; an explicit executable with automatic threads uses one worker. `ShowTiming` reports FORM execution wall time; `ShowProgress` reports stages and elapsed execution time. Use `AbsoluteTiming` when measuring the entire Mathematica call. More workers do not guarantee a faster calculation.
 
-The converter performs algebra and Lorentz contractions. It does **not** perform loop integration or integral reduction, or supply symmetry factors, integration measures, or normalization conventions. Supporting scalar integral notation does not mean that it evaluates those integrals. Checking and calculating never install software implicitly.
+The converter performs algebra and Lorentz contractions. It does **not** perform loop integration or integral reduction, or supply symmetry factors, integration measures, or normalisation conventions. Supporting scalar integral notation does not mean that it evaluates those integrals. Checking and calculating never install software implicitly.
 
 See the [user guide](CalcFormConverter/README.md) for workflows, supported expressions, options, installation details, and performance guidance; the [format specification](CalcFormConverter/FORMAT.md) for saved-file compatibility; and the [developer guide](CalcFormConverter/DEVELOPER.md) for architecture, tests, and measurements.
 
@@ -79,7 +81,7 @@ The [Examples directory](Examples) contains complete notebooks. Run their setup 
 | Notebook | Topic |
 | --- | --- |
 | [Scalars_Gravitational_Scattering_Tree_Level.nb](Examples/Scalars_Gravitational_Scattering_Tree_Level.nb) | Tree-level scalar scattering through gravity. |
-| [Graviton_Scattering_Tree_Level.nb](Examples/Graviton_Scattering_Tree_Level.nb) | Tree-level graviton scattering and polarization contractions; FORM calculation cells require FORM/TFORM. |
+| [Graviton_Scattering_Tree_Level.nb](Examples/Graviton_Scattering_Tree_Level.nb) | Tree-level graviton scattering and polarisation contractions; FORM calculation cells require FORM/TFORM. |
 | [Nieuwenhuizen_Operators.nb](Examples/Nieuwenhuizen_Operators.nb) | Algebra of the Nieuwenhuizen operators. |
 | [Graviton_Self_Energy.nb](Examples/Graviton_Self_Energy.nb) | Graviton contributions to the graviton self-energy. |
 | [Graviton_Self_Energy_Matter_Contribution.nb](Examples/Graviton_Self_Energy_Matter_Contribution.nb) | Matter contributions to the graviton self-energy; setup includes `importSUNYM[]`. |
@@ -97,9 +99,11 @@ The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, i
 | Location | Contents |
 | --- | --- |
 | [FeynGrav.wl](FeynGrav.wl) | Main package, public commands, and library loading. |
-| [Rules](Rules) | Interaction rules and algebra utilities, including the local `Calc` implementation. |
-| [Libs](Libs) | Precomputed vertex libraries and the separate library generator. |
+| [Rules](Rules) | Interaction-rule construction, structural validation and projector utilities. |
+| [Libs](Libs) | Precomputed vertex libraries and the [library generator](Libs/Generator.md), which uses CalcFormConverter. |
 | [Examples](Examples) | Calculation notebooks. |
+| [Documentation](Documentation/README.md) | Main-package reference, documentation routes and verification records. |
+| [Benchmark](Benchmark/README.md) | Reproducible converter measurements. |
 | [CalcFormConverter](CalcFormConverter) | Converter, FORM runtime, templates, documentation, examples, and tests. |
 
 ## Troubleshooting and support
@@ -114,13 +118,14 @@ Report problems through [GitHub issues](https://github.com/BorisNLatosh/FeynGrav
 
 ## Version history
 
-### Unreleased — FORM-converter branch
+### Unreleased — current development
 
-- Added CalcFormConverter for exporting bosonic FeynCalc expressions to FORM and importing results with preserved symbol mappings.
+- Added CalcFormConverter with reversible mappings, rank-four epsilon support, ordinary Dirac algebra and fundamental SU(N) colour processing.
 - Added FORM/TFORM availability checks, explicit installation support, automated calculation, timing, and progress reporting.
-- Improved conversion performance and support for graviton polarization workflows.
+- Improved conversion performance and support for graviton polarisation workflows.
 - Updated the graviton-scattering notebook to use the converter and group vertex arguments by external leg.
-- Documented the FeynCalc 10.2.1 dependency and use of FeynGrav's local `Calc` implementation.
+- Migrated the library generator to CalcFormConverter, added structural rule validation and removed the obsolete local `Calc` implementation.
+- Added a [main-package reference](Documentation/Reference.md) and retained FeynCalc 10.2.1 as the documented dependency.
 
 ### Version 4
 
@@ -142,7 +147,7 @@ Report problems through [GitHub issues](https://github.com/BorisNLatosh/FeynGrav
 
 - Supported massless spin-0, spin-1/2, and spin-1 fields, together with gravity.
 
-## Citations and license
+## Citations and licence
 
 When using FeynGrav in published work, cite the publications relevant to the version and features used:
 
@@ -153,4 +158,4 @@ When using FeynGrav in published work, cite the publications relevant to the ver
 
 Follow the citation guidance of FeynCalc and FORM when using those packages as well.
 
-FeynGrav is distributed under the GNU General Public License version 3; see [LICENSE](LICENSE). Separately downloaded datasets carry the license stated on their distribution page.
+FeynGrav is distributed under the GNU General Public Licence version 3; see [Licence](LICENSE). Separately downloaded datasets carry the licence stated on their distribution page.

@@ -1,4 +1,20 @@
-# Validation and failures in the rule packages
+# Interaction rules, validation and failures
+
+## Which interface to use
+
+Ordinary calculations use the library-backed commands in the [main-package reference](../Documentation/Reference.md). This directory implements rule construction for the [library generator](../Libs/Generator.md), plus the Nieuwenhuizen helpers automatically loaded by FeynGrav. Use a separate fresh kernel for rule construction; identical short function names in different package contexts are not interchangeable.
+
+| Rule families | Interaction constructed |
+| --- | --- |
+| Scalar, fermion and vector packages | Minimal matter couplings and the corresponding vector ghosts |
+| GravitonVertex / QuadraticGravityVertex | Gravitational self-interactions in the selected theory |
+| GravitonSUNYM | Quark–gluon, multi-gluon and Yang–Mills ghost interactions |
+| HorndeskiG2–G5 | Scalar–tensor monomial interactions with explicit scalar momentum lists |
+| ScalarGaussBonnet / GravitonAxionVectorVertex | Curvature-squared scalar coupling / axion–vector coupling |
+| Nieuwenhuizen | Gauge tensors, operator combinations, inverse and verified decomposition |
+
+An `Uncontracted` routine constructs an expression for subsequent contraction by the generator/converter. A contracted routine also performs the algebra implemented in that rule file. Neither name implies loop integration. Available pairs, signatures and algebra backends differ by family: follow the contracts below rather than mechanically appending `Uncontracted` to a command. Symbolic masses, couplings and composite momenta remain supported where their FeynCalc structures permit them.
+
 
 The `Rules` packages generate tensors and vertices. Their mathematical definitions and successful return formats are unchanged by structural validation. Load a package by its file path; local dependencies load without changing `Directory[]` or `$Path`.
 
@@ -107,7 +123,6 @@ Positions refer to each displayed signature. `Infinity` means no upper bound. Ev
 | ``HorndeskiG4`HorndeskiG4Uncontracted`` — `HorndeskiG4Uncontracted[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
 | ``GravitonVertex`GravitonVertex`` — `GravitonVertex[indexArray]` | argument 1: flat list, block size 3, length 6 to Infinity |
 | ``GravitonVertex`GravitonVertexUncontracted`` — `GravitonVertexUncontracted[indexArray]` | argument 1: flat list, block size 3, length 6 to Infinity |
-| ``Calc`Calc[expr, options…]`` | One expression, including lists, followed by the existing optional rules `Assumptions` and `PowerExpand`; original option semantics are retained. |
 
 ### Private computational helpers
 
@@ -195,15 +210,15 @@ Positions refer to each displayed signature. `Infinity` means no upper bound. Ev
 - `CTensorGeneral` and `CTensorPlainGeneral` implement zero through seven external index pairs.
 - Contracted G4 with multiple gravitons and `b >= 2` remains unimplemented and returns `UnsupportedConfiguration`.
 - G5's `TII` dispatcher supports zero through three gravitons. Its contribution for `b > 0` cannot be requested above that range. The `b = 0` path is separate.
-- The library generator's file-writing and failure-handling workflow is outside this update. Do not assume this validation layer alone makes a full regeneration transaction safe.
+- Rule validation covers construction. Staged publication and batch failure handling are implemented separately by the migrated [generator](../Libs/Generator.md#failures-and-safe-replacement); they are not properties supplied by rule validation alone.
 
 The G5 uncontracted routine now memoises its own successful result, rather than overwriting the contracted routine's cache. This is a cache correction, not a change to either formula.
 
-## Verification
+## Historical validation checks
 
 Verification scripts are kept outside the repository; no top-level `Tests` folder is required. Checks cover all listed signatures, malformed array shapes, invalid counts, injected dependency failures, parallel failure order, cancellation, cache isolation, valid baseline comparisons, loading and representative timings. These are regression checks, not a proof of every generated vertex at arbitrary order.
 
-### Results of the implementation checks
+### Results of the original implementation checks
 
 - 1,076 structural-validation and diagnostic assertions passed without secondary Wolfram messages.
 - Of 142 sampled public/private signatures, 141 agreed with the saved pre-change results. The remaining baseline case was a malformed one-graviton uncontracted vector calculation. Its triplet-to-pair conversion has since been corrected in both branches; contraction of the corrected result agrees exactly with `GravitonVectorVertex` for one and two gravitons, with symbolic momenta and gauge parameter.
@@ -211,3 +226,32 @@ Verification scripts are kept outside the repository; no top-level `Tests` folde
 - Ten failure-propagation/cache/cancellation checks and fourteen boundary/compatibility checks passed. Real parallel workers preserved failure order and successful symmetrisation.
 - The validation helper loaded without FeynCalc. Loading all rule files preserved the working directory and search path. Main-package and generator loading passed.
 - A small local timing sample of 40 fresh `CTensorGeneral` calls took 0.003728 s before and 0.025334 s after validation. Repeated batches of 1,000 cached calls took about 0.000363 s and 0.000349 s respectively. These observations show the cost of validation on tiny fresh calls; they are not portable performance guarantees.
+
+## Dimensional quark and axion conventions
+
+`GravitonQuarkGluonVertexUncontracted` retains the D-dimensional gamma matrices
+returned by `QuarkGluonVertex[..., Explicit -> True]` and the named coupling
+`SMP["g_s"]`. There is no four-dimensional gamma substitution for FORM transport.
+
+Both axion–vector rules use the internal tensor
+
+```mathematica
+Eps[LorentzIndex[tau1, D], LorentzIndex[lambda1, D],
+    LorentzIndex[tau2, D], LorentzIndex[lambda2, D]]
+```
+
+with D-dimensional momentum components. It has four slots, including for symbolic
+D, and follows FeynCalc's `$LeviCivitaSign` convention. The interaction's physical
+`-I` prefactor is retained. CalcFormConverter handles the translation convention;
+the library generator adds no compensating factor of `I`.
+
+`ScalarGaussBonnet` requires at least two graviton triples because the
+Gauss–Bonnet combination is quadratic in curvature: around a flat background
+each curvature starts at first order, so the one-graviton contribution vanishes.
+This is not an unimplemented interaction. The current rule validates the
+six-entry minimum rather than returning that zero for a one-graviton call.
+
+`GenerateScalarGaussBonnet[n]` generates orders `2` through `n`. For `n = 1`,
+the batch returns `Null` without constructing rules or producing files.
+`GenerateScalarGaussBonnetSpecific[n]` generates a single order with `n >= 2`;
+its one-graviton call still fails the rule's structural validation.

@@ -16,7 +16,7 @@ The suite uses Mathematica, FeynGrav and its normal FeynCalc dependency. Executi
 
 Each notebook exposes `config`, an association from `BenchmarkConfiguration[]`:
 
-| Key | Default behavior |
+| Key | Default behaviour |
 | --- | --- |
 | `Profile` | `None`; explicitly choose `"Quick"` or `"Full"` |
 | `FORMExecutable`, `TFORMExecutable` | `Automatic`: kernel PATH discovery; absolute paths are accepted |
@@ -33,21 +33,21 @@ Use a fresh kernel and avoid other heavy calculations during measurement. Source
 ## What the timings mean
 
 - **Construction:** one preparation observation per workload, including package vertex evaluation; library loading is separate preparation.
-- **Export:** `CalcFormExport` including normalization, serialization and writes to a fresh target. No overwrite benchmark is mixed in.
+- **Export:** `CalcFormExport` including normalisation, serialisation and writes to a fresh target. No overwrite benchmark is mixed in.
 - **Execute:** the existing runtime process helper, including launch, log handling and final cleanup. Import and result snapshot copying are outside this timer.
 - **Import:** `CalcFormImport` including reads, mapping/digest validation and reconstruction. Fixture generation is separate preparation.
 - **StageSum:** the sum of separately timed export, execution and import operations.
 - **Calculate:** a separate `CalcFormCalculate` call, including its availability check and bookkeeping. It is not expected to equal StageSum exactly.
 
-The first observed benchmark import is flagged. It is not necessarily the first import in the kernel if you previously used the converter. First observations and warmups are excluded from measured medians. Timings do not identify which internal cache or initialization step causes first-call overhead.
+The first observed benchmark import is flagged. It is not necessarily the first import in the kernel if you previously used the converter. First observations and warmups are excluded from measured medians. Timings do not identify which internal cache or initialisation step causes first-call overhead.
 
-Execution scaling compares validated measured medians to serial FORM. Timeouts have no assigned speedup. A single measured trial is labeled by its trial count and supplies no evidence of variability. Initialization, filesystem caching, background activity and thermal conditions can change results; no machine-independent speedup is promised.
+Execution scaling compares validated measured medians to serial FORM. Timeouts have no assigned speedup. A single measured trial is labelled by its trial count and supplies no evidence of variability. Initialisation, filesystem caching, background activity and thermal conditions can change results; no machine-independent speedup is promised.
 
 ## Validation and reports
 
-Small contractions have known reference answers checked outside the timer. Larger outputs are checked using complete expression fingerprints for repeated imports, serial/threaded agreement and staged/public-call agreement. These are consistency checks, not independent validation of the physical model. Different expression forms can be algebraically equivalent; an unmatched fingerprint or an unresolved reference simplification is labeled inconclusive and excluded from the validated timing summary.
+Small contractions have known reference answers checked outside the timer. Larger outputs are checked using complete expression fingerprints for repeated imports, serial/threaded agreement and staged/public-call agreement. These are consistency checks, not independent validation of the physical model. Different expression forms can be algebraically equivalent; an unmatched fingerprint or an unresolved reference simplification is labelled inconclusive and excluded from the validated timing summary.
 
-Evaluate the preparation cell again before starting another run. Each prepared run can be executed once, so rerunning only the measurement cell cannot overwrite its previous report. Every run creates a unique directory with `report.json`, `summary.csv` and `jobs/`. JSON contains raw observations, configuration, environment, source hashes, input fingerprints, file sizes, available process diagnostics and validation status. CSV contains validated measured timing summaries. Wolfram kernel memory information is labeled separately; the suite does not measure FORM peak memory.
+Evaluate the preparation cell again before starting another run. Each prepared run can be executed once, so rerunning only the measurement cell cannot overwrite its previous report. Every run creates a unique directory with `report.json`, `summary.csv` and `jobs/`. JSON contains raw observations, configuration, environment, source hashes, input fingerprints, file sizes, available process diagnostics and validation status. CSV contains validated measured timing summaries. Wolfram kernel memory information is labelled separately; the suite does not measure FORM peak memory.
 
 The notebooks show a `Dataset` and a timing chart. Inspect the raw rows as well as medians: warmups, failures, skips and timeouts remain in the report. A report is checkpointed after each recorded row so completed observations survive an interrupted later stage. RunStatus describes whether the driver finished or was aborted, not whether every trial succeeded.
 

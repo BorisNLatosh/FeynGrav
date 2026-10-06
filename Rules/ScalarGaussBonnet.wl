@@ -28,6 +28,8 @@ ScalarGaussBonnet::usage =
 "ScalarGaussBonnet[{\!\(\*SubscriptBox[\(\[Rho]\), \(1\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(1\)]\),\!\(\*SubscriptBox[\(k\), \(1\)]\),\[Ellipsis],\!\(\*SubscriptBox[\(\[Rho]\), \(n\)]\),\!\(\*SubscriptBox[\(\[Sigma]\), \(n\)]\),\!\(\*SubscriptBox[\(k\), \(n\)]\)}].";
 
 
+ScalarGaussBonnet::usage = ScalarGaussBonnet::usage <> " Returns the scalar-Gauss-Bonnet interaction rule for at least two graviton triples. Around a flat background each curvature starts at first order in the graviton perturbation, so the curvature-squared Gauss-Bonnet combination starts at second order. The one-graviton contribution vanishes; it is not a missing interaction rule. The current implementation requires at least six list entries and returns Failure for a one-graviton call rather than returning the known zero.";
+
 (* Keep helpers and memoised definitions local to this rule package. *)
 
 (* Structural failures are returned as values; callers should use FailureQ. *)

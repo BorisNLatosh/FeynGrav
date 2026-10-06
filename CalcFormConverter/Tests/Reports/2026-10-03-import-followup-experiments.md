@@ -2,7 +2,7 @@
 
 ## Outcome
 
-**No additional optimization was retained.** The requested additional 70% reduction from the current 12.994945 s reference baseline (target about 3.8985 s) was not achieved. This does not establish that the target is impossible. The existing tensor-factor optimization and its previously measured 57.02% reduction remain unchanged.
+**No additional optimisation was retained.** The requested additional 70% reduction from the current 12.994945 s reference baseline (target about 3.8985 s) was not achieved. This does not establish that the target is impossible. The existing tensor-factor optimisation and its previously measured 57.02% reduction remain unchanged.
 
 The search stopped after two consecutive candidates failed to improve the bounded small-fixture pilot, as agreed. Neither candidate was promoted to the 10 MB performance comparison. No production code, parser tests or existing documentation were changed in this round; only these experiment reports were added.
 
@@ -31,15 +31,15 @@ The reconstruction loop dominates this observation. The 12.253615 s profile cann
 | 1 confirmation, candidate then baseline | 0.328723 (0.327766–0.394947) | 0.413389 (0.407736–0.593012) | Reject |
 | 2: local Association factor cache | 0.328723 (0.327766–0.394947), latest control above | 0.485359 (0.473779–0.486730) | Reject; stop search |
 
-Candidate 1 replaced nested cursor loops and Reap/Sow collection with precomputed additive boundaries and Table-based collection. Lazy factor reconstruction, initial unary-minus behavior, subsequent whole-product subtraction, division checks and final checks were retained. Exact `SameQ` on the small fixture passed; the candidate passed all 121 Parser assertions. The single reverse-order confirmation remained slower, so no larger performance trial followed.
+Candidate 1 replaced nested cursor loops and Reap/Sow collection with precomputed additive boundaries and Table-based collection. Lazy factor reconstruction, initial unary-minus behaviour, subsequent whole-product subtraction, division checks and final checks were retained. Exact `SameQ` on the small fixture passed; the candidate passed all 121 Parser assertions. The single reverse-order confirmation remained slower, so no larger performance trial followed.
 
 Candidate 2 kept the current token reader and arithmetic loops, replacing the flat factor cache's local memoized DownValues with a local Association using lazy `KeyExistsQ` lookup and insertion only after successful decoding. It was clearly slower than the latest small control. It was rejected before differential correctness validation or regression tests; its correctness is therefore not certified. There was no fresh baseline pair specifically for candidate 2, and no claim is made about its performance on larger inputs.
 
 ## Memory observations and measurement boundaries
 
-Public `CalcFormImport` alone was timed. Output history was disabled. Unlike the earlier comparison harness, no fingerprints, leaf counts or serialization ran between imports; only the final result was serialized after its import timer stopped. Results were cleared between calls. The final released-memory sample includes that untimed serialization, so it must not be treated as a pure import-retention measurement.
+Public `CalcFormImport` alone was timed. Output history was disabled. Unlike the earlier comparison harness, no fingerprints, leaf counts or serialisation ran between imports; only the final result was serialised after its import timer stopped. Results were cleared between calls. The final released-memory sample includes that untimed serialisation, so it must not be treated as a pure import-retention measurement.
 
-In the large profile, released kernel memory after the first import and warmup was approximately 156.9 and 164.8 MiB, before the final serialization. Growth therefore remains worth investigating independently; these samples do not identify its allocation source or establish a parser leak. On the small confirmation, baseline and Association candidate released-memory trajectories were essentially the same (approximately 151.5, 154.2, 157.3 and 160.2 MiB before final serialization). The Association experiment did not demonstrate a retention benefit.
+In the large profile, released kernel memory after the first import and warmup was approximately 156.9 and 164.8 MiB, before the final serialisation. Growth therefore remains worth investigating independently; these samples do not identify its allocation source or establish a parser leak. On the small confirmation, baseline and Association candidate released-memory trajectories were essentially the same (approximately 151.5, 154.2, 157.3 and 160.2 MiB before final serialisation). The Association experiment did not demonstrate a retention benefit.
 
 Kernel data counters and sampled OS RSS are different measurements. Raw per-phase RSS and per-call kernel counters are retained in JSON. These experiments do not attribute the earlier Full-suite OOM. No full-bubble or FORM calculations were run.
 
@@ -52,4 +52,4 @@ Kernel data counters and sampled OS RSS are different measurements. Raw per-phas
 - Timing processes used the previous bounded monitor: 300 seconds per phase, 6 GiB RSS, at least 2 GiB available system memory, sampled every 50 ms. No resource stop occurred; all timing processes exited zero.
 - Harness invocation: `python3 /tmp/cfc-import-next-20261003-143734/run_one.py VERSION CASE [MEASURED_COUNT]`. Versions/cases and every generated kernel command are recorded in JSON. Separate candidate-1 equality used `validate.py candidate1 small`; Parser stdout is preserved in the JSON as well as the local log. The existing monitor dependency is recorded by path and hash.
 
-No commit was made. New optimization work requires another decision; the existing implementation remains the accepted baseline.
+No commit was made. New optimisation work requires another decision; the existing implementation remains the accepted baseline.

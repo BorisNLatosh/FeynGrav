@@ -1,1873 +1,621 @@
 (* ::Package:: *)
 
-(*
-    FeynGravLibrariesGenerator.wl
+(* ::Title:: *)
+(*FeynGrav library generation*)
 
-    This file defines the developer-side library generator for FeynGrav.
-    It is responsible for producing the pre-generated interaction-vertex
-    libraries stored in the Libs directory.
+(* Generate extensionless Wolfram-expression libraries through CalcFormConverter.
+   Loading preserves Directory[] and starts no external processes. Existing
+   libraries are replaced only after calculation and a checked serialisation.
+   See Generator.md for options, conventions and recovery instructions. *)
 
-    Purpose
-    -------
-
-    FeynGrav uses pre-generated libraries for large symbolic expressions
-    describing gravitational interaction vertices.  This is done for
-    performance reasons: generating these expressions every time the user
-    calls a vertex function would be prohibitively expensive.
-
-    This package generates such libraries from the rule-generating packages
-    stored in ../Rules.  It loads the relevant rule packages, constructs
-    symbolic expressions in FeynCalc notation, translates them to FORM input,
-    runs FORM to simplify the expressions, and translates the FORM output
-    back to FeynCalc notation.
-
-    The generated files are written to the current Libs directory and are
-    later imported by the main FeynGrav package.
-
-    Dependencies
-    ------------
-
-    This file requires:
-
-        1. Wolfram Mathematica / Wolfram Language;
-        2. FeynCalc;
-        3. FORM available from the system command line as "form";
-        4. the FeynGrav rule packages in ../Rules.
-
-    The package sets the working directory to DirectoryName[$InputFileName],
-    so it should be loaded from its file location, for example with
-
-        Get["/path/to/FeynGrav/Libs/FeynGravLibrariesGenerator.wl"]
-
-    or from a Mathematica session where $InputFileName is properly defined.
-
-    Public interface
-    ----------------
-
-    The package exposes three groups of commands.
-
-    1. Check commands
-
-       These commands inspect the Libs directory and print which generated
-       libraries are already present.  Examples:
-
-           CheckGravitonScalars
-           CheckGravitonFermions
-           CheckGravitonVectors
-           CheckGravitonVertex
-           CheckGravitonSUNYM
-           CheckHorndeskiG2
-           CheckHorndeskiG3
-           CheckHorndeskiG4
-           CheckHorndeskiG5
-           CheckScalarGaussBonnet
-           CheckGravitonAxionVector
-           CheckQuadraticGravityVertex
-
-    2. Batch-generation commands
-
-       These commands generate all libraries of a given class up to the
-       specified perturbative order.  Examples:
-
-           GenerateGravitonScalars[n]
-           GenerateGravitonFermions[n]
-           GenerateGravitonVectors[n]
-           GenerateGravitonVertex[n]
-           GenerateGravitonSUNYM[n]
-           GenerateGravitonAxionVector[n]
-           GenerateScalarGaussBonnet[n]
-           GenerateQuadraticGravityVertex[n]
-
-       Horndeski libraries require an additional argument specifying the
-       maximal number of scalar fields included in the generation:
-
-           GenerateHorndeskiG2[numberOfScalars, n]
-           GenerateHorndeskiG3[numberOfScalars, n]
-           GenerateHorndeskiG4[numberOfScalars, n]
-           GenerateHorndeskiG5[numberOfScalars, n]
-
-    3. Specific-generation commands
-
-       These commands generate one library or one family member at a fixed
-       perturbative order.  They are useful when only a single missing or
-       modified library must be regenerated.  Examples:
-
-           GenerateGravitonScalarsSpecific[n]
-           GenerateGravitonFermionsSpecific[n]
-           GenerateGravitonVectorsSpecific[n]
-           GenerateGravitonVertexSpecific[n]
-           GenerateGravitonSUNYMSpecific[n]
-           GenerateGravitonAxionVectorSpecific[n]
-           GenerateScalarGaussBonnetSpecific[n]
-           GenerateQuadraticGravityVertexSpecific[n]
-
-       For Horndeski interactions, the specific generators take the powers
-       of the scalar field and of the kinetic term explicitly:
-
-           GenerateHorndeskiG2Specific[a, b, n]
-           GenerateHorndeskiG3Specific[a, b, n]
-           GenerateHorndeskiG4Specific[a, b, n]
-           GenerateHorndeskiG5Specific[a, b, n]
-
-    Output files
-    ------------
-
-    The generator creates temporary FORM files with extension .frm.  After
-    FORM finishes, the temporary .frm file is deleted and the final library
-    is stored as a plain file without the .frm extension.  Typical output
-    names are
-
-        GravitonScalarVertex_1
-        GravitonFermionVertex_2
-        GravitonVertex_2
-        HorndeskiG2_a_b_n
-        ScalarGaussBonnet_n
-        QuadraticGravityVertex_n
-
-    Important warning
-    -----------------
-
-    Generation commands overwrite pre-existing libraries of the same name.
-    Use the corresponding Check* command before regeneration if the current
-    library set must be preserved.
-
-    This file is intended for maintainers and developers of FeynGrav.  Regular
-    users should normally use the pre-generated libraries distributed with the
-    package or downloaded separately.
-*)
-
-
-(*
-    Locate this generator file and load all rule-generation packages.
-
-    The generator lives in
-
-        FeynGrav/Libs/FeynGravLibrariesGenerator.wl
-
-    while the rule packages live in
-
-        FeynGrav/Rules/*.wl
-
-    Therefore, the code below first determines the directory containing this
-    file, then constructs the path to ../Rules in a platform-independent way.
-*)
-
-With[
-    {
-        (*
-            $InputFileName is the name of the file currently being loaded.
-            This is reliable when the generator is loaded with Get[...] or <<... .
-
-            In an interactive notebook session, however, $InputFileName is "".
-            In that case we cannot reliably infer the location of the Libs
-            directory, so we abort with an explicit diagnostic.
-        *)
-        generatorFileName = $InputFileName,
-
-        (*
-            List of rule packages required by the library generator.
-
-            Each entry has the form
-
-                {contextName, fileName}
-
-            where contextName is the package context introduced by the rule file,
-            and fileName is the corresponding file in ../Rules.
-        *)
-        rulePackages = {
-            (* Calc comes first: the rule packages below resolve Calc when they are read. *)
-            {"Calc`",                        "Calc.wl"},
-            {"GravitonScalarVertex`",        "GravitonScalarVertex.wl"},
-            {"GravitonFermionVertex`",       "GravitonFermionVertex.wl"},
-            {"GravitonVectorVertex`",        "GravitonVectorVertex.wl"},
-            {"GravitonSUNYM`",               "GravitonSUNYM.wl"},
-            {"GravitonVertex`",              "GravitonVertex.wl"},
-            {"HorndeskiG2`",                 "HorndeskiG2.wl"},
-            {"HorndeskiG3`",                 "HorndeskiG3.wl"},
-            {"HorndeskiG4`",                 "HorndeskiG4.wl"},
-            {"HorndeskiG5`",                 "HorndeskiG5.wl"},
-            {"ScalarGaussBonnet`",           "ScalarGaussBonnet.wl"},
-            {"GravitonAxionVectorVertex`",   "GravitonAxionVectorVertex.wl"},
-            {"QuadraticGravityVertex`",      "QuadraticGravityVertex.wl"}
-        }
-    },
-
-    (*
-        This generator is designed to be loaded as a file.
-
-        If $InputFileName is empty, Mathematica is most likely evaluating this
-        code directly in a notebook.  In that mode DirectoryName[$InputFileName]
-        does not identify the package location, so relative paths to ../Rules
-        cannot be constructed safely.
-    *)
-    If[!StringQ[generatorFileName] || generatorFileName === "",
-        Print[
-            "FeynGravLibrariesGenerator.wl must be loaded from a file, ",
-            "for example with Get[\"/path/to/FeynGrav/Libs/",
-            "FeynGravLibrariesGenerator.wl\"]."
-        ];
-        Abort[];
-    ];
-
-    Module[
-        {
-            generatorDirectory,
-            rulesDirectory,
-            missingRuleFiles
-        },
-
-        (*
-            Directory containing FeynGravLibrariesGenerator.wl.
-        *)
-        generatorDirectory = ExpandFileName @ DirectoryName[generatorFileName];
-
-        (*
-            Directory containing the rule-generation packages.
-
-            FileNameJoin is used instead of string concatenation, because it
-            builds paths in the form expected by the current operating system.
-        *)
-        rulesDirectory =
-            ExpandFileName @ FileNameJoin[{generatorDirectory, "..", "Rules"}];
-
-        (*
-            Fail early if the expected FeynGrav project layout is not present.
-        *)
-        If[!DirectoryQ[rulesDirectory],
-            Print["Cannot find the FeynGrav Rules directory: ", rulesDirectory];
-            Abort[];
-        ];
-
-        (*
-            Check that all rule files exist before opening the package context.
-        *)
-        missingRuleFiles =
-            Select[
-                rulePackages,
-                !FileExistsQ[FileNameJoin[{rulesDirectory, #[[2]]}]] &
-            ];
-
-        If[missingRuleFiles =!= {},
-            Print["Cannot find the following FeynGrav rule files:"];
-            Scan[
-                Print["  ", FileNameJoin[{rulesDirectory, #[[2]]}]] &,
-                missingRuleFiles
-            ];
-            Abort[];
-        ];
-
-        (*
-            Set the current working directory to Libs.
-
-            Many later functions in this file use relative paths such as
-
-                FileNames["GravitonScalarVertex_*"]
-
-            so they implicitly assume that the current directory is Libs.
-        *)
-        SetDirectory[generatorDirectory];
-
-        (*
-            Open the public context of the library generator.
-        *)
-        BeginPackage["FeynGravLibrariesGenerator`", {"FeynCalc`"}];
-
-        (*
-            Load every rule package.
-
-            Needs[context, file] loads the file only if the corresponding
-            context has not already been loaded.
-        *)
-        Scan[
-            Needs[#[[1]], FileNameJoin[{rulesDirectory, #[[2]]}]] &,
-            rulePackages
-        ];
-
-        (*
-            Keep the generator's output directory explicit after loading its
-            dependencies. Rule packages preserve the caller's working directory;
-            the generator deliberately uses Libs for its relative Check* and
-            Generate* file operations.
-        *)
-        SetDirectory[generatorDirectory];
+With[{root = DirectoryName[DirectoryName[$InputFileName]]},
+    Block[{$ContextPath = $ContextPath},
+        Needs["CalcFormConverter`", FileNameJoin[{root, "CalcFormConverter", "CalcFormConverter.wl"}]];
+        Scan[Needs[#[[1]], FileNameJoin[{root, "Rules", #[[2]]}]] &,
+            {{"GravitonScalarVertex`", "GravitonScalarVertex.wl"},
+                {"GravitonFermionVertex`", "GravitonFermionVertex.wl"},
+                {"GravitonVectorVertex`", "GravitonVectorVertex.wl"},
+                {"GravitonSUNYM`", "GravitonSUNYM.wl"},
+                {"GravitonVertex`", "GravitonVertex.wl"},
+                {"HorndeskiG2`", "HorndeskiG2.wl"},
+                {"HorndeskiG3`", "HorndeskiG3.wl"},
+                {"HorndeskiG4`", "HorndeskiG4.wl"},
+                {"HorndeskiG5`", "HorndeskiG5.wl"},
+                {"ScalarGaussBonnet`", "ScalarGaussBonnet.wl"},
+                {"GravitonAxionVectorVertex`", "GravitonAxionVectorVertex.wl"},
+                {"QuadraticGravityVertex`", "QuadraticGravityVertex.wl"}}];
     ];
 ];
 
-
-(*
-    Print a short startup message after the generator has been loaded.
-
-    The variable $FeynGravLibrariesGeneratorStartupMessage controls whether
-    the message is printed.  Users who do not want startup output can evaluate
-
-        $FeynGravLibrariesGeneratorStartupMessage = False;
-
-    before loading this file.
-*)
-
-If[!ValueQ[$FeynGravLibrariesGeneratorStartupMessage],
-    $FeynGravLibrariesGeneratorStartupMessage = True;
-];
-
-FeynGravLibrariesGeneratorPrintStartupMessage[] :=
-    Print[
-        StringRiffle[
-            {
-                "",
-                "FeynGravLibrariesGenerator",
-                "--------------------------",
-                "",
-                "This package generates precomputed FeynGrav libraries for gravitational interaction vertices.",
-                "The generated libraries are stored in the Libs directory and are used by the main FeynGrav package.",
-                "",
-                "Typical workflow:",
-                "  1. Use Check* commands to see which libraries already exist.",
-                "     Examples:",
-                "       CheckGravitonScalars",
-                "       CheckGravitonFermions",
-                "       CheckGravitonVertex",
-                "",
-                "  2. Use Generate* commands to generate missing libraries.",
-                "     Examples:",
-                "       GenerateGravitonScalars[n]",
-                "       GenerateGravitonFermions[n]",
-                "       GenerateGravitonVertex[n]",
-                "",
-                "  3. Use Generate*Specific commands to regenerate a single library.",
-                "     Examples:",
-                "       GenerateGravitonScalarsSpecific[n]",
-                "       GenerateHorndeskiG2Specific[a, b, n]",
-                "",
-                "Requirements:",
-                "  - FeynCalc must be installed and loadable.",
-                "  - FORM must be available from the command line as form.",
-                "  - The FeynGrav Rules directory must be present next to Libs.",
-                "",
-                "To suppress this message, evaluate before loading the generator:",
-                "  $FeynGravLibrariesGeneratorStartupMessage = False;",
-                ""
-            },
-            "\n"
-        ]
-    ];
-
-If[TrueQ[$FeynGravLibrariesGeneratorStartupMessage],
-    FeynGravLibrariesGeneratorPrintStartupMessage[];
-];
-
-
-(*
-    FORM availability check.
-
-    FeynGravLibrariesGenerator uses FORM to simplify large expressions during
-    library generation.  The code below checks whether FORM can be executed
-    from this Wolfram kernel and tries to extract its version from FORM's
-    startup banner.
-
-    The check is non-fatal: if FORM is not found, the package is still loaded.
-    This allows users to inspect existing libraries with Check* commands even
-    on systems where FORM is not installed.
-
-    Users may configure the executable name/path before loading the package:
-
-        $FeynGravFORMExecutable = "/usr/local/bin/form";
-
-    or suppress this startup check with
-
-        $FeynGravLibrariesGeneratorFORMCheck = False;
-*)
-
-If[!ValueQ[$FeynGravFORMExecutable],
-    $FeynGravFORMExecutable = "form";
-];
-
-If[!ValueQ[$FeynGravLibrariesGeneratorFORMCheck],
-    $FeynGravLibrariesGeneratorFORMCheck = True;
-];
-
-ClearAll[
-    FeynGravLibrariesGeneratorParseFORMVersion,
-    FeynGravLibrariesGeneratorFORMInformation,
-    FeynGravLibrariesGeneratorPrintFORMStatus
-];
-
-FeynGravLibrariesGeneratorParseFORMVersion[output_String] :=
-    Module[
-        {
-            matches
-        },
-
-        (*
-            Different FORM versions may format the startup banner differently.
-            We therefore try several conservative patterns.
-
-            Typical forms that this parser is intended to catch include
-
-                FORM version 4.3.1
-                FORM 4.3.1
-                ... version 4.3.1 ...
-
-            If no version-like string is found, we return Missing["Unknown"].
-        *)
-        matches =
-            Flatten @ StringCases[
-                output,
-                {
-                    RegularExpression[
-                        "(?im)\\bFORM\\s+version\\s+([0-9]+(?:\\.[0-9]+)*(?:[-._A-Za-z0-9]*)?)"
-                    ] -> "$1",
-
-                    RegularExpression[
-                        "(?im)^\\s*FORM\\s+([0-9]+(?:\\.[0-9]+)*(?:[-._A-Za-z0-9]*)?)"
-                    ] -> "$1",
-
-                    RegularExpression[
-                        "(?im)\\bversion\\s+([0-9]+(?:\\.[0-9]+)*(?:[-._A-Za-z0-9]*)?)"
-                    ] -> "$1"
-                }
-            ];
-
-        If[matches === {},
-            Missing["Unknown"],
-            First[matches]
-        ]
-    ];
-
-FeynGravLibrariesGeneratorFORMInformation[
-    formExecutable_String : $FeynGravFORMExecutable
-] :=
-    Module[
-        {
-            temporaryDirectory,
-            formFile,
-            formProgram,
-            result,
-            output,
-            installedQ,
-            version
-        },
-
-        temporaryDirectory =
-            CreateDirectory[
-                FileNameJoin[
-                    {
-                        $TemporaryDirectory,
-                        "FeynGravFORMCheck-" <> StringDelete[CreateUUID[], "-"]
-                    }
-                ]
-            ];
-
-        formFile = FileNameJoin[{temporaryDirectory, "form_check.frm"}];
-
-        (*
-            Minimal FORM program.
-
-            If FORM is executable and works correctly, it should simplify
-            x + x and print an expression containing 2*x.
-        *)
-        formProgram =
-            StringRiffle[
-                {
-                    "Symbols x;",
-                    "Local F = x + x;",
-                    "Print;",
-                    ".end"
-                },
-                "\n"
-            ];
-
-        Export[formFile, formProgram, "Text"];
-
-        (*
-            Run FORM in the temporary directory.
-
-            We use Check[...] because RunProcess emits messages if the executable
-            is absent.  TimeConstrained[...] prevents package loading from
-            hanging if the external process misbehaves.
-        *)
-        result =
-            TimeConstrained[
-                Quiet @ Check[
-                    RunProcess[
-                        {formExecutable, formFile},
-                        All,
-                        "",
-                        ProcessDirectory -> temporaryDirectory
-                    ],
-                    $Failed
-                ],
-                10,
-                $Failed
-            ];
-
-        output =
-            If[AssociationQ[result],
-                Lookup[result, "StandardOutput", ""] <>
-                    "\n" <>
-                    Lookup[result, "StandardError", ""],
-                ""
-            ];
-
-        installedQ =
-            AssociationQ[result]
-                && Lookup[result, "ExitCode", -1] === 0
-                && StringContainsQ[
-                    output,
-                    RegularExpression["2\\s*\\*\\s*x"]
-                ];
-
-        version =
-            If[installedQ,
-                FeynGravLibrariesGeneratorParseFORMVersion[output],
-                Missing["NotInstalled"]
-            ];
-
-        Quiet @ DeleteDirectory[temporaryDirectory, DeleteContents -> True];
-
-        <|
-            "Installed" -> installedQ,
-            "Executable" -> formExecutable,
-            "Version" -> version,
-            "Output" -> output
-        |>
-    ];
-
-FeynGravLibrariesGeneratorPrintFORMStatus[] :=
-    Module[
-        {
-            formInformation,
-            version
-        },
-
-        formInformation =
-            FeynGravLibrariesGeneratorFORMInformation[$FeynGravFORMExecutable];
-
-        If[TrueQ[formInformation["Installed"]],
-            version = formInformation["Version"];
-
-            If[MissingQ[version],
-                Print[
-                    "FORM is installed and available as \"",
-                    formInformation["Executable"],
-                    "\". Version: unknown."
-                ],
-                Print[
-                    "FORM is installed and available as \"",
-                    formInformation["Executable"],
-                    "\". Version: ",
-                    version,
-                    "."
-                ]
-            ],
-            Print[
-                "FORM is not installed or is not available as \"",
-                formInformation["Executable"],
-                "\" from this Wolfram kernel."
-            ]
-        ];
-    ];
-
-If[TrueQ[$FeynGravLibrariesGeneratorFORMCheck],
-    FeynGravLibrariesGeneratorPrintFORMStatus[];
-];
-
-
-(* Procedures that verify whether libraries exist. *)
-
-
-CheckGravitonScalars::usage =
-    "CheckGravitonScalars checks which generated libraries for graviton-scalar interaction vertices are present.";
-
-CheckGravitonFermions::usage =
-    "CheckGravitonFermions checks which generated libraries for graviton-fermion interaction vertices are present.";
-
-CheckGravitonVectors::usage =
-    "CheckGravitonVectors checks which generated libraries for graviton-vector interaction vertices are present.";
-
-CheckGravitonVertex::usage =
-    "CheckGravitonVertex checks which generated libraries for pure graviton interaction vertices are present.";
-
-CheckGravitonSUNYM::usage =
-    "CheckGravitonSUNYM checks which generated libraries for gravitational interactions of the SU(N) Yang-Mills model are present.";
-
-CheckGravitonAxionVector::usage =
-    "CheckGravitonAxionVector checks which generated libraries for graviton-axion-vector interaction vertices are present.";
-
-CheckHorndeskiG2::usage =
-    "CheckHorndeskiG2 checks which generated libraries for Horndeski G2 interaction vertices are present.";
-
-CheckHorndeskiG3::usage =
-    "CheckHorndeskiG3 checks which generated libraries for Horndeski G3 interaction vertices are present.";
-
-CheckHorndeskiG4::usage =
-    "CheckHorndeskiG4 checks which generated libraries for Horndeski G4 interaction vertices are present.";
-
-CheckHorndeskiG5::usage =
-    "CheckHorndeskiG5 checks which generated libraries for Horndeski G5 interaction vertices are present.";
-
-CheckScalarGaussBonnet::usage =
-    "CheckScalarGaussBonnet checks which generated libraries for scalar-Gauss-Bonnet interaction vertices are present.";
-
-CheckQuadraticGravityVertex::usage =
-    "CheckQuadraticGravityVertex checks which generated libraries for quadratic-gravity interaction vertices are present.";
-
-
-(* Procedures that generate libraries. *)
-
-
-GenerateGravitonScalars::usage =
-    "GenerateGravitonScalars[n] generates libraries for graviton-scalar interaction vertices through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateGravitonFermions::usage =
-    "GenerateGravitonFermions[n] generates libraries for graviton-fermion interaction vertices through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateGravitonVectors::usage =
-    "GenerateGravitonVectors[n] generates libraries for graviton-vector interaction vertices through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateGravitonVertex::usage =
-    "GenerateGravitonVertex[n] generates libraries for pure graviton interaction vertices through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateGravitonSUNYM::usage =
-    "GenerateGravitonSUNYM[n] generates libraries for gravitational interactions of the SU(N) Yang-Mills model through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateGravitonAxionVector::usage =
-    "GenerateGravitonAxionVector[n] generates libraries for graviton-axion-vector interaction vertices through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateHorndeskiG2::usage =
-    "GenerateHorndeskiG2[p, n] generates libraries for Horndeski G2 interaction vertices involving up to p scalar fields through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateHorndeskiG3::usage =
-    "GenerateHorndeskiG3[p, n] generates libraries for Horndeski G3 interaction vertices involving up to p scalar fields through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateHorndeskiG4::usage =
-    "GenerateHorndeskiG4[p, n] generates libraries for Horndeski G4 interaction vertices involving up to p scalar fields through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateHorndeskiG5::usage =
-    "GenerateHorndeskiG5[p, n] generates libraries for Horndeski G5 interaction vertices involving up to p scalar fields through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateScalarGaussBonnet::usage =
-    "GenerateScalarGaussBonnet[n] generates libraries for scalar-Gauss-Bonnet interaction vertices through perturbative order n. Pre-existing libraries of this type are removed.";
-
-GenerateQuadraticGravityVertex::usage =
-    "GenerateQuadraticGravityVertex[n] generates libraries for quadratic-gravity interaction vertices through perturbative order n. Pre-existing libraries of this type are removed.";
-
-
-(* Procedures that generate specific libraries. *)
-
+BeginPackage["FeynGravLibrariesGenerator`", {"FeynCalc`", "CalcFormConverter`"}];
+
+(* Clear old, more-specific dispatch definitions on reload without touching
+   configuration values. Names are strings so legacy Check own-values cannot run. *)
+Clear[
+    "FeynGravLibrariesGenerator`FeynGravLibrariesGeneratorFORMInformation",
+    "FeynGravLibrariesGenerator`FeynGravLibrariesGeneratorPrintFORMStatus",
+    "FeynGravLibrariesGenerator`GenerateGravitonScalarsSpecific",
+    "FeynGravLibrariesGenerator`GenerateGravitonScalars",
+    "FeynGravLibrariesGenerator`CheckGravitonScalars",
+    "FeynGravLibrariesGenerator`GenerateGravitonFermionsSpecific",
+    "FeynGravLibrariesGenerator`GenerateGravitonFermions",
+    "FeynGravLibrariesGenerator`CheckGravitonFermions",
+    "FeynGravLibrariesGenerator`GenerateGravitonVectorsSpecific",
+    "FeynGravLibrariesGenerator`GenerateGravitonVectors",
+    "FeynGravLibrariesGenerator`CheckGravitonVectors",
+    "FeynGravLibrariesGenerator`GenerateGravitonVertexSpecific",
+    "FeynGravLibrariesGenerator`GenerateGravitonVertex",
+    "FeynGravLibrariesGenerator`CheckGravitonVertex",
+    "FeynGravLibrariesGenerator`GenerateGravitonSUNYMSpecific",
+    "FeynGravLibrariesGenerator`GenerateGravitonSUNYM",
+    "FeynGravLibrariesGenerator`CheckGravitonSUNYM",
+    "FeynGravLibrariesGenerator`GenerateHorndeskiG2Specific",
+    "FeynGravLibrariesGenerator`GenerateHorndeskiG2",
+    "FeynGravLibrariesGenerator`CheckHorndeskiG2",
+    "FeynGravLibrariesGenerator`GenerateHorndeskiG3Specific",
+    "FeynGravLibrariesGenerator`GenerateHorndeskiG3",
+    "FeynGravLibrariesGenerator`CheckHorndeskiG3",
+    "FeynGravLibrariesGenerator`GenerateHorndeskiG4Specific",
+    "FeynGravLibrariesGenerator`GenerateHorndeskiG4",
+    "FeynGravLibrariesGenerator`CheckHorndeskiG4",
+    "FeynGravLibrariesGenerator`GenerateHorndeskiG5Specific",
+    "FeynGravLibrariesGenerator`GenerateHorndeskiG5",
+    "FeynGravLibrariesGenerator`CheckHorndeskiG5",
+    "FeynGravLibrariesGenerator`GenerateScalarGaussBonnetSpecific",
+    "FeynGravLibrariesGenerator`GenerateScalarGaussBonnet",
+    "FeynGravLibrariesGenerator`CheckScalarGaussBonnet",
+    "FeynGravLibrariesGenerator`GenerateGravitonAxionVectorSpecific",
+    "FeynGravLibrariesGenerator`GenerateGravitonAxionVector",
+    "FeynGravLibrariesGenerator`CheckGravitonAxionVector",
+    "FeynGravLibrariesGenerator`GenerateQuadraticGravityVertexSpecific",
+    "FeynGravLibrariesGenerator`GenerateQuadraticGravityVertex",
+    "FeynGravLibrariesGenerator`CheckQuadraticGravityVertex"];
+Clear["FeynGravLibrariesGenerator`Private`FORMCodeCleanUp",
+    "FeynGravLibrariesGenerator`Private`FORMOutputCleanUp",
+    "FeynGravLibrariesGenerator`FeynGravLibrariesGeneratorParseFORMVersion"];
+
+(* ::Section:: *)
+(*Public commands and options*)
+
+OutputDirectory::usage =
+    "OutputDirectory is an option for Generate* and Generate*Specific. Automatic (the default) writes extensionless libraries to the Libs directory containing this generator, independently of Directory[]. An explicit value must be an existing directory. WorkingDirectory instead controls the parent directory of temporary converter jobs. Check* commands always inspect the generator's Libs directory.";
+
+FeynGravLibrariesGeneratorFORMInformation::usage =
+    "FeynGravLibrariesGeneratorFORMInformation[] calls CalcFormCheck and returns its availability and diagnostic association. It honours an existing legacy executable setting; otherwise it uses automatic FORM/TFORM selection. FeynGravLibrariesGeneratorFORMInformation[executable_String] checks that executable with one worker. For worker counts or other check options, call CalcFormCheck directly. No availability check or installation runs when the generator is loaded.";
+
+FeynGravLibrariesGeneratorPrintFORMStatus::usage =
+    "FeynGravLibrariesGeneratorPrintFORMStatus[] calls FeynGravLibrariesGeneratorFORMInformation[], prints the availability and diagnostic association, and returns it. This is an explicit check; it does not install software.";
+
+(* Legacy executable and startup settings are looked up by name. Their help
+   is in Generator.md; declaring duplicate symbols would cause shadowing. *)
+$FeynGravLibrariesGeneratorFORMCheck::usage =
+    "Deprecated startup-check setting. Its value is ignored: loading the generator does not check or launch FORM. Use CalcFormCheck[] or FeynGravLibrariesGeneratorFORMInformation[] for an explicit check.";
+
+(* Shared help is private, but its full text is appended to every generation
+   command so ?Function remains self-contained. Keep option defaults in step
+   with $generationOptions below. *)
+FeynGravLibrariesGenerator`Private`$generationUsage =
+"\n\nCalculation uses CalcFormCalculate with automatic dimension inference. Options and defaults: OutputDirectory -> Automatic (this generator's Libs directory), FORMExecutable -> Automatic, FORMThreads -> Automatic, TimeConstraint -> Infinity, WorkingDirectory -> Automatic, KeepFiles -> False, ShowTiming -> False, ShowProgress -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. Automatic workers prefer TFORM with up to eight workers and fall back to serial FORM only when TFORM is absent. TimeConstraint limits FORM execution, not rule construction or total elapsed time. ColourAlgebra -> Automatic is an alias for True; False preserves colour structures. DiracAlgebra -> False disables optional Dirac processing.\n\nHonours SetOptions on the invoked command and individual or nested option lists; the first explicit occurrence wins. Explicit FORMExecutable overrides the command default and legacy setting; an Automatic command default may use that legacy setting. Batches use their own defaults and stop at the first failure.\n\nSuccess returns Null. Invalid arguments, assigned formal placeholders or failed stages return Failure; user definitions are preserved. CompletedFiles lists installed batch members, including a file whose installation succeeded before backup cleanup failed. Existing libraries are replaced only after calculation and a checked read-back. Converter failures retain their job diagnostics. Loading or generating never installs FORM. See Libs/Generator.md for the full workflow.";
 
 GenerateGravitonScalarsSpecific::usage =
-    "GenerateGravitonScalarsSpecific[n] generates the library for graviton-scalar interaction vertices at perturbative order n. The pre-existing library for this order is removed.";
+    "GenerateGravitonScalarsSpecific[n, opts] generates the scalar kinetic and scalar potential interaction libraries for exactly n external gravitons: GravitonScalarVertex_n and GravitonScalarPotentialVertex_n. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+GenerateGravitonScalars::usage =
+    "GenerateGravitonScalars[n, opts] generates the scalar kinetic and scalar potential interaction libraries for every graviton order from 1 through n, calling the same family builders as GenerateGravitonScalarsSpecific. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckGravitonScalars::usage =
+    "CheckGravitonScalars (without brackets) prints canonical filenames for the scalar kinetic and scalar potential interaction libraries in the generator's Libs directory and returns Null. It launches no FORM process and does not validate file contents. Directories, malformed names, staging files and backups are excluded; OutputDirectory does not change this search.";
 
 GenerateGravitonFermionsSpecific::usage =
-    "GenerateGravitonFermionsSpecific[n] generates the library for graviton-fermion interaction vertices at perturbative order n. The pre-existing library for this order is removed.";
+    "GenerateGravitonFermionsSpecific[n, opts] generates the Dirac-fermion interaction libraries for exactly n external gravitons: GravitonFermionVertex_n. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+GenerateGravitonFermions::usage =
+    "GenerateGravitonFermions[n, opts] generates the Dirac-fermion interaction libraries for every graviton order from 1 through n, calling the same family builders as GenerateGravitonFermionsSpecific. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckGravitonFermions::usage =
+    "CheckGravitonFermions (without brackets) prints canonical filenames for the Dirac-fermion interaction libraries in the generator's Libs directory and returns Null. It launches no FORM process and does not validate file contents. Directories, malformed names, staging files and backups are excluded; OutputDirectory does not change this search.";
 
 GenerateGravitonVectorsSpecific::usage =
-    "GenerateGravitonVectorsSpecific[n] generates the library for graviton-vector interaction vertices at perturbative order n. The pre-existing library for this order is removed.";
+    "GenerateGravitonVectorsSpecific[n, opts] generates the massive-vector, massless-vector and vector-ghost interaction libraries for exactly n external gravitons: GravitonMassiveVectorVertex_n, GravitonVectorVertex_n and GravitonVectorGhostVertex_n. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
 
-GenerateGravitonVertexSpecific::usage =
-    "GenerateGravitonVertexSpecific[n] generates the library for pure graviton interaction vertices at perturbative order n. The pre-existing library for this order is removed.";
+GenerateGravitonVectors::usage =
+    "GenerateGravitonVectors[n, opts] generates the massive-vector, massless-vector and vector-ghost interaction libraries for every graviton order from 1 through n, calling the same family builders as GenerateGravitonVectorsSpecific. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckGravitonVectors::usage =
+    "CheckGravitonVectors (without brackets) prints canonical filenames for the massive-vector, massless-vector and vector-ghost interaction libraries in the generator's Libs directory and returns Null. It launches no FORM process and does not validate file contents. Directories, malformed names, staging files and backups are excluded; OutputDirectory does not change this search.";
 
 GenerateGravitonSUNYMSpecific::usage =
-    "GenerateGravitonSUNYMSpecific[n] generates the library for gravitational interactions of the SU(N) Yang-Mills model at perturbative order n. The pre-existing library for this order is removed.";
+    "GenerateGravitonSUNYMSpecific[n, opts] generates the SU(N) Yang-Mills interaction libraries for exactly n external gravitons: GravitonQuarkGluonVertex_n, GravitonGluonVertex_n, GravitonThreeGluonVertex_n, GravitonFourGluonVertex_n, GravitonYMGhostVertex_n and GravitonGluonGhostVertex_n. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+GenerateGravitonSUNYM::usage =
+    "GenerateGravitonSUNYM[n, opts] generates the SU(N) Yang-Mills interaction libraries for every graviton order from 1 through n, calling the same family builders as GenerateGravitonSUNYMSpecific. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckGravitonSUNYM::usage =
+    "CheckGravitonSUNYM (without brackets) prints canonical filenames for the SU(N) Yang-Mills interaction libraries in the generator's Libs directory and returns Null. It launches no FORM process and does not validate file contents. Directories, malformed names, staging files and backups are excluded; OutputDirectory does not change this search.";
 
 GenerateGravitonAxionVectorSpecific::usage =
-    "GenerateGravitonAxionVectorSpecific[n] generates the library for graviton-axion-vector interaction vertices at perturbative order n. The pre-existing library for this order is removed.";
+    "GenerateGravitonAxionVectorSpecific[n, opts] generates the scalar-axion–vector interaction libraries for exactly n external gravitons: GravitonAxionVectorVertex_n. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
 
-GenerateHorndeskiG2Specific::usage =
-    "GenerateHorndeskiG2Specific[a, b, n] generates the library for Horndeski G2 interaction vertices with parameters a and b at perturbative order n. The pre-existing library for these parameters and this order is removed.";
+GenerateGravitonAxionVector::usage =
+    "GenerateGravitonAxionVector[n, opts] generates the scalar-axion–vector interaction libraries for every graviton order from 1 through n, calling the same family builders as GenerateGravitonAxionVectorSpecific. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
 
-GenerateHorndeskiG3Specific::usage =
-    "GenerateHorndeskiG3Specific[a, b, n] generates the library for Horndeski G3 interaction vertices with parameters a and b at perturbative order n. The pre-existing library for these parameters and this order is removed.";
+CheckGravitonAxionVector::usage =
+    "CheckGravitonAxionVector (without brackets) prints canonical filenames for the scalar-axion–vector interaction libraries in the generator's Libs directory and returns Null. It launches no FORM process and does not validate file contents. Directories, malformed names, staging files and backups are excluded; OutputDirectory does not change this search.";
 
-GenerateHorndeskiG4Specific::usage =
-    "GenerateHorndeskiG4Specific[a, b, n] generates the library for Horndeski G4 interaction vertices with parameters a and b at perturbative order n. The pre-existing library for these parameters and this order is removed.";
+GenerateGravitonVertexSpecific::usage =
+    "GenerateGravitonVertexSpecific[n, opts] generates GravitonVertex_n for the general-relativity graviton vertex with n + 2 external gravitons. n is the library order, not the number of graviton legs, and must be an explicit positive integer. In particular, n = 1 generates the three-graviton vertex." <> FeynGravLibrariesGenerator`Private`$generationUsage;
 
-GenerateHorndeskiG5Specific::usage =
-    "GenerateHorndeskiG5Specific[a, b, n] generates the library for Horndeski G5 interaction vertices with parameters a and b at perturbative order n. The pre-existing library for these parameters and this order is removed.";
+GenerateGravitonVertex::usage =
+    "GenerateGravitonVertex[n, opts] generates GravitonVertex_j for j = 1 through n, corresponding to 3 through n + 2 external gravitons. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
 
-GenerateScalarGaussBonnetSpecific::usage =
-    "GenerateScalarGaussBonnetSpecific[n] generates the library for scalar-Gauss-Bonnet interaction vertices at perturbative order n. The pre-existing library for this order is removed.";
+CheckGravitonVertex::usage =
+    "CheckGravitonVertex (without brackets) prints canonical GravitonVertex_n filenames in the generator's Libs directory and returns Null. The suffix n corresponds to n + 2 graviton legs. It excludes directories and malformed filenames, does not validate file contents and launches no FORM process.";
 
 GenerateQuadraticGravityVertexSpecific::usage =
-    "GenerateQuadraticGravityVertexSpecific[n] generates the library for quadratic-gravity interaction vertices at perturbative order n. The pre-existing library for this order is removed.";
+    "GenerateQuadraticGravityVertexSpecific[n, opts] generates QuadraticGravityVertex_n for the quadratic-gravity graviton vertex with n + 2 external gravitons. n is the library order, not the number of graviton legs, and must be an explicit positive integer. In particular, n = 1 generates the three-graviton vertex." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+GenerateQuadraticGravityVertex::usage =
+    "GenerateQuadraticGravityVertex[n, opts] generates QuadraticGravityVertex_j for j = 1 through n, corresponding to 3 through n + 2 external gravitons. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckQuadraticGravityVertex::usage =
+    "CheckQuadraticGravityVertex (without brackets) prints canonical QuadraticGravityVertex_n filenames in the generator's Libs directory and returns Null. The suffix n corresponds to n + 2 graviton legs. It excludes directories and malformed filenames, does not validate file contents and launches no FORM process.";
+
+GenerateHorndeskiG2Specific::usage =
+    "GenerateHorndeskiG2Specific[a, b, n, opts] generates HorndeskiG2_a_b_n from the uncontracted G2 rule, with n external gravitons and a + 2 b scalar momentum entries. a and b must be explicit non-negative integers; n must be an explicit positive integer. The underlying rule supplies any additional structural requirements. Unlike the batch command, this specific command does not impose the batch's minimum scalar-count filter." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+GenerateHorndeskiG2::usage =
+    "GenerateHorndeskiG2[numberOfScalars, n, opts] generates selected G2 libraries for graviton orders 1 through n. numberOfScalars is an explicit non-negative integer upper bound on the number of scalar momentum entries; n is an explicit positive integer. It enumerates a = 0 through numberOfScalars and b = 1 through Ceiling[numberOfScalars/2], retaining only 3 <= a + 2 b <= numberOfScalars. An empty selection returns Null without calculation or files. Use GenerateHorndeskiG2Specific[a, b, n, opts] for one parameter triple." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckHorndeskiG2::usage =
+    "CheckHorndeskiG2 (without brackets) prints canonical HorndeskiG2_a_b_n filenames in the generator's Libs directory and returns Null. The scalar momentum count is a + 2 b; n is the number of external gravitons. It excludes directories and malformed filenames, does not validate file contents and launches no FORM process.";
+
+GenerateHorndeskiG3Specific::usage =
+    "GenerateHorndeskiG3Specific[a, b, n, opts] generates HorndeskiG3_a_b_n from the uncontracted G3 rule, with n external gravitons and a + 2 b + 1 scalar momentum entries. a and b must be explicit non-negative integers; n must be an explicit positive integer. The underlying rule supplies any additional structural requirements. Unlike the batch command, this specific command does not impose the batch's minimum scalar-count filter." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+GenerateHorndeskiG3::usage =
+    "GenerateHorndeskiG3[numberOfScalars, n, opts] generates selected G3 libraries for graviton orders 1 through n. numberOfScalars is an explicit non-negative integer upper bound on the number of scalar momentum entries; n is an explicit positive integer. It enumerates a = 0 through numberOfScalars and b = 0 through Ceiling[numberOfScalars/2], retaining only 3 <= a + 2 b + 1 <= numberOfScalars. An empty selection returns Null without calculation or files. Use GenerateHorndeskiG3Specific[a, b, n, opts] for one parameter triple." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckHorndeskiG3::usage =
+    "CheckHorndeskiG3 (without brackets) prints canonical HorndeskiG3_a_b_n filenames in the generator's Libs directory and returns Null. The scalar momentum count is a + 2 b + 1; n is the number of external gravitons. It excludes directories and malformed filenames, does not validate file contents and launches no FORM process.";
+
+GenerateHorndeskiG4Specific::usage =
+    "GenerateHorndeskiG4Specific[a, b, n, opts] generates HorndeskiG4_a_b_n from the uncontracted G4 rule, with n external gravitons and a + 2 b scalar momentum entries. a and b must be explicit non-negative integers; n must be an explicit positive integer. The underlying rule supplies any additional structural requirements. Unlike the batch command, this specific command does not impose the batch's minimum scalar-count filter." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+GenerateHorndeskiG4::usage =
+    "GenerateHorndeskiG4[numberOfScalars, n, opts] generates selected G4 libraries for graviton orders 1 through n. numberOfScalars is an explicit non-negative integer upper bound on the number of scalar momentum entries; n is an explicit positive integer. It enumerates a = 0 through numberOfScalars and b = 0 through Ceiling[numberOfScalars/2], retaining only 2 <= a + 2 b <= numberOfScalars. An empty selection returns Null without calculation or files. Use GenerateHorndeskiG4Specific[a, b, n, opts] for one parameter triple." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckHorndeskiG4::usage =
+    "CheckHorndeskiG4 (without brackets) prints canonical HorndeskiG4_a_b_n filenames in the generator's Libs directory and returns Null. The scalar momentum count is a + 2 b; n is the number of external gravitons. It excludes directories and malformed filenames, does not validate file contents and launches no FORM process.";
+
+GenerateHorndeskiG5Specific::usage =
+    "GenerateHorndeskiG5Specific[a, b, n, opts] generates HorndeskiG5_a_b_n from the uncontracted G5 rule, with n external gravitons and a + 2 b + 1 scalar momentum entries. a and b must be explicit non-negative integers; n must be an explicit positive integer. The underlying rule supplies any additional structural requirements. Unlike the batch command, this specific command does not impose the batch's minimum scalar-count filter." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+GenerateHorndeskiG5::usage =
+    "GenerateHorndeskiG5[numberOfScalars, n, opts] generates selected G5 libraries for graviton orders 1 through n. numberOfScalars is an explicit non-negative integer upper bound on the number of scalar momentum entries; n is an explicit positive integer. It enumerates a = 0 through numberOfScalars and b = 0 through Ceiling[numberOfScalars/2], retaining only 3 <= a + 2 b + 1 <= numberOfScalars. An empty selection returns Null without calculation or files. Use GenerateHorndeskiG5Specific[a, b, n, opts] for one parameter triple." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckHorndeskiG5::usage =
+    "CheckHorndeskiG5 (without brackets) prints canonical HorndeskiG5_a_b_n filenames in the generator's Libs directory and returns Null. The scalar momentum count is a + 2 b + 1; n is the number of external gravitons. It excludes directories and malformed filenames, does not validate file contents and launches no FORM process.";
+
+GenerateScalarGaussBonnetSpecific::usage =
+    "GenerateScalarGaussBonnetSpecific[n, opts] generates ScalarGaussBonnet_n for exactly n external gravitons. n must be an explicit integer at least 2. Around flat space the curvature-squared interaction starts at second order, so the one-graviton contribution vanishes. This specific command requires at least two graviton triples and returns Failure for n = 1; it does not create a zero library." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+GenerateScalarGaussBonnet::usage =
+    "GenerateScalarGaussBonnet[n, opts] generates scalar–Gauss–Bonnet libraries for orders 2 through n. n must be an explicit positive integer. The flat-background curvature-squared interaction has no one-graviton contribution: for n = 1 the batch returns Null without constructing rules, launching FORM or writing libraries. Use GenerateScalarGaussBonnetSpecific[n, opts] for a single order n >= 2." <> FeynGravLibrariesGenerator`Private`$generationUsage;
+
+CheckScalarGaussBonnet::usage =
+    "CheckScalarGaussBonnet (without brackets) prints canonical ScalarGaussBonnet_n filenames in the generator's Libs directory and returns Null. Generated interaction libraries start at n = 2. This is a filename inventory, not a check of file contents or the physical order; it launches no FORM process and ignores OutputDirectory.";
 
 
-Begin["Private`"];
+Begin["`Private`"];
+$libraryDirectory = DirectoryName[$InputFileName];
+$ruleContexts = {"GravitonScalarVertex`Private`","GravitonFermionVertex`Private`","GravitonVectorVertex`Private`","GravitonSUNYM`Private`","GravitonVertex`Private`","HorndeskiG2`Private`","HorndeskiG3`Private`","HorndeskiG4`Private`","HorndeskiG5`Private`","ScalarGaussBonnet`Private`","GravitonAxionVectorVertex`Private`","QuadraticGravityVertex`Private`","CETensor`Private`","CTensorGeneral`Private`","ETensor`Private`","GammaTensor`Private`","ITensor`Private`","MTDWrapper`Private`","indexArraySymmetrization`Private`"};
 
+$generationOptions = {
+    OutputDirectory -> Automatic, FORMExecutable -> Automatic,
+    FORMThreads -> Automatic, TimeConstraint -> Infinity,
+    WorkingDirectory -> Automatic, KeepFiles -> False,
+    ShowTiming -> False, ShowProgress -> False,
+    DiracAlgebra -> Automatic, ColourAlgebra -> True
+};
+Options[GenerateGravitonScalarsSpecific] = $generationOptions;
+Options[GenerateGravitonScalars] = $generationOptions;
+Options[GenerateGravitonFermionsSpecific] = $generationOptions;
+Options[GenerateGravitonFermions] = $generationOptions;
+Options[GenerateGravitonVectorsSpecific] = $generationOptions;
+Options[GenerateGravitonVectors] = $generationOptions;
+Options[GenerateGravitonVertexSpecific] = $generationOptions;
+Options[GenerateGravitonVertex] = $generationOptions;
+Options[GenerateGravitonSUNYMSpecific] = $generationOptions;
+Options[GenerateGravitonSUNYM] = $generationOptions;
+Options[GenerateHorndeskiG2Specific] = $generationOptions;
+Options[GenerateHorndeskiG2] = $generationOptions;
+Options[GenerateHorndeskiG3Specific] = $generationOptions;
+Options[GenerateHorndeskiG3] = $generationOptions;
+Options[GenerateHorndeskiG4Specific] = $generationOptions;
+Options[GenerateHorndeskiG4] = $generationOptions;
+Options[GenerateHorndeskiG5Specific] = $generationOptions;
+Options[GenerateHorndeskiG5] = $generationOptions;
+Options[GenerateScalarGaussBonnetSpecific] = $generationOptions;
+Options[GenerateScalarGaussBonnet] = $generationOptions;
+Options[GenerateGravitonAxionVectorSpecific] = $generationOptions;
+Options[GenerateGravitonAxionVector] = $generationOptions;
+Options[GenerateQuadraticGravityVertexSpecific] = $generationOptions;
+Options[GenerateQuadraticGravityVertex] = $generationOptions;
 
-(*
-    Helper functions for generating dummy index and momentum lists.
+(* ::Section:: *)
+(*Library specifications and formal symbols*)
 
-    These functions are used by the library generator to construct formal
-    arguments for FeynGrav rule-generating functions. The generated symbols
-    do not carry any physical meaning by themselves. They only serve as
-    placeholders for Lorentz indices and momenta.
+(* These placeholders have a dedicated context. Only declared placeholders and
+   the rule coupling kappa are mapped into the library reader's context. *)
+parameter[name_String] := Symbol["FeynGravLibrariesGenerator`Parameters`" <> name];
+DummyArray[n_] := Flatten[Table[{parameter["m"<>ToString[i]], parameter["n"<>ToString[i]]}, {i,n}]];
+DummyMomenta[n_] := Table[parameter["p"<>ToString[i]], {i,n}];
+DummyArrayMomenta[n_] := Flatten[Table[{parameter["m"<>ToString[i]], parameter["n"<>ToString[i]], parameter["p"<>ToString[i]]}, {i,n}]];
+DummyArrayMomentaK[n_] := Flatten[Table[{parameter["m"<>ToString[i]], parameter["n"<>ToString[i]], parameter["k"<>ToString[i]]}, {i,n}]];
 
-    Naming convention:
-        m1, n1, m2, n2, ...     Lorentz-index pairs of gravitons;
-        p1, p2, p3, ...         generic momenta;
-        k1, k2, k3, ...         graviton momenta.
+(* A held builder prevents construction until arguments/options are validated. *)
+specifications["GenerateGravitonScalarsSpecific", {n_}] := {
+    <|"Family" -> "GravitonScalarVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonScalarVertex`GravitonScalarVertexUncontracted[DummyArray[n],parameter["p1"],parameter["p2"],parameter["m"]]]|>,
+    <|"Family" -> "GravitonScalarPotentialVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonScalarVertex`GravitonScalarPotentialVertexUncontracted[DummyArray[n],parameter["\[Lambda]"]]]|>
+};
 
-    The output order is important. Many rule-generating functions expect
-    their graviton data as a flat list, e.g.
-        {m1, n1, k1, m2, n2, k2, ...}
-    rather than as a nested list of triples.
-*)
+specifications["GenerateGravitonFermionsSpecific", {n_}] := {
+    <|"Family" -> "GravitonFermionVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonFermionVertex`GravitonFermionVertexUncontracted[DummyArrayMomentaK[n],parameter["p1"],parameter["p2"],parameter["m"]]]|>
+};
 
-(*
-    Generate n Lorentz-index pairs:
-        DummyArray[2] -> {m1, n1, m2, n2}
+specifications["GenerateGravitonVectorsSpecific", {n_}] := {
+    <|"Family" -> "GravitonMassiveVectorVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonVectorVertex`GravitonMassiveVectorVertexUncontracted[DummyArray[n],parameter["\[Lambda]1"],parameter["p1"],parameter["\[Lambda]2"],parameter["p2"],parameter["m"]]]|>,
+    <|"Family" -> "GravitonVectorVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonVectorVertex`GravitonVectorVertex[DummyArrayMomentaK[n],parameter["\[Lambda]1"],parameter["p1"],parameter["\[Lambda]2"],parameter["p2"],parameter["GaugeFixingEpsilonVector"]]]|>,
+    <|"Family" -> "GravitonVectorGhostVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonVectorVertex`GravitonVectorGhostVertex[DummyArray[n],parameter["p1"],parameter["p2"]]]|>
+};
 
-    This is used for rules where each graviton leg is represented only by
-    its two Lorentz indices and no momentum is attached to the leg.
-*)
-DummyArray[n_Integer?NonNegative] :=
-    Flatten[
-        Table[
-            {
-                ToExpression["m" <> ToString[i]],
-                ToExpression["n" <> ToString[i]]
-            },
-            {i, n}
-        ]
+specifications["GenerateGravitonVertexSpecific", {n_}] := {
+    <|"Family" -> "GravitonVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonVertex`GravitonVertexUncontracted[DummyArrayMomenta[2+n]]]|>
+};
+
+specifications["GenerateGravitonSUNYMSpecific", {n_}] := {
+    <|"Family" -> "GravitonQuarkGluonVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonSUNYM`GravitonQuarkGluonVertexUncontracted[DummyArray[n],{parameter["\[Lambda]"],parameter["a"]}]]|>,
+    <|"Family" -> "GravitonGluonVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonSUNYM`GravitonGluonVertexUncontracted[DummyArrayMomentaK[n],parameter["p1"],parameter["\[Lambda]1"],parameter["a1"],parameter["p2"],parameter["\[Lambda]2"],parameter["a2"],parameter["GaugeFixingEpsilonSUNYM"]]]|>,
+    <|"Family" -> "GravitonThreeGluonVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonSUNYM`GravitonThreeGluonVertex[DummyArray[n],parameter["p1"],parameter["\[Lambda]1"],parameter["a1"],parameter["p2"],parameter["\[Lambda]2"],parameter["a2"],parameter["p3"],parameter["\[Lambda]3"],parameter["a3"]]]|>,
+    <|"Family" -> "GravitonFourGluonVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonSUNYM`GravitonFourGluonVertexUncontracted[DummyArray[n],parameter["p1"],parameter["\[Lambda]1"],parameter["a1"],parameter["p2"],parameter["\[Lambda]2"],parameter["a2"],parameter["p3"],parameter["\[Lambda]3"],parameter["a3"],parameter["p4"],parameter["\[Lambda]4"],parameter["a4"]]]|>,
+    <|"Family" -> "GravitonYMGhostVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonSUNYM`GravitonYMGhostVertexUncontracted[DummyArray[n],parameter["p1"],parameter["a1"],parameter["p2"],parameter["a2"]]]|>,
+    <|"Family" -> "GravitonGluonGhostVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonSUNYM`GravitonGluonGhostVertexUncontracted[DummyArray[n],{parameter["p1"],parameter["\[Lambda]1"],parameter["a1"]},{parameter["p2"],parameter["\[Lambda]2"],parameter["a2"]},{parameter["p3"],parameter["\[Lambda]3"],parameter["a3"]}]]|>
+};
+
+specifications["GenerateHorndeskiG2Specific", {a_, b_, n_}] := {
+    <|"Family" -> "HorndeskiG2", "Parameters" -> {a,b,n}, "Builder" -> HoldComplete[HorndeskiG2`HorndeskiG2Uncontracted[DummyArray[n],DummyMomenta[a + 2 b ],b]]|>
+};
+
+specifications["GenerateHorndeskiG3Specific", {a_, b_, n_}] := {
+    <|"Family" -> "HorndeskiG3", "Parameters" -> {a,b,n}, "Builder" -> HoldComplete[HorndeskiG3`HorndeskiG3Uncontracted[DummyArrayMomentaK[n],DummyMomenta[ a + 2 b + 1 ],b]]|>
+};
+
+specifications["GenerateHorndeskiG4Specific", {a_, b_, n_}] := {
+    <|"Family" -> "HorndeskiG4", "Parameters" -> {a,b,n}, "Builder" -> HoldComplete[HorndeskiG4`HorndeskiG4Uncontracted[DummyArrayMomentaK[n],DummyMomenta[a+2b],b]]|>
+};
+
+specifications["GenerateHorndeskiG5Specific", {a_, b_, n_}] := {
+    <|"Family" -> "HorndeskiG5", "Parameters" -> {a,b,n}, "Builder" -> HoldComplete[HorndeskiG5`HorndeskiG5Uncontracted[DummyArrayMomentaK[n],DummyMomenta[a+2b+1],b]]|>
+};
+
+(* Flat-background curvature squared has no one-graviton contribution.
+   The rule and batch start at two triples; a batch requested through order one
+   is empty and returns Null without evaluating the rule. *)
+specifications["GenerateScalarGaussBonnetSpecific", {n_}] := {
+    <|"Family" -> "ScalarGaussBonnet", "Parameters" -> {n}, "Builder" -> HoldComplete[ScalarGaussBonnet`ScalarGaussBonnet[DummyArrayMomentaK[n]]]|>
+};
+
+specifications["GenerateGravitonAxionVectorSpecific", {n_}] := {
+    <|"Family" -> "GravitonAxionVectorVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[GravitonAxionVectorVertex`GravitonAxionVectorVertexUncontracted[DummyArray[n],parameter["\[Lambda]1"],parameter["p1"],parameter["\[Lambda]2"],parameter["p2"],parameter["\[CapitalTheta]"]]]|>
+};
+
+specifications["GenerateQuadraticGravityVertexSpecific", {n_}] := {
+    <|"Family" -> "QuadraticGravityVertex", "Parameters" -> {n}, "Builder" -> HoldComplete[QuadraticGravityVertex`QuadraticGravityVertex[DummyArrayMomenta[2+n],parameter["\[GothicM]0"],parameter["\[GothicM]2"]]]|>
+};
+
+(* Resolve only formal-argument constructors inside HoldComplete; the rule
+   itself remains held. This is each specification's symbol contract. *)
+formalSymbols[builder_HoldComplete] := DeleteDuplicates[Flatten[
+    ReleaseHold /@ Cases[builder,
+        x : (_DummyArray | _DummyMomenta | _DummyArrayMomenta | _DummyArrayMomentaK | _parameter) :> HoldComplete[x],
+        Infinity]]];
+
+(* ::Section:: *)
+(*Validation, selection and diagnostics*)
+
+failure[tag_, message_, data_:<||>] := Failure[tag, Join[
+    <|"MessageTemplate" -> message, "Function" -> "FeynGravLibrariesGenerator`" <> $command,
+      "Stage" -> $stage|>, data]];
+$command = ""; $stage = "Validation";
+require[value_] := Module[{bad},
+    bad = FirstCase[value, f_Failure :> f, None, {0, Infinity}];
+    If[bad =!= None, Throw[bad, $generationTag]];
+    If[!FreeQ[value, $Aborted], Abort[]];
+    If[!FreeQ[value, $Failed], Throw[failure["RuleEvaluationFailed", "An operation returned $Failed."], $generationTag]];
+    value
+];
+
+(* Look up legacy Global` settings by name only when they exist. A literal
+   Global` symbol in a definition would itself create a shadowing symbol. *)
+existingSetting[name_String, fallback_] := If[Names[name] === {}, fallback,
+    ToExpression[name, InputForm, Function[s, If[ValueQ[s], s, fallback], HoldAllComplete]]];
+legacyExecutable[] := existingSetting["FeynGravLibrariesGenerator`$FeynGravFORMExecutable",
+    existingSetting["Global`$FeynGravFORMExecutable", Automatic]];
+
+(* Explicit options win, then the invoked command's current defaults. A legacy
+   executable is used only when no executable option is given and that command's
+   default is Automatic. Explicit Automatic therefore disables the fallback. *)
+resolveOptions[rules_List, command_String:""] := Module[{options, defaults, executable, output},
+    If[!AllTrue[rules, MatchQ[#, _Rule | _RuleDelayed] &] ||
+       !SubsetQ[First /@ $generationOptions, First /@ rules],
+        Return[failure["InvalidOption", "An unknown or malformed generator option was supplied."]]];
+    defaults = If[command === "", $generationOptions,
+        Options[Symbol["FeynGravLibrariesGenerator`" <> command]]];
+    options = Association[Reverse[Join[rules, defaults, $generationOptions]]];
+    If[!MemberQ[First /@ rules, FORMExecutable] && options[FORMExecutable] === Automatic,
+        options[FORMExecutable] = legacyExecutable[]];
+    executable = options[FORMExecutable];
+    output = Replace[options[OutputDirectory], Automatic :> $libraryDirectory];
+    If[!StringQ[output] || !DirectoryQ[output], Return[failure["InvalidOutputDirectory", "OutputDirectory must identify an existing directory."]]];
+    options[OutputDirectory] = ExpandFileName[output];
+    If[!(executable === Automatic || (StringQ[executable] && StringLength[executable] > 0)) ||
+       !(options[FORMThreads] === Automatic || (IntegerQ[options[FORMThreads]] && options[FORMThreads] > 0)) ||
+       !(options[TimeConstraint] === Infinity || (NumberQ[options[TimeConstraint]] && TrueQ[options[TimeConstraint] > 0])) ||
+       !AllTrue[{options[KeepFiles], options[ShowTiming], options[ShowProgress]}, MemberQ[{True,False},#]&] ||
+       !MemberQ[{Automatic,False},options[DiracAlgebra]] ||
+       !MemberQ[{True,Automatic,False},options[ColourAlgebra]],
+        Return[failure["InvalidOption", "Invalid executable, worker count, timeout or algebra/runtime switch."]]];
+    If[options[WorkingDirectory] =!= Automatic &&
+       (!StringQ[options[WorkingDirectory]] || !DirectoryQ[options[WorkingDirectory]]),
+        Return[failure["InvalidOption", "WorkingDirectory must be Automatic or an existing directory."]]];
+    options
+];
+
+(* Gauss-Bonnet starts at two gravitons. Other family ranges, including the
+   Horndeski lower bounds on b and scalar count, retain their existing meaning. *)
+requestSpecifications[command_, args_List] := Module[{specific, horndeski, count, jobs, minimum, offset, bmin},
+    specific = StringEndsQ[command,"Specific"];
+    horndeski = StringContainsQ[command,"Horndeski"];
+    count = If[horndeski, If[specific,3,2],1];
+    If[Length[args] =!= count, Return[failure["InvalidArgumentCount", "Incorrect number of positional arguments.", <|"ExpectedCount"->count,"ActualCount"->Length[args]|>]]];
+    If[!AllTrue[args,IntegerQ[#] && # >= 0 &] || Last[args] < 1,
+        Return[failure["InvalidParameterValue", "Counts must be non-negative integers and the graviton order must be positive."]]];
+    If[specific, Return[specifications[command,args]]];
+    If[!horndeski, Return[Flatten[specifications[command<>"Specific",{#}]& /@ Range[If[command === "GenerateScalarGaussBonnet",2,1],First[args]],1]]];
+    bmin = If[command === "GenerateHorndeskiG2",1,0];
+    minimum = If[command === "GenerateHorndeskiG4",2,3];
+    offset = If[MemberQ[{"GenerateHorndeskiG3","GenerateHorndeskiG5"},command],1,0];
+    jobs = Select[Tuples[{Range[0,First[args]],Range[bmin,Ceiling[First[args]/2]],Range[Last[args]]}],
+        minimum <= #[[1]] + 2 #[[2]] + offset <= First[args] &];
+    Flatten[specifications[command<>"Specific",#]& /@ jobs,1]
+];
+
+(* ::Section:: *)
+(*Library symbol contract and serialisation*)
+
+(* Inspect held constructors as names before creating any symbols. This catches
+   assigned source placeholders before ReleaseHold can consume their values. *)
+formalNames[builder_HoldComplete] := DeleteDuplicates[Flatten[
+    Cases[builder, #, Infinity] & /@ {
+    HoldPattern[parameter[name_String]] :> name,
+    HoldPattern[DummyArray[n_]] :> Flatten[Table[{"m"<>ToString[i],"n"<>ToString[i]},{i,n}]],
+    HoldPattern[DummyMomenta[n_]] :> Table["p"<>ToString[i],{i,n}],
+    HoldPattern[DummyArrayMomenta[n_]] :> Flatten[Table[{"m"<>ToString[i],"n"<>ToString[i],"p"<>ToString[i]},{i,n}]],
+    HoldPattern[DummyArrayMomentaK[n_]] :> Flatten[Table[{"m"<>ToString[i],"n"<>ToString[i],"k"<>ToString[i]},{i,n}]]
+    }]];
+
+symbolHasDefinitions[name_String] := Names[name] =!= {} &&
+    ToExpression[name, InputForm, Function[s,
+        OwnValues[s] =!= {} || DownValues[s] =!= {} || UpValues[s] =!= {} || SubValues[s] =!= {}, HoldAllComplete]];
+
+validateFormalNames[names_List] := Module[{sources, targets, assigned},
+    sources = ("FeynGravLibrariesGenerator`Parameters`" <> # &) /@ names;
+    (* Public gauge parameters and kappa are explicitly localised during
+       serialisation; ordinary destination placeholders must be unassigned. *)
+    targets = ("FeynGrav`Private`" <> # &) /@ Complement[names,
+        {"GaugeFixingEpsilonVector","GaugeFixingEpsilonSUNYM"}];
+    assigned = Select[Join[sources,targets],symbolHasDefinitions];
+    If[assigned === {}, True, failure["AssignedLibrarySymbol",
+        "A formal library symbol has definitions. Use unassigned placeholders or a fresh kernel; no definitions were changed.",
+        <|"Symbols" -> assigned|>]]
+];
+
+librarySymbol[s_Symbol] := Switch[SymbolName[Unevaluated[s]],
+    "GaugeFixingEpsilonVector", Unevaluated[FeynGrav`GaugeFixingEpsilonVector],
+    "GaugeFixingEpsilonSUNYM", Unevaluated[FeynGrav`GaugeFixingEpsilonSUNYM],
+    _, Symbol["FeynGrav`Private`" <> SymbolName[Unevaluated[s]]]
+];
+
+(* Symbols are matched by full identity, not by textual substrings. Rule-local
+   dummy indices must have disappeared during FORM contraction. Unknown symbols
+   in those contexts are rejected rather than silently renamed. *)
+libraryExpression[expression_, allowed_:Automatic] := Module[{symbols, mapping, value, leaked},
+    symbols = DeleteDuplicates[Cases[expression, s_Symbol /;
+        Context[s] === "FeynGravLibrariesGenerator`Parameters`", {0,Infinity}, Heads->True]];
+    If[allowed =!= Automatic && !SubsetQ[allowed,symbols],
+        Return[failure["LibrarySymbolMismatch", "An undeclared formal symbol remains in the calculated library."]]];
+    value = validateFormalNames[SymbolName /@ symbols];
+    If[FailureQ[value], Return[value]];
+    mapping = (Rule[#,librarySymbol[#]]&) /@ symbols;
+    value = expression /. Join[mapping,{Global`\[Kappa] -> FeynGrav`\[Kappa]}];
+    leaked = Cases[value, s_Symbol /;
+        StringStartsQ[Context[s],"FeynGravLibrariesGenerator`"] || MemberQ[$ruleContexts,Context[s]],
+        {0,Infinity}, Heads->True];
+    If[leaked =!= {}, Return[failure["LibrarySymbolMismatch", "A rule-local or generator symbol remains in the calculated library.",
+        <|"Symbols" -> (ToString[#,InputForm]& /@ DeleteDuplicates[leaked])|>]]];
+    value
+];
+
+(* Read under the exact context search path used by FeynGrav's importer. *)
+readLibrary[path_] := Block[{$Context = "FeynGrav`Private`", $ContextPath = {"FeynGrav`","FeynCalc`","System`"}}, Get[path]];
+writeLibrary[path_, expression_] := Block[{$Context = "System`", $ContextPath = {"System`"}}, Put[expression,path]];
+
+(* Replacement is protected from user abort. A backup is kept until the staged
+   file has been installed. If recovery fails its path is reported, never erased. *)
+publishLibrary[staged_, target_] := AbortProtect[Module[{backup = target<>".backup-"<>CreateUUID[], hadOld, moved, installed, restored},
+    hadOld = FileExistsQ[target];
+    If[hadOld,
+        moved = Check[RenameFile[target,backup],$Failed];
+        If[moved === $Failed, Return[failure["LibraryPublicationFailed", "Could not preserve the existing library.", <|"Destination"->target|>]]]
     ];
-
-(*
-    Generate n generic momenta:
-        DummyMomenta[3] -> {p1, p2, p3}
-
-    This is used for rules that require only a list of formal external
-    momenta and no associated graviton-index pairs.
-*)
-DummyMomenta[n_Integer?NonNegative] :=
-    Table[
-        ToExpression["p" <> ToString[i]],
-        {i, n}
+    installed = Check[RenameFile[staged,target],$Failed];
+    If[installed === $Failed,
+        restored = If[hadOld,Check[RenameFile[backup,target],$Failed],Null];
+        Return[failure["LibraryPublicationFailed", "Could not install the staged library.",
+            <|"Destination"->target,"RecoveryFile"->If[hadOld && restored === $Failed,backup,None]|>]]
     ];
+    If[hadOld, If[Check[DeleteFile[backup],$Failed] === $Failed,
+        Return[failure["LibraryBackupCleanupFailed", "The library was installed but its backup could not be removed.", <|"Destination"->target,"RecoveryFile"->backup,"Published"->True|>]]]];
+    target
+]];
 
-(*
-    Generate n triples {mi, ni, pi}:
-        DummyArrayMomenta[2] -> {m1, n1, p1, m2, n2, p2}
+(* ::Section:: *)
+(*One calculation and sequential batch orchestration*)
 
-    Each triple represents one graviton leg: two Lorentz indices and one
-    associated momentum. This convention is used when the graviton momenta
-    are naturally denoted by p1, p2, ...
-*)
-DummyArrayMomenta[n_Integer?NonNegative] :=
-    Flatten[
-        Table[
-            {
-                ToExpression["m" <> ToString[i]],
-                ToExpression["n" <> ToString[i]],
-                ToExpression["p" <> ToString[i]]
-            },
-            {i, n}
-        ]
+generateOne[spec_Association, options_Association] := Block[{Global`\[Kappa]}, Module[
+    {target, staged = None, expression, calculated, serialised, reread, outcome, constructionTime, calculationTime, started = AbsoluteTime[]},
+    target = FileNameJoin[{options[OutputDirectory], spec["Family"] <> "_" <> StringRiffle[ToString /@ spec["Parameters"],"_"]}];
+    outcome = CheckAbort[Catch[
+        $stage = "Validation";
+        require[validateFormalNames[formalNames[spec["Builder"]]]];
+        $stage = "Construction";
+        (* Rules use Global`kappa. Localise its value so the library remains
+           symbolic even when the caller has assigned a numerical coupling. *)
+        {constructionTime,expression} = AbsoluteTiming[Block[{Global`\[Kappa]},ReleaseHold[spec["Builder"]]]];
+        require[expression];
+        $stage = "Calculation";
+        {calculationTime,calculated} = AbsoluteTiming[CalcFormCalculate[expression,
+            Sequence @@ Normal[KeyDrop[options,{OutputDirectory}]]]];
+        require[calculated];
+        $stage = "Serialisation";
+        Block[{FeynGrav`GaugeFixingEpsilonVector,FeynGrav`GaugeFixingEpsilonSUNYM,FeynGrav`\[Kappa]},
+            serialised = require[libraryExpression[calculated,formalSymbols[spec["Builder"]]]];
+            staged = target<>".staging-"<>CreateUUID[];
+            require[Check[writeLibrary[staged,serialised],$Failed]];
+            reread = require[Check[readLibrary[staged],$Failed]];
+            If[!SameQ[reread,serialised], require[failure["LibraryReadbackMismatch", "Serialised library differs from the calculated expression."]]];
+        ];
+        $stage = "Publication";
+        require[publishLibrary[staged,target]];
+        Print["Generated ",spec["Family"]," ",spec["Parameters"]," in ",ToString[Round[AbsoluteTime[]-started,0.01],InputForm]," s (wall clock)."];
+        If[TrueQ[options[ShowTiming]],Print["Construction: ",constructionTime," s; CalcFormCalculate: ",calculationTime," s (wall clock)."]];
+        target,
+        $generationTag],
+        If[StringQ[staged] && FileExistsQ[staged],DeleteFile[staged]]; Abort[]
     ];
+    If[StringQ[staged] && FileExistsQ[staged],DeleteFile[staged]];
+    If[FailureQ[outcome], failure["LibraryGenerationFailed",
+        If[TrueQ[Lookup[outcome[[2]],"Published",False]],
+            "The library was installed, but post-publication cleanup failed. See the recovery file.",
+            "Library generation failed; inspect the cause and any recovery file."],
+        <|"Family"->spec["Family"],"Parameters"->spec["Parameters"],"Destination"->target,
+          "Published"->TrueQ[Lookup[outcome[[2]],"Published",False]],"Cause"->outcome|>], outcome]
+]];
 
-(*
-    Generate n triples {mi, ni, ki}:
-        DummyArrayMomentaK[2] -> {m1, n1, k1, m2, n2, k2}
+optionArgumentQ[x_] := MatchQ[x,_Rule|_RuleDelayed] ||
+    (ListQ[x] && AllTrue[x,optionArgumentQ]);
 
-*)
-DummyArrayMomentaK[n_Integer?NonNegative] :=
-    Flatten[
-        Table[
-            {
-                ToExpression["m" <> ToString[i]],
-                ToExpression["n" <> ToString[i]],
-                ToExpression["k" <> ToString[i]]
-            },
-            {i, n}
-        ]
-    ];
-
-
-(* Procedures that verify whether libraries exist. *)
-
-
-(* Scalars. *)
-
-
-CheckGravitonScalars := (
-	Scan[ Print["Libraries for the scalar field kinetic term vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonScalarVertex_*"] ];
-	Scan[ Print["Libraries for the scalar field potential term vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonScalarVertex_*"] ];
-);
-
-
-(* Fermions. *)
-
-
-CheckGravitonFermions := Scan[ Print["Libraries for Dirac fermion vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonFermionVertex_*"] ];
-
-
-(* Vectors. *)
-
-
-CheckGravitonVectors := (
-	Scan[ Print["Libraries for Proca field vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonMassiveVectorVertex_*"] ];
-	Scan[ Print["Libraries for a vector field vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonVectorVertex_*"] ];
-	Scan[ Print["Libraries for a vector-ghost vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonVectorGhostVertex_*"] ];
-);
-
-
-(* Gravitons. *)
-
-
-CheckGravitonVertex := (
-	Scan[ Print["Libraries for graviton vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonVertex_*"] ];
-);
-
-
-(* SU(N) Yang-Mills. *)
-
-
-CheckGravitonSUNYM := (
-	Scan[ Print["Libraries for graviton-quark-gluon vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonQuarkGluonVertex_*"] ];
-	Scan[ Print["Libraries for graviton-gluon vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonGluonVertex_*"] ];
-	Scan[ Print["Libraries for graviton-gluon-gluon-gluon vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonThreeGluonVertex_*"] ];
-	Scan[ Print["Libraries for graviton-gluon-gluon-gluon-gluon vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonFourGluonVertex_*"] ];
-	Scan[ Print["Libraries for graviton-(Yang-Mills) ghost vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonYMGhostVertex_*"] ];
-	Scan[ Print["Libraries for graviton-gluon-(Yang-Mills) ghost vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonGluonGhostVertex_*"] ];
-);
-
-
-(* Horndeski. *)
-
-
-CheckHorndeskiG2 := Scan[ ( Print["Horndeski G2 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG2_*"] ];
-
-
-CheckHorndeskiG3 := Scan[ ( Print["Horndeski G3 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG3_*"] ];
-
-
-CheckHorndeskiG4 := Scan[ ( Print["Horndeski G4 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG4_*"] ];
-
-
-CheckHorndeskiG5 := Scan[ ( Print["Horndeski G5 vertex exists for a=",#1,", b=",#2,", n=",#3,"."]&@@ToExpression[StringSplit[#,"_"][[2;;4]]] )&, FileNames["HorndeskiG5_*"] ];
-
-
-CheckScalarGaussBonnet := Scan[ Print["Libraries for Scalar-Gauss-Bonnet vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["ScalarGaussBonnet_*"] ];
-
-
-(* Graviton-Axion. *)
-
-
-CheckGravitonAxionVector := Scan[ Print["Libraries for gravitational interaction of a scalar axion coupled to a single vector field exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["GravitonAxionVectorVertex_*"] ];
-
-
-(* Quadratic gravity. *)
-
-
-CheckQuadraticGravityVertex := (
-	Scan[ Print["Libraries for quadratic gravity vertices exist for n = ",#,"."]& ,StringSplit[#,"_"][[2]]&/@FileNames["QuadraticGravityVertex_*"] ];
-);
-
-
-(* Procedures that generate libraries. *)
-
-
-(* Supplementary functions. *)
-
-
-(* The function converts FeynCalc output to a FORM-executable file with FeynCalc2FORM and other tools. *)
-
-
-FORMCodeCleanUp[filePath_, np_, nk_] :=
-    Module[
-        {
-            theDictionary = {
-                "\\[Kappa]" -> "Kappa",
-                "\\[Alpha]" -> "al",
-                "\\[Beta]" -> "be",
-                "\\[CapitalTheta]" -> "cthet",
-                "\\[GothicM]" -> "gom",
-                "(ScriptA)" -> "sca",
-                "(ScriptB)" -> "scb",
-                "(ScriptM)" -> "scm",
-                "(ScriptN)" -> "scn",
-                "(ScriptR)" -> "scr",
-                "(ScriptS)" -> "scs",
-                "(ScriptL)" -> "scl",
-                "(ScriptT)" -> "sct",
-                "\\[Lambda]" -> "lbd",
-                "(Lambda)" -> "lbd",
-                "(Tau)" -> "tau",
-                "(Omega)" -> "omg",
-                "(Epsilon)" -> "eps",
-                "(CapitalTheta)" -> "cthet",
-                "GaugeFixingEpsilon" -> "gfEPS",
-                "(GothicM)" -> "gom"
-            },
-            theFileIndicesArray,
-            theFileMomentaArray,
-            theText
-        },
-
-        (* Give rule-private symbols distinct FORM prefixes: removing only
-           "Private`" would leave invalid backticks, while removing the whole
-           context would merge dummy indices belonging to different packages.
-           Keep the legacy generator-context replacements below. *)
-        Export[
-            filePath,
-            StringReplace[
-                Import[filePath, "Text"],
-                {
-                    "CETensor`Private`" -> "fgr1x",
-                    "CTensorGeneral`Private`" -> "fgr2x",
-                    "ETensor`Private`" -> "fgr3x",
-                    "GammaTensor`Private`" -> "fgr4x",
-                    "GravitonAxionVectorVertex`Private`" -> "fgr5x",
-                    "GravitonFermionVertex`Private`" -> "fgr6x",
-                    "GravitonSUNYM`Private`" -> "fgr7x",
-                    "GravitonScalarVertex`Private`" -> "fgr8x",
-                    "GravitonVectorVertex`Private`" -> "fgr9x",
-                    "GravitonVertex`Private`" -> "fgr10x",
-                    "HorndeskiG2`Private`" -> "fgr11x",
-                    "HorndeskiG3`Private`" -> "fgr12x",
-                    "HorndeskiG4`Private`" -> "fgr13x",
-                    "HorndeskiG5`Private`" -> "fgr14x",
-                    "ITensor`Private`" -> "fgr15x",
-                    "MTDWrapper`Private`" -> "fgr16x",
-                    "Nieuwenhuizen`Private`" -> "fgr17x",
-                    "QuadraticGravityVertex`Private`" -> "fgr18x",
-                    "ScalarGaussBonnet`Private`" -> "fgr19x",
-                    "indexArraySymmetrization`Private`" -> "fgr20x",
-                    "Private`" -> "",
-                    "FeynGrav`" -> "",
-                    "FeynCalc`FeynCalc2FORM`" -> ""
-                }
-            ],
-            "Text"
-        ];
-
-        (* Make the expression into a single line. *)
-        Export[
-            filePath,
-            StringRiffle[
-                Join[
-                    {First[#]},
-                    {StringJoin[Rest[#]]}
-                ],
-                "\n"
-            ] & @ Import[filePath, "Lines"],
-            "Text"
-        ];
-
-        (* Replace Mathematica-style names by FORM-safe names. *)
-        Export[
-            filePath,
-            StringReplace[
-                Import[filePath, "Text"],
-                theDictionary
-            ],
-            "Text"
-        ];
-
-        (*
-            FeynCalc2FORM may leave Dirac gamma matrices in a Mathematica-like
-            intermediate notation. Convert
-
-                diracg(Lorentzi_ndex(mu,D),D)
-
-            to FORM notation
-
-                g_(0,mu)
-        *)
-        Export[
-            filePath,
-            StringReplace[
-                Import[filePath, "Text"],
-                "diracg(Lorentzi_ndex(" ~~ x : (WordCharacter ..) ~~ ",D),D)" :>
-                    "g_(0," <> x <> ")"
-            ],
-            "Text"
-        ];
-
-        theText = Import[filePath, "Text"];
-
-        (* Collect Lorentz indices appearing in d_(...), e_(...), and g_(0,...). *)
-        theFileIndicesArray =
-            Join[
-                Flatten[
-                    StringCases[
-                        theText,
-                        "d_(" ~~ x1 : (WordCharacter ..) ~~ "," ~~
-                            x2 : (WordCharacter ..) ~~ ")" :> {x1, x2}
-                    ]
-                ],
-                Flatten[
-                    StringCases[
-                        theText,
-                        "e_(" ~~ a : (WordCharacter ..) ~~ "," ~~
-                            b : (WordCharacter ..) ~~ "," ~~
-                            c : (WordCharacter ..) ~~ "," ~~
-                            d : (WordCharacter ..) ~~ ")" :> {a, b, c, d}
-                    ]
-                ],
-                Flatten[
-                    StringCases[
-                        theText,
-                        "g_(0," ~~ x : (WordCharacter ..) ~~ ")" :> x
-                    ]
-                ]
-            ] // DeleteDuplicates;
-
-        (* Build the vector list without a trailing comma. *)
-        theFileMomentaArray =
-            Join[
-                "p" <> ToString[#] & /@ Range[np],
-                "k" <> ToString[#] & /@ Range[nk]
+dispatch[command_String, arguments_List] := Block[{$command = command,$stage = "Validation",$generationTag = Unique["generation"]},
+    Module[{args=arguments,rules={},options,specs,result,completed={},outcome},
+        outcome = Catch[
+            require[arguments];
+            While[args =!= {} && optionArgumentQ[Last[args]],
+                rules = Join[Flatten[{Last[args]}],rules]; args = Most[args]];
+            options = require[resolveOptions[rules,command]];
+            specs = require[requestSpecifications[command,args]];
+            Do[
+                result = generateOne[spec,options];
+                If[FailureQ[result],
+                    If[TrueQ[Lookup[result[[2]],"Published",False]], AppendTo[completed,result[[2,"Destination"]]]];
+                    Throw[Failure[result[[1]],Join[result[[2]],<|"CompletedFiles"->completed|>]],$generationTag]];
+                AppendTo[completed,result],
+                {spec,specs}
             ];
-
-        Export[
-            filePath,
-            "Indices " <> StringRiffle[theFileIndicesArray, ","] <> ";\n" <>
-            If[
-                theFileMomentaArray === {},
-                "",
-                "Vectors " <> StringRiffle[theFileMomentaArray, ","] <> ";\n"
-            ] <>
-            Import[filePath, "Text"],
-            "Text"
-        ];
-
-        (* Put the expression in the local variable theResult. *)
-        Export[
-            filePath,
-            MapAt[
-                "Local theResult = " <> # <> ";" &,
-                Import[filePath, {"Text", "Lines"}],
-                4
-            ],
-            "Lines"
-        ];
-
-        (* Add the end of the FORM program. *)
-        Export[
-            filePath,
-            Join[
-                Import[filePath, {"Text", "Lines"}],
-                {"print theResult;", ".end"}
-            ],
-            "Lines"
-        ];
-    ];
-
-
-(* The function that cleans the FORM output file. *)
-
-
-FORMOutputCleanUp[filePath_] :=
-	Module[{},
-		(* Clean the output *)
-		Export[filePath, Import[filePath,"Lines"][[Last[Position[StringContainsQ["theResult =",#]&/@Import[filePath,"Lines"],True]][[1]]+2;;]],"Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], {" " -> "", "\n" -> "", "\r" -> "", ";" -> ""}], "Text"];
-	
-		(* Bringing the output to the FeynCalc form*)
-		Export[filePath, StringReplace[Import[filePath, "Text"], "d_(" ~~ x : (WordCharacter ..) ~~ "," ~~ y : (WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> x <> ", D], LorentzIndex[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "(" ~~ (y : WordCharacter ..) ~~ ")" :> "Pair[LorentzIndex[" <> y <> ", D], Momentum[" <> x <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], (x : WordCharacter ..) ~~ "." ~~ (y : WordCharacter ..) :>  "Pair[Momentum[" <> x <> ", D], Momentum[" <> y <> ", D]]"], "Text"];
-		Export[filePath, StringReplace[Import[filePath, "Text"], "e_(" ~~ a : (WordCharacter ..) ~~ "," ~~ b : (WordCharacter ..) ~~ "," ~~ c : (WordCharacter ..) ~~ "," ~~ d : (WordCharacter ..) ~~ ")" :>  "LeviCivita[" <> a <> "," <> b <> "," <> c <> "," <> d <> "]"], "Text"];
-		
-		Export[filePath, StringReplace[Import[filePath, "Text"], {"i_" -> "I", "Kappa" -> "\\[Kappa]","gfEPS"->"GaugeFixingEpsilon","al"->"\\[Alpha]","be"->"\\[Beta]","lbd"->"\\[Lambda]","cthet"->"\\[CapitalTheta]","gsCoupling"->"SMP[\"g_s\"]","gom"->"\\[GothicM]" }], "Text"];
-	];
-
-
-(* Scalars. *)
-
-
-GenerateGravitonScalars[n_Integer?Positive] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Map[GenerateGravitonScalarsSpecific , Range[n]] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
+            Null,
+            $generationTag];
+        outcome
+    ]
 ];
 
-
-GenerateGravitonScalarsSpecific[n_Integer?Positive] := Module[{filePath,theTimingVariable},
-	(* Kinetic term *)
-	filePath = "GravitonScalarVertex_"<>ToString[n]<>".frm";
-		
-	(* Check if the FROM code file exists and is empty. *)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-	(* Check if the corresponding library exists and delete it if it does. *)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonScalarVertexUncontracted[DummyArray[n],p1,p2,m] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-	
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2,0];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-
-	Print["Scalar field kinetic term vertices is generated for n="<>ToString[n]<>"."];
-	
-	(* Potential term. *)
-	filePath = "GravitonScalarPotentialVertex_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonScalarPotentialVertexUncontracted[DummyArray[n],Global`\[Lambda]]] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2,0];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-	
-	Print["Done for the kinetic term for order n="<>ToString[n]<>"."];
-];
-
-
-GenerateGravitonFermions[n_Integer?Positive] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Map[GenerateGravitonFermionsSpecific , Range[n]] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateGravitonFermionsSpecific[n_Integer?Positive] := Module[
-	{
-		libraryFilePath = "GravitonFermionVertex_" <> ToString[n],
-		formFilePath = "GravitonFermionVertex_" <> ToString[n]  <> ".frm",
-		theTimingVariable,
-		formExitCode
-	},
-	
-	(* Remove the old FORM input file if it exists. *)
-	If[FileExistsQ[formFilePath],
-		DeleteFile[formFilePath]
-	];
-	
-	(* Create a new empty FORM input file. *)
-	CreateFile[formFilePath];
-	
-	(* Remove the old generated library file if it exists. *)
-	If[FileExistsQ[libraryFilePath],
-		DeleteFile[libraryFilePath]
-	];
-	
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable =
-		Timing[
-			FeynCalc2FORM[
-				formFilePath,
-				GravitonFermionVertexUncontracted[DummyArrayMomentaK[n],p1,p2,m]
-			]
-		][[1]];
-		
-	Print[
-		"The expression is generated in ",
-		theTimingVariable,
-		" seconds."
-	];
-	
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[formFilePath, 2, n];
-	
-	(* Run FORM and save its output to the library file. *)
-	{theTimingVariable, formExitCode} =
-		Timing[
-			Run[
-				"form -q " <> formFilePath <> " > " <> libraryFilePath
-			]
-		];
-		
-	If[formExitCode =!= 0,
-		Print[
-			"FORM failed while processing ",
-			formFilePath,
-			". Exit code: ",
-			formExitCode,
-			"."
-		];
-		Return[$Failed];
-	];
-	
-	If[!FileExistsQ[libraryFilePath],
-		Print[
-			"FORM did not create the expected library file ",
-			libraryFilePath,
-			"."
-		];
-		Return[$Failed];
-	];
-	
-	Print[
-		"FORM calculated the expression in ",
-		theTimingVariable,
-		" seconds."
-	];
-	
-	DeleteFile[formFilePath];
-	
-	(* Clean the output. *)
-	FORMOutputCleanUp[libraryFilePath];
-	
-	Export[
-		libraryFilePath,
-		StringReplace[
-			Import[libraryFilePath, "Text"],
-			{
-			"g_(0," ~~ x : (("p" | "k") ~~ DigitCharacter ..) ~~ ")" :>
-				"DiracGamma[Momentum[" <> x <> ",D],D]",
-				
-			"g_(0," ~~ x : (WordCharacter ..) ~~ ")" :>
-				"DiracGamma[LorentzIndex[" <> x <> ",D],D]"
-			}
-		],
-		"Text"
-	];
-	
-	Export[
-		libraryFilePath,
-		StringReplace[
-			Import[libraryFilePath, "Text"],
-			{
-			"GAD[" ~~ x : (("p" | "k") ~~ DigitCharacter ..) ~~ "]" :>
-				"DiracGamma[Momentum[" <> x <> ",D],D]",
-				
-			"GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>
-				"DiracGamma[LorentzIndex[" <> x <> ",D],D]"
-			}
-		],
-		"Text"
-	];
-	
-	Export[
-		libraryFilePath,
-		StringReplace[
-			Import[libraryFilePath, "Text"],
-				"g_(0," ~~ x : (WordCharacter .. ~~ ("," ~~ WordCharacter ..) ..) ~~ ")" :>
-					"(" <>
-						StringRiffle[
-							(
-								StringReplace[
-									#,
-									{
-										y : (("p" | "k") ~~ DigitCharacter ..) :>
-											"DiracGamma[Momentum[" <> y <> ",D],D]",
-											
-										y : (WordCharacter ..) :>
-											"DiracGamma[LorentzIndex[" <> y <> ",D],D]"
-									}
-								] &
-							) /@ StringSplit[x, ","],
-						"."
-					] <>
-				")"
-			],
-		"Text"
-	];
-	
-	Print[
-		"Fermion vertex library generated for n = ",
-		n,
-		"."
-	];
-];
-
-
-GenerateGravitonVectors[n_Integer?Positive] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Map[GenerateGravitonVectorsSpecific , Range[n]] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateGravitonVectorsSpecific[n_Integer?Positive] := Module[{filePath,theTimingVariable},
-(* Proca field *)
-	filePath = "GravitonMassiveVectorVertex_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonMassiveVectorVertexUncontracted[DummyArray[n],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`m]] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2,0];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-		
-	Print["Done for the Proca field for order n="<>ToString[n]<>"."];
-	
-(* Maxwell field *)
-	filePath = "GravitonVectorVertex_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonVectorVertex[DummyArrayMomentaK[n],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`GaugeFixingEpsilonVector]] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2,n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-		
-	Print["Done for the Maxwell field for order n="<>ToString[n]<>"."];
-	
-(* Ghost *)
-	filePath = "GravitonVectorGhostVertex_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonVectorGhostVertex[DummyArray[n],Global`p1,Global`p2]] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2,n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-		
-	Print["Done for the Maxwell-ghost for order n="<>ToString[n]<>"."];
-];
-
-
-GenerateGravitonVertex[n_Integer?Positive] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Map[GenerateGravitonVertexSpecific , Range[n]] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateGravitonVertexSpecific[n_Integer?Positive] := Module[{filePath,theTimingVariable},
-(* Gravitons *)
-	filePath = "GravitonVertex_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath,GravitonVertexUncontracted[DummyArrayMomenta[2+n]]] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2+n,0];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-				
-	Print["Done for the graviton vertex for order n="<>ToString[n]<>"."];
-];
-
-
-(* Procedures that generates rules for SU(N) Yang-Mills model. *)
-
-
-GenerateGravitonSUNYM[n_Integer?Positive] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Map[GenerateGravitonSUNYMSpecific , Range[n]] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateGravitonSUNYMSpecific[n_Integer?Positive] := Module[{filePath,theTimingVariable},
-(* Graviton-Quark-Gluon vertex *)
-	filePath = "GravitonQuarkGluonVertex_"<>ToString[n]<>".frm";
-		
-	(* Check if the FROM code file exists and is empty. *)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-	(* Check if the corresponding library exists and delete it if it does. *)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonQuarkGluonVertexUncontracted[DummyArray[n],{Global`\[Lambda],Global`a}] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2,n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNIndex[a]","syFC2"->"SUNT[SUNIndex[a]]"}], "Text"];
-
-	Print["Graviton-quark-gluon vertex is generated for n="<>ToString[n]<>"."];
-
-(* Graviton-Gluon-Gluon vertex *)
-	filePath = "GravitonGluonVertex_"<>ToString[n]<>".frm";
-		
-	(* Check if the FROM code file exists and is empty. *)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-	(* Check if the corresponding library exists and delete it if it does. *)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonGluonVertexUncontracted[DummyArrayMomentaK[n],Global`p1,Global`\[Lambda]1,Global`a1,Global`p2,Global`\[Lambda]2,Global`a2,Global`GaugeFixingEpsilonSUNYM] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2,n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNDelta[SUNIndex[a1],SUNIndex[a2]]","syFC2"->"SUNIndex[a1]","syFC3"->"SUNIndex[a2]"}], "Text"];
-
-	Print["Graviton-gluon vertex is generated for n="<>ToString[n]<>"."];
-		
-(* Graviton-Gluon-Gluon-Gluon vertex *)
-	
-	filePath = "GravitonThreeGluonVertex_"<>ToString[n]<>".frm";
-		
-	(* Check if the FROM code file exists and is empty. *)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-	(* Check if the corresponding library exists and delete it if it does. *)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonThreeGluonVertex[DummyArray[n],p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,3,n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[a3]]","syFC3"->"SUNIndex[a1]","syFC4"->"SUNIndex[a2]","syFC5"->"SUNIndex[a3]"}], "Text"];
-
-	Print["Graviton-gluon-gluon-gluon vertex is generated for n="<>ToString[n]<>"."];
-
-(* Graviton-Gluon-Gluon-Gluon-Gluon vertex *)
-	filePath = "GravitonFourGluonVertex_"<>ToString[n]<>".frm";
-		
-	(* Check if the FROM code file exists and is empty. *)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-	(* Check if the corresponding library exists and delete it if it does. *)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonFourGluonVertexUncontracted[DummyArray[n],p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,4,n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[s]]","syFC3"->"SUNF[SUNIndex[a1],SUNIndex[a3],SUNIndex[s]]","syFC4"->"SUNF[SUNIndex[a1],SUNIndex[a4],SUNIndex[s]]","syFC5"->"SUNF[SUNIndex[a2],SUNIndex[a3],SUNIndex[s]]","syFC6"->"SUNF[SUNIndex[a2],SUNIndex[a4],SUNIndex[s]]","syFC7"->"SUNF[SUNIndex[a3],SUNIndex[a4],SUNIndex[s]]","syFC8"->"SUNIndex[a1]","syFC9"->"SUNIndex[a2]","syFC10"->"SUNIndex[a3]","syFC11"->"SUNIndex[a4]","syFC12"->"SUNIndex[s]"} ], "Text"];
-
-	Print["Graviton-gluon-gluon-gluon-gluon vertex is generated for n="<>ToString[n]<>"."];
-
-(* Gravtion-Yang-Mills-Ghost vertex *)	
-	filePath = "GravitonYMGhostVertex_"<>ToString[n]<>".frm";
-		
-	(* Check if the FROM code file exists and is empty. *)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-	(* Check if the corresponding library exists and delete it if it does. *)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonYMGhostVertexUncontracted[DummyArray[n],p1,a1,p2,a2] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2,0];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SUNDelta[SUNIndex[a1],SUNIndex[a2]]","syFC2"->"SUNIndex[a1]","syFC3"->"SUNIndex[a2]"} ], "Text"];
-
-	Print["Graviton-YM ghost vertex is generated for n="<>ToString[n]<>"."];
-
-(* Graviton-Gluon-Ghost vertex *)
-	filePath = "GravitonGluonGhostVertex_"<>ToString[n]<>".frm";
-		
-	(* Check if the FROM code file exists and is empty. *)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-	(* Check if the corresponding library exists and delete it if it does. *)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, GravitonGluonGhostVertexUncontracted[DummyArray[n],{p1,\[Lambda]1,a1},{p2,\[Lambda]2,a2},{p3,\[Lambda]3,a3}] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,3,0];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (Except[")"] ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], {"syFC1"->"SMP[\"g_s\"]","syFC2"->"SUNF[SUNIndex[a1],SUNIndex[a2],SUNIndex[a3]]","syFC3"->"SUNIndex[a1]","syFC4"->"SUNIndex[a2]","syFC5"->"SUNIndex[a3]"} ], "Text"];
-
-	Print["Graviton-gluon-YM ghost vertex is generated for n="<>ToString[n]<>"."];
-
-];
-
-
-(* Procedures that generates rules for Horndeski G2 interaction. *)
-
-
-GenerateHorndeskiG2[numberOfScalars_,n_] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Apply[GenerateHorndeskiG2Specific , Select[ Tuples[{Range[0,numberOfScalars],Range[1,Ceiling[numberOfScalars/2]],Range[n]}], (3<=#[[1]]+2#[[2]]<=numberOfScalars)&] , 1] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateHorndeskiG2Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
-	filePath = "HorndeskiG2_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]<>".frm";
-	
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath, HorndeskiG2Uncontracted[DummyArray[n],DummyMomenta[a + 2 b ],b] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath , a + 2 b , 0];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-					
-	Print["Done for the Horndeski G2 vertex with a=",a,", b="<>ToString[b]<>" for order n="<>ToString[n]<>"."];
-];
-
-
-(* Procedures that generates rules for Horndeski G3 interaction. *)
-
-
-GenerateHorndeskiG3[numberOfScalars_,n_] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Apply[GenerateHorndeskiG3Specific , Select[ Tuples[{Range[0,numberOfScalars],Range[0,Ceiling[numberOfScalars/2]],Range[n]}], (3<=#[[1]]+2#[[2]]+1<=numberOfScalars)&] , 1] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateHorndeskiG3Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
-	filePath = "HorndeskiG3_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath, HorndeskiG3Uncontracted[DummyArrayMomentaK[n],DummyMomenta[ a + 2 b + 1 ],b] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath, a + 2 b + 1 , n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-						
-	Print["Done for the Horndeski G3 vertex with a=",a,", b="<>ToString[b]<>" for order n="<>ToString[n]<>"."];
-];
-
-
-GenerateHorndeskiG4[numberOfScalars_,n_] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Apply[GenerateHorndeskiG4Specific , Select[ Tuples[{Range[0,numberOfScalars],Range[0,Ceiling[numberOfScalars/2]],Range[n]}], (2<=#[[1]]+2#[[2]]<=numberOfScalars)&] , 1] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateHorndeskiG4Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
-	filePath = "HorndeskiG4_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath, HorndeskiG4Uncontracted[DummyArrayMomentaK[n],DummyMomenta[a+2b],b] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,a+2b,n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-		
-	Print["Done for the Horndeski G4 vertex with a=",a,", b="<>ToString[b]<>" for order n="<>ToString[n]<>"."];
-];
-
-
-GenerateHorndeskiG5[numberOfScalars_,n_] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Apply[GenerateHorndeskiG5Specific , Select[ Tuples[{Range[0,numberOfScalars],Range[0,Ceiling[numberOfScalars/2]],Range[n]}], (3<=#[[1]]+2#[[2]]+1<=numberOfScalars)&] , 1] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateHorndeskiG5Specific[a_,b_,n_] := Module[{filePath,theTimingVariable},
-	filePath = "HorndeskiG5_"<>ToString[a]<>"_"<>ToString[b]<>"_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing [ FeynCalc2FORM[filePath, HorndeskiG5Uncontracted[DummyArrayMomentaK[n],DummyMomenta[a+2b+1],b] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,a+2b+1,n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-		
-	Print["Done for the Horndeski G5 vertex with a=",a,", b="<>ToString[b]<>" for order n="<>ToString[n]<>"."];
-];
-
-
-(* Scalar-Gauss-Bonnet *)
-
-
-GenerateScalarGaussBonnet[n_Integer?Positive] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Map[GenerateScalarGaussBonnetSpecific , Range[2,n]] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateScalarGaussBonnetSpecific[n_Integer?Positive] := Module[{filePath,theTimingVariable},
-	filePath = "ScalarGaussBonnet_"<>ToString[n]<>".frm";
-		
-	(* Check if the FROM code file exists and is empty. *)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-	(* Check if the corresponding library exists and delete it if it does. *)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, ScalarGaussBonnet[DummyArrayMomentaK[n]] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,0,n];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "g_(0," ~~ x : (WordCharacter ..) ~~ ")" :>  "GAD[" <> x <> "]"], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"],{"GAD[p1]"->"DiracGamma[Momentum[p1,D],D]","GAD[p2]"->"DiracGamma[Momentum[p2,D],D]"}], "Text"];
-	Export[filePath, StringReplace[Import[filePath, "Text"], "GAD[" ~~ x : (WordCharacter ..) ~~ "]" :>  "DiracGamma[LorentzIndex[" <> x <> ",D],D]"], "Text"];
-
-	Print["Scalar-GaussBonnet vertices is generated for n="<>ToString[n]<>"."];
-];
-
-
-(* Procedures that generates rules for the simplest axion-like interaction. *)
-
-
-GenerateGravitonAxionVector[n_Integer?Positive] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Map[GenerateGravitonAxionVectorSpecific , Range[n]] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateGravitonAxionVectorSpecific[n_Integer?Positive] := Module[{filePath,theTimingVariable},
-	
-	filePath = "GravitonAxionVectorVertex_"<>ToString[n]<>".frm";
-		
-	(* Check if the FROM code file exists and is empty. *)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-	(* Check if the corresponding library exists and delete it if it does. *)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(* FeynCalc converts the expression to FORM and writes it to the file. *)
-	theTimingVariable = Timing[ FeynCalc2FORM[ filePath, (I) GravitonAxionVectorVertexUncontracted[DummyArray[n],Global`\[Lambda]1,Global`p1,Global`\[Lambda]2,Global`p2,Global`\[CapitalTheta]] ] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2,0];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-
-	Print["Done for graviton-axion-like coupling of order n="<>ToString[n]<>"."];
-];
-
-
-GenerateQuadraticGravityVertex[n_Integer?Positive] := Module[{theTimingVariable},
-	theTimingVariable = Timing[ Map[GenerateQuadraticGravityVertexSpecific , Range[n]] ][[1]];
-	Print["The computational time is ",ToString[theTimingVariable]," seconds."];
-];
-
-
-GenerateQuadraticGravityVertexSpecific[n_Integer?Positive] := Module[{filePath,theTimingVariable},
-(* Gravitons *)
-	filePath = "QuadraticGravityVertex_"<>ToString[n]<>".frm";
-		
-	(*Check if the FROM code file is exists and empty.*)
-	If[ FileExistsQ[filePath], Close[OpenWrite[filePath]], CreateFile[filePath] ];
-		
-	(*Check if the corresponding library exists and delete it if it does*)
-	If[FileExistsQ[StringDrop[filePath, -4]], DeleteFile[StringDrop[filePath, -4]]];
-		
-	(*Writing the expression of the FORM file*)
-	theTimingVariable = Timing[ FeynCalc2FORM[filePath,QuadraticGravityVertex[DummyArrayMomenta[2+n],\[GothicM]0,\[GothicM]2]] ][[1]];
-	Print["The expression is generated in ",theTimingVariable," seconds."];
-		
-	(* I modify the FORM file so that it can be executed. *)
-	FORMCodeCleanUp[filePath,2+n,0];
-		
-	(*Run the FORM*)
-	theTimingVariable = Timing[ Run["form -q " <> filePath <> " >> "<>StringDrop[filePath, -4]] ][[1]];
-	Print["FORM calculated the expression in ",theTimingVariable," seconds."];
-	DeleteFile[filePath];
-	filePath = StringDrop[filePath, -4];
-		
-	(*Clean the output*)
-	FORMOutputCleanUp[filePath];
-				
-	Print["Done for the quadratic gravity vertex for order n="<>ToString[n]<>"."];
-];
-
+(* ::Section:: *)
+(*Public entry points and library inventory*)
+GenerateGravitonScalarsSpecific[args___] := dispatch["GenerateGravitonScalarsSpecific",{args}];
+GenerateGravitonScalars[args___] := dispatch["GenerateGravitonScalars",{args}];
+CheckGravitonScalars := inventory[{"GravitonScalarVertex","GravitonScalarPotentialVertex"}];
+
+GenerateGravitonFermionsSpecific[args___] := dispatch["GenerateGravitonFermionsSpecific",{args}];
+GenerateGravitonFermions[args___] := dispatch["GenerateGravitonFermions",{args}];
+CheckGravitonFermions := inventory[{"GravitonFermionVertex"}];
+
+GenerateGravitonVectorsSpecific[args___] := dispatch["GenerateGravitonVectorsSpecific",{args}];
+GenerateGravitonVectors[args___] := dispatch["GenerateGravitonVectors",{args}];
+CheckGravitonVectors := inventory[{"GravitonMassiveVectorVertex","GravitonVectorVertex","GravitonVectorGhostVertex"}];
+
+GenerateGravitonVertexSpecific[args___] := dispatch["GenerateGravitonVertexSpecific",{args}];
+GenerateGravitonVertex[args___] := dispatch["GenerateGravitonVertex",{args}];
+CheckGravitonVertex := inventory[{"GravitonVertex"}];
+
+GenerateGravitonSUNYMSpecific[args___] := dispatch["GenerateGravitonSUNYMSpecific",{args}];
+GenerateGravitonSUNYM[args___] := dispatch["GenerateGravitonSUNYM",{args}];
+CheckGravitonSUNYM := inventory[{"GravitonQuarkGluonVertex","GravitonGluonVertex","GravitonThreeGluonVertex","GravitonFourGluonVertex","GravitonYMGhostVertex","GravitonGluonGhostVertex"}];
+
+GenerateHorndeskiG2Specific[args___] := dispatch["GenerateHorndeskiG2Specific",{args}];
+GenerateHorndeskiG2[args___] := dispatch["GenerateHorndeskiG2",{args}];
+CheckHorndeskiG2 := inventory[{"HorndeskiG2"}];
+
+GenerateHorndeskiG3Specific[args___] := dispatch["GenerateHorndeskiG3Specific",{args}];
+GenerateHorndeskiG3[args___] := dispatch["GenerateHorndeskiG3",{args}];
+CheckHorndeskiG3 := inventory[{"HorndeskiG3"}];
+
+GenerateHorndeskiG4Specific[args___] := dispatch["GenerateHorndeskiG4Specific",{args}];
+GenerateHorndeskiG4[args___] := dispatch["GenerateHorndeskiG4",{args}];
+CheckHorndeskiG4 := inventory[{"HorndeskiG4"}];
+
+GenerateHorndeskiG5Specific[args___] := dispatch["GenerateHorndeskiG5Specific",{args}];
+GenerateHorndeskiG5[args___] := dispatch["GenerateHorndeskiG5",{args}];
+CheckHorndeskiG5 := inventory[{"HorndeskiG5"}];
+
+GenerateScalarGaussBonnetSpecific[args___] := dispatch["GenerateScalarGaussBonnetSpecific",{args}];
+GenerateScalarGaussBonnet[args___] := dispatch["GenerateScalarGaussBonnet",{args}];
+CheckScalarGaussBonnet := inventory[{"ScalarGaussBonnet"}];
+
+GenerateGravitonAxionVectorSpecific[args___] := dispatch["GenerateGravitonAxionVectorSpecific",{args}];
+GenerateGravitonAxionVector[args___] := dispatch["GenerateGravitonAxionVector",{args}];
+CheckGravitonAxionVector := inventory[{"GravitonAxionVectorVertex"}];
+
+GenerateQuadraticGravityVertexSpecific[args___] := dispatch["GenerateQuadraticGravityVertexSpecific",{args}];
+GenerateQuadraticGravityVertex[args___] := dispatch["GenerateQuadraticGravityVertex",{args}];
+CheckQuadraticGravityVertex := inventory[{"QuadraticGravityVertex"}];
+
+
+(* Parse no expressions from filenames. Backups, staging files and FORM jobs
+   never count as installed libraries. *)
+canonicalLibraryQ[family_String, path_String] := FileType[path] === File &&
+    StringMatchQ[FileNameTake[path], RegularExpression[family <>
+        If[MemberQ[{"HorndeskiG2","HorndeskiG3","HorndeskiG4","HorndeskiG5"},family],
+            "_(0|[1-9][0-9]*)_(0|[1-9][0-9]*)_[1-9][0-9]*", "_[1-9][0-9]*"]]];
+
+inventoryFiles[family_String] := Select[FileNames[family<>"_*",$libraryDirectory],canonicalLibraryQ[family,#]&];
+inventory[families_List] := Scan[Function[family,
+    Scan[Print[FileNameTake[#]] &, inventoryFiles[family]]],families];
+
+FeynGravLibrariesGeneratorFORMInformation[] := CalcFormCheck[
+    FORMExecutable -> legacyExecutable[]];
+FeynGravLibrariesGeneratorFORMInformation[executable_String] := CalcFormCheck[FORMExecutable->executable];
+FeynGravLibrariesGeneratorPrintFORMStatus[] := Module[{status=FeynGravLibrariesGeneratorFORMInformation[]},Print[status];status];
+
+If[!TrueQ[existingSetting["FeynGravLibrariesGenerator`$FeynGravLibrariesGeneratorStartupMessage",
+        existingSetting["Global`$FeynGravLibrariesGeneratorStartupMessage",True]] === False],
+    Print[StringRiffle[{
+        "FeynGrav library generator — CalcFormConverter",
+        "Loading preserves Directory[] and starts no calculation, FORM check or installation.",
+        "Use CheckGravitonScalars (without brackets) to list libraries; GenerateGravitonScalarsSpecific[1] generates one order, and GenerateGravitonScalars[n] generates a batch.",
+        "Default library destination: " <> $libraryDirectory <> ". Use OutputDirectory -> anExistingDirectory to generate elsewhere. Existing files are replaced only after validation.",
+        "Calculation defaults: automatic FORM/TFORM selection, up to eight TFORM workers with serial fallback if TFORM is missing; Dirac and colour processing enabled.",
+        "Pure/quadratic gravity: order n means n + 2 graviton legs. Gauss-Bonnet batches start at two; n = 1 returns Null without files.",
+        "Use ?function and Options[function] for signatures, defaults and failures. Full guide: " <> FileNameJoin[{$libraryDirectory,"Generator.md"}],
+        "To suppress this introduction, set $FeynGravLibrariesGeneratorStartupMessage = False before loading."
+    }, "\n"]]];
 
 End[];
-
-
 EndPackage[];

@@ -1,23 +1,40 @@
-# Persisted format, version 1
+# Persisted formats, versions 1 through 5
 
 This document describes the JSON mapping and dedicated FORM result consumed by `CalcFormImport`. It is a compatibility contract for saved calculations. Internal helper associations returned by `buildExportData` and `renderExport` are private implementation details and are not this file format.
 
 ## Version and correspondence
 
-The mapping contains `"Format": "CalcFormConverter"` and integer `"Version": 1`. The result begins with:
+The mapping contains `"Format": "CalcFormConverter"` and an integer `"Version"` from 1 through 5. The result begins with `CFC<version> <mapping-digest>`, followed by the FORM expression. For example, a **version-one** result begins with:
 
 ```text
 CFC1 <mapping-digest>
 <FORM expression>
 ```
 
-The marker is derived from the format version in the implementation. Version 1 accepts only version 1; unsupported versions produce `Failure["InvalidMapping", ...]`. Changing the meaning of existing fields, symbol encoding or result grammar requires an explicit compatibility decision and, when incompatible, a new format version. Optional descriptive fields may be added without changing existing meanings.
+The marker is derived from the format version in the implementation. The importer accepts versions 1 through 5; unsupported versions produce `Failure["InvalidMapping", ...]`. Changing the meaning of existing fields, symbol encoding or result grammar requires an explicit compatibility decision and, when incompatible, a new format version. Optional descriptive fields may be added without changing existing meanings.
 
 The mapping is read as UTF-8 text. Its primary digest is Wolfram Language `Hash[jsonText, "SHA256", "HexString"]`. For compatibility with early notebook exports, the importer also accepts the digest of `FromCharacterCode[ToCharacterCode[jsonText, "UTF-8"]]`: those exports hashed the UTF-8 byte string before writing Unicode text. Both checks bind the complete mapping. These are Wolfram string hashes, not a specification to hash arbitrary raw file bytes with an external utility. Even JSON reformatting changes the digest. Preserve the mapping file with its result. This check detects mismatched artifacts, not deliberate tampering.
 
 For the user workflow and commands, see [README.md](README.md); implementation invariants and tests are in [DEVELOPER.md](DEVELOPER.md).
 
+
+### Version selection
+
+Choose the highest applicable row below; a newer feature can coexist with and retain older convention metadata.
+
+| Version | Export condition | Additional contract |
+| --- | --- | --- |
+| 1 | None of the newer structures below | Original tensor/scalar mapping and compatible polarisation identities |
+| 2 | Epsilon tensors without a higher-version feature | Captured epsilon convention and translation factor |
+| 3 | Dirac/colour translation without processing or explicit traces requiring later formats | Typed words and reserved open spin line |
+| 4 | Dirac processing or explicit Dirac traces, without version-five colour features | Processing mode and independent trace spin lines |
+| 5 | Processed colour structures or supported colour traces | Colour conventions, processing mode, typed indices/endpoints and procedure identity |
+
+Ordinary epsilon-free scalar/tensor exports remain version one even with the default algebra options. Version selection follows structures present in the input, not just an enabled option. See the version-specific sections below for exact fields and validation. Existing versions are still importable; a documentation reorganisation does not change their meaning.
+
 ## Mapping fields
+
+The table describes common fields, using version one as the baseline. Later sections add version-specific fields and processing modes.
 
 | Field | Meaning | Import requirement |
 | --- | --- | --- |
@@ -27,9 +44,9 @@ For the user workflow and commands, see [README.md](README.md); implementation i
 | `Entries` | Array of mapping entries | Required and validated |
 | `ExpressionDigest` | `Hash[FCI[input], "SHA256", "HexString"]` | Always exported; participates in mapping digest, not otherwise interpreted |
 | `LoopMomenta` | Array of encoded momentum symbols supplied by the user | Always exported; informational to the current importer |
-| `Processing` | `"TensorAlgebraOnly"` in this version | Always exported; informational to the current importer |
+| `Processing` | `"TensorAlgebraOnly"` for version one; later versions record the enabled algebra mode | Always exported; informational to the current importer |
 
-`ExpressionDigest` differentiates exports of different expressions even if they use exactly the same symbol dictionary. It is not a serialized expression or an independent proof of the FORM calculation. Future procedures must define any additional use of `LoopMomenta` or `Processing` explicitly.
+`ExpressionDigest` differentiates exports of different expressions even if they use exactly the same symbol dictionary. It is not a serialised expression or an independent proof of the FORM calculation. Future procedures must define any additional use of `LoopMomenta` or `Processing` explicitly.
 
 Each entry requires `Name`, `Kind` and `Expression`. Names are unique within a mapping. Export numbering starts at one within each kind and follows traversal order. The importer accepts a kind's prefix followed by digits. Numbering is local to each export; consumers must not assume, for example, that `cfi1` always means alpha.
 
@@ -86,9 +103,9 @@ After the header, the result is a single expression with optional whitespace and
 
 FORM output performs algebra and contractions, so the result need not retain the original factorization or denominator grouping. Opaque scalar abbreviations and denominator identifiers retain their definitions through the mapping.
 
-### Tokenization and precedence
+### Tokenisation and precedence
 
-The result body is tokenized into ASCII identifiers (`[A-Za-z][A-Za-z0-9_]*`), decimal digit sequences, and `+ - * / ^ ( ) , .`. Whitespace may separate tokens; it cannot hide other characters. There is no implicit multiplication, decimal/scientific notation, assignment, semicolon terminator, string literal or comment syntax. Use the dedicated `.out` file, not the FORM console transcript.
+The result body is tokenised into ASCII identifiers (`[A-Za-z][A-Za-z0-9_]*`), decimal digit sequences, and `+ - * / ^ ( ) , .`. Whitespace may separate tokens; it cannot hide other characters. There is no implicit multiplication, decimal/scientific notation, assignment, semicolon terminator, string literal or comment syntax. Use the dedicated `.out` file, not the FORM console transcript.
 
 From lowest to highest, parsing handles sums, products/division, unary signs, integer powers and vector dots/atoms. Division chains are left associative: `24/3/2` gives `4`. An exponent is one signed integer, optionally parenthesized, such as `x^-2` or `x^(-2)`; arbitrary exponent expressions and chained powers are rejected. Unary signs precede a power expression, so `-2^2` is `-4`, whereas `(-2)^2` is `4`.
 
@@ -100,20 +117,159 @@ All mapping expressions are decoded and checked, including entries unused by the
 
 `Tests/Fixtures/v1.map.json` and `v1.out` were generated by the original version-one exporter and FORM 4.3 before the maintainability refactor. The fixed expected expression is checked in `Tests/Core.wls`. The tests must not regenerate these files: doing so would allow exporter and importer to change incompatibly together without detecting the break.
 
-### Polarization vector extension
+### Polarisation vector extension
 
-Vector entries also accept `["Polarization", <encoded exact rational linear momentum label>,
+Vector entries also accept `["Polarisation", <encoded exact rational linear momentum label>,
 <encoded exact I or -I>]`, optionally followed by the literal data array
 `["Transversality", "True"]` or `["Transversality", "False"]`. The option data
 is decoded only inside this constrained node; general `Rule` expressions are
 not accepted. The full identity, conjugation label and explicit option survive
 reconstruction inside `Momentum`, using the mapping's Lorentz dimension.
 The momentum label consists only of symbols, rational multiples of symbols
-and their sums; nested polarizations, nonlinear products and arbitrary heads
-are rejected. Polarization is also accepted inside supported scalar abbreviations.
+and their sums; nested polarisations, nonlinear products and arbitrary heads
+are rejected. Polarisation is also accepted inside supported scalar abbreviations.
 
 This is an additive version-one vocabulary extension. Existing version-one
 artifacts remain readable and the fixed compatibility fixture is unchanged.
-Older converter revisions reject new polarization entries; new exports using
-this extension require an importer with polarization support. Ordinary symbol
+Older converter revisions reject new polarisation entries; new exports using
+this extension require an importer with polarisation support. Ordinary symbol
 vector entries retain their original encoding.
+
+
+## Version two: Lorentz epsilon tensors
+
+Epsilon-containing exports without Dirac/colour structures use Version 2 and marker `CFC2`. Existing fields,
+digest binding and identifier dictionaries retain their meanings. The required
+`EpsilonConvention` association contains encoded `Sign` and `ExportFactor` values.
+`Sign` must be one of -1, 1, -I or I; `ExportFactor` must equal `-I Sign`.
+The output grammar additionally accepts `e_(a,b,c,d)`, with four mapped index
+or vector identifiers. Version-one output cannot introduce this function.
+
+Export multiplies each native epsilon by ExportFactor; import divides each
+surviving epsilon by that factor. Real FORM tests show the raw fully contracted
+rank-four square is D(D-1)(D-2)(D-3), so the factor supplies FeynCalc's
+`-$LeviCivitaSign^2` contraction coefficient. This corrects the originally proposed
+factor `-Sign`, which failed the real-process sign tests.
+
+Import validates convention metadata and its agreement with the current FeynCalc
+setting before parsing, including scalar-only results. Invalid metadata returns
+InvalidMapping; a different current setting returns EpsilonConventionMismatch.
+
+
+## Version three: Dirac and colour translation
+
+Translation-only gamma/colour jobs without explicit traces use Version 3 and marker `CFC3`. The required `DiracSpinLine`
+is the integer 1; this line is reserved even for colour-only jobs. The required
+boolean `EpsilonPresent` must agree with the presence of `EpsilonConvention`. The epsilon
+convention association is required when epsilon tensors occur and retains its
+version-two meaning. Its presence selects epsilon pair contraction in FORM.
+
+Additional entry kinds, all declared as FORM Symbols:
+
+| Kind | Prefix | Validated value |
+|---|---|---|
+| ColourTensor | cfct | SUNF, SUND, SUNDelta, SUNFDelta or SUNTF with typed symbolic indices |
+| ColourWord | cfcw | Complete ordered nonempty list of adjoint labels, encoded with ColourWord |
+| NamedCoupling | cfcp | SMP with one string argument |
+
+Encoded colour objects use SUNIndex and SUNFIndex tags. ColourIndexList encodes
+ordered lists, including the generator list inside SUNTF. NamedCoupling holds
+one string as data; it is never interpreted as Wolfram source. Lists and these
+heads do not become generally accepted scalar expressions.
+
+The general output parser accepts `g_(1,...)` with one or more mapped Lorentz
+indices/vectors and `gi_(1)` for the identity. Special gamma codes and other
+spin lines are rejected. Gamma results and ColourWord entries remain typed
+through arithmetic validation before reconstruction as ordered Dot products.
+Multiple implicit words in the same space in a result product, and matrix
+powers/denominators, are invalid. No new forms enter the flat parser grammar.
+
+Scalar colour constants remain ordinary mapped symbols. Colour structures in
+FORM are opaque complete objects: this format performs no SU(N) algebra and
+preserves the input's normalisation. Older versions cannot introduce the new
+entry kinds or native gamma result calls.
+
+
+## Version four: configured Dirac processing and explicit traces
+
+Version 4 (`CFC4`) retains version-three entries, `DiracSpinLine -> 1`, and
+`EpsilonPresent`/`EpsilonConvention`. It adds required fields:
+
+- `DiracAlgebra`: the string `"Automatic"` or `"False"`.
+- `TraceLines`: an ordered list of associations with integer `Line` values
+  consecutively numbered from 2, and encoded scalar `TraceOfOne` values.
+- `GammaOrdering`: every mapped Index/Vector name in the canonical ordering.
+  The importer independently derives and checks this list.
+
+`Processing` is `LorentzAndDiracAlgebra` for automatic version-four jobs and
+`TensorAlgebraOnly` for translation-only jobs. Normalisation is per trace;
+FORM uses unit trace 1 and the exporter supplies each recorded scalar factor.
+The open line is never traced. Independent occurrences, including powers,
+receive distinct lines even when their expressions are identical.
+
+With automatic processing only line 1 may survive in native `g_`/`gi_` output.
+An unevaluated declared trace line is an invalid result. In translation-only
+mode a declared trace line reconstructs as `DiracTrace[..., TraceOfOne -> n,
+DiracTraceEvaluate -> False]`. It remains scalar with respect to the open
+matrix space. Trace-line identity is retained until validation: repeated use
+of one line in a product and powers/denominators of an unprocessed native
+trace word are rejected. Unknown lines, malformed gamma arguments and internal
+`cfcOpen` objects are invalid. No new syntax is added to the flat parser.
+
+Gamma argument ordering is by `{Kind, compact JSON encoding of Expression}`:
+indices precede vectors, with complete symbol contexts retained. This is
+independent of dictionary allocation order. No gamma-five identities or
+finite-dimensional basis reduction are implied. Import never reruns the
+FORM algebra and does not consult the current trace-normalisation default.
+
+
+## Version five: SU(N) colour processing
+
+Version 5 (`CFC5`) is selected for automatic processing of any supported colour
+object/constant, or for `SUNTrace` with either colour setting. All version-four
+Dirac fields and applicable epsilon metadata remain required. Unaffected jobs
+retain their previous version selection.
+
+The required `Colour` association contains:
+
+| Field | Contract |
+| --- | --- |
+| `Mode` | `"Automatic"` or `"False"` |
+| `Group`, `Representation` | `"SU(N)"`, `"Fundamental"` |
+| `TraceNormalisation`, `Flavours` | `[1,2]`, `1` |
+| `Procedure` | `"CFC-SUn-1"` when processed, otherwise `"None"` |
+| `UpstreamSHA256` | Pinned SHA-256 of the unchanged SUn.prc reference |
+| `Rank` | Scalar dictionary identifier whose decoded value is SUNN; `"None"` when preserved |
+| `IndexDictionary` | All colour-index entry identifiers, in registry order |
+| `ImplicitEndpoints` | Empty or two distinct declared fundamental identifiers, left then right |
+| `GeneratedNamespace` | ``CalcFormConverter`ColourIndices`h<64 lowercase hex digits>` ``; empty when preserved |
+
+New entry kinds are `ColourAdjointIndex` (`cfcaN`, encoded `SUNIndex`),
+`ColourFundamentalIndex` (`cfcqN`, encoded `SUNFIndex`) and `ColourTrace` (`cfcrN`).
+The latter is an opaque, validated trace body used only in preserving mode;
+its expression tag `ColourTraceBody` wraps normalised sums/products and ordered
+`ColourWord` entries. It cannot contain nested traces, Dirac words or arbitrary
+function heads. Automatic mode rejects opaque colour entries. Duplicate colour
+identities and inconsistent endpoint declarations are rejected.
+
+Processed output calls are `cfcCT(adjoint...,fundamental,fundamental)`,
+`cfcCTr(adjoint...)` with at least four arguments, `cfcCF` and `cfcCD` with three
+adjoint arguments, and native `d_` with two indices in the same space.
+Indices are typed until each complete call is validated. Colour tensor
+inverses, leaked temporary objects, wrong spaces and undeclared names fail.
+
+FORM-generated `N<positive integer>_?` tokens have a separate restricted path,
+active only in automatic version-five imports. They decode to generated
+fundamental dummy indices and must each occur twice in every term where used.
+No arbitrary unknown identifier is accepted. Generated free endpoints must
+occur once per nonzero term. Endpoint connectivity determines whether the
+whole result can return to implicit words or must remain explicit.
+
+`Processing` is `LorentzAndColourAlgebra` or `LorentzDiracAndColourAlgebra` for
+processed colour jobs; preserving jobs retain the previous descriptions.
+Only the general parser is extended. Caches and colour metadata are scoped to
+one import; the flat parser and saved versions one through four are unchanged.
+
+The public option `ColourAlgebra -> True` is normalised to the existing enabled
+mode. Version-five `Colour.Mode` remains `"Automatic"` or `"False"`; this option
+alias does not introduce another mapping version.

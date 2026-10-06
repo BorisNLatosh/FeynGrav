@@ -39,6 +39,12 @@ The function returns the gravitational vertex for coupling of scalar axions to t
 GravitonAxionVectorVertex::usage = GravitonAxionVectorVertex::usage <> " Supported signatures: GravitonAxionVectorVertex[indexArray, \\[Lambda]1, q1, \\[Lambda]2, q2, \\[Theta]]; argument 1: flat list, block size 2, length 0 to Infinity; argument 2: symbolic expression (not a list or association); argument 3: symbolic expression (not a list or association); argument 4: symbolic expression (not a list or association); argument 5: symbolic expression (not a list or association); argument 6: symbolic expression (not a list or association)." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
 GravitonAxionVectorVertexUncontracted::usage = GravitonAxionVectorVertexUncontracted::usage <> " Supported signatures: GravitonAxionVectorVertexUncontracted[indexArray, \\[Lambda]1, q1, \\[Lambda]2, q2, \\[Theta]]; argument 1: flat list, block size 2, length 0 to Infinity; argument 2: symbolic expression (not a list or association); argument 3: symbolic expression (not a list or association); argument 4: symbolic expression (not a list or association); argument 5: symbolic expression (not a list or association); argument 6: symbolic expression (not a list or association)." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
 
+(* Eps has four slots even in symbolic D. All slots and momentum components
+   use the same Lorentz space. FeynCalc's $LeviCivitaSign sets its convention;
+   the rule's physical -I prefactor is independent of FORM translation. *)
+GravitonAxionVectorVertex::usage = GravitonAxionVectorVertex::usage <> " Uses rank-four Eps with D-dimensional LorentzIndex slots and momentum components, following $LeviCivitaSign.";
+GravitonAxionVectorVertexUncontracted::usage = GravitonAxionVectorVertexUncontracted::usage <> " Uses rank-four Eps with D-dimensional LorentzIndex slots and momentum components, following $LeviCivitaSign.";
+
 Begin["`Private`"];
 
 
@@ -49,7 +55,7 @@ GravitonAxionVectorVertex[indexArray_, \[Lambda]1_, q1_, \[Lambda]2_, q2_, \[The
         GravitonAxionVectorVertex[indexArray, \[Lambda]1, q1, \[Lambda]2, q2, \[Theta]],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}},
         (
-- I (Global`\[Kappa])^(Length[indexArray]/2) \[Theta] FeynCalcInternal[RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]]] LC[\[Tau]1,\[Lambda]1,\[Tau]2,\[Lambda]2] FV[q1,\[Tau]1]FV[q2,\[Tau]2] //Contract
+- I (Global`\[Kappa])^(Length[indexArray]/2) \[Theta] FeynCalcInternal[RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]]] Eps[LorentzIndex[\[Tau]1,D],LorentzIndex[\[Lambda]1,D],LorentzIndex[\[Tau]2,D],LorentzIndex[\[Lambda]2,D]] Pair[Momentum[q1,D],LorentzIndex[\[Tau]1,D]] Pair[Momentum[q2,D],LorentzIndex[\[Tau]2,D]] //Contract
         ), True
     ];
 
@@ -61,7 +67,7 @@ GravitonAxionVectorVertexUncontracted[indexArray_, \[Lambda]1_, q1_, \[Lambda]2_
         GravitonAxionVectorVertexUncontracted[indexArray, \[Lambda]1, q1, \[Lambda]2, q2, \[Theta]],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}},
         (
-- I (Global`\[Kappa])^(Length[indexArray]/2) \[Theta] RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]] LC[\[Tau]1,\[Lambda]1,\[Tau]2,\[Lambda]2] FV[q1,\[Tau]1]FV[q2,\[Tau]2]
+- I (Global`\[Kappa])^(Length[indexArray]/2) \[Theta] RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]] Eps[LorentzIndex[\[Tau]1,D],LorentzIndex[\[Lambda]1,D],LorentzIndex[\[Tau]2,D],LorentzIndex[\[Lambda]2,D]] Pair[Momentum[q1,D],LorentzIndex[\[Tau]1,D]] Pair[Momentum[q2,D],LorentzIndex[\[Tau]2,D]]
         ), True
     ];
 

@@ -19,7 +19,7 @@ The two larger matter notebooks contain separate field sectors. Begin with the s
 ## Reading the code
 
 - **Vertices and propagators:** FeynGrav supplies the Feynman rules. Vertex momenta are incoming; repeated indices are contracted. Read the local notation paragraph before adapting signs or external legs.
-- **`CalcFormCalculate`:** sends supported bosonic algebra and Lorentz contractions to FORM, then imports the result. Automatic selection prefers up to eight TFORM workers, capped by the processor count, with serial fallback when TFORM is missing. This function does not integrate loops.
+- **`CalcFormCalculate`:** sends supported Lorentz, epsilon, Dirac and fundamental SU(N) colour algebra to FORM, then imports the result. Automatic selection prefers up to eight TFORM workers, capped by the processor count, with serial fallback when TFORM is missing. This function does not integrate loops.
 - **`TID[..., k, ToPaVe -> True]`:** FeynCalc performs tensor-integral reduction with loop momentum `k`, leaving scalar Passarino–Veltman functions such as `A0` and `B0`.
 - **`FeynAmpDenominatorExplicit`:** rewrites propagator denominators as ordinary expressions, useful for tree-level algebra and projector identities.
 - **Semicolons:** suppress long intermediate output. Evaluate a stored expression's name separately to inspect it. `AbsoluteTiming` measures elapsed wall time, including external FORM execution where used.
@@ -37,4 +37,6 @@ For performance measurements use the separate [Benchmark notebooks](../Benchmark
 
 The updated loop examples extract the pure-gravity and massive-fermion coefficient forms from the current rules rather than asserting the older hard-coded formulas. Their reconstruction checks verify algebraic decomposition, not an independent physical reference. Other reference comparisons are retained where they agree with the computed expressions.
 
-All algebra previously performed through the legacy Calc chain now uses `CalcFormCalculate`. FeynCalc propagator shorthand is expanded with `Explicit`. Fermion and colour expressions first use FeynCalc’s dedicated algebra functions (including `DiracOrder -> True` for open chains); `Collect` passes their bosonic coefficients to FORM. Loop integration and tensor reduction remain in FeynCalc.
+All algebra previously performed through the legacy Calc chain now uses `CalcFormCalculate`. FeynCalc propagator shorthand is expanded with `Explicit`. In these notebooks, fermion and colour expressions first use FeynCalc’s dedicated algebra functions (including `DiracOrder -> True` for open chains); `Collect` passes their bosonic coefficients to FORM. Loop integration and tensor reduction remain in FeynCalc.
+
+This preprocessing describes the notebooks as currently written. It is not a requirement to remove all Dirac or colour structures before using the converter: supported chains, traces and colour tensors can now be processed directly. See the [converter vocabulary](../CalcFormConverter/README.md#supported-vocabulary). The notebooks themselves are unchanged by this documentation update.

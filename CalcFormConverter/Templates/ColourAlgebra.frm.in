@@ -1,0 +1,52 @@
+* Adapted from J. Vermaseren's SUn.prc, 7 January 1997.
+* GPL-3.0-or-later; CFC-SUn-1. Copyright: original J. Vermaseren.
+* Adaptation: FeynGrav contributors, 2026. Distributed without warranty.
+* Licence text: https://www.gnu.org/licenses/gpl-3.0.html
+* All algebra is in FORM; cfc-prefixed internal names are reserved.
+#procedure cfcSUN
+* First split traces and ordered chains into explicit fundamental matrix elements.
+repeat;
+	id,once,cfcCTr(?cfcCArgsA) = cfcCT(?cfcCArgsA,cfcCi1,cfcCi1)*cfcCFlavours;
+	sum cfcCi1;
+	repeat;
+		id,once,cfcCT(cfcCj1?,cfcCj2?,?cfcCArgsA,cfcCi1?,cfcCi2?) = cfcCT(cfcCj1,cfcCi1,cfcCi3)*cfcCT(cfcCj2,?cfcCArgsA,cfcCi3,cfcCi2);
+		sum cfcCi3;
+	endrepeat;
+endrepeat;
+#do cfcLoopI = 1,1
+if ( count(cfcCF,1) || match(cfcCT(cfcCj1?,cfcCi1?,cfcCi2?)*cfcCT(cfcCj1?,cfcCi3?,cfcCi4?)) )
+		redefine cfcLoopI "0";
+id,once,cfcCF(cfcCj1?,cfcCj2?,cfcCj3?) = 1/cfcCNorm/i_*cfcCT(cfcCj1,cfcCi1,cfcCi2)*cfcCT(cfcCj2,cfcCi2,cfcCi3)*cfcCT(cfcCj3,cfcCi3,cfcCi1)
+			-1/cfcCNorm/i_*cfcCT(cfcCj3,cfcCi1,cfcCi2)*cfcCT(cfcCj2,cfcCi2,cfcCi3)*cfcCT(cfcCj1,cfcCi3,cfcCi1);
+sum cfcCi1,cfcCi2,cfcCi3;
+id	cfcCT(cfcCj1?,cfcCi1?,cfcCi2?)*cfcCT(cfcCj1?,cfcCi3?,cfcCi4?) = cfcCTp(cfcCi1,cfcCi2,cfcCi3,cfcCi4);
+#do cfcLoopJ = 1,1
+if ( count(cfcCTp,1) ) redefine cfcLoopJ "0";
+.sort
+id,once,cfcCTp(cfcCi1?,cfcCi2?,cfcCi3?,cfcCi4?) =
+			cfcCNorm*(d_(cfcCi1,cfcCi4)*d_(cfcCi2,cfcCi3)-d_(cfcCi1,cfcCi2)*d_(cfcCi3,cfcCi4)/@COLOURRANK@);
+*renumber;
+#enddo
+#enddo
+repeat;
+	id	cfcCT(cfcCj1?,?cfcCArgsA,cfcCi1?,cfcCi2?)*cfcCT(cfcCj2?,?cfcCArgsB,cfcCi2?,cfcCi3?) = cfcCT(cfcCj1,?cfcCArgsA,cfcCj2,?cfcCArgsB,cfcCi1,cfcCi3);
+endrepeat;
+id	cfcCT(?cfcCArgsA,cfcCi1?,cfcCi1?) = cfcCTr(?cfcCArgsA)/cfcCFlavours;
+id	cfcCTr(cfcCj1?) = 0;
+id	cfcCTr(cfcCj1?,cfcCj2?) = cfcCNorm*d_(cfcCj1,cfcCj2)*cfcCFlavours;
+.sort
+#endprocedure
+
+* Empty traces and scalar identities require explicit treatment.
+id cfcCTr = @COLOURRANK@;
+#call cfcSUN
+id cfcCNorm^-1=2;
+id cfcCFlavours^-1=1;
+id cfcCNorm=1/2;
+id cfcCFlavours=1;
+id cfcCNA=@COLOURRANK@^2-1;
+.sort
+* Output basis only: do not feed these tensors back into cfcSUN.
+id cfcCTr(cfcCj1?,cfcCj2?,cfcCj3?) =
+ (cfcCD(cfcCj1,cfcCj2,cfcCj3)+i_*cfcCF(cfcCj1,cfcCj2,cfcCj3))/4;
+.sort

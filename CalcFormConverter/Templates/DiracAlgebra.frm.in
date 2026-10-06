@@ -1,0 +1,14 @@
+
+* Ordinary Dirac algebra. No gamma-five, colour algebra or trace of open chains.
+* Unit-normalised native traces; each occurrence already carries TraceOfOne.
+@TRACES@
+.sort
+#procedure cfcDiracCanonical
+repeat;
+@RULES@
+@EPSILON@
+endrepeat;
+#endprocedure
+#call cfcDiracCanonical
+* Restore the public native gamma vocabulary only after the rewrite loop.
+id cfcOpen(?a) = g_(1,?a);
