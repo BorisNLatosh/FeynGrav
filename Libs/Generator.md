@@ -113,7 +113,7 @@ Every batch and specific command accepts the same options:
 | `WorkingDirectory` | `Automatic` | Parent of unique temporary converter jobs. |
 | `KeepFiles` | `False` | Retain successful converter jobs when true; failed jobs retain diagnostics. |
 | `ShowTiming` | `False` | Show converter execution timing and separate construction/public-command wall times. |
-| `ShowProgress` | `False` | Forward converter progress reporting. |
+| `ShowProgress` | `False` | Accepted for compatibility; all generation commands always report progress, even when this is `False`. |
 | `DiracAlgebra` | `Automatic` | Enable supported Dirac processing; `False` preserves chains/traces. |
 | `ColourAlgebra` | `True` | Enable SU(N) processing; `Automatic` is equivalent, `False` preserves colour structures. |
 
@@ -140,6 +140,51 @@ Use normal options in new code.
 The former also accepts an executable string. The old
 `$FeynGravLibrariesGeneratorFORMCheck` startup switch no longer launches a check.
 `$FeynGravLibrariesGeneratorStartupMessage = False` suppresses the introduction.
+
+## Generation progress
+
+Every `Generate*` and `Generate*Specific` command always prints progress,
+including when called with `ShowProgress -> False`. `ShowTiming -> True` adds a
+detailed timing breakdown; it is not required to see which calculation is running.
+Standalone converter commands retain their own reporting options.
+
+The overview gives the requested orders or parameters, destination, number of
+existing targets and total number of selected libraries. Each library is labelled
+with its position, filename and interaction family before rule construction begins.
+Horndeski labels include `a`, `b`, `n` and the scalar momentum count. Pure and
+quadratic gravity labels distinguish library order `n` from `n + 2` graviton legs.
+An empty batch explicitly reports that no rules will be constructed and FORM
+will not be launched.
+
+Messages identify validation, construction, the FORM availability check and
+selected executable/worker count, export, execution, import, file verification
+and publication.
+The selected-engine message includes serial fallback when TFORM is missing.
+
+During FORM execution, elapsed-time messages use the converter's existing
+approximately ten-second interval and include the current library label.
+Construction and import have start messages but no periodic heartbeat or
+estimated completion percentage. A completed-file count is not an estimate of
+the fraction of total calculation time: later orders can cost much more.
+
+For example, `GenerateGravitonScalars[5]` announces ten libraries, with labels
+such as `[5/10] GravitonScalarVertex_3`. Each successful publication reports its
+elapsed wall time; the final summary gives the saved count, total time and
+destination. With `ShowTiming -> True`, each library also reports construction,
+`CalcFormCalculate`, writing/verification and publication times.
+
+Failures report the current stage, diagnostic tags, available job/log/recovery
+paths and completed files. A publication followed by failed backup cleanup is
+reported as a saved library with a cleanup failure. No batch-success message is
+printed after failure. Propagating aborts print the current stage and completed
+count; converter-caught aborts remain failure diagnostics with retained job paths.
+
+Progress uses ordinary `Print` messages without dynamic notebook controls. The
+generator locally adapts `CalcFormConverter`'s private `reportCalculation` events;
+this dependency is confined to `calculateLibrary` and `generatorConverterProgress`.
+The converter's definitions and global options are restored when the call exits,
+including failure or abort. Terminal converter events are omitted from this
+adapted display because file verification and publication still follow.
 
 ## Mathematical and library conventions
 
@@ -200,3 +245,5 @@ shell command or textual gamma/colour dictionary.
 
 See [the migration verification report](../Documentation/Verification/GeneratorVerification.md) for checked
 families, regression results and the Gauss–Bonnet batch starting-order correction.
+
+See the [generation-progress verification](../Documentation/Verification/GeneratorProgress.md) for the bounded checks of this reporting change.

@@ -95,7 +95,7 @@ $FeynGravLibrariesGeneratorFORMCheck::usage =
    command so ?Function remains self-contained. Keep option defaults in step
    with $generationOptions below. *)
 FeynGravLibrariesGenerator`Private`$generationUsage =
-"\n\nCalculation uses CalcFormCalculate with automatic dimension inference. Options and defaults: OutputDirectory -> Automatic (this generator's Libs directory), FORMExecutable -> Automatic, FORMThreads -> Automatic, TimeConstraint -> Infinity, WorkingDirectory -> Automatic, KeepFiles -> False, ShowTiming -> False, ShowProgress -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. Automatic workers prefer TFORM with up to eight workers and fall back to serial FORM only when TFORM is absent. TimeConstraint limits FORM execution, not rule construction or total elapsed time. ColourAlgebra -> Automatic is an alias for True; False preserves colour structures. DiracAlgebra -> False disables optional Dirac processing.\n\nHonours SetOptions on the invoked command and individual or nested option lists; the first explicit occurrence wins. Explicit FORMExecutable overrides the command default and legacy setting; an Automatic command default may use that legacy setting. Batches use their own defaults and stop at the first failure.\n\nSuccess returns Null. Invalid arguments, assigned formal placeholders or failed stages return Failure; user definitions are preserved. CompletedFiles lists installed batch members, including a file whose installation succeeded before backup cleanup failed. Existing libraries are replaced only after calculation and a checked read-back. Converter failures retain their job diagnostics. Loading or generating never installs FORM. See Libs/Generator.md for the full workflow.";
+"\n\nEvery Generate* and Generate*Specific command always prints its overview, library/stage progress and final outcome, even with ShowProgress -> False. ShowProgress remains accepted for compatibility. ShowTiming -> True adds detailed timings. Calculation uses CalcFormCalculate with automatic dimension inference. Options and defaults: OutputDirectory -> Automatic (this generator's Libs directory), FORMExecutable -> Automatic, FORMThreads -> Automatic, TimeConstraint -> Infinity, WorkingDirectory -> Automatic, KeepFiles -> False, ShowTiming -> False, ShowProgress -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. Automatic workers prefer TFORM with up to eight workers and fall back to serial FORM only when TFORM is absent. TimeConstraint limits FORM execution, not rule construction or total elapsed time. ColourAlgebra -> Automatic is an alias for True; False preserves colour structures. DiracAlgebra -> False disables optional Dirac processing.\n\nHonours SetOptions on the invoked command and individual or nested option lists; the first explicit occurrence wins. Explicit FORMExecutable overrides the command default and legacy setting; an Automatic command default may use that legacy setting. Batches use their own defaults and stop at the first failure.\n\nSuccess returns Null. Invalid arguments, assigned formal placeholders or failed stages return Failure; user definitions are preserved. CompletedFiles lists installed batch members, including a file whose installation succeeded before backup cleanup failed. Existing libraries are replaced only after calculation and a checked read-back. Converter failures retain their job diagnostics. Loading or generating never installs FORM. See Libs/Generator.md for the full workflow.";
 
 GenerateGravitonScalarsSpecific::usage =
     "GenerateGravitonScalarsSpecific[n, opts] generates the scalar kinetic and scalar potential interaction libraries for exactly n external gravitons: GravitonScalarVertex_n and GravitonScalarPotentialVertex_n. n must be an explicit positive integer." <> FeynGravLibrariesGenerator`Private`$generationUsage;
@@ -472,22 +472,125 @@ publishLibrary[staged_, target_] := AbortProtect[Module[{backup = target<>".back
 (* ::Section:: *)
 (*One calculation and sequential batch orchestration*)
 
+(* Generation reporting is dynamically scoped by dispatch. No runtime options
+   or converter definitions are changed outside the current calculation. *)
+$generationProgress = False;
+generationElapsed[start_] := ToString[NumberForm[AbsoluteTime[] - start, {12, 2}], OutputForm];
+generationStage[name_String] := If[TrueQ[$generationProgress],
+    $progressStage = name; Print[$progressLabel, " — ", name, "..."]];
+
+(* This is the only adapter to the converter's private progress-event helper.
+   Preserve its stage and elapsed-time contract; suppress its terminal events
+   because the generator still has to verify and publish the library. *)
+generatorConverterProgress[event_Association] := Module[{name = Lookup[event,"Stage",""]},
+    Which[
+        KeyExistsQ[event,"ElapsedSeconds"],
+            Print[$progressLabel, " — FORM ", name, ": ",
+                ToString[NumberForm[event["ElapsedSeconds"],{12,2}],OutputForm],
+                " s elapsed (wall clock)."],
+        MemberQ[{"Complete","Failed"},name], Null,
+        StringStartsQ[name,"Selected "], Print[$progressLabel," — ",name,"."],
+        True, generationStage[Lookup[<|"Check"->"Checking FORM availability",
+            "Export"->"Exporting the expression", "Execute"->"Running FORM/TFORM",
+            "Import"->"Importing the result"|>,name,name]]
+    ]
+];
+
+calculateLibrary[expression_, options_Association] := If[TrueQ[$generationProgress],
+    Block[{CalcFormConverter`Private`reportCalculation},
+        CalcFormConverter`Private`reportCalculation[event_Association] := generatorConverterProgress[event];
+        CalcFormCalculate[expression, Sequence @@ Normal[
+            Join[KeyDrop[options,{OutputDirectory}],<|ShowProgress->True|>]]]
+    ],
+    CalcFormCalculate[expression, Sequence @@ Normal[KeyDrop[options,{OutputDirectory}]]]
+];
+
+generationFailureSummary[result_Failure, completed_List, total_Integer, started_] := Module[{paths,tags},
+    Print[$progressLabel, " — stopped during ", $progressStage, "."];
+    If[total > 0,
+        If[TrueQ[Lookup[result[[2]],"Published",False]],
+            Print["The current library was saved, but post-publication cleanup failed."],
+            Print["The current library was not saved by this operation."]]];
+    tags = DeleteDuplicates[Cases[result, Failure[tag_String,_Association] :> tag,{0,Infinity}]];
+    Print["Diagnostic: ",StringRiffle[tags," -> "]];
+    paths = DeleteDuplicates[Flatten[Cases[result, a_Association :>
+        KeyValueMap[List,KeyTake[a,{"Destination","JobDirectory","RecoveryFile","StandardOutputFile","StandardErrorFile"}]],
+        {0,Infinity}],1]];
+    Scan[If[StringQ[#[[2]]],Print[#[[1]],": ",#[[2]]]]&,paths];
+    Print[$generationTitle," stopped: ",Length[completed],"/",total,
+        " libraries saved; ",generationElapsed[started]," s elapsed (wall clock)."];
+    If[completed =!= {}, Print["Saved libraries: ",StringRiffle[completed,", "]]]
+];
+
+(* Display descriptions follow the already validated specification. In pure
+   gravity the library suffix is a coupling order, two below the leg count. *)
+libraryFilename[spec_Association] := spec["Family"] <> "_" <>
+    StringRiffle[ToString /@ spec["Parameters"],"_"];
+
+$libraryDescriptions = <|
+    "GravitonScalarVertex"->"Scalar kinetic interaction",
+    "GravitonScalarPotentialVertex"->"Scalar potential interaction",
+    "GravitonFermionVertex"->"Dirac-fermion interaction",
+    "GravitonMassiveVectorVertex"->"Massive-vector interaction",
+    "GravitonVectorVertex"->"Massless-vector interaction",
+    "GravitonVectorGhostVertex"->"Vector-ghost interaction",
+    "GravitonVertex"->"General-relativity graviton interaction",
+    "QuadraticGravityVertex"->"Quadratic-gravity graviton interaction",
+    "GravitonQuarkGluonVertex"->"Quark-gluon interaction",
+    "GravitonGluonVertex"->"Two-gluon interaction",
+    "GravitonThreeGluonVertex"->"Three-gluon interaction",
+    "GravitonFourGluonVertex"->"Four-gluon interaction",
+    "GravitonYMGhostVertex"->"Yang-Mills ghost interaction",
+    "GravitonGluonGhostVertex"->"Gluon-ghost interaction",
+    "GravitonAxionVectorVertex"->"Axion-vector interaction",
+    "ScalarGaussBonnet"->"Scalar-Gauss-Bonnet interaction",
+    "HorndeskiG2"->"Horndeski G2 interaction", "HorndeskiG3"->"Horndeski G3 interaction",
+    "HorndeskiG4"->"Horndeski G4 interaction", "HorndeskiG5"->"Horndeski G5 interaction"|>;
+
+libraryDescription[spec_Association] := Module[
+    {family=spec["Family"],parameters=spec["Parameters"],n,description},
+    n = Last[parameters];
+    description = Lookup[$libraryDescriptions,family,family];
+    If[StringStartsQ[family,"Horndeski"],
+        Return[description<>"; a = "<>ToString[parameters[[1]]] <>
+            ", b = "<>ToString[parameters[[2]]] <>", n = "<>ToString[n] <>
+            "; "<>ToString[n]<>" graviton(s), "<>
+            ToString[parameters[[1]]+2 parameters[[2]]+
+                If[MemberQ[{"HorndeskiG3","HorndeskiG5"},family],1,0]]<>" scalar momentum entries"]];
+    description<>"; "<>ToString[If[MemberQ[{"GravitonVertex","QuadraticGravityVertex"},family],n+2,n]]<>
+        " graviton(s)"<>If[MemberQ[{"GravitonVertex","QuadraticGravityVertex"},family],
+            " (library order "<>ToString[n]<>")", ""]
+];
+
+generationRequest[command_String,args_List] := Which[
+    StringContainsQ[command,"Horndeski"] && StringEndsQ[command,"Specific"],
+        "a = "<>ToString[args[[1]]] <>", b = "<>ToString[args[[2]]] <>", n = "<>ToString[args[[3]]],
+    StringContainsQ[command,"Horndeski"],
+        "scalar-count bound "<>ToString[First[args]]<>"; graviton orders 1 through "<>ToString[Last[args]],
+    StringEndsQ[command,"Specific"], "library order "<>ToString[First[args]],
+    command === "GenerateScalarGaussBonnet", "graviton orders starting at 2, up to "<>ToString[First[args]],
+    True, "library orders 1 through "<>ToString[First[args]]
+];
+
 generateOne[spec_Association, options_Association] := Block[{Global`\[Kappa]}, Module[
-    {target, staged = None, expression, calculated, serialised, reread, outcome, constructionTime, calculationTime, started = AbsoluteTime[]},
-    target = FileNameJoin[{options[OutputDirectory], spec["Family"] <> "_" <> StringRiffle[ToString /@ spec["Parameters"],"_"]}];
+    {target, staged = None, expression, calculated, serialised, reread, outcome, constructionTime, calculationTime, savingStarted, publicationStarted, savedAt, started = AbsoluteTime[]},
+    target = FileNameJoin[{options[OutputDirectory], libraryFilename[spec]}];
     outcome = CheckAbort[Catch[
         $stage = "Validation";
+        generationStage["Validating the library request"];
         require[validateFormalNames[formalNames[spec["Builder"]]]];
         $stage = "Construction";
+        generationStage["Constructing the interaction rule"];
         (* Rules use Global`kappa. Localise its value so the library remains
            symbolic even when the caller has assigned a numerical coupling. *)
         {constructionTime,expression} = AbsoluteTiming[Block[{Global`\[Kappa]},ReleaseHold[spec["Builder"]]]];
         require[expression];
         $stage = "Calculation";
-        {calculationTime,calculated} = AbsoluteTiming[CalcFormCalculate[expression,
-            Sequence @@ Normal[KeyDrop[options,{OutputDirectory}]]]];
+        If[TrueQ[$generationProgress],$progressStage = "Calculation"];
+        {calculationTime,calculated} = AbsoluteTiming[calculateLibrary[expression,options]];
         require[calculated];
         $stage = "Serialisation";
+        generationStage["Writing and verifying the library"]; savingStarted = AbsoluteTime[];
         Block[{FeynGrav`GaugeFixingEpsilonVector,FeynGrav`GaugeFixingEpsilonSUNYM,FeynGrav`\[Kappa]},
             serialised = require[libraryExpression[calculated,formalSymbols[spec["Builder"]]]];
             staged = target<>".staging-"<>CreateUUID[];
@@ -496,9 +599,16 @@ generateOne[spec_Association, options_Association] := Block[{Global`\[Kappa]}, M
             If[!SameQ[reread,serialised], require[failure["LibraryReadbackMismatch", "Serialised library differs from the calculated expression."]]];
         ];
         $stage = "Publication";
+        generationStage["Publishing the verified library"]; publicationStarted = AbsoluteTime[];
         require[publishLibrary[staged,target]];
-        Print["Generated ",spec["Family"]," ",spec["Parameters"]," in ",ToString[Round[AbsoluteTime[]-started,0.01],InputForm]," s (wall clock)."];
+        savedAt = AbsoluteTime[];
+        If[TrueQ[$generationProgress],
+            Print[$progressLabel," — library saved in ",generationElapsed[started]," s (wall clock)."],
+            Print["Generated ",spec["Family"]," ",spec["Parameters"]," in ",ToString[Round[AbsoluteTime[]-started,0.01],InputForm]," s (wall clock)."]];
         If[TrueQ[options[ShowTiming]],Print["Construction: ",constructionTime," s; CalcFormCalculate: ",calculationTime," s (wall clock)."]];
+        If[TrueQ[$generationProgress] && TrueQ[options[ShowTiming]],
+            Print["Writing/verification: ",publicationStarted-savingStarted,
+                " s; publication: ",savedAt-publicationStarted," s (wall clock)."]];
         target,
         $generationTag],
         If[StringQ[staged] && FileExistsQ[staged],DeleteFile[staged]]; Abort[]
@@ -515,15 +625,34 @@ generateOne[spec_Association, options_Association] := Block[{Global`\[Kappa]}, M
 optionArgumentQ[x_] := MatchQ[x,_Rule|_RuleDelayed] ||
     (ListQ[x] && AllTrue[x,optionArgumentQ]);
 
-dispatch[command_String, arguments_List] := Block[{$command = command,$stage = "Validation",$generationTag = Unique["generation"]},
-    Module[{args=arguments,rules={},options,specs,result,completed={},outcome},
-        outcome = Catch[
+dispatch[command_String, arguments_List] := Block[
+    {$command = command,$stage = "Validation",$generationTag = Unique["generation"],
+     $generationProgress = True,$generationTitle = command,
+     $progressLabel = command,$progressStage = "Validation"},
+    Module[{args=arguments,rules={},options,specs,result,completed={},outcome,
+            total=0,index=0,started=AbsoluteTime[],existing},
+        outcome = CheckAbort[Catch[
             require[arguments];
             While[args =!= {} && optionArgumentQ[Last[args]],
                 rules = Join[Flatten[{Last[args]}],rules]; args = Most[args]];
             options = require[resolveOptions[rules,command]];
             specs = require[requestSpecifications[command,args]];
+            total = Length[specs];
+            If[TrueQ[$generationProgress],
+                existing = Count[specs, spec_ /; FileExistsQ[FileNameJoin[{options[OutputDirectory],
+                    libraryFilename[spec]}]]];
+                Print[command,": ",generationRequest[command,args],"; ",total," libraries."];
+                If[total === 0,Print["No libraries selected. No rules will be constructed and FORM will not be launched."]];
+                Print["Destination: ",options[OutputDirectory]];
+                Print[existing," existing target file(s) will be replaced only after successful calculation and verification."]
+            ];
             Do[
+                index++;
+                If[TrueQ[$generationProgress],
+                    $progressLabel = "["<>ToString[index]<>"/"<>ToString[total]<>"] "<>
+                        libraryFilename[spec];
+                    Print[$progressLabel," — ",libraryDescription[spec],"."]
+                ];
                 result = generateOne[spec,options];
                 If[FailureQ[result],
                     If[TrueQ[Lookup[result[[2]],"Published",False]], AppendTo[completed,result[[2,"Destination"]]]];
@@ -532,7 +661,19 @@ dispatch[command_String, arguments_List] := Block[{$command = command,$stage = "
                 {spec,specs}
             ];
             Null,
-            $generationTag];
+            $generationTag],
+            If[TrueQ[$generationProgress],
+                Print[$progressLabel," — aborted during ",$progressStage,"."];
+                Print[$generationTitle," aborted: ",Length[completed],"/",total,
+                    " libraries saved; ",generationElapsed[started]," s elapsed (wall clock)."];
+                If[completed =!= {},Print["Saved libraries: ",StringRiffle[completed,", "]]]];
+            Abort[]
+        ];
+        If[TrueQ[$generationProgress],
+            If[FailureQ[outcome],generationFailureSummary[outcome,completed,total,started],
+                Print[$generationTitle," complete: ",Length[completed],"/",total,
+                    " libraries saved in ",generationElapsed[started]," s (wall clock)."];
+                Print["Destination: ",options[OutputDirectory]]]];
         outcome
     ]
 ];
@@ -611,6 +752,7 @@ If[!TrueQ[existingSetting["FeynGravLibrariesGenerator`$FeynGravLibrariesGenerato
         "Loading preserves Directory[] and starts no calculation, FORM check or installation.",
         "Use CheckGravitonScalars (without brackets) to list libraries; GenerateGravitonScalarsSpecific[1] generates one order, and GenerateGravitonScalars[n] generates a batch.",
         "Default library destination: " <> $libraryDirectory <> ". Use OutputDirectory -> anExistingDirectory to generate elsewhere. Existing files are replaced only after validation.",
+        "All generation commands always print library and calculation-stage progress. FORMThreads chooses the worker count; ShowTiming -> True adds detailed timings.",
         "Calculation defaults: automatic FORM/TFORM selection, up to eight TFORM workers with serial fallback if TFORM is missing; Dirac and colour processing enabled.",
         "Pure/quadratic gravity: order n means n + 2 graviton legs. Gauss-Bonnet batches start at two; n = 1 returns Null without files.",
         "Use ?function and Options[function] for signatures, defaults and failures. Full guide: " <> FileNameJoin[{$libraryDirectory,"Generator.md"}],
