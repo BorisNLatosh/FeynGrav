@@ -201,8 +201,10 @@ adapted display because file verification and publication still follow.
 - Only declared formal placeholders and the gravitational coupling are mapped
   into the contexts expected by the existing FeynGrav importer. FeynCalc heads,
   matrix order, named couplings and distinct index spaces are preserved.
-- Library files contain a single Wolfram expression, with explicit contexts where
-  needed. They remain extensionless and are read by the existing `import*`
+- Library files contain a single Wolfram expression in compact input form, without
+  line wrapping. Writing uses the importer's contexts to omit redundant qualifiers;
+  explicit contexts remain where needed to distinguish symbols. Exact read-back
+  verification is still required before publication. Files remain extensionless and are read by the existing `import*`
   commands. No changes to those importers are required.
 
 The generator uses a dedicated parameter context. Before construction it checks

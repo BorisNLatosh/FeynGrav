@@ -255,3 +255,21 @@ six-entry minimum rather than returning that zero for a one-graviton call.
 the batch returns `Null` without constructing rules or producing files.
 `GenerateScalarGaussBonnetSpecific[n]` generates a single order with `n >= 2`;
 its one-graviton call still fails the rule's structural validation.
+
+
+### Gauss–Bonnet construction checks (6 October 2026)
+
+The remaining graviton triples are converted to Lorentz-index pairs before
+being passed to `TensorT`. Previously, order three passed a three-entry list
+where a pair array was required and failed with `InvalidIndexArrayLength`.
+Generation through order three has now been checked with temporary output:
+order two agrees exactly with the pre-correction rule, order three agrees with
+direct FeynCalc contraction, and serial FORM and two-worker TFORM agree.
+The serial batch completed despite a local parallel-subkernel connection timeout;
+the independent comparison used sequential rule mapping to avoid that environment
+issue. Existing stored libraries were left untouched.
+
+Separate pre-existing problems remain in the four-and-higher-graviton branch:
+its final `GammaTensor` call has five arguments instead of six, and the preceding
+calls contain inconsistent index and graviton-slot references. Those terms need
+a separate formula review; the order-three check does not validate that branch.

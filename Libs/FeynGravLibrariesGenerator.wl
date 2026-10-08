@@ -448,7 +448,20 @@ libraryExpression[expression_, allowed_:Automatic] := Module[{symbols, mapping, 
 
 (* Read under the exact context search path used by FeynGrav's importer. *)
 readLibrary[path_] := Block[{$Context = "FeynGrav`Private`", $ContextPath = {"FeynGrav`","FeynCalc`","System`"}}, Get[path]];
-writeLibrary[path_, expression_] := Block[{$Context = "System`", $ContextPath = {"System`"}}, Put[expression,path]];
+(* Use the reader's contexts so Wolfram omits redundant qualifiers while
+   retaining those needed to distinguish symbols. An unlimited page width
+   avoids wrapping large expressions. Close the owned stream on abort; the
+   caller still verifies exact read-back before publishing the staged file. *)
+writeLibrary[path_, expression_] := Block[
+    {$Context = "FeynGrav`Private`", $ContextPath = {"FeynGrav`","FeynCalc`","System`"}},
+    Module[{stream, result, closed},
+        stream = OpenWrite[path, PageWidth -> Infinity];
+        If[Head[stream] =!= OutputStream, Return[$Failed]];
+        result = CheckAbort[Put[expression,stream], Close[stream]; Abort[]];
+        closed = Close[stream];
+        If[closed === $Failed, $Failed, result]
+    ]
+];
 
 (* Replacement is protected from user abort. A backup is kept until the staged
    file has been installed. If recovery fails its path is reported, never erased. *)
