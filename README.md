@@ -1,4 +1,4 @@
-# FeynGrav
+# FeynGrav 4.1
 
 FeynGrav is a Wolfram Mathematica package that implements gravitational Feynman rules in the FeynCalc framework. It provides propagators, interaction vertices, polarisation tensors, and tools for working with the Nieuwenhuizen operators.
 
@@ -25,6 +25,48 @@ Supported models include general relativity, minimally coupled scalar, fermion a
 - **FORM is optional for ordinary FeynGrav use.** Loading the package and exporting or importing FORM files do not require a FORM installation. Executing those files requires FORM; parallel execution with `FORMThreads > 1` requires TFORM. The converter has been tested with FORM/TFORM 4.3. The library generator uses the same converter runtime; compatibility with earlier FORM versions has not been established by the current verification. Obtain executables from the [FORM project](https://github.com/form-dev/form) or your distribution's packages.
 
 ## Installation and help
+
+### Automatic installation
+
+**Publication pending:** the public commands below become available after `install.m` is published on `main`. While testing this branch, load its local `install.m` with `Get["/absolute/path/to/FeynGrav/install.m"]` and use a temporary destination. The installer refuses to replace Git working checkouts.
+
+```mathematica
+Import["https://raw.githubusercontent.com/BorisNLatosh/FeynGrav/main/install.m"];
+InstallFeynGrav[]
+```
+
+Importing the script only defines the installer and prints instructions. `InstallFeynGrav[]` downloads GitHub `main`, checks the archive and bundled default libraries, verifies FeynCalc and the staged package in fresh kernels, and installs into `$UserBaseDirectory/Applications/FeynGrav`. No Git, Python, FORM or administrator access is required for this installation. If Mathematica reports `InternetDisabled`, enable `$AllowInternet = True` in the current session or use a local archive with FeynCalc preinstalled; the installer does not override your Internet setting. Internet access to GitHub and permission to launch a fresh Wolfram kernel are required; an inability to launch a kernel or a 180-second verification timeout produces a failure.
+
+A compatible FeynCalc installation is retained. If FeynCalc is missing or older than 10.2.1, the installer asks before invoking the [official FeynCalc installer](https://feyncalc.github.io/), whose own prompts remain enabled. Its changes are separate from FeynGrav installation and are not rolled back by this installer. FORM/TFORM and additional library datasets are not installed. The FeynGrav installer does not change front-end preferences; the official FeynCalc installer may offer its own preference settings.
+
+When FeynGrav already exists, replacement is requested only after the new package passes verification. The complete old directory is retained beside it under a unique `FeynGrav.backup-...` name. Additional libraries, edited notebooks and configuration remain in that backup; they are not merged into the new installation automatically. If the replacement move fails, the installer attempts to restore the old directory and reports recovery paths if restoration fails.
+
+After installation, **restart the kernel**, then load the package with `` << FeynGrav` ``. A successful call returns an association with `InstalledPath`, `Reference`, `Source`, `Verification` and `BackupPath`; failures return a `Failure` with an explanation. Incomplete archives report `MissingFiles`; failed fresh-kernel checks include stdout/stderr and exit status under `Verification["Diagnostics"]` (or directly in a probe failure). These diagnostics remain available after temporary files are cleaned up. `Reference` is `Null` for a local archive, whose provenance the installer cannot infer. A custom destination does not automatically change `$Path`; load its `FeynGrav.wl` by absolute path, or add its parent directory to `$Path` yourself.
+
+| Option | Default | Behaviour |
+| --- | --- | --- |
+| `InstallFeynGravTo` | `Automatic` | User `Applications/FeynGrav` directory; otherwise an absolute package-directory path. Git checkouts and destinations inside them are refused. |
+| `FeynGravReference` | `"main"` | Official GitHub branch, tag or commit. Pin a commit for reproducible installation. |
+| `FeynGravArchive` | `Automatic` | Download from GitHub, or use a local ZIP containing a single package root. A local archive takes precedence over the reference. Use only trusted archives: verification loads their Wolfram code. |
+| `OverwriteFeynGrav` | `Automatic` | Ask before replacing an existing installation. `True` consents with a retained backup; `False` refuses. |
+| `InstallFeynCalcDependency` | `Automatic` | Ask before invoking FeynCalc's installer when needed. `True` consents; `False` requires compatible FeynCalc to be installed already. |
+
+Notebook sessions display consent dialogs. Without a notebook front end, a required `Automatic` consent returns `Failure["ConsentRequired", ...]`; set the relevant option explicitly. Consenting to FeynCalc installation does not suppress its own prompts, so unattended use should preinstall FeynCalc and set `InstallFeynCalcDependency -> False`.
+
+For example, test a downloaded archive without touching the ordinary installation:
+
+```mathematica
+InstallFeynGrav[
+  FeynGravArchive -> "/absolute/path/to/FeynGrav.zip",
+  InstallFeynGravTo -> FileNameJoin[{$TemporaryDirectory, "FeynGrav-install-test"}],
+  InstallFeynCalcDependency -> False,
+  OverwriteFeynGrav -> False
+]
+```
+
+The installer accepts ordinary ZIP archives; encrypted, split, ZIP64 and link-containing archives are rejected. Interrupted or failed operations may report retained temporary paths for manual inspection. Successful backups are never deleted automatically.
+
+### Manual installation and help
 
 1. Install FeynCalc and verify that it loads in a fresh kernel.
 2. Evaluate `$UserBaseDirectory` in Mathematica. Place the complete `FeynGrav` directory inside its `Applications` subdirectory, so the main file is at `Applications/FeynGrav/FeynGrav.wl`. Retain the `Rules`, `Libs`, and `CalcFormConverter` subdirectories.
@@ -123,8 +165,11 @@ Report problems through [GitHub issues](https://github.com/BorisNLatosh/FeynGrav
 
 ## Version history
 
-### Unreleased — current development
+### Version 4.1 — unreleased
 
+Planned release tag: `v4.1.0`.
+
+- Added a two-command FeynGrav installer with dependency checks, fresh-kernel verification, and backup/rollback for updates.
 - Added CalcFormConverter with reversible mappings, rank-four epsilon support, ordinary Dirac algebra and fundamental SU(N) colour processing.
 - Added FORM/TFORM availability checks, explicit installation support, automated calculation, timing, and progress reporting.
 - Improved conversion performance and support for graviton polarisation workflows.

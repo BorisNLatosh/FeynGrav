@@ -7,7 +7,7 @@ BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
 DisplayInitializationMessages[] := Module[{},
-  Print[Style["FeynGrav 4.0", Bold, 16]];
+  Print[Style["FeynGrav 4.1", Bold, 16]];
   
   Print[Style["FeynGrav: ", Bold], 
         "Use ", 
