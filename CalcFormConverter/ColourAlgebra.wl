@@ -210,9 +210,10 @@ caPresentScalar[c_] := Module[{r = Together[c], num, den, power = 0},
     ];
     (Factor[num]/Factor[den] (2 CA CF)^power) /. SUNN -> CA
 ];
-caReconstruct[x_] := Module[{terms, endpoints, implicit, counts, tensors, validLine, y, factors, rows, groups},
-    If[$caImport === <||>, Return[x]];
-    If[$caImport["Mode"] === "False", Return[x /. t_caTrace :> caTraceRestore[t]]];
+(* Validate each coefficient term before choosing one endpoint representation
+   for the entire result, including results read a propagator group at a time. *)
+caImplicitEligible[x_] := Module[{terms, endpoints, implicit, counts, tensors, validLine},
+    If[$caImport === <||> || $caImport["Mode"] === "False", Return[True]];
     endpoints = If[$caImport["ImplicitEndpoints"] === {}, {}, SUNFIndex[Symbol[$caImport["GeneratedNamespace"] <> #]] & /@ {"left", "right"}];
     terms = If[Head[x] === Plus, List @@ x, {x}];
     validLine[t_] := (MatchQ[t, caTensor["Chain", a_List] /; Take[a, -2] === endpoints] || t === caTensor["FundamentalDelta", endpoints]);
@@ -227,6 +228,15 @@ caReconstruct[x_] := Module[{terms, endpoints, implicit, counts, tensors, validL
             throwFailure["InvalidResult", "A generated free endpoint was lost or contracted."]];
         tensors = Cases[term, _caTensor, {0, Infinity}];
         If[endpoints =!= {} && !AnyTrue[tensors, validLine], implicit = False], {term, terms}];
+    implicit
+];
+caReconstruct[x_, endpointChoice_: Automatic] := Module[{terms, endpoints, implicit, validLine, y, factors, rows, groups},
+    If[$caImport === <||>, Return[x]];
+    If[$caImport["Mode"] === "False", Return[x /. t_caTrace :> caTraceRestore[t]]];
+    implicit = caImplicitEligible[x];
+    If[endpointChoice === False, implicit = False];
+    endpoints = If[$caImport["ImplicitEndpoints"] === {}, {}, SUNFIndex[Symbol[$caImport["GeneratedNamespace"] <> #]] & /@ {"left", "right"}];
+    validLine[t_] := (MatchQ[t, caTensor["Chain", a_List] /; Take[a, -2] === endpoints] || t === caTensor["FundamentalDelta", endpoints]);
     y = If[implicit, x /. {t_caTensor /; validLine[t] :> If[t[[1]] === "Chain", colourWordToken[Drop[t[[2]], -2]], 1]}, x];
     y = y /. {caTensor["Chain", a_List] :> SUNTF[Drop[a, -2], a[[-2]], a[[-1]]],
         caTensor["FundamentalDelta", a_List] :> Apply[SUNFDelta, a],

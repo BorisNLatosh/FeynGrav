@@ -71,7 +71,17 @@ expression = MTD[mu, nu] FVD[l, mu] FVD[p - l, nu] FAD[{l, m}, {p - l, m}];
 job = CalcFormExport[expression, "/tmp/bubble.frm", LoopMomenta -> {l}];
 ```
 
-The returned association contains `InputFile`, `MappingFile`, and `ResultFile`. The exporter writes `bubble.frm` and `bubble.map.json`; FORM creates `bubble.out` when executed. Run FORM separately in a terminal:
+A successful manual export prints a static summary with the complete paths labelled FORM program, Symbol mapping and Expected result. A kernel without a front end prints plain text. The returned association still contains `InputFile`, `MappingFile`, and `ResultFile`. Suppress its separate output while keeping the summary and recording elapsed time with:
+
+```mathematica
+AbsoluteTiming[
+  job = CalcFormExport[expression, "/tmp/bubble.frm", LoopMomenta -> {l}];
+]
+```
+
+This returns `{elapsedSeconds, Null}`; the paths remain accessible through `job`. `CalcFormCalculate` suppresses this manual export summary and retains its existing progress controls.
+
+The exporter writes `bubble.frm` and `bubble.map.json`; FORM creates `bubble.out` when executed. Run FORM separately in a terminal:
 
 ```sh
 form /tmp/bubble.frm
@@ -86,6 +96,26 @@ result = CalcFormImport[job["ResultFile"], job["MappingFile"]];
 ```
 
 Keep the mapping alongside the result. The result header must match the mapping's digest. A mapping also fingerprints the original expression, so a result from a different expression is rejected even when its symbol vocabulary is identical. This is a consistency check, not a cryptographic authentication mechanism.
+
+### Automatic propagator grouping
+
+Expressions containing ordinary quadratic propagators are automatically grouped by their **complete product of denominator factors**, including powers. There is no switch to disable this. For example, the result retains the structure
+
+```mathematica
+FAD[{p, m}] (a + b) + FAD[{p, m}]^2 FAD[q] (c + d)
+```
+
+rather than distributing each denominator product over its coefficient. Terms without propagators form the unit-prefactor group. This groups mapped factors; it does not cancel denominators, impose kinematics, perform partial fractions or apply physical assumptions. Eligible commuting coefficients have common numerical and monomial factors extracted separately.
+
+New grouped results are read incrementally. The importer retains one complete top-level summand's source text at a time, parses it with the existing restricted grammar, and discards its text and tokens before continuing. The final expression and the largest coefficient still need memory. Older saved results keep their existing interpretation, and jobs without propagators retain their existing output path. Re-export and rerun an old job to obtain the new grouped layout; updating the package does not rewrite an existing `.out` file. Do not call `Expand` on a large imported result unless the expanded representation is actually needed.
+
+For version-one jobs, FORM extracts common numerical factors and powers of symbols and scalar products from coefficients containing at most 20,000 expanded terms and no free Lorentz indices. It uses `content_`, without searching for polynomial factors such as `(a+b)`. Scalar functions remain inside the residual sum, and scalar abbreviations stay opaque. Larger coefficients and free-index coefficients bypass common-factor extraction, but can still use momentum grouping. Epsilon, Dirac and colour jobs retain their existing single-level propagator grouping.
+
+The stage prepares batches of up to four coefficients per worker, computes their common factors once, and normalises the residual expressions with TFORM whole-expression scheduling. Serial FORM uses batches of one. `FORMThreads` or a manual `tform -w8 job.frm` selects the workers. The batching rule is not a RAM cap. Existing execution timeouts and cancellation still apply to the complete FORM program.
+
+Common factors are written outside the residual sums. Within each residual, a second native bracket groups repeated momentum monomials: for example, `p.q*(a+b) + q.q*(c+d)` keeps the two smaller sums instead of repeating the scalar products. The momentum dictionary supplies the grouping objects; no physical momentum names or on-shell relations are assumed. Scalar-only jobs retain the previous layout. This nested algebra is already supported by the restricted importer. This replaces the more expensive complete polynomial factorisation: output can be larger, but generating it can be much faster. The final imported expression must still fit in memory. See the [nested-grouping verification](Tests/Reports/NestedCoefficientGrouping.md) for current measurements and limitations, and the [common-factor report](Tests/Reports/CommonFactorExtraction.md) for the preceding stage. Re-export existing programs to use the new stage.
+
+See [grouped-result format](FORMAT.md#grouped-propagator-results) and the [verification report](Tests/Reports/PropagatorGroups.md).
 
 Loading the package does not change the working directory, write files, or locate/launch FORM. `CalcFormExport` and `CalcFormImport` do not launch external processes. The runtime commands below launch them only when explicitly called.
 
@@ -500,9 +530,9 @@ See [upstream attribution and adaptation notes](ThirdParty/FORMColour/README.md)
 
 Metrics, components and scalar products become native FORM objects. FORM performs polynomial algebra and tensor contractions, and `.sort` combines terms at module boundaries. The source retains sums as reusable preprocessor definitions; expansion happens in FORM. The exporter never calls `Calc`, `Contract`, `TID`, or expands the complete expression. Linear momentum routing and sums inside supported noncommutative products are distributed locally during serialisation; the complete tensor input is not globally expanded.
 
-Epsilon-containing expressions, matrix words and version-five colour jobs (including preserved colour traces) bypass tensor staging/preparation. For an eligible top-level product containing at least two immediate sum factors after `FCI`, generation proceeds in stages separated by `.sort`. Serialisation retains the original traversal order and identifier assignment. A conservative planner then prefers stages sharing open tensor indices, breaking ties by tensor content, expression size and original position. This often contracts a small tensor with a connected vertex before expanding independent factors. It does not expand the Wolfram expression or call `Contract`.
+Epsilon-containing expressions, matrix words and version-five colour jobs (including preserved colour traces) bypass tensor staging/preparation. For an eligible top-level product containing at least two immediate sum factors after `FCI`, generation proceeds in stages separated by `.sort`. Serialisation retains the original traversal order and identifier assignment. A conservative planner builds connected orders by preferring shared open tensor indices, breaking ties by tensor content, expression size and original position. For products with up to eight stages it tries each tensor stage as a starting point, then prefers a smaller maximum open-index width, smaller total width and narrower late intermediates. Larger products keep the original single-start greedy planner. This often contracts a small tensor with a connected vertex before expanding independent factors. It does not expand the Wolfram expression or call `Contract`.
 
-Reordering requires every branch of each sum to have the same index multiplicities, with no index occurring more than twice across the product. Ambiguous signatures, repeated indices beyond this limit and scalar-only products retain their original stage order. Sums hidden inside powers do not count towards staging eligibility. Other expression shapes retain one defining module. The planner is a heuristic and does not guarantee an improvement for every tensor network. See [measured scope and limitations](../Documentation/Verification/ConverterPerformance.md#connected-tensor-stage-ordering).
+Reordering requires every branch of each sum to have the same index multiplicities, with no index occurring more than twice across the product. Ambiguous signatures, repeated indices beyond this limit and scalar-only products retain their original stage order. Sums hidden inside powers do not count towards staging eligibility. Other expression shapes retain one defining module. The planner is a heuristic and does not guarantee an improvement for every tensor network. See the [bounded order-search verification](Tests/Reports/ContractionOrderSearch.md) and [measured scope and limitations](../Documentation/Verification/ConverterPerformance.md#connected-tensor-stage-ordering).
 
 For eligible tensor products with a stage of at least 1,024 Wolfram leaves, FORM first normalises the stage factors into named local expressions and hides them from subsequent operations. Multiplication then reuses their already combined terms, avoiding repeated expansion of routed momentum sums. Hidden factors remain available until the program ends. The cutoff is a conservative heuristic; it was not tuned to an optimal size. Ambiguous index signatures and small jobs keep the shorter program. Hidden storage can use memory or scratch disk, so this is a speed/memory tradeoff. See [incremental factor-normalisation measurements](../Documentation/Verification/ConverterPerformance.md#normalizing-large-form-stage-factors).
 
@@ -546,6 +576,19 @@ Use [Quick or Full benchmarks](../Benchmark/README.md) to measure export, execut
 TFORM helps only when the generated work can be distributed. Worker overhead, memory, sorting and file I/O can dominate; compare serial FORM with several worker counts rather than assuming eight is fastest. Export caches and the repeated-factor importer help repeated expressions but need memory proportional to the distinct stored objects. Unsupported fast-parser shapes fall back to the general parser.
 
 Earlier improvements used different revisions, workloads and measurement boundaries. See the [performance history](../Documentation/Verification/ConverterPerformance.md) and the [3 October tensor-parser comparison](Tests/Reports/2026-10-03-tensor-fast-parser.md) for measured results and limitations. They are not portable speedup promises and are not added together.
+
+### Memory when importing nested groups
+
+For grouped version-one results, the importer parses nested coefficient sums and bracketed products in smaller pieces, retaining their factorisation. Eligible polynomial leaves use the fast parser, with bounded dictionaries and decoded-factor caches shared only within that import. It still buffers one propagator coefficient as text and retains the final Mathematica expression. A large indivisible polynomial can still require substantial memory. This is not a disk-backed expression format.
+
+For large calculations, suppress display inside the timer:
+
+```mathematica
+AbsoluteTiming[result = CalcFormCalculate[expression];]
+```
+
+This displays the elapsed time and `Null`, rather than formatting the complete result.
+
 
 ## Organisation and future reduction
 

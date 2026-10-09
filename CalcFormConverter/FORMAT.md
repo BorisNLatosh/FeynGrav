@@ -44,6 +44,7 @@ The table describes common fields, using version one as the baseline. Later sect
 | `Entries` | Array of mapping entries | Required and validated |
 | `ExpressionDigest` | `Hash[FCI[input], "SHA256", "HexString"]` | Always exported; participates in mapping digest, not otherwise interpreted |
 | `LoopMomenta` | Array of encoded momentum symbols supplied by the user | Always exported; informational to the current importer |
+| `ResultLayout` | Optional `"PropagatorGroups"` for grouped results; absent in legacy files and denominator-free exports | Checked when present; selects incremental input and requires denominator entries |
 | `Processing` | `"TensorAlgebraOnly"` for version one; later versions record the enabled algebra mode | Always exported; informational to the current importer |
 
 `ExpressionDigest` differentiates exports of different expressions even if they use exactly the same symbol dictionary. It is not a serialised expression or an independent proof of the FORM calculation. Future procedures must define any additional use of `LoopMomenta` or `Processing` explicitly.
@@ -101,7 +102,7 @@ This is data, not Wolfram Language source. Arbitrary heads, assignments and exec
 
 After the header, the result is a single expression with optional whitespace and line wrapping. Supported forms are exact integers, declared scalar identifiers, `i_`, arithmetic `+ - * /`, parentheses and integer powers. Vector dots use `cfv1.cfv2`; components use `cfv1(cfi1)`; metrics use `d_(cfi1,cfi2)`. Scalar master functions use `cfA0`, `cfB0`, `cfC0`, `cfD0` with their documented scalar argument counts. Bare vectors/indices in scalar arithmetic, unknown identifiers, trailing statements and undefined division/powers of zero are rejected.
 
-FORM output performs algebra and contractions, so the result need not retain the original factorization or denominator grouping. Opaque scalar abbreviations and denominator identifiers retain their definitions through the mapping.
+FORM output performs algebra and contractions, so the result need not retain the input factorisation. New results with denominator entries are grouped by complete mapped propagator products as described below; legacy results retain their existing interpretation. Opaque scalar abbreviations and denominator identifiers retain their definitions through the mapping.
 
 ### Tokenisation and precedence
 
@@ -273,3 +274,22 @@ one import; the flat parser and saved versions one through four are unchanged.
 The public option `ColourAlgebra -> True` is normalised to the existing enabled
 mode. Version-five `Colour.Mode` remains `"Automatic"` or `"False"`; this option
 alias does not introduce another mapping version.
+
+## Grouped propagator results
+
+New exports containing `Denominator` entries add `"ResultLayout": "PropagatorGroups"`. This field is covered by the mapping digest. Version selection, identifier meanings and the expression grammar remain unchanged; the layout adds no wrapper functions. Files without this field use the legacy reader. Unknown layout values are rejected.
+
+After all configured algebra, the generated program brackets every mapped denominator identifier and sorts before `%E` output. Each group is a denominator monomial multiplying a parenthesised coefficient. All powers belong to the monomial. Several additive terms without denominators may appear at the top level; their prefactor is one. Zero is a valid complete result.
+
+The grouped reader validates the marker/digest, mapped entries and convention metadata before parsing the body. It reads fixed-size byte chunks (FORM identifiers and grammar are ASCII), preserving whitespace and nesting across boundaries. It accepts the existing restricted algebraic grammar, checks each parsed group's prefactor and rejects propagators nested inside a coefficient. Repeated prefactors are combined after parsing. It never evaluates file contents as Wolfram source.
+
+Colour connectivity is checked on the additive coefficient terms. The choice between implicit words and explicit generated endpoints is made for the complete result before reconstruction; one group cannot silently use a different endpoint convention from another. Existing Casimir presentation is applied within coefficients. Final multiplication by reconstructed propagators does not distribute their coefficients.
+
+This is a storage/reconstruction layout, not denominator reduction. It does not promise that every older importer implementation understands the optimised reconstruction path, although the mathematical expression syntax has not changed. The current importer continues to accept saved versions one through five without layout metadata.
+
+
+### Factorised coefficients
+
+Eligible version-one grouped exports use `Bracket+` for indexed access to complete denominator products. Batches contain up to four coefficients per worker. For coefficients with no free Lorentz indices and at most 20,000 expanded terms, `content_` extracts a common numerical/monomial factor. Scalar function factors are excluded from the extracted content. Direct monomial division preserves negative powers. No full polynomial factorisation is performed. Output is an ordinary product of parenthesised content and residual sum, in the original propagator-group order. Within the residual, native brackets collect terms with the same momentum monomial, so nested sums and products are expected. All registered vectors supply the bracket list; if the list is empty this additional bracket is omitted. Free components may also appear in that list, without contracting or identifying their indices. This grouping does not invoke polynomial factorisation or create auxiliary mathematical heads. Coefficients excluded from content extraction may still receive momentum brackets. Epsilon, Dirac and colour jobs keep their existing output path. No mapping version or vocabulary changes are required; earlier grouped and ungrouped files remain readable.
+
+The incremental importer recognises complete parenthesised factor products and parses their factors left to right through the existing restricted parsers. It combines them using `Times`, without expanding the coefficient. Other syntax uses the existing parser path, including its identifier and malformed-input checks. Unit-prefactor groups may be written as `+1*(...)`, and a leading zero permits an empty overall result.

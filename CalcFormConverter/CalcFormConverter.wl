@@ -21,7 +21,7 @@ BeginPackage["CalcFormConverter`", {"FeynCalc`"}];
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormExport::usage ="CalcFormExport[expr, file, opts] exports an exact supported FeynCalc expression, including ordinary Dirac words, SU(N) colour structures and traces and rank-four single-space Lorentz Eps tensors, to a complete FORM program and a reversible JSON mapping. Returns an association with InputFile, MappingFile and ResultFile. Options: Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. The generated program simplifies ordinary open chains and evaluates explicit DiracTrace expressions; DiracAlgebra -> False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour expressions; False preserves them and unevaluated SUNTrace. No FORM process or integral reduction is performed.";
+CalcFormConverter`CalcFormExport::usage ="CalcFormExport[expr, file, opts] exports an exact supported FeynCalc expression, including ordinary Dirac words, SU(N) colour structures and traces and rank-four single-space Lorentz Eps tensors, to a complete FORM program and a reversible JSON mapping. Prints a readable file summary and returns an association with InputFile, MappingFile and ResultFile. Options: Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. The generated program simplifies ordinary open chains and evaluates explicit DiracTrace expressions; DiracAlgebra -> False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour expressions; False preserves them and unevaluated SUNTrace. Propagator products are grouped automatically; common numerical and monomial factors are extracted from eligible commuting coefficients, with repeated momentum factors grouped inside their residual sums, with unsupported or oversized coefficients retained unchanged. No FORM process or integral reduction is performed.";
 
 
 (* ::Input::Initialization:: *)
@@ -29,7 +29,7 @@ CalcFormConverter`ColourAlgebra::usage = "ColourAlgebra selects SU(N) reduction 
 
 CalcFormConverter`DiracAlgebra::usage = "DiracAlgebra selects ordinary open-chain simplification and explicit trace evaluation in FORM (Automatic), or translation only (False).";
 
-CalcFormConverter`CalcFormImport::usage = "CalcFormImport[resultFile, mappingFile] reads the dedicated result of an exported FORM program and reconstructs FeynCalc internal notation. It does not execute Wolfram Language source or run tensor/integral reduction. Epsilon results require the exported $LeviCivitaSign setting. Versions one through five are supported. Version-four results distinguish processed open chains from preserved explicit traces; import performs scalar Casimir presentation for processed colour jobs but no Dirac or colour tensor reduction.";
+CalcFormConverter`CalcFormImport::usage = "CalcFormImport[resultFile, mappingFile] reads the dedicated result of an exported FORM program and reconstructs FeynCalc internal notation. It does not execute Wolfram Language source or run tensor/integral reduction. Epsilon results require the exported $LeviCivitaSign setting. Versions one through five are supported. New grouped results are read incrementally and retain propagator products and coefficient factors; the final expression and individual coefficients still require kernel memory. Version-four results distinguish processed open chains from preserved explicit traces; import performs scalar Casimir presentation for processed colour jobs but no Dirac or colour tensor reduction.";
 
 
 (* ::Input::Initialization:: *)
@@ -41,7 +41,7 @@ CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[opts] explicitly att
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. For a binary equality lhs == rhs, it calculates lhs - rhs and compares the imported residual with zero; the result may remain symbolic. True and False are returned directly. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress, FORMThreads, DiracAlgebra and ColourAlgebra. Failed jobs are retained. DiracAlgebra -> Automatic simplifies ordinary open chains and evaluates explicit DiracTrace expressions; False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour structures; False preserves colour objects and unevaluated SUNTrace.";
+CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. For a binary equality lhs == rhs, it calculates lhs - rhs and compares the imported residual with zero; the result may remain symbolic. True and False are returned directly. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress, FORMThreads, DiracAlgebra and ColourAlgebra. Failed jobs are retained. Propagator products are grouped automatically and imported incrementally. DiracAlgebra -> Automatic simplifies ordinary open chains and evaluates explicit DiracTrace expressions; False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour structures; False preserves colour objects and unevaluated SUNTrace.";
 
 
 (* ::Input::Initialization:: *)
@@ -646,26 +646,40 @@ connectedStageOrder[stages_List] := connectedStageOrder[stages,
 
 (* ::Input::Initialization:: *)
 connectedStageOrder[stages_List, signatures_] := Module[
-	{free, sizes, remaining, order = {}, active = {}, next},
-	(*If signature computation failed, do not attempt to be clever: keep the original order.*)
+	{free, sizes, greedy, baseline, candidates, score, starts},
+	(* Ambiguous signatures never permit reordering. *)
 	If[signatures === $Failed, Return[Range[Length[stages]]]];
-	(*free[[i]] = indices occurring exactly ONCE in stage i. These are the indices that are still open and could be contracted by joining stage i with another stage. (Despite the name, this is the set of singly-occurring indices, not "free indices" in the output sense.)*)
 	free = Keys[Select[#, # === 1 &]] & /@ signatures;
-	(*If every stage has no singly occurring indices, there are no open indices to connect between stages. Keep the original order; individual stages may still contain internal contractions.*)
 	If[AllTrue[free, # === {} &], Return[Range[Length[stages]]]];
-	(*Raw size of each stage, used as a tie-breaker below. Their evaluation cost is not modelled; this is a heuristic.*)
 	sizes = LeafCount /@ stages;
-	remaining = Range[Length[stages]];
-	(*Greedy loop: repeatedly pick the best remaining stage.*)
-	While[remaining =!= {},
-		(*Prefer shared open indices, then tensors, smaller factors and the original position. This is a deterministic heuristic, not a cost model.*)
-		next = First[SortBy[remaining,
-			{-Length[Intersection[active, free[[#]]]],
-			If[free[[#]] === {}, 1, 0], sizes[[#]], #} &]];
-		AppendTo[order, next];
-		(*Update the active index set by SYMMETRIC DIFFERENCE: an index shared with an already-processed stage cancels (it just got contracted); an index that was not active becomes active (it is now open). Union minus Intersection is exactly Complement[Union[...], Intersection[...]].*)
-		active = Complement[Union[active, free[[next]]], Intersection[active, free[[next]]]]; remaining = DeleteCases[remaining, next]];
-	order
+	(* Each starting point follows the existing connected greedy rule. This
+	   explores at most eight paths, not all permutations of the factors. *)
+	greedy[start_] := Module[{remaining, order = {start}, active = free[[start]], next},
+		remaining = DeleteCases[Range[Length[stages]], start];
+		While[remaining =!= {},
+			next = First[SortBy[remaining,
+				{-Length[Intersection[active, free[[#]]]],
+				 If[free[[#]] === {}, 1, 0], sizes[[#]], #} &]];
+			AppendTo[order, next];
+			active = Complement[Union[active, free[[next]]], Intersection[active, free[[next]]]];
+			remaining = DeleteCases[remaining, next]];
+		order
+	];
+	starts = SortBy[Range[Length[stages]], {If[free[[#]] === {}, 1, 0], sizes[[#]], #} &];
+	baseline = greedy[First[starts]];
+	If[Length[stages] > 8, Return[baseline]];
+	(* Open-index width is a cost proxy, not an algebraic condition. Prefer
+	   a narrower maximum frontier, then less total width. Among ties,
+	   narrower late intermediates are preferred because terms accumulate.
+	   Preserve the baseline on a complete score tie. *)
+	score[order_] := Module[{active = {}, widths},
+		widths = Table[
+			active = Complement[Union[active, free[[i]]], Intersection[active, free[[i]]]];
+			Length[active], {i, order}];
+		{Max[widths], Total[widths], Reverse[widths], If[order === baseline, 0, 1], order}
+	];
+	candidates = DeleteDuplicates[greedy /@ Select[starts, free[[#]] =!= {} &]];
+	First[SortBy[candidates, score]]
 ];
 
 
@@ -880,6 +894,8 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
         (*Record the format, version, fingerprint of the FCI-normalized input, dimension, loop-momentum metadata, processing label and ordered entries. ExpressionDigest helps distinguish different exports but is not independently checked against a saved input. TensorAlgebraOnly means algebra and Lorentz contractions, without integral reduction.*)
         payload = <|"Format" -> $formatName, "Version" -> If[hasColourFormat, 5, If[hasDiracProcessing, 4, If[hasDiracColour, 3, If[hasEpsilon, 2, $formatVersion]]]], "ExpressionDigest" -> originalDigest,
         "Dimension" -> encode[dim], "LoopMomenta" -> (encode /@ loops), "Processing" -> If[$caActive, If[hasDiracProcessing && algebra === Automatic, "LorentzDiracAndColourAlgebra", "LorentzAndColourAlgebra"], If[hasDiracProcessing && algebra === Automatic, "LorentzAndDiracAlgebra", "TensorAlgebraOnly"]], "Entries" -> entries|>;
+        If[AnyTrue[entries, #["Kind"] === "Denominator" &],
+            AssociateTo[payload, "ResultLayout" -> "PropagatorGroups"]];
         If[hasEpsilon, AssociateTo[payload, "EpsilonConvention" -> <|
             "Sign" -> encode[epsilonSign], "ExportFactor" -> encode[-I epsilonSign]|>]];
         If[hasDiracColour, AssociateTo[payload, {"DiracSpinLine" -> 1, "EpsilonPresent" -> hasEpsilon}]];
@@ -961,9 +977,12 @@ renderExport[data_Association, result_String, template_String] :=
           "@MULTIPLICATIONS@" -> 
        StringJoin[(".sort\nMultiply " <> # <> ";\n") & /@ 
          data["Multiplications"]] <> caProcessing[data] <> If[KeyExistsQ[data["Mapping"], "EpsilonConvention"], "contract 0;\n", ""] <> daProcessing[data],
+          "@GROUPING@" -> With[{denominators = Lookup[Select[entries, #["Kind"] === "Denominator" &], "Name", {}]},
+              If[denominators === {}, "", If[pgFactorisationQ[data], "Bracket+ ", "Bracket "] <> StringRiffle[denominators, ","] <> ";"]],
           (*The result path. Windows backslashes are normalized because FORM expects forward slashes there; Unix paths are preserved literally, including backslashes. Quoting is the template's job.*)
           "@RESULT@" -> If[$OperatingSystem === "Windows", 
              StringReplace[result, "\\" -> "/"], result], 
+          "@OUTPUT@" -> pgOutput[data, If[$OperatingSystem === "Windows", StringReplace[result, "\\" -> "/"], result]],
           "@DIGEST@" -> digest}];
      (*Return both artifacts: the rendered FORM program and the exact JSON text whose hash was embedded in it. The caller can write them side by side and a verifier can re-hash MappingJSON to confirm it matches the @DIGEST@ in the program.*)
      <|"Program" -> program, "MappingJSON" -> json|>
@@ -978,7 +997,7 @@ $requiredTemplatePlaceholders = {
    "@FORMATVERSION@", "@RESULTMARKER@", "@FUNCTIONS@", "@SCALARS@",
    "@DIMENSION@", "@VECTORS@", "@INDICES@", "@FACTORS@",
    "@PREPARATIONS@", "@EXPRESSION@", "@MULTIPLICATIONS@", "@RESULT@",
-   "@DIGEST@"};
+   "@DIGEST@", "@GROUPING@", "@OUTPUT@"};
 
 
 (* ::Text:: *)
@@ -1222,6 +1241,28 @@ Recovery copies were retained.",
 (* ::Subsection:: *)
 (*Public export orchestration*)
 
+(* ::Text:: *)
+(* Report only completed exports. Automated calculations suppress this manual
+   file hand-off because their temporary files may be deleted after import.
+   Presentation never changes the returned association or shortens its paths. *)
+
+(* ::Input::Initialization:: *)
+$showExportSummary = True;
+printExportSummary[paths_Association, frontEnd_: $FrontEnd] := Module[{rows},
+    rows = Transpose[{{"FORM program", "Symbol mapping", "Expected result"},
+        Lookup[paths, {"InputFile", "MappingFile", "ResultFile"}]}];
+    If[frontEnd === Null,
+        Print["FORM export completed"];
+        Scan[Print[#[[1]], ": ", #[[2]]] &, rows],
+        Print[StandardForm[Column[{
+            Style["FORM export completed", Bold],
+            Grid[Prepend[rows, {"File", "Location"}], Alignment -> Left,
+                Frame -> All, Spacings -> {2, 1}]
+        }, Spacings -> 1]]]
+    ]
+];
+
+
 
 (* ::Text:: *)
 (*The public exporter sequences path validation, in-memory conversion, template loading, rendering and transactional writing. Its tagged Catch converts conversion failures into returned Failure objects. Path and file operations are not pure functions.*)
@@ -1230,7 +1271,7 @@ Recovery copies were retained.",
 CalcFormConverter`CalcFormExport[expression_, file_String, 
    OptionsPattern[]] := Catch[
      (*Keep intermediate results local and read OverwriteTarget once. The one-argument OptionValue form resolves against this definition's OptionsPattern.*)
-     Module[{paths, data, rendered, 
+     Module[{paths, data, rendered, result,
      overwrite = OptionValue[System`OverwriteTarget]},
         (*Step 1: resolve and validate paths. Takes only the filename and the option value; does no writing. Fails fast on bad extension, missing directory, forbidden characters, or an existing target when overwriting is off.*)
         paths = exportPaths[file, overwrite];
@@ -1241,8 +1282,11 @@ CalcFormConverter`CalcFormExport[expression_, file_String,
         (*Step 3: render the FORM program. readProgramTemplate[] does the one piece of file I/O this stage needs (reading the template); the result path comes from paths, so the .out filename is fixed before the program text is generated.*)
         rendered = 
      renderExport[data, paths["ResultFile"], readProgramTemplate[]];
-        (*Step 4: commit. The writeExport transaction returns the paths association on success; that is the value of the Module, of the Catch (no throw occurred) and hence of the call.*)
-        writeExport[paths, rendered, overwrite]
+        (*Step 4: publish both files before announcing success. Preserve any
+          returned failure, including transaction cleanup/recovery diagnostics. *)
+        result = writeExport[paths, rendered, overwrite];
+        If[AssociationQ[result] && TrueQ[$showExportSummary], printExportSummary[result]];
+        result
       ], $failureTag];
 
 
@@ -1267,6 +1311,58 @@ CalcFormConverter`CalcFormExport[___] :=
 (*Section 5: FORM result parsing and FeynCalc reconstruction. A recursive-descent parser reads FORM's output text back into Wolfram expressions. It recognizes arithmetic, FORM's native tensor syntax (d_(i,j) metrics and p_(i) components), the reserved master-integral functions, epsilon tensors and version-three gamma words. Key design choice stated in the header: vector and index tokens keep DISTINCT types until they are converted into Pair objects, so a misplaced index is caught before arithmetic can hide it.*)
 
 (* ::Input::Initialization:: *)
+(* A grouped scalar import may reuse validated state across polynomial leaves.
+   Block owns the caches: no symbol definitions or convention-dependent values
+   survive an import, failure or abort. Limits bound retained cache entries,
+   not the returned expression or the kernel's allocator. *)
+$importParserActive = False;
+$importParserCacheEntries = 4096;
+$importParserCacheBytes = 4194304;
+SetAttributes[withImportParser, HoldAll];
+withImportParser[values_, dim_, body_] := Block[
+    {$importParserActive = True, $importParserValues = values,
+     $importParserDimension = dim, $importFactorCache = <||>,
+     $importClassCache = <||>, $importFactorBytes = 0, $importClassBytes = 0,
+     $flatParserMinimumCharacters = Min[32, $flatParserMinimumCharacters],
+     $flatParserMinimumReusePerDistinctFactor = Min[1, $flatParserMinimumReusePerDistinctFactor]},
+    body
+];
+importFactor[t_String] := Module[{value, bytes},
+    (* Exact integer literals and already validated scalar dictionary entries
+       need no recursive parser. Do not cache the many distinct integers:
+       they otherwise evict reusable powers and momentum monomials. *)
+    If[StringMatchQ[t, RegularExpression["[0-9]+"]], Return[FromDigits[t]]];
+    If[t === "i_", Return[I]];
+    If[KeyExistsQ[$importParserValues, t],
+        value = $importParserValues[t];
+        If[FreeQ[value, _vectorToken | _indexToken | _caAToken | _caFToken], Return[value]]];
+    If[KeyExistsQ[$importFactorCache, t], Return[$importFactorCache[t]]];
+    value = parseGeneralResult[t, $importParserValues, $importParserDimension];
+    If[StringLength[t] <= 512,
+        bytes = ByteCount[value] + ByteCount[t] + 256;
+        If[bytes <= 16384 && bytes <= $importParserCacheBytes,
+            If[Length[$importFactorCache] >= $importParserCacheEntries ||
+                $importFactorBytes + bytes > $importParserCacheBytes,
+                $importFactorCache = <||>; $importFactorBytes = 0];
+            AssociateTo[$importFactorCache, t -> value]; $importFactorBytes += bytes]];
+    value
+];
+importTokenClass[t_String, compoundPattern_] := Module[{value, bytes},
+    If[TrueQ[$importParserActive] && KeyExistsQ[$importClassCache, t],
+        Return[$importClassCache[t]]];
+    value = Which[StringMatchQ[t, DigitCharacter ..], 0,
+        StringMatchQ[t, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]], 1,
+        StringMatchQ[t, RegularExpression[compoundPattern]], 3, True, 2];
+    If[TrueQ[$importParserActive] && StringLength[t] <= 512,
+        bytes = ByteCount[t] + 256;
+        If[bytes <= $importParserCacheBytes,
+            If[Length[$importClassCache] >= $importParserCacheEntries ||
+                $importClassBytes + bytes > $importParserCacheBytes,
+                $importClassCache = <||>; $importClassBytes = 0];
+            AssociateTo[$importClassCache, t -> value]; $importClassBytes += bytes]];
+    value
+];
+
 parseGeneralResult[text_String, values_Association, dim_] := Module[
      {tokens, pos = 1, peek, take, expect, atom, power, unary, 
     product, sum,
@@ -1274,6 +1370,10 @@ parseGeneralResult[text_String, values_Association, dim_] := Module[
     stripped, classes,
        tokenCount, compoundPattern, compoundValue},
      (*Lexing, part 1 -- what can be one token. Only COMPLETE component/metric calls are made composite: cfvN(cfiM) and d_(cfiM,cfiN). Everything else is lexed piecewise. The input text is tokenized as-is (not whitespace-stripped first), precisely so whitespace cannot glue separate identifier fragments into one token. Dots are deliberately left as ordinary operator tokens, which is what lets the dot-chain validation below run left-to-right.*)
+     (* Local recursive functions refer to one another and to token storage.
+        Explicit cleanup breaks those references after every small subgroup,
+        including failures and aborts, rather than retaining parser closures. *)
+     Internal`WithLocalSettings[Null,
      compoundPattern = 
     "(?:cfv[0-9]+\\s*\\(\\s*cfi[0-9]+\\s*\\)|d_\\s*\\(\\s*cfi[0-9]+\\\
 s*,\\s*cfi[0-9]+\\s*\\))";
@@ -1288,15 +1388,7 @@ s*,\\s*cfi[0-9]+\\s*\\))";
       stripped || tokens === {}, 
     throwFailure["InvalidResult", "The result contains invalid syntax."]];
      (*Classify each DISTINCT lexeme once, into: 0 = integer, 1 = identifier, 2 = punctuation, 3 = native call Caching classification in an association avoids re-running the regular expressions at every occurrence, which matters for large results where a few identifiers repeat thousands of times.*)
-     classes = Association[
-         Map[# -> Which[
-               StringMatchQ[#, DigitCharacter ..], 0,
-               StringMatchQ[#, RegularExpression["[A-Za-z][A-Za-z0-9_]*"]], 
-         1,
-               StringMatchQ[#, RegularExpression[compoundPattern]], 3,
-               True, 2
-             ] &, DeleteDuplicates[tokens]]
-       ];
+     classes = Association[(# -> importTokenClass[#, compoundPattern] &) /@ DeleteDuplicates[tokens]];
      (*Decode composite calls lazily, in parse order, through the SAME call[]/entryValue[] machinery as ordinary calls, so identifier and argument validation is identical. Eager decoding would report a later unknown identifier before an earlier syntax error, which is a worse diagnostic. compoundValue is SetDelayed plus an inner Set, so only SUCCESSFUL results are cached and that cache lives only for this import.*)
      compoundValue[t_] := compoundValue[t] = With[
           {parts = 
@@ -1474,7 +1566,10 @@ expression."]
         throwFailure["InvalidResult", 
      "Unexpected trailing tokens in FORM result."]
       ];
-     result
+     result,
+     Clear[tokens, classes, stripped, compoundValue, dot, peek, take,
+       expect, atom, power, unary, product, sum, scalarValue, entryValue, call]
+     ]
    ];
 
 
@@ -1540,9 +1635,11 @@ parseFlatResult[flatTokenData[tokenList_List, start_Integer],
    values_Association, dim_] := Module[
      {tokens = tokenList, count = Length[tokenList], pos = start,
        factor, checked, product, firstSign, result, terms, op, r},
+     Internal`WithLocalSettings[Null,
      firstSign = If[start === 2 && First[tokens] === "-", -1, 1];
      (*Memoize successful general-parser results by factor text within this call. A thrown failure exits before Set stores a value. No result text is evaluated as Wolfram source.*)
-     factor[t_] := factor[t] = parseGeneralResult[t, values, dim];
+     factor[t_] := factor[t] = If[TrueQ[$importParserActive], importFactor[t],
+         parseGeneralResult[t, values, dim]];
      (*Identical typed-token gate as the general parser.*)
      checked[x_] := If[! FreeQ[x, _vectorToken | _indexToken],
          
@@ -1582,7 +1679,9 @@ parseFlatResult[flatTokenData[tokenList_List, start_Integer],
            ][[2, 1]];
         result = Plus @@ terms
       ];
-     checked[result]
+     checked[result],
+     Clear[tokens, factor, checked, product]
+     ]
    ];
 
 
@@ -1592,11 +1691,15 @@ parseFlatResult[flatTokenData[tokenList_List, start_Integer],
 (* ::Input::Initialization:: *)
 parseResult[text_String, values_Association, dim_] := 
   Module[{prepared = $Failed},
+     (* Short momentum monomials recur between coefficient leaves. Decode them
+        once per import instead of constructing another general-parser state. *)
+     If[TrueQ[$importParserActive] && StringLength[text] < $flatParserMinimumCharacters,
+         Return[importFactor[text]]];
      If[StringLength[text] >= $flatParserMinimumCharacters &&
           
-     AllTrue[DeleteDuplicates[
-       Cases[{Values[values], dim}, _Symbol, Infinity, Heads -> True]], 
-      UpValues[#] === {} &],
+     (TrueQ[$importParserActive] || AllTrue[DeleteDuplicates[
+       Cases[{Values[values], dim}, _Symbol, Infinity, Heads -> True]],
+      UpValues[#] === {} &]),
         (*This is an optional optimization. Local messages or an unevaluated eligibility result must not escape as an apparently successful import. Check does not catch Abort, so user cancellation still propagates.*)
         prepared = Quiet[Check[prepareFlatResult[text], $Failed]]
       ];
@@ -1650,19 +1753,14 @@ decodeEntries[entries_List, dim_:Automatic] := Association[
 (* ::Input::Initialization:: *)
 CalcFormConverter`CalcFormImport[resultFile_String, 
    mappingFile_String] := Catch[
-     Module[{json, mapping, text, lines, digest, entries, dim, names, 
+     Module[{json, mapping, text, lines, digest, entries, dim, names, grouped,
      values},
-        (*Read both files as UTF-8 text. Quiet/Check handles read messages, and the StringQ check reports ReadFailed for unsuccessful reads. This does not catch Abort.*)
+        (*Read the mapping as UTF-8 text first. Legacy results retain their text reader; grouped results use an owned, bounded byte stream. Read failures do not catch user aborts.*)
         json = 
      Quiet[Check[
        Import[mappingFile, "Text", 
         CharacterEncoding -> "UTF-8"], $Failed]];
-        text = 
-     Quiet[Check[
-       Import[resultFile, "Text", 
-        CharacterEncoding -> "UTF-8"], $Failed]];
-        If[! StringQ[json] || ! StringQ[text], 
-     throwFailure["ReadFailed", "Cannot read the result or mapping file."]];
+        If[!StringQ[json], throwFailure["ReadFailed", "Cannot read the result or mapping file."]];
         (*Try RawJSON string import first. If it fails, retry using an explicit UTF-8 byte buffer to handle Unicode import differences. Format and entry validation follow separately.*)
         mapping = Quiet[Check[ImportString[json, "RawJSON"], $Failed]];
         If[mapping === $Failed,
@@ -1675,16 +1773,19 @@ CalcFormConverter`CalcFormImport[resultFile_String,
       Lookup[mapping, "Format", None] =!= $formatName ||
              !MemberQ[{1, 2, 3, 4, 5}, Lookup[mapping, "Version", None]],
            throwFailure["InvalidMapping", "Unsupported mapping format or version."]];
-        (*Split the result into lines for the marker check. CRLF is normalized first, since the exporter may have written the file on any platform.*)
-        lines = StringSplit[StringReplace[text, "\r\n" -> "\n"], "\n"];
-        (*Accept the digest of the exact JSON text or the legacy UTF-8 byte-string representation. This preserves early notebook exports. Both bind the complete mapping; neither authenticates the sender nor proves the FORM calculation.*)
+        grouped = Lookup[mapping, "ResultLayout", None] === "PropagatorGroups";
+        If[KeyExistsQ[mapping, "ResultLayout"] && !grouped,
+            throwFailure["InvalidMapping", "Unknown result layout."]];
         digest = Hash[#, "SHA256", "HexString"] & /@
             {json, FromCharacterCode[ToCharacterCode[json, "UTF-8"]]};
-        If[
-     Length[lines] < 2 || ! 
-       MemberQ[(resultMarker[mapping["Version"]] <> " " <> # &) /@ digest, First[lines]],
-           throwFailure["MappingMismatch", 
-      "The result does not correspond to this mapping file."]];
+        If[grouped, pgWithStream[resultFile, Function[stream, pgHeader[stream, mapping, digest]]]];
+        If[!grouped,
+            text = Quiet[Check[Import[resultFile, "Text", CharacterEncoding -> "UTF-8"], $Failed]];
+            If[!StringQ[text], throwFailure["ReadFailed", "Cannot read the result or mapping file."]];
+            lines = StringSplit[StringReplace[text, "\r\n" -> "\n"], "\n"];
+            If[Length[lines] < 2 || !MemberQ[(resultMarker[mapping["Version"]] <> " " <> # &) /@ digest, First[lines]],
+                throwFailure["MappingMismatch", "The result does not correspond to this mapping file."]]
+        ];
         (*Structural validation of the entries list BEFORE any value is decoded.*)
         entries = Lookup[mapping, "Entries", None];
         If[! ListQ[entries] || ! AllTrue[entries, AssociationQ], 
@@ -1708,7 +1809,7 @@ CalcFormConverter`CalcFormImport[resultFile_String,
         (*Only now decode every mapped value: name -> value, with vectors and indices wrapped in their typed tokens.*)
         values = decodeEntries[entries, dim];
         (*Hand the result text (everything after the marker line) to the parser together with the symbol table and dimension.*)
-        Block[{$caImport = <||>, $epsilonImportFactor = None, $diracImportLine = None, $daImportLines = <||>, $daImportMode = False},
+        Block[{$importParserActive = False, $caImport = <||>, $epsilonImportFactor = None, $diracImportLine = None, $daImportLines = <||>, $daImportMode = False},
             If[mapping["Version"] >= 3,
                 If[!MemberQ[{True, False}, Lookup[mapping, "EpsilonPresent", None]] ||
                     Lookup[mapping, "EpsilonPresent", None] =!= KeyExistsQ[mapping, "EpsilonConvention"],
@@ -1732,6 +1833,8 @@ CalcFormConverter`CalcFormImport[resultFile_String,
             ];
             If[mapping["Version"] >= 4, daValidateMetadata[mapping, entries]];
             If[mapping["Version"] === 5, caValidateMetadata[mapping, entries]];
+            If[grouped,
+                Return[pgImport[resultFile, mapping, digest, values, dim]]];
             If[$diracImportLine === None,
                 parseResult[StringRiffle[Rest[lines], "\n"], values, dim],
                 With[{prepared = caPrepareResult[StringRiffle[Rest[lines], "\n"], values]},
@@ -1761,6 +1864,7 @@ CalcFormConverter`CalcFormImport[___] :=
 Get[FileNameJoin[{$moduleDirectory, "DiracColour.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "DiracAlgebra.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "ColourAlgebra.wl"}]];
+Get[FileNameJoin[{$moduleDirectory, "PropagatorGroups.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "FORMRuntime.wl"}]];
 
 

@@ -40,6 +40,17 @@ assert["triple index retains original order",
  plan[{FVD[p,a]+FVD[q,a],FVD[r,a]+FVD[s,a],FVD[t,a]+FVD[u,a]}]==={1,2,3}];
 assert["internal contraction and external reuse retains original order",
  plan[{FVD[p,a]^2+x FVD[q,a]^2,FVD[r,a]+FVD[s,a]}]==={1,2}];
+(* Explore a bounded set of starting points. This graph has a narrower late
+   intermediate when contracted from the opposite end. No physical names enter
+   the planner; these are only incidence sets. *)
+frontierIndices={{a,b,c,d},{e,f,b,c,h,i},{e,j,f},{k,h,i,l},{a,m,n,o,d,k,l},{j,m,n,o}};
+frontierSignatures=(AssociationThread[#,ConstantArray[1,Length[#]]]&)/@frontierIndices;
+assert["planner prefers narrower late intermediates",
+ CalcFormConverter`Private`connectedStageOrder[Range/@{31,1173,31,163,1173,31},frontierSignatures]==={6,5,1,4,2,3}];
+assert["large plans preserve bounded greedy fallback",
+ CalcFormConverter`Private`connectedStageOrder[Range[9],Table[AssociationThread[{i,i+1},{1,1}],{i,9}]]===Range[9]];
+frontierStages=(Times@@(FVD[p,#]&/@#)+Times@@(FVD[q,#]&/@#)&)/@frontierIndices;
+stageCase["stages_frontier",Times@@frontierStages,5];
 stageCase["stages_chain",(MTD[a,b]+FVD[p,a]FVD[p,b])
  (MTD[b,c]+FVD[q,b]FVD[q,c])(FVD[r,c]+FVD[s,c]),2];
 stageCase["stages_loop",(MTD[a,b]+FVD[p,a]FVD[p,b])

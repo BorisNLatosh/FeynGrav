@@ -1,0 +1,89 @@
+* Enumerate complete propagator products once. The full result stays hidden
+* and shared; only one batch of coefficients is active during common-factor extraction.
+#$cfcKeys=0;
+Skip;
+NSkip cfcResult;
+Keep Brackets;
+$cfcKeys=$cfcKeys+term_;
+Bracket+ @DENOMINATORS@;
+ModuleOption noparallel;
+.sort
+Hide cfcResult;
+.sort
+* NTHREADS_ includes the master. Serial FORM reports one. No dependence on
+* Mathematica or a launcher: a manually selected tform -wN sets this batch too.
+* Four queued expressions per worker reduce idle time from unequal costs;
+* normalisation uses whole-expression scheduling on the selected workers.
+#define CFCFactorBatch "1"
+#ifdef `NTHREADS_'
+#if `NTHREADS_' > 1
+#redefine CFCFactorBatch "{4*(`NTHREADS_'-1)}"
+#endif
+#endif
+#write <@RESULT@> "0"
+#do cfcBatch=1,1
+#if "`$cfcKeys'" != "0"
+#$cfcBatchCount=0;
+#do cfcSlot=1,`CFCFactorBatch'
+#if "`$cfcKeys'" != "0"
+#$cfcKey`cfcSlot'=firstterm_($cfcKeys);
+#$cfcKeys=$cfcKeys-$cfcKey`cfcSlot';
+#$cfcIndexed`cfcSlot'=0;
+Local cfcCoefficient`cfcSlot'=cfcResult[`$cfcKey`cfcSlot''];
+#$cfcBatchCount=`cfcSlot';
+#endif
+#enddo
+* Validate each coefficient independently, including mixed safe/unsafe batches.
+#do cfcSlot=1,`$cfcBatchCount'
+if ( expression(cfcCoefficient`cfcSlot') );
+@INDEXCHECK@
+endif;
+#enddo
+#do cfcSlot=1,`$cfcBatchCount'
+NFactorize cfcCoefficient`cfcSlot';
+#enddo
+#do cfcSlot=1,`$cfcBatchCount'
+ModuleOption maximum,$cfcIndexed`cfcSlot';
+#enddo
+.sort
+#do cfcSlot=1,`$cfcBatchCount'
+Drop cfcCoefficient`cfcSlot';
+#enddo
+* Compute each common monomial once. Strip scalar functions from the content:
+* FORM does not cancel a function against its formal reciprocal. Direct monomial
+* division preserves Laurent powers; polynomial div_ is unsuitable here.
+#do cfcSlot=1,`$cfcBatchCount'
+#$cfcContent`cfcSlot'=1;
+#$cfcTerms=termsin_(cfcCoefficient`cfcSlot');
+#if ( `$cfcTerms' > 0 ) && ( `$cfcTerms' <= 20000 ) && ( `$cfcIndexed`cfcSlot'' == 0 )
+#$cfcContent`cfcSlot'=content_(cfcCoefficient`cfcSlot');
+#inside $cfcContent`cfcSlot'
+id cfA0(?a)=1;
+id cfB0(?a)=1;
+id cfC0(?a)=1;
+id cfD0(?a)=1;
+#endinside
+#endif
+Local cfcPrimitive`cfcSlot'=cfcCoefficient`cfcSlot'/($cfcContent`cfcSlot');
+#enddo
+* Only coefficient normalisation is scheduled here; no polynomial factor search.
+* A second bracket level groups repeated momentum monomials inside each
+* denominator coefficient. Native output preserves the nested sums without
+* wrapping a large coefficient inside a single FORM function argument.
+@COEFFICIENTBRACKET@
+ModuleOption inparallel;
+.sort
+* Preserve the common monomial outside the residual sum in ordinary syntax.
+#do cfcSlot=1,`$cfcBatchCount'
+#write <@RESULT@> "+%$*((%$)*(",$cfcKey`cfcSlot',$cfcContent`cfcSlot'
+#write <@RESULT@> "%E",cfcPrimitive`cfcSlot'
+#write <@RESULT@> "))"
+Drop cfcPrimitive`cfcSlot';
+#$cfcContent`cfcSlot'=0;
+#$cfcKey`cfcSlot'=0;
+#$cfcIndexed`cfcSlot'=0;
+#enddo
+.sort
+#redefine cfcBatch "0"
+#endif
+#enddo

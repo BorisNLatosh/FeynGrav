@@ -39,6 +39,7 @@ def main():
             if suite == 'core':
                 run_kernel('Core')
                 run_kernel('Parser')
+                run_kernel('SharedParser')
                 run_kernel('Transactions')
                 run_kernel('Installer')
                 continue
@@ -50,6 +51,7 @@ def main():
                 run_kernel('DiracColour')
                 run_kernel('DiracAlgebra')
                 run_kernel('ColourAlgebra')
+                run_kernel('PropagatorGroups')
                 continue
             run_kernel('Export' if suite == 'form' else 'GravityExport')
             if suite == 'form':

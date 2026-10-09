@@ -246,10 +246,10 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
  result = CheckAbort[
    Catch[
      announce["Export"];
-     job = CalcFormConverter`CalcFormExport[input, FileNameJoin[{directory, "job.frm"}],
+     job = Block[{$showExportSummary = False}, CalcFormConverter`CalcFormExport[input, FileNameJoin[{directory, "job.frm"}],
        FeynCalc`Dimension -> OptionValue[FeynCalc`Dimension], FeynCalc`LoopMomenta -> OptionValue[FeynCalc`LoopMomenta],
        CalcFormConverter`DiracAlgebra -> OptionValue[CalcFormConverter`DiracAlgebra],
-       CalcFormConverter`ColourAlgebra -> OptionValue[CalcFormConverter`ColourAlgebra]];
+       CalcFormConverter`ColourAlgebra -> OptionValue[CalcFormConverter`ColourAlgebra]]];
      If[FailureQ[job], Throw[retainedFailure["ExportFailed", "FORM export failed; job files were retained.", <|"Cause" -> job|>], $failureTag]];
      announce["Execute"];
      run = runtimeProcess[formCommand[check["Executable"], job["InputFile"], threads], directory, limit, True, progress];

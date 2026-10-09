@@ -169,33 +169,41 @@ Report problems through [GitHub issues](https://github.com/BorisNLatosh/FeynGrav
 
 Planned release tag: `v4.1.0`.
 
-- Added a two-command FeynGrav installer with dependency checks, fresh-kernel verification, and backup/rollback for updates.
-- Added CalcFormConverter with reversible mappings, rank-four epsilon support, ordinary Dirac algebra and fundamental SU(N) colour processing.
-- Added FORM/TFORM availability checks, explicit installation support, automated calculation, timing, and progress reporting.
-- Improved conversion performance and support for graviton polarisation workflows.
-- Updated the graviton-scattering notebook to use the converter and group vertex arguments by external leg.
-- Migrated the library generator to CalcFormConverter, added structural rule validation and removed the obsolete local `Calc` implementation.
-- Added a [main-package reference](Documentation/Reference.md) and retained FeynCalc 10.2.1 as the documented dependency.
+- Added a two-command installer with dependency checks, package verification, and backups when replacing an existing installation.
+- Added CalcFormConverter for exchanging supported FeynCalc expressions with FORM, including Lorentz contractions, rank-four epsilon tensors, ordinary Dirac algebra, and fundamental SU(N) colour algebra. Automated FORM/TFORM execution includes timing and progress reporting.
+- Added D-dimensional polarisation vectors and factorised polarisation tensors in four and D dimensions.
+- Migrated interaction-library generation to CalcFormConverter and added reproducible benchmarks for conversion and library generation.
+- Improved rule-input validation and library loading, preserving existing definitions when an import fails.
+- Added `FeynGravConventions[]` and `FeynGravLibraryInformation[]` to inspect mathematical conventions, current settings, and the provenance of loaded libraries.
+- Expanded the function reference and updated calculation examples for the FORM workflow.
 
-### Version 4
+**Compatibility:** requires FeynCalc 10.2.1 or newer and Wolfram Language 12.2 or newer, subject to the requirements of the selected FeynCalc version. The local `Calc` implementation has been removed, and the library generator is now loaded from `Libs/Generator.wl`. FORM remains optional for loading FeynGrav; it is required for converter execution and library generation.
 
-- Implemented a finite set of graviton–Faddeev–Popov ghost vertices.
-- Added a higher-derivative gauge-fixing term for quadratic gravity.
-- Implemented Cheung–Remmen variables for general relativity.
-- Added functions for working with the Nieuwenhuizen operators.
+### Version 4.0
 
-### Version 3
+- Revised the BRST treatment of general relativity and quadratic gravity to use a finite set of graviton–Faddeev–Popov ghost interaction rules.
+- Added higher-derivative gauge fixing for quadratic gravity, with the corresponding graviton and ghost propagators and ghost–graviton interaction.
+- Implemented the pure-gravity Cheung–Remmen formulation, including its auxiliary field, propagators, and finite set of interaction vertices.
+- Added commands to construct, invert, and decompose linear combinations of Nieuwenhuizen operators, and updated command descriptions. See [FeynGrav 4.0](https://arxiv.org/html/2510.17320v3#S4).
 
-- Added a massive-gravity propagator, Horndeski models, axion-like coupling, and quadratic gravity.
+### Version 3.0
 
-### Version 2
+- Added Horndeski interactions, scalar–Gauss–Bonnet interactions, axion-like coupling to a vector field, and quadratic gravity.
+- Added a massive-graviton propagator.
+- Introduced recursive tensor-construction algorithms, memoisation, and FORM-assisted interaction-library generation.
+- Added selective loading of interaction libraries and standardised propagator interfaces around FeynCalc’s `FAD` notation. See [FeynGrav 3.0](https://arxiv.org/html/2406.14872#S7).
 
-- Added arbitrary masses for spin-0, spin-1/2, and spin-1 fields.
-- Extended general relativity with advanced gauge fixing and implemented SU(N) Yang–Mills theory.
+### Version 2.0
 
-### Version 1
+- Extended minimally coupled scalar, Dirac, and vector fields to arbitrary masses.
+- Added gravitational interactions for SU(N) Yang–Mills theory, including the associated ghost sector.
+- Extended gravitational gauge fixing to an arbitrary gauge parameter and included the corresponding ghost interactions. See [FeynGrav 2.0](https://arxiv.org/abs/2302.14310).
 
-- Supported massless spin-0, spin-1/2, and spin-1 fields, together with gravity.
+### Version 1.0
+
+- Introduced FeynGrav as a FeynCalc extension for gravitational Feynman rules.
+- Supported general relativity and minimally coupled massless fields of spin 0, 1/2, and 1.
+- Provided examples of tree-level graviton scattering, one-loop self-energies, and scalar–gravity interactions. See [the original FeynGrav publication](https://arxiv.org/abs/2201.06812).
 
 ## Citations and licence
 

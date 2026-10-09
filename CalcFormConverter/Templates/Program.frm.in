@@ -16,12 +16,13 @@ Local cfcResult = @EXPRESSION@;
 
 * Processing stage: FORM contracts native Lorentz objects during normalization.
 * Future denominator and one-loop reduction procedures belong at this boundary.
+@GROUPING@
 .sort
 
 * Dedicated, overwritten result file. The first line identifies its mapping.
 Format nospaces;
 #create <@RESULT@>
 #write <@RESULT@> "@RESULTMARKER@ @DIGEST@"
-#write <@RESULT@> "%E",cfcResult
+@OUTPUT@
 #close <@RESULT@>
 .end
