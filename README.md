@@ -92,7 +92,7 @@ The converter's [ScalarBubble.wl](CalcFormConverter/Examples/ScalarBubble.wl) de
 
 ## Benchmarks
 
-The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, import and complete CalcFormConverter calls. Select **Quick** or **Full** before running. Inputs and import fixtures are generated locally; no extra tools beyond Mathematica, the package dependencies, and FORM/TFORM are required. Reports include raw timings, validation status and source hashes.
+The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, import, complete CalcFormConverter calls and library generation. Select **Quick** or **Full** before running. Inputs and import fixtures are generated locally; no extra tools beyond Mathematica, the package dependencies, and FORM/TFORM are required. Reports include raw timings, validation status and source hashes.
 
 ## Package structure
 
@@ -103,7 +103,7 @@ The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, i
 | [Libs](Libs) | Precomputed vertex libraries and the [library generator](Libs/Generator.md), which uses CalcFormConverter. |
 | [Examples](Examples) | Calculation notebooks. |
 | [Documentation](Documentation/README.md) | Main-package reference, documentation routes and verification records. |
-| [Benchmark](Benchmark/README.md) | Reproducible converter measurements. |
+| [Benchmark](Benchmark/README.md) | Reproducible converter and library-generation measurements. |
 | [CalcFormConverter](CalcFormConverter) | Converter, FORM runtime, templates, documentation, examples, and tests. |
 
 ## Troubleshooting and support

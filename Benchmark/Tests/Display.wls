@@ -7,7 +7,7 @@ assert[name_,test_] := (checks++;If[!TrueQ[test],failures++;Print["FAIL: ",name]
 Do[
  nb=Get[file];
  inputs=Cases[nb,Cell[BoxData[b_],"Input",___]:>b,Infinity];
- tables=Select[inputs,!FreeQ[#,"Dataset"|"BenchmarkSummary"]&];
+ tables=Select[inputs,!FreeQ[#,"Dataset"|"BenchmarkSummary"|"Grid"]&];
  assert[FileNameTake[file]<>" three protected table inputs",Length[tables]===3 && AllTrue[tables,MatchQ[ToExpression[#,StandardForm,HoldComplete],HoldComplete[StandardForm[_]]]&]];
  outputs=Cases[nb,Cell[BoxData[b_],"Output",___]:>b,Infinity];
  tables=Select[outputs,!FreeQ[#,Dataset`InterpretDataset]&];

@@ -249,3 +249,7 @@ See [the migration verification report](../Documentation/Verification/GeneratorV
 families, regression results and the Gauss–Bonnet batch starting-order correction.
 
 See the [generation-progress verification](../Documentation/Verification/GeneratorProgress.md) for the bounded checks of this reporting change.
+
+## Benchmarking generation
+
+Use [Benchmark/06_Library_Generation.nb](../Benchmark/06_Library_Generation.nb) in a fresh kernel to measure public commands and isolated construction, export, FORM execution, import, writing and publication. All output goes to owned temporary directories; shipped libraries are not replaced. See the [benchmark guide](../Benchmark/README.md#library-generation-notebook-06) for profiles, caching and validation boundaries.

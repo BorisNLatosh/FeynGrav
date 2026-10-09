@@ -1,0 +1,55 @@
+(* Focused developer checks; users run the notebook without this script. *)
+$FeynCalcStartupMessages=False;
+root=DirectoryName[DirectoryName[$InputFileName]];
+Get[FileNameJoin[{root,"Support","GeneratorBenchmark.wl"}]];
+checks=0;failures=0;
+assert[name_,test_]:=(checks++;If[!TrueQ[test],failures++;Print["FAIL ",name]]);
+syntheticRows=(<|"Case"->"Unequal timings","Stage"->"Generate","Workers"->1,"Phase"->"Measured","Status"->"Success","Validation"->"Verified","Seconds"->#|>& /@ {1,2,9});
+syntheticSummary=First[FeynGravBenchmark`Private`summaryRows[syntheticRows]];
+assert["mean and median calculated independently",syntheticSummary["MeanSeconds"]===4 && syntheticSummary["MedianSeconds"]===2];
+assert["generator-only loading",!MemberQ[$Packages,"FeynGrav`"]];
+c=BenchmarkConfiguration[];calls=0;
+f=Block[{CalcFormCheck},CalcFormCheck[___]:=(calls++;$Failed);BenchmarkPrepare["Generation",c]];
+assert["unset profile skips work",calls===0&&MatchQ[f,Failure["ProfileRequired",_]]];
+assert["invalid threads",FailureQ[BenchmarkPrepare["Generation",Join[c,<|"Profile"->"Quick","GeneratorThreads"->0|>]]]];
+c=Join[c,<|"Profile"->"Quick","GeneratorThreads"->1,"PhysicalRepetitions"->1|>];
+p=BenchmarkPrepare["Generation",c];
+assert["serial selection",p["Checks","Generator","Result","FORMThreads"]===1];
+assert["source provenance",KeyExistsQ[p["Environment","SourceHashes"],"Rules/ScalarGaussBonnet.wl"]&&KeyExistsQ[p["Environment","SourceHashes"],"Libs/FeynGravLibrariesGenerator.wl"]];
+p["Cases"]=Take[p["Cases"],1];r=BenchmarkRun[p];
+assert["progress log retained",FileExistsQ[r["Directory"]<>"/progress.log"] && StringContainsQ[Import[r["Directory"]<>"/progress.log","Text"],"public generator"]];
+assert["public first invocation recorded",Count[Lookup[r["Rows"],"Phase"],"FirstObservation"]===1];
+assert["staged and public validated",AllTrue[Select[r["Rows"],#["Phase"]==="Measured"&],#["Validation"]==="Verified"&]];
+assert["no byte comparison",FreeQ[r,"ByteIdentical"]];
+assert["mean and median",AllTrue[r["Summary"],KeyExistsQ[#,"MeanSeconds"] && KeyExistsQ[#,"MedianSeconds"] && !KeyExistsQ[#,"SerialSpeedup"]&]];
+assert["six stage sum",And@@Table[With[{a=Select[r["Rows"],#["Case"]===name&&#["Phase"]==="Measured"&]},
+ Abs[Total[Lookup[Select[a,#["Stage"]=!="StageSum"&],"Seconds"]]-First[Select[a,#["Stage"]==="StageSum"&]]["Seconds"]]<10^-9],{name,{"GravitonScalarVertex_1","GravitonScalarPotentialVertex_1"}}]];
+assert["reuse rejected",MatchQ[BenchmarkRun[p],Failure["RunAlreadyStarted",_]]];
+assert["static summary",MatchQ[BenchmarkSummary[r],StandardForm[_Grid]]];
+assert["JSON CSV",AssociationQ[Import[r["Directory"]<>"/report.json","RawJSON"]]&&FileExistsQ[r["Directory"]<>"/summary.csv"]];
+assert["cleanup forged root",FailureQ[BenchmarkCleanup[Join[r,<|"Directory"->$TemporaryDirectory|>]]]];
+retained=CreateDirectory[r["Directory"]<>"/jobs/failed-fixture"];Export[retained<>"/stderr.log","diagnostic","Text"];
+owned=FeynGravBenchmark`Private`$ownedRuns[r["ID"],"SuccessfulDirectories"];
+BenchmarkCleanup[r];assert["owned success cleanup",AllTrue[owned,!DirectoryQ[#]&]];
+assert["failure and report retained",FileExistsQ[retained<>"/stderr.log"]&&FileExistsQ[r["Directory"]<>"/report.json"]];
+p=BenchmarkPrepare["Generation",Join[c,<|"FORMExecutable"->"/missing/form"|>]];
+p["Cases"]={First[p["Cases"]],Last[p["Cases"]]};r=BenchmarkRun[p];
+assert["missing FORM retains helpers",MemberQ[Lookup[r["Rows"],"Status"],"Skipped"]&&Length[r["Summary"]]===1&&First[r["Summary"]]["Stage"]==="Helper"];
+Do[p=BenchmarkPrepare["Generation",c];p["Cases"]=Take[p["Cases"],1];
+r=Block[{FeynGravBenchmark`Private`executeFORM},
+ FeynGravBenchmark`Private`executeFORM[_,_,_,directory_,_]:=(Export[directory<>"/stderr.log","injected","Text"];<|"Status"->mode,"ExitCode"->1|>);
+ BenchmarkRun[p]];
+assert[mode<>" recorded",MemberQ[Lookup[r["Rows"],"Status"],mode]];
+assert[mode<>" no false staged summary",FreeQ[Lookup[r["Summary"],"Stage"],"Execute"]];
+If[mode==="Aborted",assert["abort stops",r["RunStatus"]==="Aborted"]],{mode,{"TimedOut","Aborted"}}];
+p=BenchmarkPrepare["Generation",c];p["Cases"]=Take[p["Cases"],1];
+r=Block[{FeynGravBenchmark`Private`genPublic},FeynGravBenchmark`Private`genPublic[___]:=Failure["LibraryGenerationFailed",<|"Cause"->Failure["TimedOut",<||>]|>];BenchmarkRun[p]];
+assert["nested public timeout",AllTrue[Select[r["Rows"],#["Stage"]==="Generate"&],#["Status"]==="TimedOut"&]];
+assert["stages independent of previous outputs",AllTrue[Select[r["Rows"],#["Stage"]==="StageSum"&],#["Validation"]==="Verified"&]];
+(* Full repetition defaults exercised on a tiny helper and scalar command. *)
+p=BenchmarkPrepare["Generation",Join[c,<|"Profile"->"Full","PhysicalRepetitions"->Automatic|>]];
+p["Cases"]={First[p["Cases"]],First[Select[p["Cases"],#["Kind"]==="Helper"&]]};r=BenchmarkRun[p];
+assert["Full public repetitions",First[Select[r["Summary"],#["Stage"]==="Generate"&]]["Trials"]===3];
+assert["Full helper repetitions",First[Select[r["Summary"],#["Stage"]==="Helper"&]]["Trials"]===5];
+assert["switch requires restart",MatchQ[Get[FileNameJoin[{root,"Support","Benchmark.wl"}]],Failure["FreshKernelRequired",_]]];
+Print["Generation regression: ",checks," checks; ",failures," failures."];Quit[If[failures===0,0,1]];

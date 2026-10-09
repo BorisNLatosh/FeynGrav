@@ -21,3 +21,5 @@ The reference covers main-package commands, public gauge parameters and the auto
 - [Epsilon](../CalcFormConverter/Tests/Reports/Epsilon.md), [Dirac translation](../CalcFormConverter/Tests/Reports/DiracColour.md), [Dirac processing](../CalcFormConverter/Tests/Reports/DiracAlgebra.md) and [colour processing](../CalcFormConverter/Tests/Reports/ColourAlgebra.md): implementation records with their original verification boundaries.
 
 User guides describe supported behaviour. Verification reports record what was tested at a particular stage; an earlier report is not evidence that every later revision was rerun through the same checks. Documentation is ordinary Markdown: no site build, network service or native Mathematica F1 installation is required.
+
+For library-generation timings, use [benchmark 06](../Benchmark/06_Library_Generation.nb) and the [benchmark guide](../Benchmark/README.md). Start in a fresh kernel, separate from the main-package workflow.
