@@ -1,6 +1,6 @@
 # FeynGrav documentation
 
-This documentation describes the development source checked on 6 October 2026. Installed releases may differ; consult `?FunctionName` and `Options[FunctionName]` in your kernel. Begin a new kernel after changing package files.
+This documentation describes the development source checked on 6 October 2026, with the conventions report added on 9 October 2026. Installed releases may differ; consult `?FunctionName` and `Options[FunctionName]` in your kernel. Begin a new kernel after changing package files.
 
 ## Choose a route
 
@@ -15,6 +15,7 @@ The reference covers main-package commands, public gauge parameters and the auto
 
 ## Verification and history
 
+- [Conventions report checks](Verification/Conventions.md): current settings, held import records, static rendering and representative curvature/Fourier checks.
 - [Documentation checks](Verification/DocumentationVerification.md): coverage, links, representative commands and preservation checks for this update.
 - [Generator migration](Verification/GeneratorVerification.md): family comparisons and failure-handling verification, with its own scope and date.
 - [Converter performance history](Verification/ConverterPerformance.md): earlier measurements, baselines and qualifications; not current machine-independent guarantees.

@@ -55,7 +55,7 @@ metadata[c_] := Module[{e=FCI[c["Expression"]]},
 ];
 environment[] := Module[{files},
  files=Join[FileNames["*.wl",FileNameJoin[{$packageRoot,"Rules"}]],
- {FileNameJoin[{$packageRoot,"Libs","FeynGravLibrariesGenerator.wl"}]},
+ {FileNameJoin[{$packageRoot,"Libs","Generator.wl"}]},
  FileNames["*.prc",FileNameJoin[{$packageRoot,"CalcFormConverter"}],Infinity],{FileNameJoin[{$packageRoot,"FeynGrav.wl"}]},
  FileNames["*.wl",FileNameJoin[{$packageRoot,"CalcFormConverter"}]],
  FileNames["*",FileNameJoin[{$packageRoot,"CalcFormConverter","Templates"}]],

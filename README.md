@@ -52,9 +52,13 @@ At initialisation, FeynGrav calls `importGravitons[2]`, `importScalars[2]`, `imp
 
 The order-limited import commands load up to the available order when the requested maximum is higher than the installed libraries. They read local files; they do not download missing libraries. Use their `printOutput -> True` option to report available and imported orders. Consult each command's usage message for its interface.
 
+Use `FeynGravConventions[]` for a readable report of geometry, Fourier, dimension, gauge, polarisation, algebra and diagram conventions. It distinguishes fixed definitions from current settings and shows loaded orders and settings changed since import. The command prints static mathematical output (plain text in a kernel without a front end), returns `Null`, and changes no settings. See the [conventions report](Documentation/Reference.md#conventions-report).
+
+Use `FeynGravLibraryInformation[]` to inspect the last successful imports: source paths and hashes, actual orders, import times and relevant settings. `FeynGravLibraryInformation[importVectors]` selects one importer and identifies settings changed since that import. See [library import records](Documentation/Reference.md#library-import-records) for the scope and limitations.
+
 Additional precomputed libraries are distributed in the [FeynGrav Libraries dataset](https://data.mendeley.com/datasets/9xrw2jjrbr/2). Download the required files and place them directly in `FeynGrav/Libs`, preserving names such as `GravitonVertex_3`, then invoke the appropriate import command. The dataset predates version 4: use compatible interaction libraries and retain the current package's ghost rules, which were revised in version 4. Availability varies by sector; the dataset is not a guarantee that every requested order exists.
 
-The [library generator](Libs/FeynGravLibrariesGenerator.wl) is a separate developer tool for producing vertex libraries. Most users can work with the supplied or downloaded libraries.
+The [library generator](Libs/Generator.wl) is a separate developer tool for producing vertex libraries. Most users can work with the supplied or downloaded libraries.
 
 ## CalcFormConverter
 
@@ -99,6 +103,7 @@ The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, i
 | Location | Contents |
 | --- | --- |
 | [FeynGrav.wl](FeynGrav.wl) | Main package, public commands, and library loading. |
+| [Conventions.wl](Conventions.wl) | Read-only conventions report and static formatting. |
 | [Rules](Rules) | Interaction-rule construction, structural validation and projector utilities. |
 | [Libs](Libs) | Precomputed vertex libraries and the [library generator](Libs/Generator.md), which uses CalcFormConverter. |
 | [Examples](Examples) | Calculation notebooks. |

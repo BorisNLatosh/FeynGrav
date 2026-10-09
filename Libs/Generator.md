@@ -11,7 +11,7 @@ factor is introduced by the generator.
 Use a separate fresh kernel with FeynCalc installed. Do not load the main FeynGrav interface in that kernel: generator rule packages export some of the same short names and can produce shadowing warnings. Load the generator by its filename:
 
 ```mathematica
-Get["/path/to/FeynGrav/Libs/FeynGravLibrariesGenerator.wl"];
+Get["/path/to/FeynGrav/Libs/Generator.wl"];
 CheckGravitonScalars
 ```
 

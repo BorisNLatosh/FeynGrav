@@ -15,7 +15,7 @@ assert["invalid threads",FailureQ[BenchmarkPrepare["Generation",Join[c,<|"Profil
 c=Join[c,<|"Profile"->"Quick","GeneratorThreads"->1,"PhysicalRepetitions"->1|>];
 p=BenchmarkPrepare["Generation",c];
 assert["serial selection",p["Checks","Generator","Result","FORMThreads"]===1];
-assert["source provenance",KeyExistsQ[p["Environment","SourceHashes"],"Rules/ScalarGaussBonnet.wl"]&&KeyExistsQ[p["Environment","SourceHashes"],"Libs/FeynGravLibrariesGenerator.wl"]];
+assert["source provenance",KeyExistsQ[p["Environment","SourceHashes"],"Rules/ScalarGaussBonnet.wl"]&&KeyExistsQ[p["Environment","SourceHashes"],"Libs/Generator.wl"]];
 p["Cases"]=Take[p["Cases"],1];r=BenchmarkRun[p];
 assert["progress log retained",FileExistsQ[r["Directory"]<>"/progress.log"] && StringContainsQ[Import[r["Directory"]<>"/progress.log","Text"],"public generator"]];
 assert["public first invocation recorded",Count[Lookup[r["Rows"],"Phase"],"FirstObservation"]===1];

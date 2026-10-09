@@ -5,11 +5,13 @@ Development reference checked against the working source on 6 October 2026. This
 ## Contents
 
 - [Conventions and return values](#conventions-and-return-values)
+- [Conventions report](#conventions-report)
 - [Propagators](#propagators)
 - [Interaction vertices](#interaction-vertices)
 - [Polarisation objects](#polarisation-objects)
 - [Projectors and operators](#projectors-and-operators)
 - [Library importers](#library-importers)
+- [Library import records](#library-import-records)
 - [Gauge parameters and coupling](#gauge-parameters-and-coupling)
 - [Command discovery and initialisation](#command-discovery-and-initialisation)
 - [FORM commands](#form-commands)
@@ -29,6 +31,31 @@ In the signatures below:
 Successful propagator and vertex calls return symbolic FeynCalc expressions, including their implemented factors of `I` and coupling constants. They do not add diagram symmetry factors, loop integration or on-shell conditions. No optional arguments are accepted unless listed. Singular parameter choices are not automatically diagnosed.
 
 **Loaded vertices match the available library signatures.** An unavailable order, wrong list length or unmatched call can remain unevaluated; these wrappers do not promise a `Failure` for every invalid call. Rule-generation functions in `Rules` have a separate validation contract. Importers and converter commands have explicit failure handling described below. Do not interpret an unevaluated vertex or `Failure` as a zero interaction.
+
+## Conventions report
+
+```mathematica
+FeynGravConventions[]
+```
+
+Prints a fully visible, static report and returns `Null`. The command takes no arguments or options; invalid calls return `Failure`. It is listed by `FeynGravCommands[]` and has `?` help. Mathematical formulas appear in notebook notation, with tables protected by `StandardForm`; kernels without a front end receive plain text.
+
+The six sections cover:
+
+1. The curvature definition, positive Fourier phase, its D-dimensional extension, metric expansion and gravitational coupling normalisation. Cheung–Remmen variables are a separate parametrisation.
+2. Lorentz dimensions, incoming vertex momenta and the current assignment to `D`.
+3. Initial and current gauge parameters, actual loaded orders, and differences between recorded import settings and the current session.
+4. Momentum-first polarisation syntax, conjugation labels, current transversality defaults and limitations of the tensor product shortcuts.
+5. Rank-four epsilon conventions, trace normalisation, the current FeynCalc Dirac scheme, supported Dirac operations and fundamental SU(N) normalisation. Export and calculation defaults are shown separately.
+6. Factors already supplied by interaction rules and factors the converter does not add, together with the limits of ordinary `FAD` prescription information.
+
+Fixed formulas are inert display data: assignments to symbols do not change them. Historical import settings remain held when displayed. The report reads the existing [library import records](#library-import-records); it does not import libraries, calculate tensors, launch FORM, write files or change settings. It is not printed automatically on loading.
+
+“Not recorded” means that provenance is unavailable. Records describe the last successful import, not historical generation settings, manually redefined vertices or previously calculated user expressions. Reimport a library when a gauge value was substituted into its vertices. Other setting differences need not affect every expression. Use `FeynGravLibraryInformation[]` for detailed diagnostic data, including paths and hashes.
+
+FeynCalc's Cartesian metric setting is reported separately from the package's spacetime convention; changing it does not transform stored interactions. Likewise, displaying a FeynCalc Dirac scheme does not imply converter support for all operations in that scheme. Unavailable dependency settings are labelled explicitly. The effective omitted transversality setting for all four polarisation shortcuts is read from `Options[Polarization]`; wrapper option declarations do not override it. Delayed option defaults (`:>`) are displayed as held expressions labelled “Delayed default”, without evaluating them.
+
+Representative curvature and momentum-space checks and the display checks are recorded in [Conventions verification](Verification/Conventions.md). They do not constitute a proof for every interaction or perturbative order.
 
 ## Propagators
 
@@ -185,6 +212,37 @@ For order-limited importers, omitted `n` defaults to 2. Except for Gauss–Bonne
 | `importHorndeskiG5[opts]` | All available G5 files; no order argument. |
 
 `n : 2` above describes the default; actual calls use `importScalars[]` or `importScalars[2]`. Horndeski filenames have the form `HorndeskiG2_a_b_n`, and the installed files determine the accepted vertex signatures. Use `printOutput -> True` to inspect that selection. Avoid assuming every requested model/order is distributed.
+
+## Library import records
+
+`FeynGravLibraryInformation[]` returns an association keyed by fully qualified importer names. `FeynGravLibraryInformation[importVectors]` selects the last successful vector import; pass the importer symbol without `[]`. Unknown importers or malformed query arguments return `Failure`. Families with no recorded import return `Missing["NotRecorded"]`.
+
+Every successful import, including initialisation, publishes its record together with the new vertex definitions. A failed or aborted import preserves both. Reimporting replaces the record for that importer, so it describes the currently installed import rather than accumulating a history. Package reloads preserve records for optional families that are not reimported.
+
+| Field | Meaning |
+| --- | --- |
+| `Importer`, `Targets` | Fully qualified importer and vertex-function names. |
+| `Orders` | Actual orders loaded, grouped by library filename family; these may be fewer than requested. |
+| `Files` | Absolute path, SHA-256 hash, filename family, order and complete filename indices for each loaded file. Horndeski indices retain `{a,b,n}`. |
+| `ImportedAt` | UTC `DateObject` recorded on successful import. |
+| `Settings` | Held snapshots of the relevant settings when importing. |
+| `CurrentSettings` | Corresponding settings when the query runs. |
+| `ChangedSettings` | Names of settings whose current values differ from their import snapshots. |
+| `GenerationSettings` | `Missing["NotRecorded"]`: historical library-generation settings cannot be recovered from these files. |
+
+Snapshots cover `FeynGrav`'s gravitational coupling and `D` for every importer, the vector/Yang–Mills gauge parameter for its corresponding importer, and `$LeviCivitaSign` for axion–vector imports. They describe the import environment, not necessarily a nontrivial dependence of every individual vertex. Propagator-only gauge parameters do not enter these records. Arbitrary user-defined FeynCalc scalar products and transformation rules are not captured.
+
+Values are wrapped in `HoldComplete` to prevent an unassigned symbol in an old record from acquiring a later assignment. Do not release that hold to reconstruct past settings: it allows evaluation in the current session.
+
+```mathematica
+information = FeynGravLibraryInformation[importVectors];
+information["Settings"]
+information["ChangedSettings"]
+```
+
+For example, if vectors were imported with `GaugeFixingEpsilonVector = -1`, then changing it to `-2` makes `ChangedSettings` identify that parameter. Reimport the required vector order to update the loaded definitions and record together. A change indicates a difference in settings, not a proof that a particular expression has changed.
+
+The query reads only in-memory records and settings: it does not reopen files, recalculate hashes, import libraries or launch FORM. Hashes identify the files as read, not their contents at query time. The importer checks hashes before and after reading and rejects a detected change. Import records do not track manual vertex redefinitions or expressions computed earlier by the user. Successful queries return associations; they do not print a conventions report. See the [bookkeeping verification](Verification/LibraryBookkeeping.md) for the tested scope.
 
 ## Gauge parameters and coupling
 
