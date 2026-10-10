@@ -1,5 +1,7 @@
 # Single-pass coefficient import
 
+Historical implementation-stage record: preserve the measurements and checks below as evidence for that revision. The current implementation and later review corrections are described in the [developer guide](../../DEVELOPER.md) and [10 October follow-up](EarlyDimensionCompaction.md#independent-review-corrections).
+
 ## Change
 
 Eligible nested coefficients in version-one grouped results now use a restricted

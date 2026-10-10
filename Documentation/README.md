@@ -1,6 +1,6 @@
 # FeynGrav documentation
 
-This documentation describes the development source checked on 6 October 2026, with the conventions report added on 9 October 2026. Installed releases may differ; consult `?FunctionName` and `Options[FunctionName]` in your kernel. Begin a new kernel after changing package files.
+This documentation describes the development source checked on 6 October 2026, with the conventions report added on 9 October and converter optimisation documentation reviewed on 10 October 2026. Installed releases may differ; consult `?FunctionName` and `Options[FunctionName]` in your kernel. Begin a new kernel after changing package files.
 
 ## Choose a route
 
@@ -18,6 +18,7 @@ The reference covers main-package commands, public gauge parameters and the auto
 - [Conventions report checks](Verification/Conventions.md): current settings, held import records, static rendering and representative curvature/Fourier checks.
 - [Documentation checks](Verification/DocumentationVerification.md): coverage, links, representative commands and preservation checks for this update.
 - [Generator migration](Verification/GeneratorVerification.md): family comparisons and failure-handling verification, with its own scope and date.
+- [Current converter optimisation and independent review](../CalcFormConverter/Tests/Reports/EarlyDimensionCompaction.md#follow-up-complete-calculation-optimisation): complete-call observations, power qualifications, retained changes and 1,964 regression checks after review corrections.
 - [Converter performance history](Verification/ConverterPerformance.md): earlier measurements, baselines and qualifications; not current machine-independent guarantees.
 - [Epsilon](../CalcFormConverter/Tests/Reports/Epsilon.md), [Dirac translation](../CalcFormConverter/Tests/Reports/DiracColour.md), [Dirac processing](../CalcFormConverter/Tests/Reports/DiracAlgebra.md) and [colour processing](../CalcFormConverter/Tests/Reports/ColourAlgebra.md): implementation records with their original verification boundaries.
 

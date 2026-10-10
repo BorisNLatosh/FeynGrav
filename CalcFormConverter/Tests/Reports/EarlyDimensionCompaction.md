@@ -2,7 +2,7 @@
 
 10 October 2026. Parent commit: `9f875d6`. FORM/TFORM 5.0.2; Wolfram 15.0.1.
 
-## Result
+## Initial result (historical 200-second FORM target)
 
 The complete public workflow met the 200-second FORM target in two fresh kernels, using the exact reconstructed input from `One-Loop-Counterterms.nb` and ten TFORM workers:
 
@@ -52,3 +52,83 @@ Trials were sequential. The experimental wrapper enforced 300 seconds, 6 GiB pro
 Re-export existing `.frm` files after reloading the package to obtain the new processing. Use `FORMThreads -> 10`, `ShowTiming -> True` and `KeepFiles -> True` to inspect comparable public runs; the measurement above also retained progress output and used a unique temporary working directory.
 
 Machine-readable measurements, power observations, input/output fingerprints and source hashes: [EarlyDimensionCompaction.json](EarlyDimensionCompaction.json). FORM's rational-function and module behaviour is documented in the [official reference manual](https://form-dev.github.io/form-docs/stable/manual/).
+
+## Follow-up: complete-calculation optimisation
+
+A later request set a target below **20 seconds for the complete calculation**.
+That target was not reached. The user subsequently accepted the retained
+improvement and requested final verification, ending further optimisation.
+The earlier verified fresh-kernel performance observation took
+**26.768938 seconds including 0.182756 seconds of input construction**;
+`CalcFormCalculate` itself took 26.586182 seconds and reported 16.24 seconds of
+FORM execution. This is a single observation, not a repeated-run median.
+
+This run used ten TFORM workers on mains power, with the same input digest above.
+Peak process-tree RSS was 2,166,116,352 bytes, including the Wolfram kernel and
+FORM subprocess. The wrapper's 33.15-second wall time also includes kernel and
+package startup; it is not the public-command timing. Earlier battery-powered
+observations are not controlled speedup baselines.
+
+The retained changes combine native term iteration during output, bulk importer
+syntax scans, held native reconstruction of validated arithmetic, early massless
+cancellation, temporary abbreviations of dimension coefficients, and exact early
+rejection of growing numerator-cancellation candidates. Prepared factors also
+use verified two-index partner symmetries to combine intermediate terms before
+multiplication. The symmetry optimisation is valid only inside that contraction;
+it does not assert that the reduced intermediate tensor equals the original one
+with arbitrary free indices. FORM checks the remaining partner explicitly and
+leaves a pair unchanged when its check does not vanish.
+
+The result file's SHA-256 is
+`0a603c3c2573a77e52d47b71875f856a7eebc9e4b27ecaaf75a5c50927a79660`.
+It is byte-identical to the retained, independently FORM-verified result. The
+full imported expression has ByteCount 174,278,808. Core, FORM and runtime suites
+passed **1,909 assertions**, including 64 new stage-symmetry checks with symmetric,
+non-symmetric and antisymmetric partners. Three additional native-path checks
+then confirmed that the symmetry guard passes and reduces a three-term
+intermediate to two terms, for **1,912 distinct checks** in total. No Full
+benchmark suite was run.
+
+Native common-subexpression output, balanced contraction trees and several
+additional coefficient-abbreviation variants were explored but not retained:
+they were slower, increased output size, or gave no convincing measured benefit.
+The source and output formats remain unchanged; no result cache is substituted
+for a fresh calculation.
+
+## Final verification after acceptance
+
+The final fresh-kernel calculation used the unchanged retained sources and the
+same notebook input. It completed successfully in **63.437993 seconds**, including
+construction; FORM took 42.57 seconds. Its output is byte-identical to the verified
+result above, and the reconstructed expression has the same SHA-256 fingerprint:
+`3e833e63add335f4cbb74047e4180b2deeb82c4932da7c5def96f2aa57dc79bb`.
+
+This correctness rerun is not a controlled timing comparison. The earlier
+26.768938-second observation is not a guaranteed runtime. No additional
+experimental parser or output-writer changes were retained. No commit was made.
+
+Final focused regression checks passed **670 assertions with zero failures**: tree
+parser (277), propagator grouping (153), cancellation (95), dimension preparation
+(78) and stage symmetry (67). The symmetry checks include serial FORM and TFORM
+and independent FeynCalc comparisons. `git diff --check` also passed.
+
+## Independent review corrections
+
+Fixed the reversed nested-denominator check order, which could emit
+`Power::infy` before returning the intended division-by-zero failure. Added
+direct hostile-source tests and observed dispatcher tests for the native parser.
+
+Temporary serial FORM and TFORM probes now establish accepted sector assembly,
+rejection after sector 1 of 2, and restoration of the original expression. An
+initial fixture did not trigger rejection because its mixed scalar product was
+not a rewritten pivot; the final fixture uses a routed square that does.
+
+Replaced source-string insertion around sorts with `dcfStageSort[plan, beforeSort]`
+and moved final abbreviation restoration into `dcfStageRestore[plan]`. Tests
+verify the emitted stage sequence remains identical.
+
+Core and FORM suites passed. After correcting the rejection fixture, all runtime
+checks were also covered successfully, with its last four suites run separately
+in fresh kernels: **1,964 distinct assertions, zero failures** in the final
+coverage. `git diff --check` passed. No performance rerun, Full benchmark, stored
+library regeneration or commit was performed for these review corrections.

@@ -93,7 +93,20 @@ dcfPrecondition[plan_Association] := If[plan === <||>, "",
    terms rather than on every raw contraction. Disable it again before the next
    tensor multiplication. Used only for the existing prepared version-one
    stages; dimension-free and matrix/epsilon/colour jobs keep their old path. *)
-dcfStageSort[plan_Association] := If[plan === <||>, ".sort\n",
-    ".sort\nPolyRatFun cfcDimRat;\n" <> plan["Rules"] <>
-    "\n.sort\nPolyRatFun;\n" <>
-    "id cfcDimRat(cfcDimNum?number_,cfcDimDen?number_)=cfcDimNum/cfcDimDen;\n.sort\n"];
+(* Native extra symbols shorten repeated rational dimension coefficients during
+   tensor multiplication. Only cfcDimRat is abbreviated: no Lorentz indices or
+   momentum components are hidden. Restore definitions before rational algebra
+   and after the last prepared stage, before general processing or output. *)
+(* The caller supplies non-growing identities explicitly. Apply them at each
+   sorting boundary, without rewriting generated source text. Restoration of
+   this module's temporary abbreviations stays with their creation here. *)
+dcfStageSort[plan_Association, beforeSort_String : ""] := With[
+    {sort = beforeSort <> ".sort\n"},
+    If[plan === <||>, sort,
+        sort <> "PolyRatFun cfcDimRat;\nFromPolynomial;\n" <> plan["Rules"] <>
+        "\n" <> sort <> "PolyRatFun;\n" <>
+        "id cfcDimRat(cfcDimNum?number_,cfcDimDen?number_)=cfcDimNum/cfcDimDen;\nToPolynomial,OnlyFunctions,cfcDimRat;\n" <> sort]
+];
+
+dcfStageRestore[plan_Association] := If[plan === <||>, "",
+    "FromPolynomial;\n.sort\n"];

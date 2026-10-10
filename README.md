@@ -116,7 +116,7 @@ CalcFormConverter loads automatically with FeynGrav and can also be loaded indep
 
 `FORMThreads -> Automatic` is the default for checking, installation, and calculation: it prefers up to eight TFORM workers, capped by the processor count, and falls back to serial FORM when TFORM is missing. Explicit worker counts do not fall back; an explicit executable with automatic threads uses one worker. `ShowTiming` reports FORM execution wall time; `ShowProgress` reports stages and elapsed execution time. Use `AbsoluteTiming` when measuring the entire Mathematica call. More workers do not guarantee a faster calculation.
 
-The converter performs algebra and Lorentz contractions. It does **not** perform loop integration or integral reduction, or supply symmetry factors, integration measures, or normalisation conventions. Supporting scalar integral notation does not mean that it evaluates those integrals. Checking and calculating never install software implicitly.
+The converter performs algebra and Lorentz contractions. It automatically groups complete propagator products, applies guarded numerator cancellation, and simplifies eligible scalar coefficients in FORM. Prepared tensor stages and incremental, factor-preserving import reduce intermediate work; these are automatic implementation choices, not new public options. It does **not** perform loop integration or integral reduction, or supply symmetry factors, integration measures, or normalisation conventions. Supporting scalar integral notation does not mean that it evaluates those integrals. Checking and calculating never install software implicitly.
 
 See the [user guide](CalcFormConverter/README.md) for workflows, supported expressions, options, installation details, and performance guidance; the [format specification](CalcFormConverter/FORMAT.md) for saved-file compatibility; and the [developer guide](CalcFormConverter/DEVELOPER.md) for architecture, tests, and measurements.
 
@@ -171,6 +171,7 @@ Planned release tag: `v4.1.0`.
 
 - Added a two-command installer with dependency checks, package verification, and backups when replacing an existing installation.
 - Added CalcFormConverter for exchanging supported FeynCalc expressions with FORM, including Lorentz contractions, rank-four epsilon tensors, ordinary Dirac algebra, and fundamental SU(N) colour algebra. Automated FORM/TFORM execution includes timing and progress reporting.
+- Added automatic propagator grouping, guarded numerator cancellation, coefficient simplification, verified tensor-stage symmetries and incremental result import. See the [current converter guide](CalcFormConverter/README.md) for scope and memory limits.
 - Added D-dimensional polarisation vectors and factorised polarisation tensors in four and D dimensions.
 - Migrated interaction-library generation to CalcFormConverter and added reproducible benchmarks for conversion and library generation.
 - Improved rule-input validation and library loading, preserving existing definitions when an import fails.

@@ -21,7 +21,7 @@ pcPlan[data_Association] := Module[
     {specs = Lookup[data, "CancellationData", {}], pairs, aliases, rows, bases,
      candidates, matrix, rank, columns, inverse, rules, branches, declarations,
      ration, sum, names, polynomials, processing, routing, coefficients, loops,
-     loopNames, entries, orderedPairs, groupCount},
+     loopNames, entries, orderedPairs, groupCount, rewrite, invariantVectors},
     If[specs === {} || $pcMaximumBases < 1, Return[<||>]];
     entries = data["Mapping"]["Entries"];
     loops = data["Mapping"]["LoopMomenta"];
@@ -89,8 +89,7 @@ pcPlan[data_Association] := Module[
     groupCount[label_String] := "Bracket+ " <> StringRiffle[names, ","] <>
         ";\n.sort\n#$cfcPCKeys=0;\nKeep Brackets;\n$cfcPCKeys=$cfcPCKeys+term_;\n" <>
         "ModuleOption noparallel;\n.sort\n#$" <> label <> "=termsin_($cfcPCKeys);\n";
-    processing = "\n* Exact numerator cancellation; no shifts or scaleless removal.\n.sort\n" <>
-        groupCount["cfcPCGroupsBefore"] <> "#$cfcPCBefore=termsin_(cfcResult);\nLocal cfcPCBackup=cfcResult;\n.sort\nHide cfcPCBackup;\n.sort\n" <>
+    rewrite =
         StringRiffle[MapThread["id " <> StringRiffle[#1, "."] <> "=" <> #2 <> ";" &,
             {pairs, aliases}], "\n"] <> "\n" <> StringRiffle[branches, "\n"] <>
         "\nendif;\n" <>
@@ -99,17 +98,77 @@ pcPlan[data_Association] := Module[
         StringRiffle[MapThread["id " <> #1 <> "^cfcPCPower?neg_=" <> #2 <>
             "^(-cfcPCPower);" &, {names, polynomials}], "\n"] <> "\n" <>
         StringRiffle[MapThread["id " <> #1 <> "=" <> StringRiffle[#2, "."] <> ";" &,
-            {aliases, pairs}], "\n"] <> "\n.sort\n" <>
+            {aliases, pairs}], "\n"] <> "\n.sort\n";
+    (* Version-one tensors have no matrix or epsilon output. Vectors absent
+       from EVERY denominator routing label disjoint sectors: the substitution
+       rules cannot change any monomial containing one of these vectors. *)
+    invariantVectors = If[data["Mapping"]["Version"] === 1,
+        Complement[Lookup[Select[entries, #["Kind"] === "Vector" &], "Name", {}],
+            Flatten[pairs]], {}];
+    processing = "\n* Exact numerator cancellation; no shifts or scaleless removal.\n.sort\n" <>
+        groupCount["cfcPCGroupsBefore"] <> "#$cfcPCBefore=termsin_(cfcResult);\nLocal cfcPCBackup=cfcResult;\n.sort\nHide cfcPCBackup;\n.sort\n" <>
+        pcSectorProcessing[rewrite, invariantVectors] <>
         (* A valid cancellation can enlarge a polynomial. Preserve the complete
            original when the sorted candidate exceeds both sixteen terms and twice
            the original term count, or quadruples the denominator group count.
            These structural guards do not guarantee smaller factored output. The two paths
            rejoin before grouping, with only cfcResult active. *)
-        groupCount["cfcPCGroupsAfter"] <> "#$cfcPCAfter=termsin_(cfcResult);\n" <>
+        (* The term-count rejection is sufficient on its own. Avoid sorting
+           and enumerating denominator groups for a candidate already rejected
+           by that exact existing condition. No cancellation rule is skipped. *)
+        "#$cfcPCGroupsAfter=0;\n" <>
+        "#if ( `$cfcPCAfter' <= 16 ) || ( `$cfcPCAfter' <= {2*`$cfcPCBefore'} )\n" <>
+        groupCount["cfcPCGroupsAfter"] <> "#endif\n" <>
         "#if ( ( `$cfcPCAfter' > 16 ) && ( `$cfcPCAfter' > {2*`$cfcPCBefore'} ) ) || ( `$cfcPCGroupsAfter' > {4*`$cfcPCGroupsBefore'} )\n" <>
         "Drop cfcResult;\n.sort\nUnhide cfcPCBackup;\nDrop cfcPCBackup;\nLocal cfcResult=cfcPCBackup;\n" <>
         ".sort\n#else\nUnhide cfcPCBackup;\nDrop cfcPCBackup;\n.sort\n#endif\n";
     <|"Declarations" -> declarations, "Processing" -> processing|>
+];
+
+(* ::Section:: *)
+(* Exact early rejection of a growing cancellation candidate *)
+
+(* These thresholds select an equivalent execution strategy, not a different
+   cancellation criterion. A completed sector's sorted term count is a lower
+   bound for the complete candidate: invariant vector monomials distinguish
+   sectors and the rewrite changes scalar products of routed momenta only.
+   Stop when this lower bound already proves the existing term-growth guard.
+   Otherwise assemble every sector before applying the original group guard.
+   Keep the whole-expression path for small jobs, excessive sector counts and
+   matrix/epsilon mappings; only the planner supplies eligible vector names. *)
+$pcSectorMinimumTerms = 1024;
+$pcMaximumSectors = 32;
+pcSectorProcessing[rewrite_String, {}] := rewrite <>
+    "#$cfcPCAfter=termsin_(cfcResult);\n";
+pcSectorProcessing[rewrite_String, vectors_List] := Module[{bracket},
+    bracket = "Bracket+ " <> StringRiffle[vectors, ","] <> ";\n";
+    "#$cfcPCSectorCount=0;\n#if `$cfcPCBefore' >= " <>
+        IntegerString[$pcSectorMinimumTerms] <> "\n" <>
+    bracket <> ".sort\n#$cfcPCSectorKeys=0;\nKeep Brackets;\n" <>
+    "$cfcPCSectorKeys=$cfcPCSectorKeys+term_;\n" <> bracket <>
+    "ModuleOption noparallel;\n.sort\n#$cfcPCSectorCount=termsin_($cfcPCSectorKeys);\n#endif\n" <>
+    "#if ( `$cfcPCSectorCount' > 1 ) && ( `$cfcPCSectorCount' <= " <>
+        IntegerString[$pcMaximumSectors] <> " )\n" <>
+    "Hide cfcResult;\n.sort\n#$cfcPCAfter=0;\n" <>
+    "#do cfcPCSector=1,`$cfcPCSectorCount'\n" <>
+    "#$cfcPCSectorKey=firstterm_($cfcPCSectorKeys);\n" <>
+    "#$cfcPCSectorKeys=$cfcPCSectorKeys-$cfcPCSectorKey;\n" <>
+    "Local cfcPCSectorResult`cfcPCSector'=cfcResult[`$cfcPCSectorKey'];\n.sort\n" <>
+    rewrite <>
+    "#$cfcPCAfter=$cfcPCAfter+termsin_(cfcPCSectorResult`cfcPCSector');\n" <>
+    "#if ( `$cfcPCAfter' > 16 ) && ( `$cfcPCAfter' > {2*`$cfcPCBefore'} )\n" <>
+    "#do cfcPCDiscard=1,`cfcPCSector'\n" <>
+    "Unhide cfcPCSectorResult`cfcPCDiscard';\nDrop cfcPCSectorResult`cfcPCDiscard';\n" <>
+    "#enddo\n.sort\n#breakdo\n#endif\n" <>
+    "Multiply $cfcPCSectorKey;\n.sort\nHide cfcPCSectorResult`cfcPCSector';\n.sort\n#enddo\n" <>
+    "#if ( `$cfcPCAfter' <= 16 ) || ( `$cfcPCAfter' <= {2*`$cfcPCBefore'} )\n" <>
+    "Unhide cfcResult;\nDrop cfcResult;\n.sort\nLocal cfcResult=0\n" <>
+    "#do cfcPCSector=1,`$cfcPCSectorCount'\n+cfcPCSectorResult`cfcPCSector'\n#enddo\n;\n.sort\n" <>
+    "#do cfcPCSector=1,`$cfcPCSectorCount'\n" <>
+    "Unhide cfcPCSectorResult`cfcPCSector';\nDrop cfcPCSectorResult`cfcPCSector';\n#enddo\n.sort\n" <>
+    "#else\nUnhide cfcResult;\n.sort\n#endif\n" <>
+    "#else\n" <> rewrite <> "#$cfcPCAfter=termsin_(cfcResult);\n#endif\n" <>
+    "#$cfcPCSectorKeys=0;\n#$cfcPCSectorKey=0;\n"
 ];
 
 (* ::Section:: *)
@@ -120,7 +179,7 @@ pcPlan[data_Association] := Module[
    basis stage: its growth fallback must keep these inexpensive cancellations.
    Multiple routed momenta require polynomial identities and stay on that
    separate guarded path. No loop-momentum or on-shell assumption is involved. *)
-pcDirectProcessing[data_Association] := Module[{rules},
+pcDirectRules[data_Association] := Module[{rules},
     rules = Map[Function[s, Module[{routing, scale, name},
         routing = Normal[GroupBy[s["Routing"], Last -> First, Total]];
         routing = Select[routing, Last[#] =!= 0 &];
@@ -130,6 +189,11 @@ pcDirectProcessing[data_Association] := Module[{rules},
                 "=" <> intString[Denominator[scale]] <> "/" <>
                 intString[Numerator[scale]] <> ";"]
     ]], Select[Lookup[data, "CancellationData", {}], #["MassSquared"] === "0" &]];
-    If[rules === {}, "", "\n* Direct massless cancellations cannot increase the term count.\n.sort\nrepeat;\n" <>
-        StringRiffle[rules, "\n"] <> "\nendrepeat;\n.sort\n"]
+    If[rules === {}, "", "repeat;\n" <> StringRiffle[rules, "\n"] <> "\nendrepeat;\n"]
+];
+
+(* Reuse the same non-growing identities between prepared contractions and
+   before the guarded general cancellation. No temporary objects are added. *)
+pcDirectProcessing[data_Association] := With[{rules = pcDirectRules[data]},
+    If[rules === "", "", "\n* Direct massless cancellations cannot increase the term count.\n.sort\n" <> rules <> ".sort\n"]
 ];

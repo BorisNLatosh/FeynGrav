@@ -332,5 +332,254 @@
     },
     "loading": "Passed automatic loading and namespace isolation checks"
   },
-  "rss_sampling_interval_seconds": 0.1
+  "rss_sampling_interval_seconds": 0.1,
+  "CompleteCalculationFollowUp": {
+    "Date": "2026-10-10",
+    "ParentCommit": "baf371e",
+    "TargetCompleteSeconds": 20,
+    "TargetMet": false,
+    "ObservationClassification": "Single fresh-kernel observation",
+    "PublicCommand": {
+      "InputDigest": "d43dcf3b6594db5d58df9f3d2af85ecd6283d304cb271c8a35bb87769405295b",
+      "ExpectedInput": true,
+      "SecondsIncludingConstruction": 26.768938,
+      "ConstructionSeconds": 0.182756,
+      "PublicCallSeconds": 26.586181999999997,
+      "Failure": false,
+      "Head": "Plus",
+      "ByteCount": 174278808,
+      "KernelMemory": 400384664,
+      "JobDirectories": [
+        "/tmp/cfc-under20/public-symmetry/calcform-job-a1a8c2ae-93d4-437c-9308-a821a4fba4ab"
+      ]
+    },
+    "FORMSeconds": 16.24,
+    "WrapperWallSeconds": 33.154393333999906,
+    "PeakProcessTreeRSSBytes": 2166116352,
+    "Power": [
+      {
+        "Seconds": 0,
+        "State": {
+          "ucsi-source-psy-USBC000:001": {
+            "type": "USB",
+            "online": "1"
+          },
+          "BAT0": {
+            "type": "Battery",
+            "status": "Not charging",
+            "capacity": "79"
+          },
+          "AC": {
+            "type": "Mains",
+            "online": "1"
+          }
+        }
+      }
+    ],
+    "Assertions": 1912,
+    "Failures": 0,
+    "OutputSHA256": "0a603c3c2573a77e52d47b71875f856a7eebc9e4b27ecaaf75a5c50927a79660",
+    "SourceSHA256": {
+      "CalcFormConverter.wl": "753d95c3125d4204e308cb207038fc86ad621af205f3ed05055d33b00caa1286",
+      "CoefficientParser.wl": "aa3e6bc91c070eaf59b820f521827a94deab73b3219486cb689af8ea808763e4",
+      "ColourAlgebra.wl": "4b7126455fc0ac000ca9473851977b29a1066cb7b523b583490f6f160c34a020",
+      "DimensionCoefficients.wl": "f6fdd0141911a5ac36eb5d4106c8f72bdfcacd322879ccbfa05ff25eedd49f7d",
+      "DiracAlgebra.wl": "1143e7f07b8e9884a646814bacff42c42657332ac7f73ac3e8877ce594c471e9",
+      "DiracColour.wl": "68d4a23ee464f5600bce2413a25c9c504fba0adc1a1ca00afcb125b3dddd0175",
+      "FORMRuntime.wl": "1b21f431abf353377f5a14db00a2d988828a288a211fe3e00824409ece142274",
+      "PropagatorCancellation.wl": "d79a29d6557e42aee0728f5477b4a511a302836fa258fe5be81b95feb038cb6c",
+      "PropagatorGroups.wl": "2f37335f31285bba228dd74a36b546d2cbc8a72cdfcecf78541602fb9da151ef",
+      "RationalCoefficients.wl": "69aaea45497291287a2fe793d85254aba93a371a6e7d9380188b54f648abd47e",
+      "StageSymmetry.wl": "9378bc4f9bcb37cd264e051770f53ea94b455834db241bccf8871f45de58c858"
+    },
+    "SuiteAssertions": 1909,
+    "AdditionalNativePathAssertions": 3,
+    "Acceptance": "The user accepted the retained improvement and requested final verification, ending further optimisation. The original 20-second target was not reached."
+  },
+  "FinalVerification": {
+    "Date": "2026-10-10",
+    "PublicCommand": {
+      "InputDigest": "d43dcf3b6594db5d58df9f3d2af85ecd6283d304cb271c8a35bb87769405295b",
+      "ExpectedInput": true,
+      "SecondsIncludingConstruction": 63.437993,
+      "ConstructionSeconds": 0.712273,
+      "PublicCallSeconds": 62.725719999999995,
+      "Failure": false,
+      "Head": "Plus",
+      "ByteCount": 174278808,
+      "ResultHash": "3e833e63add335f4cbb74047e4180b2deeb82c4932da7c5def96f2aa57dc79bb",
+      "KernelMemory": 400409536,
+      "JobDirectories": [
+        "/tmp/cfc-under20/public-final-check/calcform-job-eb3aca66-4462-4a18-9411-bee6e518eede"
+      ]
+    },
+    "Resources": {
+      "Command": [
+        "/usr/local/bin/WolframKernel",
+        "-script",
+        "/tmp/cfc-under20/public-final-check.wls"
+      ],
+      "ExitCode": 0,
+      "WallSeconds": 96.95316508300311,
+      "PeakProcessTreeRSSBytes": 2243276800,
+      "StopReason": null,
+      "Power": [
+        {
+          "Seconds": 0,
+          "State": {
+            "ucsi-source-psy-USBC000:001": {
+              "type": "USB",
+              "online": "1"
+            },
+            "BAT0": {
+              "type": "Battery",
+              "status": "Not charging",
+              "capacity": "79"
+            },
+            "AC": {
+              "type": "Mains",
+              "online": "1"
+            }
+          }
+        }
+      ]
+    },
+    "FORMSeconds": 42.57,
+    "OutputSHA256": "0a603c3c2573a77e52d47b71875f856a7eebc9e4b27ecaaf75a5c50927a79660",
+    "OutputMatchesVerifiedResult": true,
+    "ImportedExpressionMatchesVerifiedFingerprint": true,
+    "SourceHashesUnchanged": true,
+    "TimingQualification": "Fresh-kernel correctness rerun; not a controlled timing comparison. Current runtime 63.437993 seconds; earlier observation 26.768938 seconds is not guaranteed.",
+    "FocusedSuites": {
+      "Coefficient tree parser": {
+        "Assertions": 277,
+        "Failures": 0
+      },
+      "Propagator grouping": {
+        "Assertions": 153,
+        "Failures": 0
+      },
+      "Propagator cancellation": {
+        "Assertions": 95,
+        "Failures": 0
+      },
+      "Dimension preconditioning": {
+        "Assertions": 78,
+        "Failures": 0
+      },
+      "Verified stage symmetry": {
+        "Assertions": 67,
+        "Failures": 0
+      }
+    },
+    "FocusedAssertions": 670
+  },
+  "IndependentReviewCorrections": {
+    "Date": "2026-10-10",
+    "Assertions": 1964,
+    "Failures": 0,
+    "Suites": {
+      "Core": {
+        "Assertions": 111,
+        "Failures": 0
+      },
+      "Parser": {
+        "Assertions": 121,
+        "Failures": 0
+      },
+      "Shared parser": {
+        "Assertions": 148,
+        "Failures": 0
+      },
+      "Coefficient tree parser": {
+        "Assertions": 304,
+        "Failures": 0
+      },
+      "Export transactions": {
+        "Assertions": 20,
+        "Failures": 0
+      },
+      "Installer mocks": {
+        "Assertions": 62,
+        "Failures": 0
+      },
+      "FORM export": {
+        "Assertions": 31,
+        "Failures": 0
+      },
+      "FORM stages": {
+        "Assertions": 155,
+        "Failures": 0
+      },
+      "FORM import": {
+        "Assertions": 71,
+        "Failures": 0
+      },
+      "Runtime": {
+        "Assertions": 82,
+        "Failures": 0
+      },
+      "Epsilon": {
+        "Assertions": 48,
+        "Failures": 0
+      },
+      "DiracColour": {
+        "Assertions": 65,
+        "Failures": 0
+      },
+      "DiracAlgebra": {
+        "Assertions": 104,
+        "Failures": 0
+      },
+      "ColourAlgebra": {
+        "Assertions": 139,
+        "Failures": 0
+      },
+      "Propagator grouping": {
+        "Assertions": 153,
+        "Failures": 0
+      },
+      "Rational coefficients": {
+        "Assertions": 38,
+        "Failures": 0
+      },
+      "Propagator cancellation": {
+        "Assertions": 115,
+        "Failures": 0
+      },
+      "Dimension coefficients": {
+        "Assertions": 47,
+        "Failures": 0
+      },
+      "Dimension preconditioning": {
+        "Assertions": 83,
+        "Failures": 0
+      },
+      "Verified stage symmetry": {
+        "Assertions": 67,
+        "Failures": 0
+      }
+    },
+    "ExecutionNote": "Core and FORM suites completed. Runtime checks before cancellation passed; after correcting the rejection fixture, cancellation and the three remaining runtime suites completed in fresh kernels.",
+    "Changes": [
+      "Check nested reciprocal operands inside out without stray messages",
+      "Direct hostile-source checks and observed native-parser dispatch",
+      "Observe sector assembly, early rejection and backup restoration with serial FORM and TFORM",
+      "Explicit stage sort hooks and dimension-owned restoration"
+    ],
+    "SourceSHA256": {
+      "CalcFormConverter.wl": "aeafa0a9bb4d1ffb149780081b85ae951b5c698dd548fcec7e945099898cdbb7",
+      "CoefficientParser.wl": "724e38003fda3084034b09bde3a16e061cc1bef004ae4e9c510859db3fbba804",
+      "ColourAlgebra.wl": "4b7126455fc0ac000ca9473851977b29a1066cb7b523b583490f6f160c34a020",
+      "DimensionCoefficients.wl": "e591371aba29e62431067a73376a38ed14404a578808f3138c0b77792be396f0",
+      "DiracAlgebra.wl": "1143e7f07b8e9884a646814bacff42c42657332ac7f73ac3e8877ce594c471e9",
+      "DiracColour.wl": "68d4a23ee464f5600bce2413a25c9c504fba0adc1a1ca00afcb125b3dddd0175",
+      "FORMRuntime.wl": "1b21f431abf353377f5a14db00a2d988828a288a211fe3e00824409ece142274",
+      "PropagatorCancellation.wl": "d79a29d6557e42aee0728f5477b4a511a302836fa258fe5be81b95feb038cb6c",
+      "PropagatorGroups.wl": "2f37335f31285bba228dd74a36b546d2cbc8a72cdfcecf78541602fb9da151ef",
+      "RationalCoefficients.wl": "69aaea45497291287a2fe793d85254aba93a371a6e7d9380188b54f648abd47e",
+      "StageSymmetry.wl": "9378bc4f9bcb37cd264e051770f53ea94b455834db241bccf8871f45de58c858"
+    },
+    "PerformanceRerun": false
+  }
 }

@@ -57,6 +57,7 @@ def main():
                 run_kernel('PropagatorCancellation')
                 run_kernel('DimensionCoefficients')
                 run_kernel('DimensionPreconditioning')
+                run_kernel('StageSymmetry')
                 continue
             run_kernel('Export' if suite == 'form' else 'GravityExport')
             if suite == 'form':

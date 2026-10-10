@@ -51,4 +51,37 @@ s=Import[job["InputFile"],"Text"];
 assert["prepared tensor stage path exercised",StringContainsQ[s,"Local cfcStage"]];
 assert["dimension compacted between multiplications",
  Length[StringPosition[s,"PolyRatFun cfcDimRat;"]]>2];
+
+assert["dimension functions temporarily abbreviated",
+ StringContainsQ[s,"ToPolynomial,OnlyFunctions,cfcDimRat;"]];
+assert["dimension aliases restored",StringContainsQ[s,"FromPolynomial;"]];
+(* Repeated scaled massless denominators, free indices, complex coefficients
+   and custom dimensions exercise cancellation inside prepared contractions. *)
+stagedCases={
+ staged FAD[l]^2 SPD[l]^2,
+ (staged /. FAD[{l,m}]->FAD[-l/2]) SPD[l],
+ staged FAD[p] (SPD[p]+I SPD[l]),
+ (staged FAD[l] SPD[l]) /. r->-l+p,
+ (staged FAD[l] SPD[l]) /. D->dim,
+ staged FAD[l] SPD[l] FVD[q,sigma]
+};
+Do[
+ got=Block[{CalcFormConverter`Private`$stagePreparationMinimumLeaves=0},
+  CalcFormCalculate[stagedCases[[k]],FORMThreads->workers]];
+ assert["early stage cancellation algebra "<>ToString[{workers,k}],
+  equal[got,stagedCases[[k]]]],{workers,{1,2}},{k,Length[stagedCases]}];
+job=Block[{CalcFormConverter`Private`$stagePreparationMinimumLeaves=0},
+ CalcFormExport[stagedCases[[1]],FileNameJoin[{testDirectory,"early-massless.frm"}]]];
+s=Import[job["InputFile"],"Text"];
+assert["direct rules precede prepared contractions",
+ First[StringPosition[s,"repeat;"]][[1]]<First[StringPosition[s,"Hide cfcStage"]][[1]]];
+(* Explicit hooks preserve each boundary and pair abbreviation ownership. *)
+stagePlan=<|"Rules"->"* dimension rules"|>;
+plain=CalcFormConverter`Private`dcfStageSort[stagePlan];
+hooked=CalcFormConverter`Private`dcfStageSort[stagePlan,"* direct identities\n"];
+assert["stage hooks preserve old programme",hooked===StringReplace[plain,".sort\n"->"* direct identities\n.sort\n"]];
+assert["stage hooks at all three boundaries",StringCount[hooked,"* direct identities"]===3];
+assert["ordinary stage accepts hook",CalcFormConverter`Private`dcfStageSort[<||>,"* direct\n"]==="* direct\n.sort\n"];
+assert["no dimension restoration without plan",CalcFormConverter`Private`dcfStageRestore[<||>]===""];
+assert["dimension restoration owned by module",CalcFormConverter`Private`dcfStageRestore[stagePlan]==="FromPolynomial;\n.sort\n"];
 finish["Dimension preconditioning"];

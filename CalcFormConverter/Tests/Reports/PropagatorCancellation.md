@@ -1,5 +1,7 @@
 # Numerator–propagator cancellation — 10 October 2026
 
+Historical implementation-stage record: preserve the measurements and checks below as evidence for that revision. The current implementation and later review corrections are described in the [developer guide](../../DEVELOPER.md) and [10 October follow-up](EarlyDimensionCompaction.md#independent-review-corrections).
+
 ## Implemented behaviour
 
 New exports and `CalcFormCalculate` calls perform a bounded algebraic cancellation stage in FORM before final propagator grouping. Small exact rational routing matrices determine independent denominator bases; numerator expressions are not expanded or simplified in Mathematica. Scalar-product substitutions, expansion and power cancellation take place in FORM. Remaining numerator polynomials and surviving mapped propagators are restored before output.

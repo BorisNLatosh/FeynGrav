@@ -2,6 +2,8 @@
 
 Archived on 6 October 2026 from the developer guide. These are measurements from different revisions and workloads, not a rerun of the current source. Preserve their baselines, raw observations and qualifications when citing them. The [current developer guide](../../CalcFormConverter/DEVELOPER.md) describes maintenance responsibilities.
 
+For later complete-calculation observations and review corrections, see the [10 October record](../../CalcFormConverter/Tests/Reports/EarlyDimensionCompaction.md#follow-up-complete-calculation-optimisation). Its timings use another workload and revision; they do not replace the historical measurements below.
+
 ### Earlier recorded performance checks
 
 On the development machine, a retained 636 KB result containing 6,244 terms was used for paired full-import comparisons. The original importer took 7.626 and 7.683 seconds; the optimised importer took 2.989 and 3.573 seconds in the corresponding runs. All imported expressions were exactly equal under `SameQ`. These are measurements on one result, not a general performance guarantee.

@@ -171,4 +171,18 @@ Block[{CalcFormConverter`Private`$pgNestedParsing=True, CalcFormConverter`Privat
  CalcFormConverter`Private`pgParseNested["a*(b+c)+b*(a+c)",
  Function[t,AppendTo[leafLengths,StringLength[t]];1]]];
 assert["nested leaves bounded",Max[leafLengths]<=3];
+(* Bulk nesting scans must preserve boundary and failure order at every
+   small chunk size, including a valid group before a later malformed close. *)
+Do[
+ Block[{CalcFormConverter`Private`$pgReadChunkSize=n},
+  assert["bulk nested chunk "<>ToString[n],
+   fixture[da<>"*(((("<>sa<>"+"<>sb<>"))))+"<>db<>"^(-2)*("<>sa<>")"]===
+    FCI[FAD[{p,m}]](a+b)+FCI[FAD[q]]^-2 a];
+  assertFailure["bulk diagnostic order "<>ToString[n],"UnknownIdentifier",
+   fixture[da<>"*(unknown)+"<>db<>"*("<>sa<>"))"]];
+  assertFailure["bulk truncated nesting "<>ToString[n],"InvalidResult",
+   fixture[da<>"*(((("<>sa<>"+"<>sb<>")))"]];
+  assertFailure["bulk unmatched close "<>ToString[n],"InvalidResult",
+   fixture[da<>"*("<>sa<>"))+"<>db<>"*(unknown)"]]
+ ],{n,{1,2,3,4,5,7,11,31,64,1048576}}];
 finish["Propagator grouping"];

@@ -110,7 +110,7 @@ The result body is tokenised into ASCII identifiers (`[A-Za-z][A-Za-z0-9_]*`), d
 
 From lowest to highest, parsing handles sums, products/division, unary signs, integer powers and vector dots/atoms. Division chains are left associative: `24/3/2` gives `4`. An exponent is one signed integer, optionally parenthesized, such as `x^-2` or `x^(-2)`; arbitrary exponent expressions and chained powers are rejected. Unary signs precede a power expression, so `-2^2` is `-4`, whereas `(-2)^2` is `4`.
 
-Identifiers must be declared in the mapping, except `i_` and the reserved call names. Function argument counts and scalar/vector/index roles are checked before reconstruction. A dot requires two vector values, a component requires one index, and `d_` requires two indices. Bare typed values cannot be cancelled into apparent scalars: `0*cfv1`, `cfv1-cfv1`, and `cfi1^0` fail. Unknown identifiers are rejected even in terms that would vanish. Division by zero and zero to a nonpositive power fail.
+Identifiers must be declared in the mapping, except `i_` and the reserved call names. Function argument counts and scalar/vector/index roles are checked before reconstruction. A dot requires two vector values, a component requires one index, and `d_` requires two indices. Bare typed values cannot be cancelled into apparent scalars: `0*cfv1`, `cfv1-cfv1`, and `cfi1^0` fail. Unknown identifiers are rejected even in terms that would vanish. Division by zero and zero to a nonpositive power fail. Nested reciprocal operands are checked from the inside out before evaluating an enclosing denominator, including inside a zero-multiplied term; the optimised path must retain the general parser’s failure and message behaviour.
 
 All mapping expressions are decoded and checked, including entries unused by the result. A valid digest does not bypass grammar, entry-kind, dimension or expression validation. Conversely, the digest authenticates no sender and proves no mathematical calculation. Restored symbols and whitelisted heads undergo normal Wolfram evaluation in the receiving kernel; this data format does not isolate pre-existing kernel definitions.
 
@@ -299,7 +299,7 @@ internal arithmetic tree. This changes neither the grammar nor the returned
 mathematical heads: factors still pass through the restricted typed decoder,
 and products of sums remain factored. Malformed or ineligible tree input is
 replayed through the established parser for its original diagnostic. Version
-selection, layout metadata and mapping digests are unchanged.
+selection, layout metadata and mapping digests are unchanged. Current reconstruction uses a held expression built from validated factor references and fixed arithmetic operators; result-file text is never passed to the Wolfram evaluator as source. This private implementation choice adds no syntax to the saved format.
 
 ### Bounded rational coefficient output
 
@@ -325,4 +325,4 @@ apply: no value at an original pole is assigned by this representation.
 
 Remaining version-one coefficients may contain a sum of monomials multiplied by ordinary numerator/denominator quotients in the mapped Lorentz dimension. `DimensionCoefficients.wl` emits this syntax after univariate FORM rational arithmetic. Its private `cfcDimRat` objects never enter output. Unsupported scalar abbreviations retain their recorded meaning. No new mapping fields or parser grammar are required. Direct massless cancellation precedes the guarded general numerator stage, so the latter's fallback does not undo it.
 
-Dimension-only rational functions can also occur internally between prepared tensor stages and before general numerator cancellation. They are removed by the existing dimension coefficient writer. These processing changes introduce no mathematical heads, mapping metadata or importer behaviour.
+Dimension-only rational functions can also occur internally between prepared tensor stages and before general numerator cancellation. They are removed by the existing dimension coefficient writer. Temporary dimension abbreviations and verified two-index symmetry placeholders are restored within FORM. Symmetry canonicalisation is valid inside the checked contraction, not as an identity for an arbitrary free intermediate tensor. These processing changes introduce no saved mathematical heads or mapping metadata and do not reinterpret older files.

@@ -85,5 +85,24 @@ stageCase["prepared_polarized",largeChain /. p -> Polarization[k,I],2];
 largeInternal = Sum[(x^j+y^j) (FVD[p,mu]^2+j FVD[q,mu]^2), {j,1,40}];
 stageCase["prepared_internal",largeInternal (MTD[a,b]+FVD[r,a]FVD[r,b])
  (FVD[s,b]+FVD[t,b]) FVD[u,a],2];
+(* External components join their unique tensor neighbour, without changing
+   identifier allocation or splitting a factor that connects several sums. *)
+attach[factors_, ranges_] := CalcFormConverter`Private`attachStageFactors[FCI /@ factors,ranges];
+assert["external factors join their own sums",
+ attach[{FVD[p,a], FVD[q,b], MTD[a,c]+FVD[r,a]FVD[r,c],
+   MTD[b,d]+FVD[s,b]FVD[s,d]}, {{1,3},{4,4}}] === {{1,3},{2,4}}];
+assert["bridging tensor retains original group",
+ attach[{MTD[a,b],FVD[p,a]+FVD[q,a],FVD[r,b]+FVD[s,b]},
+   {{1,2},{3,3}}] === {{1,2},{3}}];
+assert["ambiguous sum prevents attachment",
+ attach[{FVD[p,a],x+FVD[q,b],FVD[r,a]+FVD[s,a]},
+   {{1,2},{3,3}}] === {{1,2},{3}}];
+assert["triple index prevents attachment",
+ attach[{FVD[p,a],FVD[q,a]+FVD[r,a],FVD[s,a]+FVD[t,a]},
+   {{1,2},{3,3}}] === {{1,2},{3}}];
+stageCase["stages_attached",FVD[p,a] FVD[q,b]
+ (MTD[a,c]+FVD[r,a] FVD[r,c]) (MTD[b,c]+FVD[s,b] FVD[s,c]),1];
+stageCase["stages_attached_metric",MTD[a,b]
+ (MTD[a,b]+FVD[p,a]FVD[p,b]) (SPD[p]+SPD[q]),1];
 saveCases[];
 finish["FORM stages"];

@@ -633,6 +633,40 @@ stageIndexSignatures[stages_List] := Module[{counts, signatures},
 
 
 (* ::Text:: *)
+(*Attach a non-sum tensor to its unique neighbouring sum before ordering the
+  stages. In particular, both polarisation vectors of an external line should
+  contract with that line before multiplying a large vertex. Arbitrary Times
+  ordering can otherwise attach them to unrelated stages. Move a factor only
+  when all its indices occur once and meet exactly one sum. Ambiguous index
+  signatures and tensors connecting several sums retain the original grouping.
+  This operates on positions after emission: mapping names remain unchanged.*)
+
+(* ::Input::Initialization:: *)
+attachStageFactors[factors_List, ranges_List] := Module[
+    {groups = (Range @@ # &) /@ ranges, signatures, sums, owners, indices, targets,
+     source, target},
+    If[FreeQ[factors, _LorentzIndex], Return[groups]];
+    signatures = stageIndexSignatures[factors];
+    If[signatures === $Failed, Return[groups]];
+    sums = Flatten[Position[factors, _Plus, {1}, Heads -> False]];
+    owners = Association[Flatten[MapIndexed[Thread[#1 -> First[#2]] &, groups]]];
+    Do[
+        indices = Keys[signatures[[i]]];
+        If[indices =!= {} && AllTrue[Values[signatures[[i]]], # === 1 &],
+            targets = Select[sums, Function[j,
+                AllTrue[indices, Lookup[signatures[[j]], #, 0] === 1 &]]];
+            If[Length[targets] === 1,
+                source = owners[i]; target = owners[First[targets]];
+                If[source =!= target,
+                    groups[[source]] = DeleteCases[groups[[source]], i];
+                    groups[[target]] = Sort[Append[groups[[target]], i]]]
+            ]
+        ], {i, Complement[Range[Length[factors]], sums]}];
+    groups
+];
+
+
+(* ::Text:: *)
 (*The one-argument form computes stage signatures, using empty signatures for expressions without Lorentz indices, then delegates to the two-argument planner.*)
 
 (* ::Input::Initialization:: *)
@@ -699,9 +733,9 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
 	macros = {},
 	register, scalar, vector, index, pair, denominator, emit, 
 	abbreviation, makeMacro,body, dimensionName, payload, factorExpressions, factorTexts, 
-	stageEnds, stageRanges,
+	stageEnds, stageRanges, stageGroups,
 	stageTexts, stageExpressions, stageSignatures, stageOrder,
-	preparations = {}, multiplications = {}, cancellationData},
+	preparations = {}, multiplications = {}, symmetryLinks = {}, cancellationData},
 	(*Validate LoopMomenta: must be a list, every element a symbol, and no duplicates. Anything else aborts before any work is done.*)
 	If[! ListQ[loops] || ! AllTrue[loops, MatchQ[#, _Symbol] &] || ! DuplicateFreeQ[loops],
 		throwFailure["InvalidLoopMomenta", 
@@ -873,10 +907,11 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
 		(*The last stage always runs to the end of the factor list, covering any trailing non-sum factors.*)
 		stageEnds[[-1]] = Length[factorTexts];
 		stageRanges = MapThread[{#1 + 1, #2} &, {Prepend[Most[stageEnds], 0], stageEnds}];
-		(*Build the text of each stage as a parenthesized product, and the corresponding expression, so the planner can inspect indices.*)
-		stageTexts = ("(" <> StringRiffle[Take[factorTexts, #], "*"] <> ")") & /@ stageRanges;
-		stageExpressions = (Times @@ Take[factorExpressions, #]) & /@ 
-		stageRanges;
+		stageGroups = attachStageFactors[factorExpressions, stageRanges];
+		(*Build each stage from its assigned factor positions. Emission above has
+          already fixed the mapping and macro identifiers.*)
+		stageTexts = ("(" <> StringRiffle[factorTexts[[#]], "*"] <> ")") & /@ stageGroups;
+		stageExpressions = (Times @@ factorExpressions[[#]]) & /@ stageGroups;
 		(*Index signatures drive the ordering; if there are no indices at all, use empty signatures (which makes the planner fall back to the original order).*)
 		stageSignatures = If[FreeQ[stageExpressions, _LorentzIndex],
 			ConstantArray[<||>, Length[stageExpressions]], 
@@ -885,6 +920,7 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
 		stageTexts = stageTexts[[stageOrder]];
 		(*Normalize large, unambiguous tensor stages once in FORM before reuse. The configurable leaf-count cutoff defaults to 1024. Hidden cfcStageN factors remain available until the program ends. Ambiguous signatures bypass preparation even when multiplication order is unchanged.*)
         If[ stageSignatures =!= $Failed && ! FreeQ[stageExpressions, _LorentzIndex] && Max[LeafCount /@ stageExpressions] >= $stagePreparationMinimumLeaves,preparations = stageTexts;
+        symmetryLinks = ssLinks[stageSignatures[[stageOrder]], index];
         stageTexts = Table["cfcStage" <> intString[i], {i, Length[stageTexts]}]];
         (*The final program multiplies the stages left to right.*)
         body = First[stageTexts];
@@ -909,7 +945,7 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
         If[hasDiracProcessing || hasColourFormat, AssociateTo[payload, daMetadata[algebra, entries]]];
         If[hasColourFormat, AssociateTo[payload, caMetadata[entries]]];
         (*Single return value consumed by rendering and file writing: the dimension's FORM name, the body expression text, the remaining multiplication stages, the #define macros, the hoisted stage preparations, and the mapping payload.*)
-        <|"DimensionName" -> dimensionName, "Body" -> body, "Multiplications" -> multiplications,"Factors" -> macros, "Preparations" -> preparations, "Mapping" -> payload, "CancellationData" -> cancellationData|>
+        <|"DimensionName" -> dimensionName, "Body" -> body, "Multiplications" -> multiplications,"Factors" -> macros, "Preparations" -> preparations, "SymmetryLinks" -> symmetryLinks, "Mapping" -> payload, "CancellationData" -> cancellationData|>
    ]];
 
 
@@ -925,7 +961,7 @@ renderExport[data_Association, result_String, template_String] :=
   Module[
      (*Projections of the single big association produced by buildExportData. entries is the ordered registry table; declaration/json/digest/program are scalars built below.*)
     {entries = data["Mapping"]["Entries"], declaration, json, digest, 
-    program, templateNames, unknownTemplateNames, rationalPlan, cancellationPlan, dimensionPlan, stagedDimensionQ, stageSort},
+    program, templateNames, unknownTemplateNames, rationalPlan, cancellationPlan, dimensionPlan, symmetryPlan, stagedDimensionQ, stageSort},
      (*The template contract is enforced HERE, not only where the shipped template is read, because this function is the one that accepts an arbitrary template. Without this check a template missing a placeholder would silently render a program that omits a declaration or directive -- a FORM-level failure far from its cause. Required and unknown placeholders are rejected against the original template before any values are inserted.*)
      templateNames = templatePlaceholderNames[template];
      If[! AllTrue[$requiredTemplatePlaceholders, 
@@ -951,8 +987,13 @@ renderExport[data_Association, result_String, template_String] :=
      rationalPlan = rcPlan[data];
      dimensionPlan = dcfPlan[data];
      cancellationPlan = pcPlan[data];
+     symmetryPlan = ssPlan[data];
      stagedDimensionQ = dimensionPlan =!= <||> && data["Preparations"] =!= {};
-     stageSort = If[stagedDimensionQ, dcfStageSort[dimensionPlan], ".sort\n"];
+     (* Each stage owns its sort boundaries. Supply the shared non-growing
+        cancellation identities through an explicit hook; the dimension module
+        also owns restoration of its temporary coefficient abbreviations. *)
+     stageSort = dcfStageSort[If[stagedDimensionQ, dimensionPlan, <||>],
+         If[data["Preparations"] === {}, "", pcDirectRules[data]]];
      (*Serialize the mapping and hash the exact resulting JSON text. Reformatting that text changes the digest. Compact output avoids extra whitespace but does not promise identical serialization across all kernel versions.*)
      json = 
     ExportString[data["Mapping"], "RawJSON", "Compact" -> True];
@@ -965,7 +1006,7 @@ renderExport[data_Association, result_String, template_String] :=
       "@RESULTMARKER@" -> resultMarker[data["Mapping"]["Version"]],
           (*Declare the FORM functions for the masters (A0..D0). The names come from $masterSpecByFORMName, i.e. the "FORMName" fields of the spec table -- again, no name is hard-coded here.*)
           "@FUNCTIONS@" -> 
-       "CFunctions " <> StringRiffle[Keys[$masterSpecByFORMName], ","] <> ";" <> daDeclarations[data] <> caDeclarations[data] <> Lookup[rationalPlan, "Declarations", ""] <> Lookup[cancellationPlan, "Declarations", ""] <> Lookup[dimensionPlan, "Declarations", ""],
+       "CFunctions " <> StringRiffle[Keys[$masterSpecByFORMName], ","] <> ";" <> daDeclarations[data] <> caDeclarations[data] <> Lookup[rationalPlan, "Declarations", ""] <> Lookup[cancellationPlan, "Declarations", ""] <> Lookup[dimensionPlan, "Declarations", ""] <> Lookup[symmetryPlan, "Declarations", ""],
           (*Declarations grouped by class, driven by $kindSpecs. Note "Symbols" covers Scalars, Abbreviations and Denominators -- they share a FORM class by design.*)
           "@SCALARS@" -> declaration["Symbols"], 
       "@DIMENSION@" -> data["DimensionName"],
@@ -984,11 +1025,12 @@ renderExport[data_Association, result_String, template_String] :=
                
          StringRiffle[
           Table["cfcStage" <> intString[i], {i, 
-            Length[data["Preparations"]]}], ","] <> ";\n"],
+            Length[data["Preparations"]]}], ","] <> ";\n" <> Lookup[symmetryPlan, "Checks", ""]],
           (*Each multiplication follows a normalising stage boundary. Eligible prepared tensors compact their dimension dependence after ordinary tensor sorting, with rational arithmetic disabled for the next multiplication. The final boundary completes the last product before cancellation.*)
           "@MULTIPLICATIONS@" -> 
-       StringJoin[(stageSort <> "Multiply " <> # <> ";\n") & /@
-         data["Multiplications"]] <> If[stagedDimensionQ, stageSort, ""] <> caProcessing[data] <> If[KeyExistsQ[data["Mapping"], "EpsilonConvention"], "contract 0;\n", ""] <> daProcessing[data] <> pcDirectProcessing[data] <> If[cancellationPlan === <||>, "", dcfPrecondition[dimensionPlan]] <> Lookup[cancellationPlan, "Processing", ""],
+       StringJoin[MapIndexed[(stageSort <>
+         If[symmetryPlan === <||>, "", symmetryPlan["Boundaries"][[First[#2]]]] <>
+         "Multiply " <> #1 <> ";\n") &, data["Multiplications"]]] <> If[stagedDimensionQ, stageSort <> dcfStageRestore[dimensionPlan], ""] <> caProcessing[data] <> If[KeyExistsQ[data["Mapping"], "EpsilonConvention"], "contract 0;\n", ""] <> daProcessing[data] <> pcDirectProcessing[data] <> If[cancellationPlan === <||>, "", dcfPrecondition[dimensionPlan]] <> Lookup[cancellationPlan, "Processing", ""],
           "@GROUPING@" -> With[{denominators = Lookup[Select[entries, #["Kind"] === "Denominator" &], "Name", {}]},
               If[denominators === {}, "", If[pgFactorisationQ[data], "Bracket+ ", "Bracket "] <> StringRiffle[denominators, ","] <> ";"]],
           (*The result path. Windows backslashes are normalized because FORM expects forward slashes there; Unix paths are preserved literally, including backslashes. Quoting is the template's job.*)
@@ -1919,6 +1961,7 @@ Get[FileNameJoin[{$moduleDirectory, "PropagatorGroups.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "RationalCoefficients.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "DimensionCoefficients.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "PropagatorCancellation.wl"}]];
+Get[FileNameJoin[{$moduleDirectory, "StageSymmetry.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "FORMRuntime.wl"}]];
 
 

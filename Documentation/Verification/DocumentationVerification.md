@@ -36,3 +36,28 @@ The follow-up corrects two usage strings in `Rules/Nieuwenhuizen.wl`:
 - `NieuwenhuizenOperator2` now displays the two distinct transverse products, `theta(mu,alpha) theta(nu,beta)` and `theta(mu,beta) theta(nu,alpha)`, matching its definition. The trace subtraction and fixed `1/3` convention are unchanged.
 
 The [function reference](../Reference.md#projectors-and-operators) already gives the matching definitions. A source comparison confirms that all content outside these two usage blocks is unchanged. No computational definition was modified.
+
+## Converter documentation refresh — 10 October 2026
+
+This follow-up changes Markdown only. It cross-checks the retained converter
+implementation, its regression tests and the latest verification record. It
+does not repeat the earlier main-package signature audit or run calculations.
+
+- Updated automatic grouping, guarded cancellation, coefficient processing,
+  stage symmetry and held-parser descriptions, including the explicit stage
+  sort/restoration interfaces and nested-zero diagnostic checks.
+- Corrected the future-work boundary: numerator cancellation exists; integral
+  reduction with repeated propagators remains outside this implementation.
+- Added missing companion modules, navigation entries and links to the latest
+  optimisation/review evidence. Marked superseded implementation reports as
+  historical without changing their recorded measurements.
+- Kept the 26.77-second observation and 63.44-second correctness rerun qualified
+  as individual measurements. The 1,964 regression checks were completed for
+  the preceding code correction; they were not rerun for this prose-only edit.
+- Checked every local Markdown link and heading target, code-fence balance and
+  `git diff --check`. All checks passed.
+- SHA-256 comparisons confirmed that Wolfram source, test scripts, FORM
+  templates, JSON records and saved notebooks were unchanged by this update.
+
+External websites were not revalidated. No Full benchmarks, interaction-library
+regeneration, public API changes or commit were included.

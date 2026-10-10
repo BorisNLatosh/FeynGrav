@@ -78,7 +78,7 @@ pgHeader[stream_, mapping_, digests_] := Module[{header, expected, newline},
    Fragments preserve whitespace: removing it could join invalid identifiers. *)
 pgReadSummands[stream_, consume_] := Module[
     {chunk, depth = 0, fragments = {}, last = "", seen = False, emitted = 0,
-     append, flush, outside, positions, start, at, mark, segment, tail},
+     append, flush, outside, positions, marks, levels, previous, selected, finalDepth, start, at, mark, segment, tail},
     append[s_String] := If[s =!= "", AppendTo[fragments, s];
         tail = StringTrim[s]; If[tail =!= "", last = StringTake[tail, -1]; seen = True]];
     flush[] := If[seen, consume[StringJoin[fragments]]; emitted++;
@@ -98,16 +98,30 @@ pgReadSummands[stream_, consume_] := Module[
         If[chunk === EndOfFile || chunk === "", Break[]];
         If[!StringQ[chunk], throwFailure["ReadFailed", "Cannot read the FORM result body."]];
         positions = StringPosition[chunk, "(" | ")"];
+        (* Compute nesting levels in bulk, then visit only the boundaries of
+           outermost parentheses. Nested spans remain one source fragment.
+           Retain invalid closing events in order, so an earlier completed
+           summand still receives its normal parser diagnostic first. *)
+        finalDepth = depth;
+        marks = StringTake[chunk, positions];
+        If[positions =!= {},
+            levels = depth + Accumulate[Lookup[<|"(" -> 1, ")" -> -1|>, marks]];
+            finalDepth = Last[levels];
+            previous = Prepend[Most[levels], depth];
+            selected = Flatten[Position[Unitize[UnitStep[-previous] + UnitStep[-levels]], 1]];
+            positions = positions[[selected]]; marks = marks[[selected]];
+            levels = levels[[selected]]];
         start = 1;
-        Do[at = position[[1]]; segment = StringTake[chunk, {start, at - 1}];
+        Do[at = positions[[event, 1]]; segment = StringTake[chunk, {start, at - 1}];
             If[depth === 0, outside[segment], append[segment]];
-            mark = StringTake[chunk, {at}];
-            If[mark === "(", depth++, depth--];
+            mark = marks[[event]];
+            depth = levels[[event]];
             If[depth < 0, throwFailure["InvalidResult", "Unmatched closing parenthesis in grouped result."]];
             append[mark]; start = at + 1,
-            {position, positions}];
+            {event, Length[positions]}];
         segment = StringDrop[chunk, start - 1];
-        If[depth === 0, outside[segment], append[segment]]
+        If[depth === 0, outside[segment], append[segment]];
+        depth = finalDepth
     ];
     If[depth =!= 0, throwFailure["InvalidResult", "Truncated parenthesis in grouped result."]];
     flush[];
@@ -130,6 +144,9 @@ pgDenFactorQ[_] := False;
 pgParseCoefficient[text_String, parse_] := Module[
     {body = StringTrim[text], positions, depth = 0, start = 0, stop = 0,
      ranges = {}, eligible = True, ch},
+    (* A parenthesised-factor product must start with an opening bracket.
+       Other shapes need no factor-boundary scan before ordinary parsing. *)
+    If[!StringStartsQ[body, "("], Return[parse[body]]];
     positions = StringPosition[body, "(" | ")"];
     Do[
         ch = StringTake[body, pos];
@@ -233,16 +250,18 @@ pgParseNested[text_String, parse_, level_: 0] := Module[
     ]
 ];
 
-pgParse[text_String, values_, dim_] := Module[{trimmed = StringTrim[text], cut, prefix, body, depth = 0, balanced, factor, prepared, parse},
+pgParse[text_String, values_, dim_] := Module[{trimmed = StringTrim[text], cut, prefix, body, depth = 0, balanced, factor, prepared, parse, positions, levels},
     parse[t_] := If[$diracImportLine === None, parseResult[t, values, dim],
         prepared = caPrepareResult[t, values]; parseGeneralResult[prepared[[1]], prepared[[2]], dim]];
     cut = StringPosition[trimmed, RegularExpression["\\*\\s*\\("], 1];
     If[cut =!= {} && StringEndsQ[trimmed, ")"],
         prefix = StringTake[trimmed, cut[[1, 1]] - 1];
         body = StringTake[trimmed, {cut[[1, 2]] + 1, -2}];
-        balanced = True;
-        Scan[Function[pos, depth += If[StringTake[body, pos] === "(", 1, -1];
-            If[depth < 0, balanced = False]], StringPosition[body, "(" | ")"]];
+        positions = StringPosition[body, "(" | ")"];
+        levels = If[positions === {}, {},
+            Accumulate[StringTake[body, positions] /. {"(" -> 1, ")" -> -1}]];
+        balanced = levels === {} || Min[levels] >= 0;
+        depth = If[levels === {}, 0, Last[levels]];
         If[balanced && depth === 0 &&
             StringMatchQ[prefix, RegularExpression["[+-]?\\s*(?:1|cfd[0-9]+)(?:\\s*\\^\\s*[+-]?[0-9]+)?(?:\\s*\\*\\s*cfd[0-9]+(?:\\s*\\^\\s*[+-]?[0-9]+)?)*\\s*"]],
             (* Lexical shape is only eligibility. Every identifier is resolved

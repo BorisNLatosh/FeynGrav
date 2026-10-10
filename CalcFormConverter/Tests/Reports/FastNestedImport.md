@@ -1,5 +1,7 @@
 # Fast nested import and shared parser state — 9 October 2026
 
+Historical implementation-stage record: preserve the measurements and checks below as evidence for that revision. The current implementation and later review corrections are described in the [developer guide](../../DEVELOPER.md) and [10 October follow-up](EarlyDimensionCompaction.md#independent-review-corrections).
+
 ## Implementation
 
 Nested commuting coefficients are decomposed to eligible polynomial leaves. Their fast-parser threshold is 32 characters inside one import-local environment, replacing the ineffective combination of 32,768-character nested batches and a 131,072-character fast-path threshold. Flat lexical validation, typed factors, lazy failure order and general-parser fallback remain in force. Unsupported nested shapes continue through the general parser.
