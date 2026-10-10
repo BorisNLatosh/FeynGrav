@@ -1,0 +1,37 @@
+{
+  "Assertions": {
+    "Core": 712,
+    "FORM": 235,
+    "Runtime": 654
+  },
+  "LoadingPassed": true,
+  "Realistic": {
+    "Seconds": 0.681851,
+    "InputLeaves": 10697,
+    "OutputLeaves": 388,
+    "Groups": 1,
+    "Equal": true,
+    "Failure": false
+  },
+  "ResourceMeasurement": {
+    "command": [
+      "/usr/local/bin/WolframKernel",
+      "-noinit",
+      "-script",
+      "/tmp/cfc-cancel-tests/realistic.wls"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 3.9910641290043714,
+    "peak_process_tree_rss_bytes": 334733312,
+    "stop_reason": null
+  },
+  "SourceSHA256": {
+    "PropagatorCancellation.wl": "68a94e45dbbd380d1eacd0bbd10736856e214adb90e29c0d4a192d3194c2aba8",
+    "CalcFormConverter.wl": "c3ec36cbd751333dad2a918153b40cb7bc6a94867415c685602fe8c077b7bb4d",
+    "Templates/Program.frm.in": "c4928587a2806ef8759938a373fbc91c60c96fff27109945b92dbdabcecbab11",
+    "Tests/PropagatorCancellation.wls": "96b0e20796118c3d1f3c71cbe9c2e960143b51e9c4215e01cf69e389ffd24360",
+    "Tests/RationalCoefficients.wls": "53a344bbfc405145bca9ff2ffd70ac60c862254bbc46a12f19e630f63266331a"
+  },
+  "CompleteLargeResultTested": false,
+  "Committed": false
+}

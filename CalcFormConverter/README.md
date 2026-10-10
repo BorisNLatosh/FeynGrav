@@ -105,11 +105,36 @@ Expressions containing ordinary quadratic propagators are automatically grouped 
 FAD[{p, m}] (a + b) + FAD[{p, m}]^2 FAD[q] (c + d)
 ```
 
-rather than distributing each denominator product over its coefficient. Terms without propagators form the unit-prefactor group. This groups mapped factors; it does not cancel denominators, impose kinematics, perform partial fractions or apply physical assumptions. Eligible commuting coefficients have common numerical and monomial factors extracted separately.
+rather than distributing each denominator product over its coefficient. Terms without propagators form the unit-prefactor group. Before grouping, the generated programme cancels reducible polynomial numerator scalar products against ordinary propagators. It does not impose kinematics, perform partial fractions or apply integral identities. Eligible commuting coefficients have common numerical and monomial factors extracted separately.
 
 New grouped results are read incrementally. The importer retains one complete top-level summand's source text at a time, parses it with the existing restricted grammar, and discards its text and tokens before continuing. The final expression and the largest coefficient still need memory. Older saved results keep their existing interpretation, and jobs without propagators retain their existing output path. Re-export and rerun an old job to obtain the new grouped layout; updating the package does not rewrite an existing `.out` file. Do not call `Expand` on a large imported result unless the expanded representation is actually needed.
 
-For version-one jobs, FORM extracts common numerical factors and powers of symbols and scalar products from coefficients containing at most 20,000 expanded terms and no free Lorentz indices. It uses `content_`, without searching for polynomial factors such as `(a+b)`. Scalar functions remain inside the residual sum, and scalar abbreviations stay opaque. Larger coefficients and free-index coefficients bypass common-factor extraction, but can still use momentum grouping. Epsilon, Dirac and colour jobs retain their existing single-level propagator grouping.
+### Numerator–propagator cancellation
+
+Both export and calculation automatically prepare a bounded basis of denominator polynomials. FORM expresses reducible scalar products through denominators present in each term, cancels their powers, restores unmatched numerator polynomials and then groups the surviving propagator products. For example:
+
+```mathematica
+CalcFormCalculate[SPD[l] FAD[{l, m}], LoopMomenta -> {l}]
+(* 1 + m^2 FCI[FAD[{l, m}]] *)
+```
+
+The constant term is retained. There are no momentum shifts, scaleless-integral deletions, integrations or partial fractions. Scalar products outside the selected basis remain in the numerator. `LoopMomenta` gives loop-dependent scalar products priority in basis selection; without it, selection uses a deterministic ordering of all scalar products in the denominator routings. The algebra remains valid in either case, but the output basis may differ.
+
+The current planner allows at most 256 nonempty independent denominator subsets. Before this search, a direct pass cancels matching squares against massless propagators with routing `a p`, where `a` is an exact nonzero rational. This pass handles repeated powers without creating terms. If the basis budget is exceeded, these direct cancellations remain in place. Routing matrices contain exact rational numbers only: no division by a mass difference, external invariant or Gram determinant is introduced. Cancellation does not penetrate opaque inverse-polynomial abbreviations or scalar functions. FORM also retains a hidden copy of the original expression and restores that directly cancelled expression if the candidate exceeds both 16 terms and twice the original expanded term count, or exceeds four times the original propagator-group count. This prevents large structural growth but does not guarantee smaller factored output. These checks apply to the complete job and occur after the candidate has been computed; they are not execution-time or memory limits.
+
+Identities use ordinary quadratic propagators with their common Feynman prescription understood in the infinitesimal limit. They do not assert equality with a finite regulator omitted from a numerator. No new interpretation of older saved files is required; re-export existing programmes to include the stage.
+
+The approach follows numerator cancellation described in [FeynCalc 9.0, section 3.2](https://arxiv.org/pdf/1601.01167) and the scalar-product basis approach of [Feng](https://arxiv.org/pdf/1204.2314). Small validation cases use `ApartFF[..., FDS -> False, DropScaleless -> False]` and direct rational identities, outside production calculations. See the [verification report](Tests/Reports/PropagatorCancellation.md).
+
+### Bounded coefficient simplification
+
+For version-one jobs, small scalar coefficients now undergo rational cancellation and numerator/denominator factorisation **inside FORM**, automatically in both `CalcFormExport` programs and `CalcFormCalculate`. The initial selection limit is 1,000 expanded terms per coefficient and 12 potential scalar variables per job, counting mapped scalar symbols and scalar products of registered vectors. Reciprocal-polynomial abbreviations must use already mapped symbols; their outer inverse powers are limited to eight and polynomial powers to 32. Other scalar abbreviations, including radicals, exclude this multivariate procedure. Free-index, complex and scalar-function coefficients also bypass it. These are conservative work-selection limits, not time or memory guarantees.
+
+For remaining version-one coefficients, a separate pass simplifies rational dependence on the mapped symbolic Lorentz dimension alone. Momentum and mass monomials stay outside `PolyRatFun`; there is no full multivariate factorisation. Inverse polynomials depending only on that dimension are exposed within the same power limits. Other abbreviations remain opaque. This pass also accepts free-index, complex and scalar-function coefficients, and recognises a custom dimension symbol. It writes ordinary fractions and needs no importer or saved-format change. See the [dimension and massless-cancellation report](Tests/Reports/DimensionCoefficients.md) for validation and realistic-trial limits.
+
+The remaining fallback uses `content_` to extract common numerical/monomial factors from coefficients with at most 20,000 terms and no free Lorentz indices, followed by momentum grouping. Epsilon, Dirac and colour jobs keep their existing single-level grouping. No new public option is needed. No Mathematica `Simplify` is called. Propagator factors stay opaque even when their scalar coefficient is simplified.
+
+For example, `CalcFormCalculate[FAD[p] (D^2-1)/(D-1)]` returns the equivalent `(D+1) FCI[FAD[p]]` at generic `D`. Cancellation does not define a value at the original pole. See the [integration report](Tests/Reports/RationalCoefficientIntegration.md) for measured coverage and limits. Previously exported `.frm` files must be exported again to acquire this processing.
 
 The stage prepares batches of up to four coefficients per worker, computes their common factors once, and normalises the residual expressions with TFORM whole-expression scheduling. Serial FORM uses batches of one. `FORMThreads` or a manual `tform -w8 job.frm` selects the workers. The batching rule is not a RAM cap. Existing execution timeouts and cancellation still apply to the complete FORM program.
 
@@ -233,7 +258,7 @@ Public commands and converter-specific options belong to the `` CalcFormConverte
 
 ### Comparing results
 
-`CalcFormImport` and `CalcFormCalculate` return equivalent algebraic expressions, not a canonical simplified form. In particular, FORM treats inverse composite factors such as `1/(D-1)` as opaque abbreviations. After import, an expression can therefore differ structurally from a FeynCalc reference even when their difference is zero. Neither command automatically calls `Simplify`. Processed colour jobs do have a scalar-only presentation step: it collects identical colour tensor structures and factors rank-dependent coefficients into the documented Casimir form. This is not a call to `SUNSimplify` or a general tensor reduction in Mathematica.
+`CalcFormImport` and `CalcFormCalculate` return equivalent algebraic expressions, not a canonical simplified form. Eligible grouped scalar coefficients expose inverse polynomial factors such as `1/(D-1)` to FORM rational arithmetic; other scalar abbreviations retain their opaque interpretation. After import, an expression can therefore differ structurally from a FeynCalc reference even when their difference is zero. Neither command automatically calls `Simplify`. Processed colour jobs do have a scalar-only presentation step: it collects identical colour tensor structures and factors rank-dependent coefficients into the documented Casimir form. This is not a call to `SUNSimplify` or a general tensor reduction in Mathematica.
 
 For a manageable scalar or already-contracted tensor example, compare the difference explicitly:
 
@@ -540,7 +565,7 @@ This matters because a newly defined FORM expression starts as a single input te
 
 Generated calculation programs suppress source echo with `#-`; errors and the dedicated result file remain available. The complete program is retained in `job.frm` when job files are kept.
 
-Propagators are commuting scalar identifiers. Each mapping entry stores its original FeynCalc definition, routing, mass, dimension, unit power and Feynman prescription; repeated occurrences/powers in the expression retain multiplicity. Radicals and inverse composite scalar expressions are also reversible scalar abbreviations. Consequently FORM cannot cancel a numerator against an opaque denominator or simplify relations involving opaque abbreviations. Import restores these objects exactly, although an equivalent product of denominators need not have the same grouping as the original combined `FAD`.
+Propagators are commuting scalar identifiers. Each mapping entry stores its original FeynCalc definition, routing, mass, dimension, unit power and Feynman prescription; repeated occurrences/powers retain multiplicity except where removed by algebraic numerator cancellation. Radicals and inverse composite scalar expressions are also reversible scalar abbreviations. The numerator-cancellation stage exposes their quadratic polynomials transiently and restores surviving denominator identifiers. The bounded scalar-coefficient procedure can expose supported reciprocal-polynomial abbreviations; radicals and other unsupported abbreviations remain opaque. Import restores surviving mapped objects exactly, although an equivalent product of denominators need not have the same grouping as the original combined `FAD`.
 
 The converter inserts no symmetry factor, loop measure, on-shell condition or factor of `i`. Existing vertex factors of `i` and couplings are retained. The output is the algebraically contracted integrand, not an integrated self-energy.
 
@@ -579,7 +604,7 @@ Earlier improvements used different revisions, workloads and measurement boundar
 
 ### Memory when importing nested groups
 
-For grouped version-one results, the importer parses nested coefficient sums and bracketed products in smaller pieces, retaining their factorisation. Eligible polynomial leaves use the fast parser, with bounded dictionaries and decoded-factor caches shared only within that import. It still buffers one propagator coefficient as text and retains the final Mathematica expression. A large indivisible polynomial can still require substantial memory. This is not a disk-backed expression format.
+For eligible grouped version-one results, the importer reads each nested coefficient into a restricted arithmetic tree and reconstructs its sums and products in batches, retaining factorisation. The syntax scan uses Mathematica’s built-in virtual machine; no compiler installation or external process is required. Unsupported shapes use the existing smaller-piece and general parsers. Decoded-factor caches remain bounded and local to the import. Source text, tokens and the tree for one coefficient need memory alongside the growing final Mathematica expression. This is not a disk-backed expression format. See the [coefficient-parser verification](Tests/Reports/CoefficientTreeImport.md) for measurements and limits.
 
 For large calculations, suppress display inside the timer:
 

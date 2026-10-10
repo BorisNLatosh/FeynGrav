@@ -1,0 +1,23 @@
+* Emit one coefficient term at a time as an ordinary quotient. The private
+* rational function and temporary dollar variables never enter saved output.
+#write <@RESULT@> "+%$*(0",$cfcKey`cfcSlot'
+#$cfcDimTerms=cfcDimWork`cfcSlot';
+#do cfcDimLoop=1,1
+#if "`$cfcDimTerms'" != "0"
+#$cfcDimTerm=firstterm_($cfcDimTerms);
+#$cfcDimTerms=$cfcDimTerms-$cfcDimTerm;
+#$cfcDimNumerator=1;
+#$cfcDimDenominator=1;
+#inside $cfcDimTerm
+id cfcDimRat(cfcDimNum?$cfcDimNumerator,cfcDimDen?$cfcDimDenominator)=1;
+#endinside
+#write <@RESULT@> "+(%$)*((%$)/(%$))",$cfcDimTerm,$cfcDimNumerator,$cfcDimDenominator
+#redefine cfcDimLoop "0"
+#endif
+#enddo
+#write <@RESULT@> ")"
+Drop cfcDimWork`cfcSlot';
+#$cfcDimTerms=0;
+#$cfcDimTerm=0;
+#$cfcDimNumerator=0;
+#$cfcDimDenominator=0;

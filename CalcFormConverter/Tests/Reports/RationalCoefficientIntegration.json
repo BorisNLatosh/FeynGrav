@@ -1,0 +1,179 @@
+{
+  "Status": "Enabled; guarded coefficients only",
+  "Limits": {
+    "Terms": 1000,
+    "PotentialVariables": 12
+  },
+  "Groups": {
+    "Total": 1022,
+    "Reduced": 37,
+    "Fallback": 985
+  },
+  "OriginalBytes": 171993554,
+  "ReplayBytes": 171430748,
+  "Replay": {
+    "command": [
+      "/usr/local/bin/tform",
+      "-w10",
+      "-q",
+      "/tmp/cfc-rational-integration/replay.frm"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 26.357912210005452,
+    "peak_process_tree_rss_bytes": 2730500096,
+    "stop_reason": null
+  },
+  "Equality": {
+    "command": [
+      "/usr/local/bin/tform",
+      "-w10",
+      "-q",
+      "/tmp/cfc-rational-integration/verify-full.frm"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 36.50731026699941,
+    "peak_process_tree_rss_bytes": 2121859072,
+    "stop_reason": null
+  },
+  "RejectedWiderTrial": {
+    "command": [
+      "/usr/local/bin/tform",
+      "-w10",
+      "-q",
+      "/tmp/cfc-rational-integration/replay.frm"
+    ],
+    "exit_code": 1,
+    "wall_seconds": 14.990460874003475,
+    "peak_process_tree_rss_bytes": 2711498752,
+    "stop_reason": null
+  },
+  "Import": {
+    "Seconds": 141.595367,
+    "Failure": false,
+    "Head": "Plus",
+    "Terms": 1022,
+    "ByteCount": 2166871080,
+    "KernelMemory": 1176676488
+  },
+  "ImportProcess": {
+    "command": [
+      "/usr/local/bin/WolframKernel",
+      "-script",
+      "/tmp/cfc-rational-integration/import-full.wls"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 145.59110850399884,
+    "peak_process_tree_rss_bytes": 1346252800,
+    "stop_reason": null
+  },
+  "PublicFirstTerm": [
+    {
+      "Workers": 1,
+      "Seconds": 0.359741,
+      "Failure": false,
+      "Leaves": 388,
+      "SameQToVerifiedProbe": false,
+      "FORMResidualZero": true
+    },
+    {
+      "Workers": 10,
+      "Seconds": 0.371306,
+      "Failure": false,
+      "Leaves": 388,
+      "SameQToVerifiedProbe": false,
+      "FORMResidualZero": true
+    }
+  ],
+  "Regressions": [
+    {
+      "Suite": "core",
+      "Assertions": 111,
+      "Failures": 0
+    },
+    {
+      "Suite": "core",
+      "Assertions": 121,
+      "Failures": 0
+    },
+    {
+      "Suite": "core",
+      "Assertions": 148,
+      "Failures": 0
+    },
+    {
+      "Suite": "core",
+      "Assertions": 250,
+      "Failures": 0
+    },
+    {
+      "Suite": "core",
+      "Assertions": 20,
+      "Failures": 0
+    },
+    {
+      "Suite": "core",
+      "Assertions": 62,
+      "Failures": 0
+    },
+    {
+      "Suite": "form",
+      "Assertions": 31,
+      "Failures": 0
+    },
+    {
+      "Suite": "form",
+      "Assertions": 137,
+      "Failures": 0
+    },
+    {
+      "Suite": "form",
+      "Assertions": 67,
+      "Failures": 0
+    },
+    {
+      "Suite": "runtime",
+      "Assertions": 82,
+      "Failures": 0
+    },
+    {
+      "Suite": "runtime",
+      "Assertions": 48,
+      "Failures": 0
+    },
+    {
+      "Suite": "runtime",
+      "Assertions": 65,
+      "Failures": 0
+    },
+    {
+      "Suite": "runtime",
+      "Assertions": 104,
+      "Failures": 0
+    },
+    {
+      "Suite": "runtime",
+      "Assertions": 139,
+      "Failures": 0
+    },
+    {
+      "Suite": "runtime",
+      "Assertions": 113,
+      "Failures": 0
+    },
+    {
+      "Suite": "runtime",
+      "Assertions": 38,
+      "Failures": 0
+    }
+  ],
+  "LoadingPassed": true,
+  "SourceHashes": {
+    "CalcFormConverter.wl": "37fb5dae73992861fab0e458e5863abd08084e1ec8cf322ac60e66b3de321cd9",
+    "PropagatorGroups.wl": "0ba950e197fc89a5d2e59fde00cdc24236ea0f1c0e98e1a7df4a4345c0d9a991",
+    "RationalCoefficients.wl": "1e5d386a2f04b007ba22671a5dda4a491a80355522b40e415c4cd65e30497665",
+    "Templates/PropagatorFactors.frm.in": "f3f343e5883676b7ad19a003a93176cfa4d8c7f7d9e5583ffe4971706f0d1eb6",
+    "Templates/RationalCoefficients.frm.in": "3c972dbc22b14b3871a0fcaa52a890e07233e98a7f76f08668cd13d60eac0930",
+    "Templates/RationalCoefficientOutput.frm.in": "10f8154d55973755ea0ad816f135f79fb538561b60ea9775c9e9fa96846e7f4c",
+    "Tests/RationalCoefficients.wls": "0827d9b1e54d267cac70e198997034debdb554ac375583fdbebcc69507ad3f55"
+  }
+}

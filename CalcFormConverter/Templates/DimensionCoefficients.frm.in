@@ -1,0 +1,17 @@
+* Keep the bounded full-polynomial factorisation for coefficients it handles.
+* For the others, collect rational dependence in D only. All momentum/mass
+* monomials remain outside function arguments, avoiding large multivariate GCDs.
+.sort
+PolyRatFun cfcDimRat;
+Skip;
+#do cfcSlot=1,`$cfcBatchCount'
+#if ( `$cfcRDone`cfcSlot'' == 0 ) && ( `$cfcDimNeeded`cfcSlot'' == 1 )
+#$cfcDimDone`cfcSlot'=1;
+Local cfcDimWork`cfcSlot'=cfcCoefficient`cfcSlot';
+#endif
+#enddo
+@RULES@
+ModuleOption inparallel;
+.sort
+PolyRatFun;
+NSkip;

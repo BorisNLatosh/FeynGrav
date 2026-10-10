@@ -1,0 +1,220 @@
+#-
+* CalcFormConverter format 1. Generated file; mapping is stored separately.
+* Lorentz algebra and configured Dirac processing; no integration or on-shell substitutions.
+Off Statistics;
+Symbols cfcProbePower,cfcProbeNum,cfcProbeDen,cfcProbeX1,cfcProbeX2,cfcProbeX3,cfcProbeX4,cfcProbeX5,cfcProbeX6;
+CFunction cfcProbeRat;
+
+Symbols cfs1,cfa1,cfs2,cfs3,cfs4,cfd1,cfd2,cfd3,cfd4,cfd5,cfa2,cfa3,cfa4;
+Dimension cfs1;
+Vectors cfv1,cfv2,cfv3;
+
+CFunctions cfA0,cfB0,cfC0,cfD0;
+
+* Reusable factors. Expansion takes place in FORM, not in Mathematica.
+#define CFCF1 "((-162*(cfs2)^(4)*(cfs3)^(2))+(6*cfa2*(cfs2)^(4)*(cfs3)^(2))+(-54*cfa3*(cfs2)^(4)*(cfs3)^(2))+(162*cfa4*(cfs2)^(4)*(cfs3)^(2))+(243*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-3*cfa2*cfs1*(cfs2)^(4)*(cfs3)^(2))+(45*cfa3*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-189*cfa4*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-135*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-9*cfa3*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(72*cfa4*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(33*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-9*cfa4*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-3*(cfs1)^(4)*(cfs2)^(4)*(cfs3)^(2))+(162*(cfs2)^(2)*(cfs3)^(4))+(-6*cfa2*(cfs2)^(2)*(cfs3)^(4))+(54*cfa3*(cfs2)^(2)*(cfs3)^(4))+(-162*cfa4*(cfs2)^(2)*(cfs3)^(4))+(-243*cfs1*(cfs2)^(2)*(cfs3)^(4))+(3*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-45*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(4))+(189*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(4))+(135*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(9*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-72*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-33*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(9*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(3*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(4)))"
+#define CFCF2 "((135*(cfs2)^(4))+(-5*cfa2*(cfs2)^(4))+(45*cfa3*(cfs2)^(4))+(-135*cfa4*(cfs2)^(4))+(-189*cfs1*(cfs2)^(4))+(2*cfa2*cfs1*(cfs2)^(4))+(-33*cfa3*cfs1*(cfs2)^(4))+(144*cfa4*cfs1*(cfs2)^(4))+(99*(cfs1)^(2)*(cfs2)^(4))+(6*cfa3*(cfs1)^(2)*(cfs2)^(4))+(-51*cfa4*(cfs1)^(2)*(cfs2)^(4))+(-23*(cfs1)^(3)*(cfs2)^(4))+(6*cfa4*(cfs1)^(3)*(cfs2)^(4))+(2*(cfs1)^(4)*(cfs2)^(4))+(-108*(cfs2)^(2)*(cfs3)^(2))+(4*cfa2*(cfs2)^(2)*(cfs3)^(2))+(-36*cfa3*(cfs2)^(2)*(cfs3)^(2))+(108*cfa4*(cfs2)^(2)*(cfs3)^(2))+(135*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-1*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(21*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-99*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-63*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-3*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(30*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(13*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-3*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-1*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(-27*(cfs3)^(4))+(cfa2*(cfs3)^(4))+(-9*cfa3*(cfs3)^(4))+(27*cfa4*(cfs3)^(4))+(54*cfs1*(cfs3)^(4))+(-1*cfa2*cfs1*(cfs3)^(4))+(12*cfa3*cfs1*(cfs3)^(4))+(-45*cfa4*cfs1*(cfs3)^(4))+(-36*(cfs1)^(2)*(cfs3)^(4))+(-3*cfa3*(cfs1)^(2)*(cfs3)^(4))+(21*cfa4*(cfs1)^(2)*(cfs3)^(4))+(10*(cfs1)^(3)*(cfs3)^(4))+(-3*cfa4*(cfs1)^(3)*(cfs3)^(4))+(-1*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF3 "((324*(cfs2)^(4)*(cfs3)^(2))+(-12*cfa2*(cfs2)^(4)*(cfs3)^(2))+(108*cfa3*(cfs2)^(4)*(cfs3)^(2))+(-324*cfa4*(cfs2)^(4)*(cfs3)^(2))+(-486*cfs1*(cfs2)^(4)*(cfs3)^(2))+(6*cfa2*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-90*cfa3*cfs1*(cfs2)^(4)*(cfs3)^(2))+(378*cfa4*cfs1*(cfs2)^(4)*(cfs3)^(2))+(270*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(18*cfa3*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-144*cfa4*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-66*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(18*cfa4*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(6*(cfs1)^(4)*(cfs2)^(4)*(cfs3)^(2))+(-324*(cfs2)^(2)*(cfs3)^(4))+(12*cfa2*(cfs2)^(2)*(cfs3)^(4))+(-108*cfa3*(cfs2)^(2)*(cfs3)^(4))+(324*cfa4*(cfs2)^(2)*(cfs3)^(4))+(486*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-6*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(4))+(90*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-378*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-270*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-18*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(144*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(66*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(-18*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(-6*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(4)))"
+#define CFCF4 "((-540*(cfs2)^(4))+(20*cfa2*(cfs2)^(4))+(-180*cfa3*(cfs2)^(4))+(540*cfa4*(cfs2)^(4))+(756*cfs1*(cfs2)^(4))+(-8*cfa2*cfs1*(cfs2)^(4))+(132*cfa3*cfs1*(cfs2)^(4))+(-576*cfa4*cfs1*(cfs2)^(4))+(-396*(cfs1)^(2)*(cfs2)^(4))+(-24*cfa3*(cfs1)^(2)*(cfs2)^(4))+(204*cfa4*(cfs1)^(2)*(cfs2)^(4))+(92*(cfs1)^(3)*(cfs2)^(4))+(-24*cfa4*(cfs1)^(3)*(cfs2)^(4))+(-8*(cfs1)^(4)*(cfs2)^(4))+(432*(cfs2)^(2)*(cfs3)^(2))+(-16*cfa2*(cfs2)^(2)*(cfs3)^(2))+(144*cfa3*(cfs2)^(2)*(cfs3)^(2))+(-432*cfa4*(cfs2)^(2)*(cfs3)^(2))+(-540*cfs1*(cfs2)^(2)*(cfs3)^(2))+(4*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-84*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(396*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(252*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(12*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-120*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-52*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(12*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(4*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(108*(cfs3)^(4))+(-4*cfa2*(cfs3)^(4))+(36*cfa3*(cfs3)^(4))+(-108*cfa4*(cfs3)^(4))+(-216*cfs1*(cfs3)^(4))+(4*cfa2*cfs1*(cfs3)^(4))+(-48*cfa3*cfs1*(cfs3)^(4))+(180*cfa4*cfs1*(cfs3)^(4))+(144*(cfs1)^(2)*(cfs3)^(4))+(12*cfa3*(cfs1)^(2)*(cfs3)^(4))+(-84*cfa4*(cfs1)^(2)*(cfs3)^(4))+(-40*(cfs1)^(3)*(cfs3)^(4))+(12*cfa4*(cfs1)^(3)*(cfs3)^(4))+(4*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF5 "((540*(cfs2)^(4))+(-20*cfa2*(cfs2)^(4))+(180*cfa3*(cfs2)^(4))+(-540*cfa4*(cfs2)^(4))+(-756*cfs1*(cfs2)^(4))+(8*cfa2*cfs1*(cfs2)^(4))+(-132*cfa3*cfs1*(cfs2)^(4))+(576*cfa4*cfs1*(cfs2)^(4))+(396*(cfs1)^(2)*(cfs2)^(4))+(24*cfa3*(cfs1)^(2)*(cfs2)^(4))+(-204*cfa4*(cfs1)^(2)*(cfs2)^(4))+(-92*(cfs1)^(3)*(cfs2)^(4))+(24*cfa4*(cfs1)^(3)*(cfs2)^(4))+(8*(cfs1)^(4)*(cfs2)^(4))+(-432*(cfs2)^(2)*(cfs3)^(2))+(16*cfa2*(cfs2)^(2)*(cfs3)^(2))+(-144*cfa3*(cfs2)^(2)*(cfs3)^(2))+(432*cfa4*(cfs2)^(2)*(cfs3)^(2))+(540*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-4*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(84*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-396*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-252*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-12*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(120*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(52*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-12*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-4*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(-108*(cfs3)^(4))+(4*cfa2*(cfs3)^(4))+(-36*cfa3*(cfs3)^(4))+(108*cfa4*(cfs3)^(4))+(216*cfs1*(cfs3)^(4))+(-4*cfa2*cfs1*(cfs3)^(4))+(48*cfa3*cfs1*(cfs3)^(4))+(-180*cfa4*cfs1*(cfs3)^(4))+(-144*(cfs1)^(2)*(cfs3)^(4))+(-12*cfa3*(cfs1)^(2)*(cfs3)^(4))+(84*cfa4*(cfs1)^(2)*(cfs3)^(4))+(40*(cfs1)^(3)*(cfs3)^(4))+(-12*cfa4*(cfs1)^(3)*(cfs3)^(4))+(-4*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF6 "((324*(cfs2)^(4)*(cfs3)^(2))+(-12*cfa2*(cfs2)^(4)*(cfs3)^(2))+(108*cfa3*(cfs2)^(4)*(cfs3)^(2))+(-324*cfa4*(cfs2)^(4)*(cfs3)^(2))+(-486*cfs1*(cfs2)^(4)*(cfs3)^(2))+(6*cfa2*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-90*cfa3*cfs1*(cfs2)^(4)*(cfs3)^(2))+(378*cfa4*cfs1*(cfs2)^(4)*(cfs3)^(2))+(270*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(18*cfa3*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-144*cfa4*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-66*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(18*cfa4*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(6*(cfs1)^(4)*(cfs2)^(4)*(cfs3)^(2))+(-324*(cfs2)^(2)*(cfs3)^(4))+(12*cfa2*(cfs2)^(2)*(cfs3)^(4))+(-108*cfa3*(cfs2)^(2)*(cfs3)^(4))+(324*cfa4*(cfs2)^(2)*(cfs3)^(4))+(486*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-6*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(4))+(90*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-378*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-270*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-18*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(144*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(66*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(-18*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(-6*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(4)))"
+#define CFCF7 "((-270*(cfs2)^(4))+(10*cfa2*(cfs2)^(4))+(-90*cfa3*(cfs2)^(4))+(270*cfa4*(cfs2)^(4))+(378*cfs1*(cfs2)^(4))+(-4*cfa2*cfs1*(cfs2)^(4))+(66*cfa3*cfs1*(cfs2)^(4))+(-288*cfa4*cfs1*(cfs2)^(4))+(-198*(cfs1)^(2)*(cfs2)^(4))+(-12*cfa3*(cfs1)^(2)*(cfs2)^(4))+(102*cfa4*(cfs1)^(2)*(cfs2)^(4))+(46*(cfs1)^(3)*(cfs2)^(4))+(-12*cfa4*(cfs1)^(3)*(cfs2)^(4))+(-4*(cfs1)^(4)*(cfs2)^(4))+(216*(cfs2)^(2)*(cfs3)^(2))+(-8*cfa2*(cfs2)^(2)*(cfs3)^(2))+(72*cfa3*(cfs2)^(2)*(cfs3)^(2))+(-216*cfa4*(cfs2)^(2)*(cfs3)^(2))+(-270*cfs1*(cfs2)^(2)*(cfs3)^(2))+(2*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-42*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(198*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(126*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(6*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-60*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-26*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(6*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(2*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(54*(cfs3)^(4))+(-2*cfa2*(cfs3)^(4))+(18*cfa3*(cfs3)^(4))+(-54*cfa4*(cfs3)^(4))+(-108*cfs1*(cfs3)^(4))+(2*cfa2*cfs1*(cfs3)^(4))+(-24*cfa3*cfs1*(cfs3)^(4))+(90*cfa4*cfs1*(cfs3)^(4))+(72*(cfs1)^(2)*(cfs3)^(4))+(6*cfa3*(cfs1)^(2)*(cfs3)^(4))+(-42*cfa4*(cfs1)^(2)*(cfs3)^(4))+(-20*(cfs1)^(3)*(cfs3)^(4))+(6*cfa4*(cfs1)^(3)*(cfs3)^(4))+(2*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF8 "((-648*(cfs2)^(4)*(cfs3)^(2))+(24*cfa2*(cfs2)^(4)*(cfs3)^(2))+(-216*cfa3*(cfs2)^(4)*(cfs3)^(2))+(648*cfa4*(cfs2)^(4)*(cfs3)^(2))+(972*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-12*cfa2*cfs1*(cfs2)^(4)*(cfs3)^(2))+(180*cfa3*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-756*cfa4*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-540*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-36*cfa3*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(288*cfa4*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(132*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-36*cfa4*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-12*(cfs1)^(4)*(cfs2)^(4)*(cfs3)^(2))+(648*(cfs2)^(2)*(cfs3)^(4))+(-24*cfa2*(cfs2)^(2)*(cfs3)^(4))+(216*cfa3*(cfs2)^(2)*(cfs3)^(4))+(-648*cfa4*(cfs2)^(2)*(cfs3)^(4))+(-972*cfs1*(cfs2)^(2)*(cfs3)^(4))+(12*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-180*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(4))+(756*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(4))+(540*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(36*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-288*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-132*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(36*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(12*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(4)))"
+#define CFCF9 "((1080*(cfs2)^(4))+(-40*cfa2*(cfs2)^(4))+(360*cfa3*(cfs2)^(4))+(-1080*cfa4*(cfs2)^(4))+(-1512*cfs1*(cfs2)^(4))+(16*cfa2*cfs1*(cfs2)^(4))+(-264*cfa3*cfs1*(cfs2)^(4))+(1152*cfa4*cfs1*(cfs2)^(4))+(792*(cfs1)^(2)*(cfs2)^(4))+(48*cfa3*(cfs1)^(2)*(cfs2)^(4))+(-408*cfa4*(cfs1)^(2)*(cfs2)^(4))+(-184*(cfs1)^(3)*(cfs2)^(4))+(48*cfa4*(cfs1)^(3)*(cfs2)^(4))+(16*(cfs1)^(4)*(cfs2)^(4))+(-864*(cfs2)^(2)*(cfs3)^(2))+(32*cfa2*(cfs2)^(2)*(cfs3)^(2))+(-288*cfa3*(cfs2)^(2)*(cfs3)^(2))+(864*cfa4*(cfs2)^(2)*(cfs3)^(2))+(1080*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-8*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(168*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-792*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-504*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-24*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(240*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(104*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-24*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-8*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(-216*(cfs3)^(4))+(8*cfa2*(cfs3)^(4))+(-72*cfa3*(cfs3)^(4))+(216*cfa4*(cfs3)^(4))+(432*cfs1*(cfs3)^(4))+(-8*cfa2*cfs1*(cfs3)^(4))+(96*cfa3*cfs1*(cfs3)^(4))+(-360*cfa4*cfs1*(cfs3)^(4))+(-288*(cfs1)^(2)*(cfs3)^(4))+(-24*cfa3*(cfs1)^(2)*(cfs3)^(4))+(168*cfa4*(cfs1)^(2)*(cfs3)^(4))+(80*(cfs1)^(3)*(cfs3)^(4))+(-24*cfa4*(cfs1)^(3)*(cfs3)^(4))+(-8*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF10 "((-162*(cfs2)^(4)*(cfs3)^(2))+(6*cfa2*(cfs2)^(4)*(cfs3)^(2))+(-54*cfa3*(cfs2)^(4)*(cfs3)^(2))+(162*cfa4*(cfs2)^(4)*(cfs3)^(2))+(243*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-3*cfa2*cfs1*(cfs2)^(4)*(cfs3)^(2))+(45*cfa3*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-189*cfa4*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-135*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-9*cfa3*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(72*cfa4*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(33*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-9*cfa4*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-3*(cfs1)^(4)*(cfs2)^(4)*(cfs3)^(2))+(162*(cfs2)^(2)*(cfs3)^(4))+(-6*cfa2*(cfs2)^(2)*(cfs3)^(4))+(54*cfa3*(cfs2)^(2)*(cfs3)^(4))+(-162*cfa4*(cfs2)^(2)*(cfs3)^(4))+(-243*cfs1*(cfs2)^(2)*(cfs3)^(4))+(3*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-45*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(4))+(189*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(4))+(135*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(9*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-72*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-33*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(9*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(3*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(4)))"
+#define CFCF11 "((-810*(cfs2)^(4))+(30*cfa2*(cfs2)^(4))+(-270*cfa3*(cfs2)^(4))+(810*cfa4*(cfs2)^(4))+(1134*cfs1*(cfs2)^(4))+(-12*cfa2*cfs1*(cfs2)^(4))+(198*cfa3*cfs1*(cfs2)^(4))+(-864*cfa4*cfs1*(cfs2)^(4))+(-594*(cfs1)^(2)*(cfs2)^(4))+(-36*cfa3*(cfs1)^(2)*(cfs2)^(4))+(306*cfa4*(cfs1)^(2)*(cfs2)^(4))+(138*(cfs1)^(3)*(cfs2)^(4))+(-36*cfa4*(cfs1)^(3)*(cfs2)^(4))+(-12*(cfs1)^(4)*(cfs2)^(4))+(648*(cfs2)^(2)*(cfs3)^(2))+(-24*cfa2*(cfs2)^(2)*(cfs3)^(2))+(216*cfa3*(cfs2)^(2)*(cfs3)^(2))+(-648*cfa4*(cfs2)^(2)*(cfs3)^(2))+(-810*cfs1*(cfs2)^(2)*(cfs3)^(2))+(6*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-126*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(594*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(378*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(18*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-180*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-78*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(18*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(6*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(162*(cfs3)^(4))+(-6*cfa2*(cfs3)^(4))+(54*cfa3*(cfs3)^(4))+(-162*cfa4*(cfs3)^(4))+(-324*cfs1*(cfs3)^(4))+(6*cfa2*cfs1*(cfs3)^(4))+(-72*cfa3*cfs1*(cfs3)^(4))+(270*cfa4*cfs1*(cfs3)^(4))+(216*(cfs1)^(2)*(cfs3)^(4))+(18*cfa3*(cfs1)^(2)*(cfs3)^(4))+(-126*cfa4*(cfs1)^(2)*(cfs3)^(4))+(-60*(cfs1)^(3)*(cfs3)^(4))+(18*cfa4*(cfs1)^(3)*(cfs3)^(4))+(6*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF12 "((-540*(cfs2)^(4))+(20*cfa2*(cfs2)^(4))+(-180*cfa3*(cfs2)^(4))+(540*cfa4*(cfs2)^(4))+(756*cfs1*(cfs2)^(4))+(-8*cfa2*cfs1*(cfs2)^(4))+(132*cfa3*cfs1*(cfs2)^(4))+(-576*cfa4*cfs1*(cfs2)^(4))+(-396*(cfs1)^(2)*(cfs2)^(4))+(-24*cfa3*(cfs1)^(2)*(cfs2)^(4))+(204*cfa4*(cfs1)^(2)*(cfs2)^(4))+(92*(cfs1)^(3)*(cfs2)^(4))+(-24*cfa4*(cfs1)^(3)*(cfs2)^(4))+(-8*(cfs1)^(4)*(cfs2)^(4))+(432*(cfs2)^(2)*(cfs3)^(2))+(-16*cfa2*(cfs2)^(2)*(cfs3)^(2))+(144*cfa3*(cfs2)^(2)*(cfs3)^(2))+(-432*cfa4*(cfs2)^(2)*(cfs3)^(2))+(-540*cfs1*(cfs2)^(2)*(cfs3)^(2))+(4*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-84*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(396*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(252*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(12*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-120*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-52*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(12*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(4*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(108*(cfs3)^(4))+(-4*cfa2*(cfs3)^(4))+(36*cfa3*(cfs3)^(4))+(-108*cfa4*(cfs3)^(4))+(-216*cfs1*(cfs3)^(4))+(4*cfa2*cfs1*(cfs3)^(4))+(-48*cfa3*cfs1*(cfs3)^(4))+(180*cfa4*cfs1*(cfs3)^(4))+(144*(cfs1)^(2)*(cfs3)^(4))+(12*cfa3*(cfs1)^(2)*(cfs3)^(4))+(-84*cfa4*(cfs1)^(2)*(cfs3)^(4))+(-40*(cfs1)^(3)*(cfs3)^(4))+(12*cfa4*(cfs1)^(3)*(cfs3)^(4))+(4*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF13 "((-162*(cfs2)^(4)*(cfs3)^(2))+(6*cfa2*(cfs2)^(4)*(cfs3)^(2))+(-54*cfa3*(cfs2)^(4)*(cfs3)^(2))+(162*cfa4*(cfs2)^(4)*(cfs3)^(2))+(243*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-3*cfa2*cfs1*(cfs2)^(4)*(cfs3)^(2))+(45*cfa3*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-189*cfa4*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-135*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-9*cfa3*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(72*cfa4*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(33*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-9*cfa4*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-3*(cfs1)^(4)*(cfs2)^(4)*(cfs3)^(2))+(162*(cfs2)^(2)*(cfs3)^(4))+(-6*cfa2*(cfs2)^(2)*(cfs3)^(4))+(54*cfa3*(cfs2)^(2)*(cfs3)^(4))+(-162*cfa4*(cfs2)^(2)*(cfs3)^(4))+(-243*cfs1*(cfs2)^(2)*(cfs3)^(4))+(3*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-45*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(4))+(189*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(4))+(135*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(9*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-72*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-33*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(9*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(3*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(4)))"
+#define CFCF14 "((135*(cfs2)^(4))+(-5*cfa2*(cfs2)^(4))+(45*cfa3*(cfs2)^(4))+(-135*cfa4*(cfs2)^(4))+(-189*cfs1*(cfs2)^(4))+(2*cfa2*cfs1*(cfs2)^(4))+(-33*cfa3*cfs1*(cfs2)^(4))+(144*cfa4*cfs1*(cfs2)^(4))+(99*(cfs1)^(2)*(cfs2)^(4))+(6*cfa3*(cfs1)^(2)*(cfs2)^(4))+(-51*cfa4*(cfs1)^(2)*(cfs2)^(4))+(-23*(cfs1)^(3)*(cfs2)^(4))+(6*cfa4*(cfs1)^(3)*(cfs2)^(4))+(2*(cfs1)^(4)*(cfs2)^(4))+(-108*(cfs2)^(2)*(cfs3)^(2))+(4*cfa2*(cfs2)^(2)*(cfs3)^(2))+(-36*cfa3*(cfs2)^(2)*(cfs3)^(2))+(108*cfa4*(cfs2)^(2)*(cfs3)^(2))+(135*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-1*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(21*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-99*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-63*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-3*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(30*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(13*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-3*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-1*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(-27*(cfs3)^(4))+(cfa2*(cfs3)^(4))+(-9*cfa3*(cfs3)^(4))+(27*cfa4*(cfs3)^(4))+(54*cfs1*(cfs3)^(4))+(-1*cfa2*cfs1*(cfs3)^(4))+(12*cfa3*cfs1*(cfs3)^(4))+(-45*cfa4*cfs1*(cfs3)^(4))+(-36*(cfs1)^(2)*(cfs3)^(4))+(-3*cfa3*(cfs1)^(2)*(cfs3)^(4))+(21*cfa4*(cfs1)^(2)*(cfs3)^(4))+(10*(cfs1)^(3)*(cfs3)^(4))+(-3*cfa4*(cfs1)^(3)*(cfs3)^(4))+(-1*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF15 "((324*(cfs2)^(4)*(cfs3)^(2))+(-12*cfa2*(cfs2)^(4)*(cfs3)^(2))+(108*cfa3*(cfs2)^(4)*(cfs3)^(2))+(-324*cfa4*(cfs2)^(4)*(cfs3)^(2))+(-486*cfs1*(cfs2)^(4)*(cfs3)^(2))+(6*cfa2*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-90*cfa3*cfs1*(cfs2)^(4)*(cfs3)^(2))+(378*cfa4*cfs1*(cfs2)^(4)*(cfs3)^(2))+(270*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(18*cfa3*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-144*cfa4*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-66*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(18*cfa4*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(6*(cfs1)^(4)*(cfs2)^(4)*(cfs3)^(2))+(-324*(cfs2)^(2)*(cfs3)^(4))+(12*cfa2*(cfs2)^(2)*(cfs3)^(4))+(-108*cfa3*(cfs2)^(2)*(cfs3)^(4))+(324*cfa4*(cfs2)^(2)*(cfs3)^(4))+(486*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-6*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(4))+(90*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-378*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-270*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-18*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(144*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(66*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(-18*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(-6*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(4)))"
+#define CFCF16 "((-540*(cfs2)^(4))+(20*cfa2*(cfs2)^(4))+(-180*cfa3*(cfs2)^(4))+(540*cfa4*(cfs2)^(4))+(756*cfs1*(cfs2)^(4))+(-8*cfa2*cfs1*(cfs2)^(4))+(132*cfa3*cfs1*(cfs2)^(4))+(-576*cfa4*cfs1*(cfs2)^(4))+(-396*(cfs1)^(2)*(cfs2)^(4))+(-24*cfa3*(cfs1)^(2)*(cfs2)^(4))+(204*cfa4*(cfs1)^(2)*(cfs2)^(4))+(92*(cfs1)^(3)*(cfs2)^(4))+(-24*cfa4*(cfs1)^(3)*(cfs2)^(4))+(-8*(cfs1)^(4)*(cfs2)^(4))+(432*(cfs2)^(2)*(cfs3)^(2))+(-16*cfa2*(cfs2)^(2)*(cfs3)^(2))+(144*cfa3*(cfs2)^(2)*(cfs3)^(2))+(-432*cfa4*(cfs2)^(2)*(cfs3)^(2))+(-540*cfs1*(cfs2)^(2)*(cfs3)^(2))+(4*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-84*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(396*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(252*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(12*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-120*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-52*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(12*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(4*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(108*(cfs3)^(4))+(-4*cfa2*(cfs3)^(4))+(36*cfa3*(cfs3)^(4))+(-108*cfa4*(cfs3)^(4))+(-216*cfs1*(cfs3)^(4))+(4*cfa2*cfs1*(cfs3)^(4))+(-48*cfa3*cfs1*(cfs3)^(4))+(180*cfa4*cfs1*(cfs3)^(4))+(144*(cfs1)^(2)*(cfs3)^(4))+(12*cfa3*(cfs1)^(2)*(cfs3)^(4))+(-84*cfa4*(cfs1)^(2)*(cfs3)^(4))+(-40*(cfs1)^(3)*(cfs3)^(4))+(12*cfa4*(cfs1)^(3)*(cfs3)^(4))+(4*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF17 "((324*(cfs2)^(4)*(cfs3)^(2))+(-12*cfa2*(cfs2)^(4)*(cfs3)^(2))+(108*cfa3*(cfs2)^(4)*(cfs3)^(2))+(-324*cfa4*(cfs2)^(4)*(cfs3)^(2))+(-486*cfs1*(cfs2)^(4)*(cfs3)^(2))+(6*cfa2*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-90*cfa3*cfs1*(cfs2)^(4)*(cfs3)^(2))+(378*cfa4*cfs1*(cfs2)^(4)*(cfs3)^(2))+(270*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(18*cfa3*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-144*cfa4*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-66*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(18*cfa4*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(6*(cfs1)^(4)*(cfs2)^(4)*(cfs3)^(2))+(-324*(cfs2)^(2)*(cfs3)^(4))+(12*cfa2*(cfs2)^(2)*(cfs3)^(4))+(-108*cfa3*(cfs2)^(2)*(cfs3)^(4))+(324*cfa4*(cfs2)^(2)*(cfs3)^(4))+(486*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-6*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(4))+(90*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-378*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-270*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-18*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(144*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(66*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(-18*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(-6*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(4)))"
+#define CFCF18 "((1080*(cfs2)^(4))+(-40*cfa2*(cfs2)^(4))+(360*cfa3*(cfs2)^(4))+(-1080*cfa4*(cfs2)^(4))+(-1512*cfs1*(cfs2)^(4))+(16*cfa2*cfs1*(cfs2)^(4))+(-264*cfa3*cfs1*(cfs2)^(4))+(1152*cfa4*cfs1*(cfs2)^(4))+(792*(cfs1)^(2)*(cfs2)^(4))+(48*cfa3*(cfs1)^(2)*(cfs2)^(4))+(-408*cfa4*(cfs1)^(2)*(cfs2)^(4))+(-184*(cfs1)^(3)*(cfs2)^(4))+(48*cfa4*(cfs1)^(3)*(cfs2)^(4))+(16*(cfs1)^(4)*(cfs2)^(4))+(-864*(cfs2)^(2)*(cfs3)^(2))+(32*cfa2*(cfs2)^(2)*(cfs3)^(2))+(-288*cfa3*(cfs2)^(2)*(cfs3)^(2))+(864*cfa4*(cfs2)^(2)*(cfs3)^(2))+(1080*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-8*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(168*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-792*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-504*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-24*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(240*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(104*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-24*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-8*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(-216*(cfs3)^(4))+(8*cfa2*(cfs3)^(4))+(-72*cfa3*(cfs3)^(4))+(216*cfa4*(cfs3)^(4))+(432*cfs1*(cfs3)^(4))+(-8*cfa2*cfs1*(cfs3)^(4))+(96*cfa3*cfs1*(cfs3)^(4))+(-360*cfa4*cfs1*(cfs3)^(4))+(-288*(cfs1)^(2)*(cfs3)^(4))+(-24*cfa3*(cfs1)^(2)*(cfs3)^(4))+(168*cfa4*(cfs1)^(2)*(cfs3)^(4))+(80*(cfs1)^(3)*(cfs3)^(4))+(-24*cfa4*(cfs1)^(3)*(cfs3)^(4))+(-8*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF19 "((135*(cfs2)^(4))+(-5*cfa2*(cfs2)^(4))+(45*cfa3*(cfs2)^(4))+(-135*cfa4*(cfs2)^(4))+(-189*cfs1*(cfs2)^(4))+(2*cfa2*cfs1*(cfs2)^(4))+(-33*cfa3*cfs1*(cfs2)^(4))+(144*cfa4*cfs1*(cfs2)^(4))+(99*(cfs1)^(2)*(cfs2)^(4))+(6*cfa3*(cfs1)^(2)*(cfs2)^(4))+(-51*cfa4*(cfs1)^(2)*(cfs2)^(4))+(-23*(cfs1)^(3)*(cfs2)^(4))+(6*cfa4*(cfs1)^(3)*(cfs2)^(4))+(2*(cfs1)^(4)*(cfs2)^(4))+(-108*(cfs2)^(2)*(cfs3)^(2))+(4*cfa2*(cfs2)^(2)*(cfs3)^(2))+(-36*cfa3*(cfs2)^(2)*(cfs3)^(2))+(108*cfa4*(cfs2)^(2)*(cfs3)^(2))+(135*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-1*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(21*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-99*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-63*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-3*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(30*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(13*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-3*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-1*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(-27*(cfs3)^(4))+(cfa2*(cfs3)^(4))+(-9*cfa3*(cfs3)^(4))+(27*cfa4*(cfs3)^(4))+(54*cfs1*(cfs3)^(4))+(-1*cfa2*cfs1*(cfs3)^(4))+(12*cfa3*cfs1*(cfs3)^(4))+(-45*cfa4*cfs1*(cfs3)^(4))+(-36*(cfs1)^(2)*(cfs3)^(4))+(-3*cfa3*(cfs1)^(2)*(cfs3)^(4))+(21*cfa4*(cfs1)^(2)*(cfs3)^(4))+(10*(cfs1)^(3)*(cfs3)^(4))+(-3*cfa4*(cfs1)^(3)*(cfs3)^(4))+(-1*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF20 "((-162*(cfs2)^(4)*(cfs3)^(2))+(6*cfa2*(cfs2)^(4)*(cfs3)^(2))+(-54*cfa3*(cfs2)^(4)*(cfs3)^(2))+(162*cfa4*(cfs2)^(4)*(cfs3)^(2))+(243*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-3*cfa2*cfs1*(cfs2)^(4)*(cfs3)^(2))+(45*cfa3*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-189*cfa4*cfs1*(cfs2)^(4)*(cfs3)^(2))+(-135*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(-9*cfa3*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(72*cfa4*(cfs1)^(2)*(cfs2)^(4)*(cfs3)^(2))+(33*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-9*cfa4*(cfs1)^(3)*(cfs2)^(4)*(cfs3)^(2))+(-3*(cfs1)^(4)*(cfs2)^(4)*(cfs3)^(2))+(162*(cfs2)^(2)*(cfs3)^(4))+(-6*cfa2*(cfs2)^(2)*(cfs3)^(4))+(54*cfa3*(cfs2)^(2)*(cfs3)^(4))+(-162*cfa4*(cfs2)^(2)*(cfs3)^(4))+(-243*cfs1*(cfs2)^(2)*(cfs3)^(4))+(3*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(4))+(-45*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(4))+(189*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(4))+(135*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(9*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-72*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(4))+(-33*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(9*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(4))+(3*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(4)))"
+#define CFCF21 "((270*(cfs2)^(4))+(-10*cfa2*(cfs2)^(4))+(90*cfa3*(cfs2)^(4))+(-270*cfa4*(cfs2)^(4))+(-378*cfs1*(cfs2)^(4))+(4*cfa2*cfs1*(cfs2)^(4))+(-66*cfa3*cfs1*(cfs2)^(4))+(288*cfa4*cfs1*(cfs2)^(4))+(198*(cfs1)^(2)*(cfs2)^(4))+(12*cfa3*(cfs1)^(2)*(cfs2)^(4))+(-102*cfa4*(cfs1)^(2)*(cfs2)^(4))+(-46*(cfs1)^(3)*(cfs2)^(4))+(12*cfa4*(cfs1)^(3)*(cfs2)^(4))+(4*(cfs1)^(4)*(cfs2)^(4))+(-216*(cfs2)^(2)*(cfs3)^(2))+(8*cfa2*(cfs2)^(2)*(cfs3)^(2))+(-72*cfa3*(cfs2)^(2)*(cfs3)^(2))+(216*cfa4*(cfs2)^(2)*(cfs3)^(2))+(270*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-2*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(42*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-198*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-126*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-6*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(60*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(26*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-6*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-2*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(-54*(cfs3)^(4))+(2*cfa2*(cfs3)^(4))+(-18*cfa3*(cfs3)^(4))+(54*cfa4*(cfs3)^(4))+(108*cfs1*(cfs3)^(4))+(-2*cfa2*cfs1*(cfs3)^(4))+(24*cfa3*cfs1*(cfs3)^(4))+(-90*cfa4*cfs1*(cfs3)^(4))+(-72*(cfs1)^(2)*(cfs3)^(4))+(-6*cfa3*(cfs1)^(2)*(cfs3)^(4))+(42*cfa4*(cfs1)^(2)*(cfs3)^(4))+(20*(cfs1)^(3)*(cfs3)^(4))+(-6*cfa4*(cfs1)^(3)*(cfs3)^(4))+(-2*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF22 "((-540*(cfs2)^(4))+(20*cfa2*(cfs2)^(4))+(-180*cfa3*(cfs2)^(4))+(540*cfa4*(cfs2)^(4))+(756*cfs1*(cfs2)^(4))+(-8*cfa2*cfs1*(cfs2)^(4))+(132*cfa3*cfs1*(cfs2)^(4))+(-576*cfa4*cfs1*(cfs2)^(4))+(-396*(cfs1)^(2)*(cfs2)^(4))+(-24*cfa3*(cfs1)^(2)*(cfs2)^(4))+(204*cfa4*(cfs1)^(2)*(cfs2)^(4))+(92*(cfs1)^(3)*(cfs2)^(4))+(-24*cfa4*(cfs1)^(3)*(cfs2)^(4))+(-8*(cfs1)^(4)*(cfs2)^(4))+(432*(cfs2)^(2)*(cfs3)^(2))+(-16*cfa2*(cfs2)^(2)*(cfs3)^(2))+(144*cfa3*(cfs2)^(2)*(cfs3)^(2))+(-432*cfa4*(cfs2)^(2)*(cfs3)^(2))+(-540*cfs1*(cfs2)^(2)*(cfs3)^(2))+(4*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-84*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(396*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(252*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(12*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-120*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-52*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(12*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(4*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(108*(cfs3)^(4))+(-4*cfa2*(cfs3)^(4))+(36*cfa3*(cfs3)^(4))+(-108*cfa4*(cfs3)^(4))+(-216*cfs1*(cfs3)^(4))+(4*cfa2*cfs1*(cfs3)^(4))+(-48*cfa3*cfs1*(cfs3)^(4))+(180*cfa4*cfs1*(cfs3)^(4))+(144*(cfs1)^(2)*(cfs3)^(4))+(12*cfa3*(cfs1)^(2)*(cfs3)^(4))+(-84*cfa4*(cfs1)^(2)*(cfs3)^(4))+(-40*(cfs1)^(3)*(cfs3)^(4))+(12*cfa4*(cfs1)^(3)*(cfs3)^(4))+(4*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF23 "((-270*(cfs2)^(4))+(10*cfa2*(cfs2)^(4))+(-90*cfa3*(cfs2)^(4))+(270*cfa4*(cfs2)^(4))+(378*cfs1*(cfs2)^(4))+(-4*cfa2*cfs1*(cfs2)^(4))+(66*cfa3*cfs1*(cfs2)^(4))+(-288*cfa4*cfs1*(cfs2)^(4))+(-198*(cfs1)^(2)*(cfs2)^(4))+(-12*cfa3*(cfs1)^(2)*(cfs2)^(4))+(102*cfa4*(cfs1)^(2)*(cfs2)^(4))+(46*(cfs1)^(3)*(cfs2)^(4))+(-12*cfa4*(cfs1)^(3)*(cfs2)^(4))+(-4*(cfs1)^(4)*(cfs2)^(4))+(216*(cfs2)^(2)*(cfs3)^(2))+(-8*cfa2*(cfs2)^(2)*(cfs3)^(2))+(72*cfa3*(cfs2)^(2)*(cfs3)^(2))+(-216*cfa4*(cfs2)^(2)*(cfs3)^(2))+(-270*cfs1*(cfs2)^(2)*(cfs3)^(2))+(2*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-42*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(198*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(126*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(6*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-60*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-26*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(6*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(2*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(54*(cfs3)^(4))+(-2*cfa2*(cfs3)^(4))+(18*cfa3*(cfs3)^(4))+(-54*cfa4*(cfs3)^(4))+(-108*cfs1*(cfs3)^(4))+(2*cfa2*cfs1*(cfs3)^(4))+(-24*cfa3*cfs1*(cfs3)^(4))+(90*cfa4*cfs1*(cfs3)^(4))+(72*(cfs1)^(2)*(cfs3)^(4))+(6*cfa3*(cfs1)^(2)*(cfs3)^(4))+(-42*cfa4*(cfs1)^(2)*(cfs3)^(4))+(-20*(cfs1)^(3)*(cfs3)^(4))+(6*cfa4*(cfs1)^(3)*(cfs3)^(4))+(2*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF24 "((135*(cfs2)^(4))+(-5*cfa2*(cfs2)^(4))+(45*cfa3*(cfs2)^(4))+(-135*cfa4*(cfs2)^(4))+(-189*cfs1*(cfs2)^(4))+(2*cfa2*cfs1*(cfs2)^(4))+(-33*cfa3*cfs1*(cfs2)^(4))+(144*cfa4*cfs1*(cfs2)^(4))+(99*(cfs1)^(2)*(cfs2)^(4))+(6*cfa3*(cfs1)^(2)*(cfs2)^(4))+(-51*cfa4*(cfs1)^(2)*(cfs2)^(4))+(-23*(cfs1)^(3)*(cfs2)^(4))+(6*cfa4*(cfs1)^(3)*(cfs2)^(4))+(2*(cfs1)^(4)*(cfs2)^(4))+(-108*(cfs2)^(2)*(cfs3)^(2))+(4*cfa2*(cfs2)^(2)*(cfs3)^(2))+(-36*cfa3*(cfs2)^(2)*(cfs3)^(2))+(108*cfa4*(cfs2)^(2)*(cfs3)^(2))+(135*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-1*cfa2*cfs1*(cfs2)^(2)*(cfs3)^(2))+(21*cfa3*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-99*cfa4*cfs1*(cfs2)^(2)*(cfs3)^(2))+(-63*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(-3*cfa3*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(30*cfa4*(cfs1)^(2)*(cfs2)^(2)*(cfs3)^(2))+(13*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-3*cfa4*(cfs1)^(3)*(cfs2)^(2)*(cfs3)^(2))+(-1*(cfs1)^(4)*(cfs2)^(2)*(cfs3)^(2))+(-27*(cfs3)^(4))+(cfa2*(cfs3)^(4))+(-9*cfa3*(cfs3)^(4))+(27*cfa4*(cfs3)^(4))+(54*cfs1*(cfs3)^(4))+(-1*cfa2*cfs1*(cfs3)^(4))+(12*cfa3*cfs1*(cfs3)^(4))+(-45*cfa4*cfs1*(cfs3)^(4))+(-36*(cfs1)^(2)*(cfs3)^(4))+(-3*cfa3*(cfs1)^(2)*(cfs3)^(4))+(21*cfa4*(cfs1)^(2)*(cfs3)^(4))+(10*(cfs1)^(3)*(cfs3)^(4))+(-3*cfa4*(cfs1)^(3)*(cfs3)^(4))+(-1*(cfs1)^(4)*(cfs3)^(4)))"
+#define CFCF25 "((`CFCF1'*((1*cfv1.cfv1))*(((1*cfv1.cfv2)))^(4))+(`CFCF2'*(((1*cfv1.cfv1)))^(2)*(((1*cfv1.cfv2)))^(4))+(`CFCF3'*(((1*cfv1.cfv2)))^(5))+(`CFCF4'*((1*cfv1.cfv1))*(((1*cfv1.cfv2)))^(5))+(`CFCF5'*(((1*cfv1.cfv2)))^(6))+(`CFCF6'*(((1*cfv1.cfv1)))^(2)*(((1*cfv1.cfv2)))^(2)*((1*cfv2.cfv2)))+(`CFCF7'*(((1*cfv1.cfv1)))^(3)*(((1*cfv1.cfv2)))^(2)*((1*cfv2.cfv2)))+(`CFCF8'*((1*cfv1.cfv1))*(((1*cfv1.cfv2)))^(3)*((1*cfv2.cfv2)))+(`CFCF9'*(((1*cfv1.cfv1)))^(2)*(((1*cfv1.cfv2)))^(3)*((1*cfv2.cfv2)))+(`CFCF10'*(((1*cfv1.cfv2)))^(4)*((1*cfv2.cfv2)))+(`CFCF11'*((1*cfv1.cfv1))*(((1*cfv1.cfv2)))^(4)*((1*cfv2.cfv2)))+(`CFCF12'*(((1*cfv1.cfv2)))^(5)*((1*cfv2.cfv2)))+(`CFCF13'*(((1*cfv1.cfv1)))^(3)*(((1*cfv2.cfv2)))^(2))+(`CFCF14'*(((1*cfv1.cfv1)))^(4)*(((1*cfv2.cfv2)))^(2))+(`CFCF15'*(((1*cfv1.cfv1)))^(2)*((1*cfv1.cfv2))*(((1*cfv2.cfv2)))^(2))+(`CFCF16'*(((1*cfv1.cfv1)))^(3)*((1*cfv1.cfv2))*(((1*cfv2.cfv2)))^(2))+(`CFCF17'*((1*cfv1.cfv1))*(((1*cfv1.cfv2)))^(2)*(((1*cfv2.cfv2)))^(2))+(`CFCF18'*((1*cfv1.cfv1))*(((1*cfv1.cfv2)))^(3)*(((1*cfv2.cfv2)))^(2))+(`CFCF19'*(((1*cfv1.cfv2)))^(4)*(((1*cfv2.cfv2)))^(2))+(`CFCF20'*(((1*cfv1.cfv1)))^(2)*(((1*cfv2.cfv2)))^(3))+(`CFCF21'*(((1*cfv1.cfv1)))^(3)*(((1*cfv2.cfv2)))^(3))+(`CFCF22'*(((1*cfv1.cfv1)))^(2)*((1*cfv1.cfv2))*(((1*cfv2.cfv2)))^(3))+(`CFCF23'*((1*cfv1.cfv1))*(((1*cfv1.cfv2)))^(2)*(((1*cfv2.cfv2)))^(3))+(`CFCF24'*(((1*cfv1.cfv1)))^(2)*(((1*cfv2.cfv2)))^(4)))"
+
+Local cfcResult = ((-1/9)*cfa1*(cfs2)^(-4)*(cfs3)^(-4)*(cfs4)^(2)*((cfd1))^(2)*(cfd2)*((cfd3))^(4)*((cfd4))^(2)*(cfd5)*(((1*cfv1.cfv2)))^(2)*`CFCF25'*(((1*cfv2.cfv3)))^(4));
+
+
+* Processing stage: FORM contracts native Lorentz objects during normalization.
+* Future denominator and one-loop reduction procedures belong at this boundary.
+Bracket+ cfd1,cfd2,cfd3,cfd4,cfd5;
+.sort
+
+
+#$cfcProbeKey=0;
+Keep Brackets;
+$cfcProbeKey=$cfcProbeKey+term_;
+Bracket+ cfd1,cfd2,cfd3,cfd4,cfd5;
+ModuleOption noparallel;
+.sort
+#$cfcProbeKeyCount=termsin_($cfcProbeKey);
+#if `$cfcProbeKeyCount' != 1
+#message Expected exactly one complete propagator product.
+#terminate 1
+#endif
+
+Hide cfcResult;
+.sort
+PolyRatFun cfcProbeRat;
+Local cfcProbe=cfcResult/($cfcProbeKey);
+id cfa1=cfcProbeRat(1,((-2+cfs1))^4);
+id cfa2=cfcProbeRat(1,((-1+cfs1))^3);
+id cfa3=cfcProbeRat(1,((-1+cfs1))^2);
+id cfa4=cfcProbeRat(1,((-1+cfs1))^1);
+id cfv1.cfv1=cfcProbeX1;
+id cfv1.cfv2=cfcProbeX2;
+id cfv1.cfv3=cfcProbeX3;
+id cfv2.cfv2=cfcProbeX4;
+id cfv2.cfv3=cfcProbeX5;
+id cfv3.cfv3=cfcProbeX6;
+id cfs1^cfcProbePower?pos_=cfcProbeRat(cfs1^cfcProbePower,1);
+id cfs1^cfcProbePower?neg_=cfcProbeRat(1,cfs1^(-cfcProbePower));
+id cfs2^cfcProbePower?pos_=cfcProbeRat(cfs2^cfcProbePower,1);
+id cfs2^cfcProbePower?neg_=cfcProbeRat(1,cfs2^(-cfcProbePower));
+id cfs3^cfcProbePower?pos_=cfcProbeRat(cfs3^cfcProbePower,1);
+id cfs3^cfcProbePower?neg_=cfcProbeRat(1,cfs3^(-cfcProbePower));
+id cfs4^cfcProbePower?pos_=cfcProbeRat(cfs4^cfcProbePower,1);
+id cfs4^cfcProbePower?neg_=cfcProbeRat(1,cfs4^(-cfcProbePower));
+id cfcProbeX1^cfcProbePower?pos_=cfcProbeRat(cfcProbeX1^cfcProbePower,1);
+id cfcProbeX1^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX1^(-cfcProbePower));
+id cfcProbeX2^cfcProbePower?pos_=cfcProbeRat(cfcProbeX2^cfcProbePower,1);
+id cfcProbeX2^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX2^(-cfcProbePower));
+id cfcProbeX3^cfcProbePower?pos_=cfcProbeRat(cfcProbeX3^cfcProbePower,1);
+id cfcProbeX3^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX3^(-cfcProbePower));
+id cfcProbeX4^cfcProbePower?pos_=cfcProbeRat(cfcProbeX4^cfcProbePower,1);
+id cfcProbeX4^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX4^(-cfcProbePower));
+id cfcProbeX5^cfcProbePower?pos_=cfcProbeRat(cfcProbeX5^cfcProbePower,1);
+id cfcProbeX5^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX5^(-cfcProbePower));
+id cfcProbeX6^cfcProbePower?pos_=cfcProbeRat(cfcProbeX6^cfcProbePower,1);
+id cfcProbeX6^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX6^(-cfcProbePower));
+Multiply cfcProbeRat(1,1);
+.sort
+
+* After reduction the coefficient must be one rational polynomial or zero.
+PolyRatFun;
+#$cfcProbeNum=0;
+#$cfcProbeDen=1;
+if (match(cfcProbeRat(cfcProbeNum?$cfcProbeNum,cfcProbeDen?$cfcProbeDen)));
+  id cfcProbeRat(?a)=1;
+endif;
+ModuleOption noparallel;
+.sort
+#$cfcProbeResidual=cfcProbe;
+#if ( "`$cfcProbeResidual'" != "1" ) && ( "`$cfcProbeResidual'" != "0" )
+#message The coefficient contains unsupported residual objects.
+#terminate 1
+#endif
+Drop cfcProbe;
+Local cfcProbeNumerator=$cfcProbeNum;
+Local cfcProbeDenominator=$cfcProbeDen;
+Factorize cfcProbeNumerator,cfcProbeDenominator;
+.sort
+Format nospaces;
+#create <candidate.out>
+#write <candidate.out> "CFC1 88708bb78cac3de989b6615934ae648bbcc7e7a7ed0a6b072f8d23a5f59b9fda"
+#write <candidate.out> "%$*(",$cfcProbeKey
+#create <numerator.inc>
+#$cfcProbeFactorCount=numfactors_(cfcProbeNumerator);
+#if `$cfcProbeFactorCount' == 0
+#write <candidate.out> "(%E)",cfcProbeNumerator
+#write <numerator.inc> "(%E)",cfcProbeNumerator
+#else
+#write <candidate.out> "(1"
+#write <numerator.inc> "("
+#do cfcProbeFactor=1,`$cfcProbeFactorCount'
+#$cfcProbeFactorValue=cfcProbeNumerator[factor_^`cfcProbeFactor'];
+#inside $cfcProbeFactorValue
+id cfcProbeX1=cfv1.cfv1;
+id cfcProbeX2=cfv1.cfv2;
+id cfcProbeX3=cfv1.cfv3;
+id cfcProbeX4=cfv2.cfv2;
+id cfcProbeX5=cfv2.cfv3;
+id cfcProbeX6=cfv3.cfv3;
+#endinside
+#write <candidate.out> "*(%$)",$cfcProbeFactorValue
+#write <numerator.inc> "(%$)*",$cfcProbeFactorValue
+#enddo
+#write <candidate.out> ")"
+#write <numerator.inc> "1)"
+#endif
+#close <numerator.inc>
+#write <candidate.out> "/"
+#create <denominator.inc>
+#$cfcProbeFactorCount=numfactors_(cfcProbeDenominator);
+#if `$cfcProbeFactorCount' == 0
+#write <candidate.out> "(%E)",cfcProbeDenominator
+#write <denominator.inc> "(%E)",cfcProbeDenominator
+#else
+#write <candidate.out> "(1"
+#write <denominator.inc> "("
+#do cfcProbeFactor=1,`$cfcProbeFactorCount'
+#$cfcProbeFactorValue=cfcProbeDenominator[factor_^`cfcProbeFactor'];
+#inside $cfcProbeFactorValue
+id cfcProbeX1=cfv1.cfv1;
+id cfcProbeX2=cfv1.cfv2;
+id cfcProbeX3=cfv1.cfv3;
+id cfcProbeX4=cfv2.cfv2;
+id cfcProbeX5=cfv2.cfv3;
+id cfcProbeX6=cfv3.cfv3;
+#endinside
+#write <candidate.out> "*(%$)",$cfcProbeFactorValue
+#write <denominator.inc> "(%$)*",$cfcProbeFactorValue
+#enddo
+#write <candidate.out> ")"
+#write <denominator.inc> "1)"
+#endif
+#close <denominator.inc>
+#write <candidate.out> ")"
+#close <candidate.out>
+* Independently reread the printed factors. This checks both the algebra and
+* the output serialisation by cross-multiplication against the original.
+PolyRatFun cfcProbeRat;
+Drop cfcProbeNumerator,cfcProbeDenominator;
+Local cfcProbeDifference=cfcResult*(
+#include denominator.inc
+)-($cfcProbeKey)*(
+#include numerator.inc
+);
+id cfa1=cfcProbeRat(1,((-2+cfs1))^4);
+id cfa2=cfcProbeRat(1,((-1+cfs1))^3);
+id cfa3=cfcProbeRat(1,((-1+cfs1))^2);
+id cfa4=cfcProbeRat(1,((-1+cfs1))^1);
+id cfv1.cfv1=cfcProbeX1;
+id cfv1.cfv2=cfcProbeX2;
+id cfv1.cfv3=cfcProbeX3;
+id cfv2.cfv2=cfcProbeX4;
+id cfv2.cfv3=cfcProbeX5;
+id cfv3.cfv3=cfcProbeX6;
+id cfs1^cfcProbePower?pos_=cfcProbeRat(cfs1^cfcProbePower,1);
+id cfs1^cfcProbePower?neg_=cfcProbeRat(1,cfs1^(-cfcProbePower));
+id cfs2^cfcProbePower?pos_=cfcProbeRat(cfs2^cfcProbePower,1);
+id cfs2^cfcProbePower?neg_=cfcProbeRat(1,cfs2^(-cfcProbePower));
+id cfs3^cfcProbePower?pos_=cfcProbeRat(cfs3^cfcProbePower,1);
+id cfs3^cfcProbePower?neg_=cfcProbeRat(1,cfs3^(-cfcProbePower));
+id cfs4^cfcProbePower?pos_=cfcProbeRat(cfs4^cfcProbePower,1);
+id cfs4^cfcProbePower?neg_=cfcProbeRat(1,cfs4^(-cfcProbePower));
+id cfcProbeX1^cfcProbePower?pos_=cfcProbeRat(cfcProbeX1^cfcProbePower,1);
+id cfcProbeX1^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX1^(-cfcProbePower));
+id cfcProbeX2^cfcProbePower?pos_=cfcProbeRat(cfcProbeX2^cfcProbePower,1);
+id cfcProbeX2^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX2^(-cfcProbePower));
+id cfcProbeX3^cfcProbePower?pos_=cfcProbeRat(cfcProbeX3^cfcProbePower,1);
+id cfcProbeX3^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX3^(-cfcProbePower));
+id cfcProbeX4^cfcProbePower?pos_=cfcProbeRat(cfcProbeX4^cfcProbePower,1);
+id cfcProbeX4^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX4^(-cfcProbePower));
+id cfcProbeX5^cfcProbePower?pos_=cfcProbeRat(cfcProbeX5^cfcProbePower,1);
+id cfcProbeX5^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX5^(-cfcProbePower));
+id cfcProbeX6^cfcProbePower?pos_=cfcProbeRat(cfcProbeX6^cfcProbePower,1);
+id cfcProbeX6^cfcProbePower?neg_=cfcProbeRat(1,cfcProbeX6^(-cfcProbePower));
+Multiply cfcProbeRat(1,1);
+.sort
+
+#create <difference.out>
+#write <difference.out> "%E",cfcProbeDifference
+#close <difference.out>
+.end

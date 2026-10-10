@@ -22,6 +22,11 @@ This guide describes implementation and maintenance of CalcFormConverter. Start 
 | `DiracColour.wl` | Typed matrix words, local noncommutative normalisation and reversible translation |
 | `DiracAlgebra.wl` | Open-chain processing, explicit Dirac traces and spin-line metadata |
 | `ColourAlgebra.wl` | Typed colour indices/endpoints, procedure configuration and scalar Casimir presentation |
+| `PropagatorGroups.wl` | Propagator layout, streaming input and grouped reconstruction |
+| `PropagatorCancellation.wl` | Exact routing-matrix bases and FORM numerator cancellation before grouping |
+| `DimensionCoefficients.wl` | Univariate dimension simplification and ordinary-arithmetic output for remaining version-one coefficients |
+| `RationalCoefficients.wl` | Bounded scalar coefficient eligibility and embedded FORM rational/factor procedures |
+| `CoefficientParser.wl` | Restricted integer syntax tree and batched reconstruction of commuting coefficients |
 | `Templates/` | Main program plus embedded Dirac/colour processing procedures |
 
 Export validates and normalises the input, selects typed dictionaries and format metadata, serialises, then renders and publishes files. Enabled colour processing precedes Dirac processing and final Lorentz contraction in FORM. Import validates the mapping and result, reconstructs typed expressions and applies scalar coefficient presentation for processed colour jobs; it does not run tensor colour reduction in Mathematica. Companion loading launches no processes.
@@ -255,7 +260,7 @@ inputs directly. See [the generator guide](../Libs/Generator.md).
 
 ## Incremental propagator groups
 
-`PropagatorGroups.wl` is a private companion loaded without I/O or processes. `buildExportData` adds layout metadata only when the registry contains denominator entries; `renderExport` fills `@GROUPING@` from those entries. The template brackets after all configured algebra and before the final sort. No `Collect` wrapper or FORM single-term argument-size dependency is introduced.
+`PropagatorGroups.wl` is a private companion loaded without I/O or processes. `buildExportData` adds layout metadata only when the registry contains denominator entries; `renderExport` fills `@GROUPING@` from those entries. The template brackets after all configured algebra and before the final sort. The fallback grouping uses no `Collect` wrapper. The separately guarded rational procedure does use polynomial function arguments, so its selection limits must remain conservative.
 
 `pgWithStream` owns an input stream and closes it on normal completion, tagged failure or abort. `pgHeader` reads only the fixed marker/digest length and its line ending, so a missing newline cannot trigger an unbounded header read. `pgReadSummands` uses 1 MiB byte chunks and a nesting-aware scanner. Parenthesised coefficients are buffered as fragments; only signs at the top level are considered summand boundaries, and exponent/operator signs are preserved across chunks. The private chunk size can be reduced in tests.
 
@@ -268,7 +273,7 @@ inputs directly. See [the generator guide](../Libs/Generator.md).
 
 `pgFactorisationQ[data]` selects grouped version-one jobs; the private name is retained for compatibility. `pgOutput[data, path]` embeds `Templates/PropagatorFactors.frm.in`. The exported program needs no installed package files.
 
-The template enumerates denominator monomials once, retains the full result in hidden storage, and prepares up to four coefficients per worker. Free-index checks and the 20,000-term guard remain conservative eligibility conditions. A zero coefficient bypasses extraction to avoid division by zero. Each eligible coefficient's `content_` is evaluated once in the preprocessor. Scalar PaVe functions are removed from that content, so only invertible numerical, symbol and scalar-product monomials are divided out. Direct division is essential: `div_` on Laurent expressions can discard negative-power terms and must not be substituted here. No polynomial factor search is performed.
+The template enumerates denominator monomials once, retains the full result in hidden storage, and prepares up to four coefficients per worker. Free-index checks and the 20,000-term guard remain conservative eligibility conditions. A zero coefficient bypasses extraction to avoid division by zero. Each eligible coefficient's `content_` is evaluated once in the preprocessor. Scalar PaVe functions are removed from that content, so only invertible numerical, symbol and scalar-product monomials are divided out. Direct division is essential: `div_` on Laurent expressions can discard negative-power terms and must not be substituted here. This describes the fallback path; the bounded rational procedure below performs a factor search only for selected coefficients.
 
 `ModuleOption inparallel` includes the newly defined primitive expressions in whole-expression scheduling. Common-factor dollar variables are read-only during that module. Output writes the common monomial and residual separately in stable group order. Temporary expressions and dollar values are cleared per batch. The queue limits expression count, not RAM; runtime timeout and cancellation remain unchanged.
 
@@ -290,8 +295,100 @@ For eligible grouped version-one imports, `withImportParser` owns the validated 
 
 `pgParseNested` now descends through bracketed batches to polynomial leaves instead of passing a small but still nested batch to the general parser. Inside this environment, flat-path eligibility starts at 32 characters and does not require four local occurrences per factor: reusable factors can recur across leaves and groups. The existing restricted lexical checks and general-parser fallback remain in place. Smaller recurrent monomials use the same bounded factor decoder. Ungrouped and epsilon/Dirac/colour jobs retain their previous dispatch thresholds.
 
-The shared decoder handles exact ASCII integer literals with `FromDigits`, the imaginary unit, and already validated scalar dictionary entries directly. It does not evaluate Wolfram source text. Other factors use the general parser, with successful results cached. Distinct integer coefficients are deliberately not cached, to avoid displacing reusable powers and momentum monomials. A leaf-local memo table avoids repeated shared-cache lookups and is explicitly cleared after the leaf.
+The shared decoder handles exact ASCII integer literals with `FromDigits`, the imaginary unit, and already validated scalar dictionary entries directly. It does not evaluate Wolfram source text. Other factors use the general parser, with successful results cached. Distinct integer coefficients are deliberately not cached, to avoid displacing reusable powers and momentum monomials. For grouped commuting leaves, a local association decodes distinct factors once; bulk lookup and additive-boundary lists then construct each product once. Typed operands and zero divisors are checked before reconstruction. A speculative failure replays the original ordered parser to preserve the first diagnostic. Imports outside the shared environment retain the ordered parser and its leaf-local memo table, which is explicitly cleared after the leaf.
 
 Each shared cache has a 4,096-entry limit and a 4 MiB accounting budget. Factor keys longer than 512 characters and entries exceeding 16 KiB are not retained. A full cache is cleared before another admissible entry is inserted. These are cache limits, not a bound on process RSS, source text or the final expression. Token buffers remain temporary. `Tests/SharedParser.wls` covers differential values and failures, fast dispatch below the old threshold, bounded caches, dictionary and scalar-product isolation, and abort cleanup.
 
 See [the matched comparison](Tests/Reports/FastNestedImport.md) for measured results and verification limits.
+
+Historical intermediate measurements for bulk polynomial reconstruction, before the complete-import target was met, are recorded in [bulk coefficient import](Tests/Reports/BulkCoefficientImport.md).
+
+## Single-pass commuting coefficient parser
+
+`pgParseNestedChecked` first tries `pgParseCoefficientTree` on bracketed text of
+at least 128 characters in the shared version-one environment. Other mapping
+versions, symbols with UpValues, smaller inputs and flat polynomials retain the
+previous paths. This is an internal dispatch threshold, not a public option.
+
+The lexer reuses the flat-factor vocabulary plus parentheses and arithmetic
+operators, and requires exact lexical coverage. `pgCoefficientTreeShape[]`
+lazily builds a WVM `CompiledFunction` that recognises only integer token codes.
+Its arrays describe factor, product and sum nodes, parent IDs, unary signs,
+reciprocal flags and depths. It evaluates no mapped values. The 64-level
+parenthesis limit selects fallback for deeper input.
+
+After syntax validation, `importFactor` decodes each distinct factor. Native list
+operations group children by parent and reconstruct one depth at a time. Typed
+operands and zero divisors are checked before arithmetic can hide them. Failed
+speculation replays the original nested/general path to retain first-failure
+ordering. Abort propagates. The compiled function stores no dictionaries or input
+arrays; all coefficient data is local. It needs no C compiler or process launch.
+
+This path tokenises one complete coefficient, not the complete output file.
+Working memory therefore scales with the largest coefficient and the returned
+expression. The smaller-piece parser remains the fallback. No saved-format,
+public-API or mathematical-vocabulary changes are involved. `Tests/TreeParser.wls`
+covers structure, arithmetic, fallback, first-failure order and cache isolation.
+See [verification and complete-result measurements](Tests/Reports/CoefficientTreeImport.md).
+
+### Focused rational-coefficient experiment
+
+[Tests/RationalCoefficient](Tests/RationalCoefficient/README.md) reproduces the
+compact first-term result from `One-Loop-Counterterms.nb` using only FORM
+rational-polynomial arithmetic and factorisation. It includes directly runnable
+FORM files, a test-only preparation adapter, serial/TFORM equality checks and
+[a measured report](Tests/Reports/RationalCoefficient.md).
+This records the preliminary experiment. A guarded version is now enabled in the public export/calculation pipeline; its single-term reduction must not be extrapolated to all coefficients. See the integration notes below.
+
+### Integrated rational coefficient processing
+
+`renderExport` constructs one `rcPlan` from the validated encoded mapping and
+passes it to declarations and `pgOutput`. It recognises reciprocal polynomial
+abbreviations structurally, without `ToExpression`, expansion or simplification
+in Mathematica. Unsupported abbreviation vocabularies and excessive variable
+counts disable this procedure for the job. The initial work limits are in
+`RationalCoefficients.wl` and are private implementation choices.
+
+`RationalCoefficients.frm.in` selects coefficients by term count and excludes
+free indices, imaginary factors and scalar master functions. Original
+coefficients remain available for fallback. `PolyRatFun` collects each selected
+coefficient; numerator/denominator capture is serial and separately initialised
+for empty expressions. Factorisation uses whole-expression scheduling. A
+residual object causes fallback rather than being discarded.
+
+`RationalCoefficientOutput.frm.in` writes factor values and restores temporary
+scalar products. Keep a newline before the generated `#else`: otherwise FORM
+can skip the fallback output entirely. Unsupported coefficients in mixed and
+all-unsupported batches are explicit regression cases. Restore ordinary
+expression selection before creating fallback primitives and keep factorised
+numerator/denominator expressions out of their momentum-bracketing module.
+
+No new public options, mapping version, mathematical heads or importer changes
+are involved. `Tests/RationalCoefficients.wls` runs through the real public API
+with serial FORM and TFORM and is part of the runtime suite. The
+[integration report](Tests/Reports/RationalCoefficientIntegration.md) records
+all-suite results and the realistic replay, including the failed wider-limit
+trial. A term/variable limit is not a hard bound on polynomial arithmetic cost;
+normal runtime timeout, cancellation and failure-file retention still apply.
+
+## Numerator cancellation
+
+`buildExportData` records private `CancellationData` with denominator names, rational routing coefficients and mass squares emitted through the existing scalar serializer. This data is not a mapping-format extension. `pcPlan[data]` constructs independent row subsets of the routing matrix and deterministic pivot columns. Only small rational matrices are inverted; numerator expressions are never expanded or simplified in Wolfram.
+
+The FORM stage runs after colour/Dirac/epsilon processing and a normalising sort, before final bracketing. Native scalar products become temporary commuting scalar aliases. An if/elseif chain selects the first, largest independent subset whose propagators are present in that term. Pivot substitutions contain only reciprocal denominator identifiers and non-pivot scalar products. FORM expands and cancels powers; residual negative powers of denominator identifiers are restored to their quadratic polynomials, then aliases become native scalar products again. A final sort combines results before grouping. The ordering is acyclic; there are no repeated reciprocal substitutions or partial-fraction rules.
+
+The private `$pcMaximumBases = 256` budget limits generated branching. An exceeded budget skips the general basis stage; preceding direct massless cancellations remain intact. It does not reject the input or bound execution time. Zero rows do not enter a basis. `LoopMomenta` affects pivot priority, not algebraic validity. Constants, irreducible numerators, common infinitesimal prescriptions and positive repeated propagator powers are preserved under formal rational identities. Matrix/colour factors commute with the scalar substitutions.
+
+`Tests/PropagatorCancellation.wls` checks serial and TFORM results against explicit rational identities and FeynCalc with FDS and DropScaleless disabled. It also checks fallback, retained constants and absence of private output symbols. No Mathematica Simplify is used in the production stage.
+
+Before the substitutions, FORM keeps a hidden backup of the complete expression. It compares sorted term and denominator-group counts after cancellation, restoring the backup if terms exceed both 16 and twice the original count, or groups exceed four times the original count. Small growth is allowed because even `l^2/(l^2-m^2)` needs two terms. The group-count guard matters: a candidate can have similar expanded size yet lose compact coefficient factorisation by spreading across many propagator products. Counting uses bracket keys with a serial dollar collector; all backups are dropped before the existing grouping stage. This is a job-wide fallback, not a guarantee of minimal size or bounded intermediate memory.
+
+## Dimension-only coefficients and direct massless cancellation
+
+`pcDirectProcessing` reads validated `CancellationData`. For zero mass and a single nonzero rational routing coefficient `a`, it emits `p.p*P = 1/a^2` in a repeated FORM module. Composite routes and nonzero masses stay with `pcPlan`. The general stage takes its backup afterwards; its growth guard therefore preserves direct cancellations.
+
+`dcfPlan` uses the encoded dimension and scalar dictionary, without evaluating saved expressions. It recognises inverse dimension-only polynomials (outer powers down to -8, polynomial powers up to 32). Unrecognised abbreviations stay opaque. `dcfReduction` runs after bounded multivariate reduction, only on remaining coefficients containing the dimension or recognised abbreviations. It does not move other scalar variables or tensor factors into `PolyRatFun`. Coefficients are scheduled as whole expressions in the existing bounded batches.
+
+`DimensionCoefficientOutput.frm.in` traverses the reduced terms and writes their commuting/tensor factors multiplied by ordinary dimension quotients. Temporary dollar expressions are cleared after each coefficient. The existing restricted importer handles this grammar unchanged. This reduces intermediate algebra compared with multivariate factorisation, but neither output traversal nor any single coefficient has a fixed memory/time guarantee. Epsilon, Dirac and colour coefficients retain their existing output paths.
+
+`Tests/DimensionCoefficients.wls` tests both engines, dimension aliases, opaque factors, free indices, complex coefficients, scalar functions, batching, repeated massless cancellations and exclusions. See the [integration report](Tests/Reports/DimensionCoefficients.md) for measured scope and limits.

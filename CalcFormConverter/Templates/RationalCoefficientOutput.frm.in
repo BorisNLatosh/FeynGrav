@@ -1,0 +1,24 @@
+* Preserve numerator and denominator factors in ordinary result grammar.
+#write <@RESULT@> "+%$*(",$cfcKey`cfcSlot'
+#do cfcRKind={N,D}
+#if "`cfcRKind'" == "D"
+#write <@RESULT@> "/"
+#endif
+#$cfcRCount=numfactors_(cfcR`cfcRKind'`cfcSlot');
+#if `$cfcRCount' == 0
+#write <@RESULT@> "(%E)",cfcR`cfcRKind'`cfcSlot'
+#else
+#write <@RESULT@> "(1"
+#do cfcRFactor=1,`$cfcRCount'
+#$cfcRValue=cfcR`cfcRKind'`cfcSlot'[factor_^`cfcRFactor'];
+#inside $cfcRValue
+@RESTORE@
+#endinside
+#write <@RESULT@> "*(%$)",$cfcRValue
+#enddo
+#write <@RESULT@> ")"
+#endif
+#enddo
+#write <@RESULT@> ")"
+Drop cfcRN`cfcSlot',cfcRD`cfcSlot';
+#$cfcRValue=0;

@@ -1,0 +1,200 @@
+{
+  "Status": "Verified",
+  "TargetImportSeconds": 180,
+  "InputIdentity": {
+    "Expected": "d43dcf3b6594db5d58df9f3d2af85ecd6283d304cb271c8a35bb87769405295b",
+    "Actual": "d43dcf3b6594db5d58df9f3d2af85ecd6283d304cb271c8a35bb87769405295b",
+    "Same": true,
+    "LeafCount": 180571
+  },
+  "OutputSHA256": "5990abf716a1d9b7a889282ea11adf5553345cd4188364c8d8a15d8154e79eaa",
+  "OutputBytes": 171993554,
+  "CompleteImport": {
+    "Seconds": 139.924678,
+    "Failure": false,
+    "Bytes": 2173428952,
+    "Retained": 1186895656,
+    "TopLevelTerms": 1022,
+    "Head": "Plus",
+    "SourceHashes": {
+      "CalcFormConverter.wl": "b8d382c0e95992cd6fae9682b5e8c0f9e50c9239754f2088885c563f88f8b7de",
+      "CoefficientParser.wl": "de9b742bf2088b46eba1d4c7623fa4143b0c343c9b36c9e990e7a1b8636afe1d",
+      "PropagatorGroups.wl": "c36b510fdf3105092b098e3e4b4b31c2e538eca7f2e6000a8b6efe8ae2c2cf13"
+    }
+  },
+  "CompleteProcess": {
+    "exit_code": 0,
+    "wall_seconds": 143.25685057599912,
+    "peak_process_tree_rss_bytes": 1377652736,
+    "stop_reason": null
+  },
+  "ChunkComparisons": [
+    {
+      "first_group": 1,
+      "groups": 128,
+      "output_bytes": 18672193,
+      "SameQ": true,
+      "ReferenceSeconds": 55.397419,
+      "CandidateSeconds": 16.254747,
+      "ReferenceBytes": 234942488,
+      "CandidateBytes": 234942488,
+      "Failure": false
+    },
+    {
+      "first_group": 129,
+      "groups": 128,
+      "output_bytes": 26721480,
+      "SameQ": true,
+      "ReferenceSeconds": 70.313905,
+      "CandidateSeconds": 22.848414,
+      "ReferenceBytes": 329708936,
+      "CandidateBytes": 329708936,
+      "Failure": false
+    },
+    {
+      "first_group": 257,
+      "groups": 128,
+      "output_bytes": 20527643,
+      "SameQ": true,
+      "ReferenceSeconds": 58.750881,
+      "CandidateSeconds": 17.383132,
+      "ReferenceBytes": 257912952,
+      "CandidateBytes": 257912952,
+      "Failure": false
+    },
+    {
+      "first_group": 385,
+      "groups": 128,
+      "output_bytes": 20246066,
+      "SameQ": true,
+      "ReferenceSeconds": 58.86463,
+      "CandidateSeconds": 17.91667,
+      "ReferenceBytes": 258175024,
+      "CandidateBytes": 258175024,
+      "Failure": false
+    },
+    {
+      "first_group": 513,
+      "groups": 128,
+      "output_bytes": 23666737,
+      "SameQ": true,
+      "ReferenceSeconds": 65.907437,
+      "CandidateSeconds": 19.981054,
+      "ReferenceBytes": 301838240,
+      "CandidateBytes": 301838240,
+      "Failure": false
+    },
+    {
+      "first_group": 641,
+      "groups": 128,
+      "output_bytes": 26428456,
+      "SameQ": true,
+      "ReferenceSeconds": 72.921308,
+      "CandidateSeconds": 21.565643,
+      "ReferenceBytes": 334248384,
+      "CandidateBytes": 334248384,
+      "Failure": false
+    },
+    {
+      "first_group": 769,
+      "groups": 128,
+      "output_bytes": 18142885,
+      "SameQ": true,
+      "ReferenceSeconds": 52.219335,
+      "CandidateSeconds": 15.185535,
+      "ReferenceBytes": 231601576,
+      "CandidateBytes": 231601576,
+      "Failure": false
+    },
+    {
+      "first_group": 897,
+      "groups": 127,
+      "output_bytes": 17588584,
+      "SameQ": true,
+      "ReferenceSeconds": 50.600651,
+      "CandidateSeconds": 15.045165,
+      "ReferenceBytes": 225001352,
+      "CandidateBytes": 225001352,
+      "Failure": false
+    }
+  ],
+  "RegressionChecks": [
+    {
+      "suite": "Core",
+      "assertions": 111,
+      "failures": 0
+    },
+    {
+      "suite": "Parser",
+      "assertions": 121,
+      "failures": 0
+    },
+    {
+      "suite": "Shared parser",
+      "assertions": 148,
+      "failures": 0
+    },
+    {
+      "suite": "Coefficient tree parser",
+      "assertions": 250,
+      "failures": 0
+    },
+    {
+      "suite": "Export transactions",
+      "assertions": 20,
+      "failures": 0
+    },
+    {
+      "suite": "Installer mocks",
+      "assertions": 62,
+      "failures": 0
+    },
+    {
+      "suite": "FORM export",
+      "assertions": 31,
+      "failures": 0
+    },
+    {
+      "suite": "FORM stages",
+      "assertions": 137,
+      "failures": 0
+    },
+    {
+      "suite": "FORM import",
+      "assertions": 67,
+      "failures": 0
+    },
+    {
+      "suite": "Runtime",
+      "assertions": 82,
+      "failures": 0
+    },
+    {
+      "suite": "Epsilon",
+      "assertions": 48,
+      "failures": 0
+    },
+    {
+      "suite": "DiracColour",
+      "assertions": 65,
+      "failures": 0
+    },
+    {
+      "suite": "DiracAlgebra",
+      "assertions": 104,
+      "failures": 0
+    },
+    {
+      "suite": "ColourAlgebra",
+      "assertions": 139,
+      "failures": 0
+    },
+    {
+      "suite": "Propagator grouping",
+      "assertions": 113,
+      "failures": 0
+    }
+  ],
+  "LoadingAndNamespaceIsolation": true,
+  "FullBenchmarkSuiteRun": false
+}

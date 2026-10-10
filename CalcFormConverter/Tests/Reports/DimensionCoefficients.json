@@ -1,0 +1,87 @@
+{
+  "Date": "2026-10-10",
+  "FORM": "5.0.2",
+  "Workers": 4,
+  "Wolfram": "15.0.1",
+  "OriginalBytes": 171993554,
+  "CandidateBytes": 11346673,
+  "InputDigest": "d43dcf3b6594db5d58df9f3d2af85ecd6283d304cb271c8a35bb87769405295b",
+  "FullPipeline": {
+    "command": [
+      "/usr/local/bin/tform",
+      "-w4",
+      "/tmp/cfc-dimension-integration/replay.frm"
+    ],
+    "exit_code": 1,
+    "wall_seconds": 300.32472294599575,
+    "peak_process_tree_rss_bytes": 4527554560,
+    "stop_reason": "300 second limit"
+  },
+  "IsolatedReplay": {
+    "command": [
+      "/usr/local/bin/tform",
+      "-w4",
+      "/tmp/cfc-dimension-integration/direct-only.frm"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 71.36852038800134,
+    "peak_process_tree_rss_bytes": 3357569024,
+    "stop_reason": null
+  },
+  "EqualityProof": {
+    "command": [
+      "/usr/local/bin/tform",
+      "-w4",
+      "/tmp/cfc-dimension-integration/proof.frm"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 11.063276449000114,
+    "peak_process_tree_rss_bytes": 306393088,
+    "stop_reason": null
+  },
+  "Residual": "0",
+  "Import": {
+    "Seconds": 24.842222,
+    "Failure": false,
+    "Head": "Plus",
+    "Groups": 1394,
+    "ByteCount": 214993968,
+    "KernelMemory": 263802040
+  },
+  "ImportResources": {
+    "command": [
+      "/usr/local/bin/WolframKernel",
+      "-noinit",
+      "-script",
+      "/tmp/cfc-dimension-integration/import-direct.wls"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 27.985382471000776,
+    "peak_process_tree_rss_bytes": 408190976,
+    "stop_reason": null
+  },
+  "Scope": "Replay of retained contracted result. Isolated replay omits the pre-existing general denominator-basis cancellation stage. Full default replay timed out before output.",
+  "Limits": {
+    "Seconds": 300,
+    "ProcessTreeRSSBytes": 6442450944,
+    "MinimumAvailableRAMBytes": 2147483648
+  },
+  "SourceSHA256": {
+    "CalcFormConverter.wl": "af203a2b3fff1383cbe76f3c5bfbc5bad8d3e4e832ae369ed51e5ce003fb6fbd",
+    "PropagatorGroups.wl": "46e6fc1fc5e51aaa4df33ce3cd1130c0cf3156acd72d448cc3c8caff9e31dc78",
+    "PropagatorCancellation.wl": "09e9246e6ad5a1872ab021bb8cb2efeca74686ab9f1a1c66d33fcbdd46318a24",
+    "RationalCoefficients.wl": "69aaea45497291287a2fe793d85254aba93a371a6e7d9380188b54f648abd47e",
+    "DimensionCoefficients.wl": "3446c235e0c942e9087aab4df831644154d115818a976f627e0f88ef8d73c72b",
+    "Templates/DimensionCoefficients.frm.in": "a2ae20ed334f68f645d142315aaecbcc0e4ff47602dcb4e6a88e7d7687451514",
+    "Templates/DimensionCoefficientOutput.frm.in": "e953985b356f551567fe3ed4ff10f8b953ab0edc56533c7a2be7406da864e4b5",
+    "Templates/PropagatorFactors.frm.in": "725e07ed41b45e2e40abe9fd2bdd3a21995458e2bde5d327ffea863ca2915c2f",
+    "Tests/DimensionCoefficients.wls": "8e79d141a4007c32820735a01efba1cbad773bed4fcaeae6f1048c9f220e942c"
+  },
+  "RegressionAssertions": {
+    "Core": 712,
+    "FORM": 235,
+    "Runtime": 701,
+    "Total": 1648
+  },
+  "LoadingChecks": "passed"
+}

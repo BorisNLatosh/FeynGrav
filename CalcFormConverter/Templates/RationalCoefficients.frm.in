@@ -1,0 +1,68 @@
+* Select scalar coefficients before placing anything inside a rational function.
+* The original coefficients remain available for every fallback.
+#do cfcSlot=1,`$cfcBatchCount'
+#$cfcRDone`cfcSlot'=0;
+#$cfcRTerms=termsin_(cfcCoefficient`cfcSlot');
+#if ( `$cfcRTerms' > 0 ) && ( `$cfcRTerms' <= @LIMIT@ ) && ( `$cfcIndexed`cfcSlot'' == 0 ) && ( `$cfcRUnsafe`cfcSlot'' == 0 )
+#$cfcRDone`cfcSlot'=1;
+#endif
+#enddo
+PolyRatFun cfcRat;
+Skip;
+#do cfcSlot=1,`$cfcBatchCount'
+#if `$cfcRDone`cfcSlot'' == 1
+Local cfcRWork`cfcSlot'=cfcCoefficient`cfcSlot';
+#endif
+#enddo
+@RULES@
+ModuleOption inparallel;
+.sort
+* Capture each rational polynomial separately. Empty expressions need
+* preprocessor initialisation, since they execute no term-level assignments.
+PolyRatFun;
+Skip;
+#do cfcSlot=1,`$cfcBatchCount'
+#if `$cfcRDone`cfcSlot'' == 1
+NSkip cfcRWork`cfcSlot';
+#endif
+#enddo
+#do cfcSlot=1,`$cfcBatchCount'
+#$cfcRNum`cfcSlot'=0;
+#$cfcRDen`cfcSlot'=1;
+#if `$cfcRDone`cfcSlot'' == 1
+if ( expression(cfcRWork`cfcSlot') );
+if (match(cfcRat(cfcRNum?$cfcRNum`cfcSlot',cfcRDen?$cfcRDen`cfcSlot')));
+id cfcRat(?a)=1;
+endif;
+endif;
+#endif
+#enddo
+ModuleOption noparallel;
+.sort
+* A scalar polynomial becomes one rational function (or zero). Any residual
+* object means that this coefficient must use the unchanged output path.
+Skip;
+#do cfcSlot=1,`$cfcBatchCount'
+#if `$cfcRDone`cfcSlot'' == 1
+#$cfcRResidual=cfcRWork`cfcSlot';
+Drop cfcRWork`cfcSlot';
+#if ( "`$cfcRResidual'" != "1" ) && ( "`$cfcRResidual'" != "0" )
+#$cfcRDone`cfcSlot'=0;
+#endif
+#endif
+#enddo
+#do cfcSlot=1,`$cfcBatchCount'
+#if `$cfcRDone`cfcSlot'' == 1
+Local cfcRN`cfcSlot'=$cfcRNum`cfcSlot';
+Local cfcRD`cfcSlot'=$cfcRDen`cfcSlot';
+#endif
+#enddo
+#do cfcSlot=1,`$cfcBatchCount'
+#if `$cfcRDone`cfcSlot'' == 1
+Factorize cfcRN`cfcSlot',cfcRD`cfcSlot';
+#endif
+#enddo
+ModuleOption inparallel;
+.sort
+* Restore normal expression selection before the legacy fallback.
+NSkip;

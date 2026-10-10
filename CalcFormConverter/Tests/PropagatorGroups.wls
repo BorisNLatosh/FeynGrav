@@ -101,7 +101,7 @@ assert["each factor reaches flat parser",flatCount===2];
 Internal`InheritedBlock[{CalcFormConverter`Private`pgOutput},
  DownValues[CalcFormConverter`Private`pgOutput]=DownValues[CalcFormConverter`Private`pgOutput]/.
   HoldPattern[RuleDelayed[lhs_,rhs_]]:>RuleDelayed[lhs,StringReplace[rhs,"<= 20000"->"<= 1"]];
- got=CalcFormCalculate[FAD[p](2 a^2 b+2 a b^2),FORMThreads->1]
+ got=Block[{CalcFormConverter`Private`$rcMaximumTerms=0},CalcFormCalculate[FAD[p](2 a^2 b+2 a b^2),FORMThreads->1]]
 ];
 assert["oversized coefficient fallback",!FailureQ[got] && Expand[got-FCI[FAD[p](2 a^2 b+2 a b^2)]]===0 && FreeQ[got,a+b]];
 
@@ -135,7 +135,7 @@ Do[
  4,I (2 a^2 b+2 a b^2),
  5,2 a/3+4 b/9]}}];
 assert["common extraction emitted",StringContainsQ[Import[job["InputFile"],"Text"],"content_("]];
-assert["no full factor search",!StringContainsQ[Import[job["InputFile"],"Text"],"\nFactorize "]];
+assert["bounded coefficient factor search",StringContainsQ[Import[job["InputFile"],"Text"],"Factorize cfcRN"]];
 (* Nested momentum grouping preserves the coefficient sums, including signed
    Laurent powers, scalar functions, free tensor factors and several keys. *)
 Do[

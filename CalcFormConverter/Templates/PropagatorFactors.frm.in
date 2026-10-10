@@ -29,6 +29,7 @@ Hide cfcResult;
 #$cfcKey`cfcSlot'=firstterm_($cfcKeys);
 #$cfcKeys=$cfcKeys-$cfcKey`cfcSlot';
 #$cfcIndexed`cfcSlot'=0;
+@RINITIAL@
 Local cfcCoefficient`cfcSlot'=cfcResult[`$cfcKey`cfcSlot''];
 #$cfcBatchCount=`cfcSlot';
 #endif
@@ -37,6 +38,7 @@ Local cfcCoefficient`cfcSlot'=cfcResult[`$cfcKey`cfcSlot''];
 #do cfcSlot=1,`$cfcBatchCount'
 if ( expression(cfcCoefficient`cfcSlot') );
 @INDEXCHECK@
+@RCHECK@
 endif;
 #enddo
 #do cfcSlot=1,`$cfcBatchCount'
@@ -44,9 +46,13 @@ NFactorize cfcCoefficient`cfcSlot';
 #enddo
 #do cfcSlot=1,`$cfcBatchCount'
 ModuleOption maximum,$cfcIndexed`cfcSlot';
+@RMAXIMUM@
 #enddo
 .sort
+@REDUCTION@
+@DREDUCTION@
 #do cfcSlot=1,`$cfcBatchCount'
+@RSKIP@
 Drop cfcCoefficient`cfcSlot';
 #enddo
 * Compute each common monomial once. Strip scalar functions from the content:
@@ -75,13 +81,12 @@ ModuleOption inparallel;
 .sort
 * Preserve the common monomial outside the residual sum in ordinary syntax.
 #do cfcSlot=1,`$cfcBatchCount'
-#write <@RESULT@> "+%$*((%$)*(",$cfcKey`cfcSlot',$cfcContent`cfcSlot'
-#write <@RESULT@> "%E",cfcPrimitive`cfcSlot'
-#write <@RESULT@> "))"
+@COEFFICIENTOUTPUT@
 Drop cfcPrimitive`cfcSlot';
 #$cfcContent`cfcSlot'=0;
 #$cfcKey`cfcSlot'=0;
 #$cfcIndexed`cfcSlot'=0;
+@RCLEANUP@
 #enddo
 .sort
 #redefine cfcBatch "0"

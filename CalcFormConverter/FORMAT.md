@@ -290,6 +290,37 @@ This is a storage/reconstruction layout, not denominator reduction. It does not 
 
 ### Factorised coefficients
 
-Eligible version-one grouped exports use `Bracket+` for indexed access to complete denominator products. Batches contain up to four coefficients per worker. For coefficients with no free Lorentz indices and at most 20,000 expanded terms, `content_` extracts a common numerical/monomial factor. Scalar function factors are excluded from the extracted content. Direct monomial division preserves negative powers. No full polynomial factorisation is performed. Output is an ordinary product of parenthesised content and residual sum, in the original propagator-group order. Within the residual, native brackets collect terms with the same momentum monomial, so nested sums and products are expected. All registered vectors supply the bracket list; if the list is empty this additional bracket is omitted. Free components may also appear in that list, without contracting or identifying their indices. This grouping does not invoke polynomial factorisation or create auxiliary mathematical heads. Coefficients excluded from content extraction may still receive momentum brackets. Epsilon, Dirac and colour jobs keep their existing output path. No mapping version or vocabulary changes are required; earlier grouped and ungrouped files remain readable.
+Eligible version-one grouped exports use `Bracket+` for indexed access to complete denominator products. Batches contain up to four coefficients per worker. For coefficients with no free Lorentz indices and at most 20,000 expanded terms, `content_` extracts a common numerical/monomial factor. Scalar function factors are excluded from the extracted content. Direct monomial division preserves negative powers. This remains the fallback for coefficients not selected for the bounded rational procedure. Output is an ordinary product of parenthesised content and residual sum, in the original propagator-group order. Within the residual, native brackets collect terms with the same momentum monomial, so nested sums and products are expected. All registered vectors supply the bracket list; if the list is empty this additional bracket is omitted. Free components may also appear in that list, without contracting or identifying their indices. Momentum grouping itself does not create auxiliary mathematical heads. Coefficients excluded from content extraction may still receive momentum brackets. Epsilon, Dirac and colour jobs keep their existing output path. No mapping version or vocabulary changes are required; earlier grouped and ungrouped files remain readable.
 
 The incremental importer recognises complete parenthesised factor products and parses their factors left to right through the existing restricted parsers. It combines them using `Times`, without expanding the coefficient. Other syntax uses the existing parser path, including its identifier and malformed-input checks. Unit-prefactor groups may be written as `+1*(...)`, and a leading zero permits an empty overall result.
+
+The version-one grouped importer may reconstruct a coefficient through an
+internal arithmetic tree. This changes neither the grammar nor the returned
+mathematical heads: factors still pass through the restricted typed decoder,
+and products of sums remain factored. Malformed or ineligible tree input is
+replayed through the established parser for its original diagnostic. Version
+selection, layout metadata and mapping digests are unchanged.
+
+### Bounded rational coefficient output
+
+Selected version-one coefficients may instead be printed as a factored
+numerator divided by a factored denominator, multiplied by their original
+propagator monomial. This uses only existing arithmetic syntax and mapped
+identifiers. `RationalCoefficients.wl` reconstructs supported inverse-polynomial
+abbreviations from the export dictionary for FORM arithmetic, then restores all
+temporary scalar-product symbols before output. Neither `cfcRat` nor internal
+`factor_` objects enter a saved result. `Processing` retains its existing
+version-one interpretation; this scalar algebra needs no additional mapping
+entry, convention or format version. Old result files remain readable.
+
+The importer performs no new simplification. Coefficient quotients use its
+existing restricted grammar; surviving propagators remain outside the coefficient. A preceding numerator-cancellation stage may reduce their powers or remove them entirely. Domain caveats of rational-function cancellation
+apply: no value at an original pole is assigned by this representation.
+
+## Numerator cancellation without a format change
+
+`PropagatorCancellation.wl` emits exact numerator/denominator identities before final propagator grouping. Existing denominator entries continue to describe their original momentum, mass and unit inverse power; surviving powers appear in the result, and cancelled entries may be unused. Scalar masses occurring only inside a propagator may now receive ordinary scalar dictionary entries for FORM processing. No additional mapping kind or result head is introduced. Temporary `cfcPCX` scalar-product aliases and negative denominator powers used during processing are restored before output. Versions one through five retain their import interpretation.
+
+### Dimension-only rational coefficients
+
+Remaining version-one coefficients may contain a sum of monomials multiplied by ordinary numerator/denominator quotients in the mapped Lorentz dimension. `DimensionCoefficients.wl` emits this syntax after univariate FORM rational arithmetic. Its private `cfcDimRat` objects never enter output. Unsupported scalar abbreviations retain their recorded meaning. No new mapping fields or parser grammar are required. Direct massless cancellation precedes the guarded general numerator stage, so the latter's fallback does not undo it.

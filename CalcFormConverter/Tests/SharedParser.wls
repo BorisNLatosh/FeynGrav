@@ -69,4 +69,23 @@ plainName[expr_] := SelectFirst[plainMap["Entries"],CalcFormConverter`Private`de
 Export[plain["ResultFile"],"CFC1 "<>Hash[plainJSON,"SHA256","HexString"]<>"\n"<>plainName[a]<>"+"<>plainName[b],"Text"];
 got=CalcFormConverter`Private`withImportParser[changed,D,CalcFormImport[plain["ResultFile"],plain["MappingFile"]]];
 assert["nested public import dictionary isolation",got===a+b];
+(* Exercise bulk reconstruction directly below its usual size threshold.
+   Failure equality includes metadata and first-failure order. *)
+bulkCandidate[t_] := Catch[CalcFormConverter`Private`withImportParser[values,D,
+ Block[{CalcFormConverter`Private`$flatParserMinimumReusePerDistinctFactor=1},
+  With[{packet=CalcFormConverter`Private`prepareFlatResult[t]},
+   If[Head[packet]===CalcFormConverter`Private`flatTokenData,
+    CalcFormConverter`Private`parseFlatResult[packet,values,D],
+    CalcFormConverter`Private`parseGeneralResult[t,values,D]]]]],CalcFormConverter`Private`$failureTag];
+Do[assert["bulk differential "<>t,SameQ[bulkCandidate[t],reference[t]]],
+ {t,{"1", "-1", "cfs1", "cfs1*cfs2/2/3-cfs1/7+cfs2", "0*cfs1+2",
+ "cfv1.cfv2*cfs1-cfs2*cfv1.cfv2", "d_(cfi1,cfi2)*cfs1+cfv1(cfi1)*cfs2",
+ "1/0+cfs999", "cfs999+1/0", "0^0+cfs999", "cfs1/0+cfs999^2",
+ "cfv999.cfv1+1/0", "1/0+cfv999.cfv1", "cfs1^ -2*cfs2/3+cfs1",
+ "cfs1**cfs2", "cfs1 cfs2", "1/0+cfv1", "cfv1+1/0"}}];
+BlockRandom[SeedRandom[761];
+ Do[text=StringRiffle[Table[
+   StringRiffle[RandomChoice[{"cfs1","cfs2","2","3","cfs1^2","cfv1.cfv2"},4],RandomChoice[{"*","/"}]],{5}],
+   RandomChoice[{"+","-"}]];
+  assert["bulk polynomial "<>ToString[k],SameQ[bulkCandidate[text],reference[text]]],{k,100}]];
 finish["Shared parser"];

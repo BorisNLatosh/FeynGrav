@@ -16,10 +16,10 @@
    retain ordinary grouping until their factorised reconstruction is validated. *)
 pgFactorisationQ[data_Association] := data["Mapping"]["Version"] === 1 &&
     AnyTrue[data["Mapping"]["Entries"], #["Kind"] === "Denominator" &];
-pgOutput[data_Association, path_String] := Module[{template, names, indices, vectors},
+pgOutput[data_Association, path_String, rationalPlan_: <||>, dimensionPlan_: <||>] := Module[{template, names, indices, vectors, fallback},
     If[!pgFactorisationQ[data], Return["#write <" <> path <> "> \"%E\",cfcResult"]];
     template = Quiet[Check[Import[FileNameJoin[{$moduleDirectory, "Templates", "PropagatorFactors.frm.in"}], "Text"], $Failed]];
-    If[!StringQ[template] || !ContainsAll[StringCases[template, RegularExpression["@[A-Z]+@"]], {"@RESULT@", "@DENOMINATORS@", "@INDEXCHECK@", "@COEFFICIENTBRACKET@"}],
+    If[!StringQ[template] || !ContainsAll[StringCases[template, RegularExpression["@[A-Z]+@"]], {"@RESULT@", "@DENOMINATORS@", "@INDEXCHECK@", "@COEFFICIENTBRACKET@", "@RINITIAL@", "@RCHECK@", "@RMAXIMUM@", "@REDUCTION@", "@RSKIP@", "@COEFFICIENTOUTPUT@", "@RCLEANUP@", "@DREDUCTION@"}],
         throwFailure["MissingTemplate", "Cannot read the propagator factorisation template."]];
     names = Lookup[Select[data["Mapping"]["Entries"], #["Kind"] === "Denominator" &], "Name"];
     (* occurs detects component indices but not indices in native metrics.
@@ -28,7 +28,21 @@ pgOutput[data_Association, path_String] := Module[{template, names, indices, vec
     (* Use dictionary identities, not assumed names or physical momentum roles.
        With no vectors the previous scalar-only output path is unchanged. *)
     vectors = Lookup[Select[data["Mapping"]["Entries"], #["Kind"] === "Vector" &], "Name", {}];
-    StringReplace[template, {"@COEFFICIENTBRACKET@" -> If[vectors === {}, "", "Bracket " <> StringRiffle[vectors, ","] <> ";"], "@RESULT@" -> path, "@DENOMINATORS@" -> StringRiffle[names, ","],
+    fallback = "#write <" <> path <> "> \"+%$*((%$)*(\",$cfcKey`cfcSlot',$cfcContent`cfcSlot'\n" <>
+        "#write <" <> path <> "> \"%E\",cfcPrimitive`cfcSlot'\n" <>
+        "#write <" <> path <> "> \"))\"";
+    StringReplace[template, {
+        "@RINITIAL@" -> "#$cfcRDone`cfcSlot'=0;" <>
+            If[rationalPlan === <||>, "", "\n#$cfcRUnsafe`cfcSlot'=0;"] <>
+            If[dimensionPlan === <||>, "", "\n#$cfcDimNeeded`cfcSlot'=0;\n#$cfcDimDone`cfcSlot'=0;"],
+        "@RCHECK@" -> If[rationalPlan === <||>, "", "if (occurs(i_) || match(cfA0(?a)) || match(cfB0(?a)) || match(cfC0(?a)) || match(cfD0(?a)));\n$cfcRUnsafe`cfcSlot'=1;\nendif;"] <> "\n" <> Lookup[dimensionPlan, "Check", ""],
+        "@RMAXIMUM@" -> If[rationalPlan === <||>, "", "ModuleOption maximum,$cfcRUnsafe`cfcSlot';"] <> If[dimensionPlan === <||>, "", "\nModuleOption maximum,$cfcDimNeeded`cfcSlot';"],
+        "@REDUCTION@" -> rcReduction[rationalPlan],
+        "@DREDUCTION@" -> dcfReduction[dimensionPlan],
+        "@RSKIP@" -> If[rationalPlan === <||>, "", "#if `$cfcRDone`cfcSlot'' == 1\nSkip cfcRN`cfcSlot',cfcRD`cfcSlot';\n#endif"] <> If[dimensionPlan === <||>, "", "\n#if `$cfcDimDone`cfcSlot'' == 1\nSkip cfcDimWork`cfcSlot';\n#endif"],
+        "@COEFFICIENTOUTPUT@" -> rcWrite[rationalPlan, path, dcfWrite[dimensionPlan, path, fallback]],
+        "@RCLEANUP@" -> If[rationalPlan === <||>, "", "#$cfcRDone`cfcSlot'=0;\n#$cfcRUnsafe`cfcSlot'=0;\n#$cfcRNum`cfcSlot'=0;\n#$cfcRDen`cfcSlot'=0;"] <> If[dimensionPlan === <||>, "", "\n#$cfcDimNeeded`cfcSlot'=0;\n#$cfcDimDone`cfcSlot'=0;"],
+        "@COEFFICIENTBRACKET@" -> If[vectors === {}, "", "Bracket " <> StringRiffle[vectors, ","] <> ";"], "@RESULT@" -> path, "@DENOMINATORS@" -> StringRiffle[names, ","],
         "@INDEXCHECK@" -> If[indices === {}, "", "if ( occurs(" <> StringRiffle[indices, ","] <> ")" <>
             If[Length[indices] >= 2, " || match(d_(" <> indices[[1]] <> "?," <> indices[[2]] <> "?))", ""] <>
             " );\n$cfcIndexed`cfcSlot'=1;\nendif;"]}]
@@ -148,7 +162,11 @@ $pgNestedBlockCharacters = 32768;
 (* Reparse rejected input through the original parser so error messages and
    first-failure ordering remain unchanged. Abort is deliberately not caught. *)
 pgParseNestedChecked[text_String, parse_] := Module[{value},
-    value = Catch[pgParseNested[text, parse], $failureTag];
+    value = If[TrueQ[$importParserActive] && StringLength[text] >= 128 &&
+        StringContainsQ[text, "("],
+        Catch[pgParseCoefficientTree[text], $failureTag], $Failed];
+    If[value === $Failed || FailureQ[value],
+        value = Catch[pgParseNested[text, parse], $failureTag]];
     If[FailureQ[value], parse[text], value]
 ];
 pgParseNested[text_String, parse_, level_: 0] := Module[

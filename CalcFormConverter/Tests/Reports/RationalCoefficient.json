@@ -1,0 +1,210 @@
+{
+  "Status": "Focused experiment passed; not enabled in public commands",
+  "OriginalResultSHA256": "5990abf716a1d9b7a889282ea11adf5553345cd4188364c8d8a15d8154e79eaa",
+  "FullResultTested": false,
+  "WolframSimplificationUsed": false,
+  "Timings": [
+    {
+      "engine": "FORM",
+      "trial": 0,
+      "phase": "warmup",
+      "kind": "baseline",
+      "seconds": 0.008368397000594996,
+      "bytes": 23086
+    },
+    {
+      "engine": "FORM",
+      "trial": 0,
+      "phase": "warmup",
+      "kind": "calculate",
+      "seconds": 0.09519180600182153,
+      "bytes": 768
+    },
+    {
+      "engine": "FORM",
+      "trial": 1,
+      "phase": "measured",
+      "kind": "calculate",
+      "seconds": 0.09769436899659922,
+      "bytes": 768
+    },
+    {
+      "engine": "FORM",
+      "trial": 1,
+      "phase": "measured",
+      "kind": "baseline",
+      "seconds": 0.009530634997645393,
+      "bytes": 23086
+    },
+    {
+      "engine": "FORM",
+      "trial": 2,
+      "phase": "measured",
+      "kind": "baseline",
+      "seconds": 0.009940328003722243,
+      "bytes": 23086
+    },
+    {
+      "engine": "FORM",
+      "trial": 2,
+      "phase": "measured",
+      "kind": "calculate",
+      "seconds": 0.09136338400276145,
+      "bytes": 768
+    },
+    {
+      "engine": "FORM",
+      "trial": 3,
+      "phase": "measured",
+      "kind": "calculate",
+      "seconds": 0.091888705996098,
+      "bytes": 768
+    },
+    {
+      "engine": "FORM",
+      "trial": 3,
+      "phase": "measured",
+      "kind": "baseline",
+      "seconds": 0.009827476998907514,
+      "bytes": 23086
+    },
+    {
+      "engine": "TFORM10",
+      "trial": 0,
+      "phase": "warmup",
+      "kind": "baseline",
+      "seconds": 0.01660271100263344,
+      "bytes": 23086
+    },
+    {
+      "engine": "TFORM10",
+      "trial": 0,
+      "phase": "warmup",
+      "kind": "calculate",
+      "seconds": 0.1118193189977319,
+      "bytes": 768
+    },
+    {
+      "engine": "TFORM10",
+      "trial": 1,
+      "phase": "measured",
+      "kind": "calculate",
+      "seconds": 0.11153810399991926,
+      "bytes": 768
+    },
+    {
+      "engine": "TFORM10",
+      "trial": 1,
+      "phase": "measured",
+      "kind": "baseline",
+      "seconds": 0.015177146000496577,
+      "bytes": 23086
+    },
+    {
+      "engine": "TFORM10",
+      "trial": 2,
+      "phase": "measured",
+      "kind": "baseline",
+      "seconds": 0.0160843269986799,
+      "bytes": 23086
+    },
+    {
+      "engine": "TFORM10",
+      "trial": 2,
+      "phase": "measured",
+      "kind": "calculate",
+      "seconds": 0.11914238199824467,
+      "bytes": 768
+    },
+    {
+      "engine": "TFORM10",
+      "trial": 3,
+      "phase": "measured",
+      "kind": "calculate",
+      "seconds": 0.10389121100160992,
+      "bytes": 768
+    },
+    {
+      "engine": "TFORM10",
+      "trial": 3,
+      "phase": "measured",
+      "kind": "baseline",
+      "seconds": 0.01584640199871501,
+      "bytes": 23086
+    }
+  ],
+  "Checks": [
+    "FORM: exact original coefficient equality",
+    "FORM: exact saved notebook formula equality",
+    "FORM: no internal identifiers in result",
+    "TFORM10: exact original coefficient equality",
+    "TFORM10: exact saved notebook formula equality",
+    "TFORM10: no internal identifiers in result",
+    "FORM: polynomial",
+    "TFORM10: polynomial",
+    "FORM: rational",
+    "TFORM10: rational",
+    "FORM: cancellation",
+    "TFORM10: cancellation",
+    "FORM: negative_powers",
+    "TFORM10: negative_powers",
+    "FORM: rational_numbers",
+    "TFORM10: rational_numbers",
+    "FORM: unit",
+    "TFORM10: unit",
+    "FORM: zero",
+    "TFORM10: zero",
+    "FORM: rejects functions",
+    "TFORM10: rejects functions",
+    "FORM: rejects two_products",
+    "TFORM10: rejects two_products",
+    "preparation rejects complex",
+    "preparation rejects version",
+    "preparation rejects header",
+    "preparation rejects boundary"
+  ],
+  "SourceHashes": {
+    "Calculate.frm": "cd0322535697c42f84cc567811503ef85171374d5d70a23df2642352e6db97dd",
+    "Candidate.frm": "2a6402ba5fa9add91bb397bf9bfc73fe2dbeeccee9034645585a715155379ed1",
+    "Expected.out": "bd089152b3fa1d81c91845a2ffffdbb3fc8c8761e6ac5bd99ad92bea8ead5051",
+    "NotebookDenominator.inc": "32715c96346ccab791660d119339e4e8f8c83a4ba4daa1a46fb4f314ff7e6e5d",
+    "NotebookNumerator.inc": "184e1a76bd9fb1fc494f21ba22f01b94cfeb92a2c859c3208deb33369a32463d",
+    "Original.frm": "14d51aed7dc60874c3ad5bed44b541092e5f0b3f49fd21b6f445af10ffa863fc",
+    "Original.map.json": "88708bb78cac3de989b6615934ae648bbcc7e7a7ed0a6b072f8d23a5f59b9fda",
+    "README.md": "ba0c705f12e89d8cdbd61adb8b65a81f7201f51b2c99ff078c4ca71c5bc0e077",
+    "check.py": "5130eb894f205fc1e59bbd5ed1c833eabcc48b3512e1b64e463795b5cd4d3f05",
+    "prepare.py": "e0753facc8faae98f2027400f10d4697ad64814a40028228c18b0d2aa0754358"
+  },
+  "SeparateResourceTrials": [
+    {
+      "Engine": "FORM",
+      "WallSeconds": 0.08,
+      "PeakProcessRSSKiB": 12656
+    },
+    {
+      "Engine": "TFORM10",
+      "WallSeconds": 0.09,
+      "PeakProcessRSSKiB": 16764
+    }
+  ],
+  "Import": [
+    {
+      "Engine": "FORM",
+      "ImportSeconds": 0.220511,
+      "OriginalLeafCount": 10697,
+      "CandidateLeafCount": 388,
+      "OriginalByteCount": 309488,
+      "CandidateByteCount": 10960,
+      "PropagatorsUnchanged": true
+    },
+    {
+      "Engine": "TFORM10",
+      "ImportSeconds": 0.009839,
+      "OriginalLeafCount": 10697,
+      "CandidateLeafCount": 388,
+      "OriginalByteCount": 309488,
+      "CandidateByteCount": 10960,
+      "PropagatorsUnchanged": true
+    }
+  ]
+}
