@@ -392,3 +392,13 @@ Before the substitutions, FORM keeps a hidden backup of the complete expression.
 `DimensionCoefficientOutput.frm.in` traverses the reduced terms and writes their commuting/tensor factors multiplied by ordinary dimension quotients. Temporary dollar expressions are cleared after each coefficient. The existing restricted importer handles this grammar unchanged. This reduces intermediate algebra compared with multivariate factorisation, but neither output traversal nor any single coefficient has a fixed memory/time guarantee. Epsilon, Dirac and colour coefficients retain their existing output paths.
 
 `Tests/DimensionCoefficients.wls` tests both engines, dimension aliases, opaque factors, free indices, complex coefficients, scalar functions, batching, repeated massless cancellations and exclusions. See the [integration report](Tests/Reports/DimensionCoefficients.md) for measured scope and limits.
+
+### Early dimension compaction
+
+`renderExport` selects `dcfStageSort` when a version-one dimension plan and prepared tensor factors are both present. Each boundary first sorts ordinary tensor algebra with rational functions inert, enables `PolyRatFun` for the dimension-only rules on the collected terms, then disables it and restores numerical ratios. Keeping `PolyRatFun` enabled throughout tensor multiplication was tested and rejected as too costly.
+
+`dcfPrecondition` runs after direct massless cancellation and before `pcPlan` processing when an eligible result exceeds the private 1,000-term threshold. The threshold selects work; it is not a time/memory limit. The original general cancellation pass, backup and growth guards are retained. Its post-expansion guards still cannot prevent every expensive candidate.
+
+The group selector recognises existing `cfcDimRat` coefficients and sends them to dimension-only output. They bypass multivariate selection because their compressed term count understates the original polynomial complexity. No private function may enter a result file. `Tests/DimensionPreconditioning.wls` forces the early path and prepared stages on small cases, comparing both engines against independent FeynCalc algebra.
+
+Performance evidence and power-state qualifications are recorded in [EarlyDimensionCompaction.md](Tests/Reports/EarlyDimensionCompaction.md).

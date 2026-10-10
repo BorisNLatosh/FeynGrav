@@ -21,7 +21,7 @@ BeginPackage["CalcFormConverter`", {"FeynCalc`"}];
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormExport::usage ="CalcFormExport[expr, file, opts] exports an exact supported FeynCalc expression, including ordinary Dirac words, SU(N) colour structures and traces and rank-four single-space Lorentz Eps tensors, to a complete FORM program and a reversible JSON mapping. Prints a readable file summary and returns an association with InputFile, MappingFile and ResultFile. Options: Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. The generated program simplifies ordinary open chains and evaluates explicit DiracTrace expressions; DiracAlgebra -> False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour expressions; False preserves them and unevaluated SUNTrace. Propagator products are grouped automatically. Eligible small scalar coefficients undergo rational cancellation and numerator/denominator factorisation in FORM. Remaining version-one coefficients can simplify rational dependence on the symbolic Lorentz dimension alone; other cases retain common-factor extraction and momentum grouping. A direct massless monomial pass followed by a bounded denominator-basis stage cancels polynomial numerators against ordinary propagators before grouping, retaining constant terms and momentum routing. No Mathematica Simplify is called. No FORM process or integral reduction is performed.";
+CalcFormConverter`CalcFormExport::usage ="CalcFormExport[expr, file, opts] exports an exact supported FeynCalc expression, including ordinary Dirac words, SU(N) colour structures and traces and rank-four single-space Lorentz Eps tensors, to a complete FORM program and a reversible JSON mapping. Prints a readable file summary and returns an association with InputFile, MappingFile and ResultFile. Options: Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. The generated program simplifies ordinary open chains and evaluates explicit DiracTrace expressions; DiracAlgebra -> False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour expressions; False preserves them and unevaluated SUNTrace. Dimension dependence can be compacted between prepared tensor stages and before general numerator cancellation. Propagator products are grouped automatically. Eligible small scalar coefficients undergo rational cancellation and numerator/denominator factorisation in FORM. Remaining version-one coefficients can simplify rational dependence on the symbolic Lorentz dimension alone; other cases retain common-factor extraction and momentum grouping. A direct massless monomial pass followed by a bounded denominator-basis stage cancels polynomial numerators against ordinary propagators before grouping, retaining constant terms and momentum routing. No Mathematica Simplify is called. No FORM process or integral reduction is performed.";
 
 
 (* ::Input::Initialization:: *)
@@ -41,7 +41,7 @@ CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[opts] explicitly att
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. For a binary equality lhs == rhs, it calculates lhs - rhs and compares the imported residual with zero; the result may remain symbolic. True and False are returned directly. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress, FORMThreads, DiracAlgebra and ColourAlgebra. Failed jobs are retained. Polynomial numerators are cancelled against ordinary propagators using a direct massless monomial pass followed by a bounded independent-basis stage; no momentum shifts or scaleless removal are applied. Surviving propagator products are grouped automatically and imported incrementally. Eligible small scalar coefficients are rationally simplified and factorised in FORM; remaining version-one coefficients can simplify rational dependence on the symbolic Lorentz dimension alone. Other cases retain the existing grouped path. No Mathematica Simplify is called. DiracAlgebra -> Automatic simplifies ordinary open chains and evaluates explicit DiracTrace expressions; False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour structures; False preserves colour objects and unevaluated SUNTrace.";
+CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. For a binary equality lhs == rhs, it calculates lhs - rhs and compares the imported residual with zero; the result may remain symbolic. True and False are returned directly. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress, FORMThreads, DiracAlgebra and ColourAlgebra. Failed jobs are retained. Polynomial numerators are cancelled against ordinary propagators using a direct massless monomial pass followed by a bounded independent-basis stage; no momentum shifts or scaleless removal are applied. Dimension dependence can be compacted between prepared tensor stages and before general cancellation. Surviving propagator products are grouped automatically and imported incrementally. Eligible small scalar coefficients are rationally simplified and factorised in FORM; remaining version-one coefficients can simplify rational dependence on the symbolic Lorentz dimension alone. Other cases retain the existing grouped path. No Mathematica Simplify is called. DiracAlgebra -> Automatic simplifies ordinary open chains and evaluates explicit DiracTrace expressions; False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour structures; False preserves colour objects and unevaluated SUNTrace.";
 
 
 (* ::Input::Initialization:: *)
@@ -925,7 +925,7 @@ renderExport[data_Association, result_String, template_String] :=
   Module[
      (*Projections of the single big association produced by buildExportData. entries is the ordered registry table; declaration/json/digest/program are scalars built below.*)
     {entries = data["Mapping"]["Entries"], declaration, json, digest, 
-    program, templateNames, unknownTemplateNames, rationalPlan, cancellationPlan, dimensionPlan},
+    program, templateNames, unknownTemplateNames, rationalPlan, cancellationPlan, dimensionPlan, stagedDimensionQ, stageSort},
      (*The template contract is enforced HERE, not only where the shipped template is read, because this function is the one that accepts an arbitrary template. Without this check a template missing a placeholder would silently render a program that omits a declaration or directive -- a FORM-level failure far from its cause. Required and unknown placeholders are rejected against the original template before any values are inserted.*)
      templateNames = templatePlaceholderNames[template];
      If[! AllTrue[$requiredTemplatePlaceholders, 
@@ -951,6 +951,8 @@ renderExport[data_Association, result_String, template_String] :=
      rationalPlan = rcPlan[data];
      dimensionPlan = dcfPlan[data];
      cancellationPlan = pcPlan[data];
+     stagedDimensionQ = dimensionPlan =!= <||> && data["Preparations"] =!= {};
+     stageSort = If[stagedDimensionQ, dcfStageSort[dimensionPlan], ".sort\n"];
      (*Serialize the mapping and hash the exact resulting JSON text. Reformatting that text changes the digest. Compact output avoids extra whitespace but does not promise identical serialization across all kernel versions.*)
      json = 
     ExportString[data["Mapping"], "RawJSON", "Compact" -> True];
@@ -972,21 +974,21 @@ renderExport[data_Association, result_String, template_String] :=
           (*The #define macros, one per line.*)
           "@FACTORS@" -> StringRiffle[data["Factors"], "\n"], 
       "@EXPRESSION@" -> data["Body"],
-          (*Pre-prepared large tensor stages. When empty, the whole substitution is the empty string so no stray directives appear. Otherwise: one "Local cfcStageN = <stage>;" per preparation (MapIndexed supplies the 1-based counter), then a single ".sort" and "Hide cfcStage1,cfcStage2,...;" so FORM can reuse the normalized stages later.*)
+          (*Pre-prepared large tensor stages. When empty, the whole substitution is the empty string so no stray directives appear. Otherwise: one "Local cfcStageN = <stage>;" per preparation (MapIndexed supplies the 1-based counter), then normalisation (including eligible dimension compaction) and "Hide cfcStage1,cfcStage2,...;" so FORM can reuse the normalized stages later.*)
           "@PREPARATIONS@" -> If[data["Preparations"] === {}, "",
               
         StringJoin[
           MapIndexed[("Local cfcStage" <> intString[First[#2]] <> 
               " = " <> #1 <> ";\n") &,
-                   data["Preparations"]]] <> ".sort\nHide " <>
+                   data["Preparations"]]] <> stageSort <> "Hide " <>
                
          StringRiffle[
           Table["cfcStage" <> intString[i], {i, 
             Length[data["Preparations"]]}], ","] <> ";\n"],
-          (*Remaining multiplication stages: each is ".sort" then "Multiply <stage>;", i.e. the planned order becomes the order of FORM operations.*)
+          (*Each multiplication follows a normalising stage boundary. Eligible prepared tensors compact their dimension dependence after ordinary tensor sorting, with rational arithmetic disabled for the next multiplication. The final boundary completes the last product before cancellation.*)
           "@MULTIPLICATIONS@" -> 
-       StringJoin[(".sort\nMultiply " <> # <> ";\n") & /@ 
-         data["Multiplications"]] <> caProcessing[data] <> If[KeyExistsQ[data["Mapping"], "EpsilonConvention"], "contract 0;\n", ""] <> daProcessing[data] <> pcDirectProcessing[data] <> Lookup[cancellationPlan, "Processing", ""],
+       StringJoin[(stageSort <> "Multiply " <> # <> ";\n") & /@
+         data["Multiplications"]] <> If[stagedDimensionQ, stageSort, ""] <> caProcessing[data] <> If[KeyExistsQ[data["Mapping"], "EpsilonConvention"], "contract 0;\n", ""] <> daProcessing[data] <> pcDirectProcessing[data] <> If[cancellationPlan === <||>, "", dcfPrecondition[dimensionPlan]] <> Lookup[cancellationPlan, "Processing", ""],
           "@GROUPING@" -> With[{denominators = Lookup[Select[entries, #["Kind"] === "Denominator" &], "Name", {}]},
               If[denominators === {}, "", If[pgFactorisationQ[data], "Bracket+ ", "Bracket "] <> StringRiffle[denominators, ","] <> ";"]],
           (*The result path. Windows backslashes are normalized because FORM expects forward slashes there; Unix paths are preserved literally, including backslashes. Quoting is the template's job.*)

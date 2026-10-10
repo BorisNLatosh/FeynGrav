@@ -35,7 +35,7 @@ pgOutput[data_Association, path_String, rationalPlan_: <||>, dimensionPlan_: <||
         "@RINITIAL@" -> "#$cfcRDone`cfcSlot'=0;" <>
             If[rationalPlan === <||>, "", "\n#$cfcRUnsafe`cfcSlot'=0;"] <>
             If[dimensionPlan === <||>, "", "\n#$cfcDimNeeded`cfcSlot'=0;\n#$cfcDimDone`cfcSlot'=0;"],
-        "@RCHECK@" -> If[rationalPlan === <||>, "", "if (occurs(i_) || match(cfA0(?a)) || match(cfB0(?a)) || match(cfC0(?a)) || match(cfD0(?a)));\n$cfcRUnsafe`cfcSlot'=1;\nendif;"] <> "\n" <> Lookup[dimensionPlan, "Check", ""],
+        "@RCHECK@" -> If[rationalPlan === <||>, "", "if (" <> If[dimensionPlan === <||>, "", "match(cfcDimRat(?a)) || "] <> "occurs(i_) || match(cfA0(?a)) || match(cfB0(?a)) || match(cfC0(?a)) || match(cfD0(?a)));\n$cfcRUnsafe`cfcSlot'=1;\nendif;"] <> "\n" <> Lookup[dimensionPlan, "Check", ""],
         "@RMAXIMUM@" -> If[rationalPlan === <||>, "", "ModuleOption maximum,$cfcRUnsafe`cfcSlot';"] <> If[dimensionPlan === <||>, "", "\nModuleOption maximum,$cfcDimNeeded`cfcSlot';"],
         "@REDUCTION@" -> rcReduction[rationalPlan],
         "@DREDUCTION@" -> dcfReduction[dimensionPlan],

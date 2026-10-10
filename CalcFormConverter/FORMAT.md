@@ -324,3 +324,5 @@ apply: no value at an original pole is assigned by this representation.
 ### Dimension-only rational coefficients
 
 Remaining version-one coefficients may contain a sum of monomials multiplied by ordinary numerator/denominator quotients in the mapped Lorentz dimension. `DimensionCoefficients.wl` emits this syntax after univariate FORM rational arithmetic. Its private `cfcDimRat` objects never enter output. Unsupported scalar abbreviations retain their recorded meaning. No new mapping fields or parser grammar are required. Direct massless cancellation precedes the guarded general numerator stage, so the latter's fallback does not undo it.
+
+Dimension-only rational functions can also occur internally between prepared tensor stages and before general numerator cancellation. They are removed by the existing dimension coefficient writer. These processing changes introduce no mathematical heads, mapping metadata or importer behaviour.

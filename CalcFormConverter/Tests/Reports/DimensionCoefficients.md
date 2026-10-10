@@ -2,6 +2,8 @@
 
 Date: 10 October 2026. FORM/TFORM 5.0.2; Wolfram 15.0.1.
 
+Historical snapshot at `9f875d6`. The later [early dimension compaction report](EarlyDimensionCompaction.md) supersedes its full-pipeline timing limitation for the measured realistic input; the observations below are retained unchanged.
+
 ## Implementation
 
 Both passes are automatic in newly exported programmes and `CalcFormCalculate`:
