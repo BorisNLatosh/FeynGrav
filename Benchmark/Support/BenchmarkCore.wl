@@ -168,7 +168,7 @@ BenchmarkRun[run_Association] := Module[
  ];
  exportJob[c_,ph_,r_] := Module[{d=newJob[run,"export"],t,j,mapping,valid},
   Print["  ",ph," ",r,": export"];
-  {t,j}=measure[CalcFormExport[c["Expression"],FileNameJoin[{d,"job.frm"}],LoopMomenta->c["LoopMomenta"]]];
+  {t,j}=measure[CalcFormExport[c["Expression"],FileNameJoin[{d,"job.frm"}],TensorDecomposition -> False, ReduceToScalarMasters -> False, LoopMomenta ->c["LoopMomenta"]]];
   valid=If[AssociationQ[j],mapping=Import[j["MappingFile"],"RawJSON"];Lookup[mapping,"ExpressionDigest",None]===c["Metadata","InputFingerprint"],False];
   append[Join[base[c,"Export",0,ph,r],<|"Seconds"->t,"Status"->If[j===$Aborted,"Aborted",If[AssociationQ[j],"Success","Failure"]],
    "Validation"->If[valid,"Verified","Failed"],"ValidationMethod"->"Export mapping input digest",
@@ -194,7 +194,7 @@ BenchmarkRun[run_Association] := Module[
  ];
  oneCalculate[c_,w_,ph_,r_] := Module[{d=newJob[run,"calculate"],t,v,valid},
   Print["  ",ph," ",r,": complete CalcFormCalculate call"];
-  {t,v}=measure[CalcFormCalculate[c["Expression"],LoopMomenta->c["LoopMomenta"],FORMThreads->w,
+  {t,v}=measure[CalcFormCalculate[c["Expression"],TensorDecomposition -> False, ReduceToScalarMasters -> False, LoopMomenta ->c["LoopMomenta"],FORMThreads->w,
     FORMExecutable->checks[ToString[w],"Result","Executable"],WorkingDirectory->d,TimeConstraint->cfg["ExecutionTimeout"],ShowProgress->True]];
   If[outcome[v]==="Success",$importObserved=True];valid=validate[c,v];
   append[Join[base[c,"Calculate",w,ph,r],<|"Seconds"->t,"Status"->outcome[v],"Validation"->valid,

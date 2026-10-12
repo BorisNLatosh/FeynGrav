@@ -14,6 +14,7 @@
 Options[CalcFormConverter`CalcFormCheck] = {CalcFormConverter`FORMExecutable -> Automatic, CalcFormConverter`FORMThreads -> Automatic, System`TimeConstraint -> 10};
 Options[CalcFormConverter`CalcFormInstall] = {CalcFormConverter`FORMThreads -> Automatic};
 Options[CalcFormConverter`CalcFormCalculate] = {
+ CalcFormConverter`TensorDecomposition -> True, CalcFormConverter`ReduceLoopCoefficients -> False, CalcFormConverter`ReduceToScalarMasters -> True, FeynCalc`DropScaleless -> False,
  CalcFormConverter`ColourAlgebra -> True, CalcFormConverter`DiracAlgebra -> Automatic, FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}, CalcFormConverter`FORMExecutable -> Automatic,
  System`TimeConstraint -> Infinity, CalcFormConverter`WorkingDirectory -> Automatic, CalcFormConverter`KeepFiles -> False,
  CalcFormConverter`ShowTiming -> False, CalcFormConverter`ShowProgress -> False, CalcFormConverter`FORMThreads -> Automatic
@@ -219,10 +220,16 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
  {limit = OptionValue[System`TimeConstraint], keep = OptionValue[CalcFormConverter`KeepFiles], check, directory,
   job, run, result, input, equality, stage = "Check", retainedFailure,
   timing = OptionValue[CalcFormConverter`ShowTiming], progress = OptionValue[CalcFormConverter`ShowProgress],
-  threads = OptionValue[CalcFormConverter`FORMThreads], announce},
+  threads = OptionValue[CalcFormConverter`FORMThreads], announce, masterSummary=<||>, requested},
  If[!validTimeLimitQ[limit] || !BooleanQ[keep], Return[makeFailure["InvalidOption", "Use a positive TimeConstraint or Infinity, and KeepFiles -> True or False."]]];
  If[!BooleanQ[timing] || !BooleanQ[progress] || !validThreadsQ[threads],
    Return[makeFailure["InvalidOption", "ShowTiming and ShowProgress must be True or False; FORMThreads must be Automatic or a positive integer."]]];
+ If[!BooleanQ[OptionValue[CalcFormConverter`ReduceToScalarMasters]],
+   Return[makeFailure["InvalidOption", "ReduceToScalarMasters must be True or False."]]];
+ If[!BooleanQ[OptionValue[CalcFormConverter`ReduceLoopCoefficients]],
+   Return[makeFailure["InvalidOption", "ReduceLoopCoefficients must be True or False."]]];
+ If[!BooleanQ[OptionValue[CalcFormConverter`TensorDecomposition]] || !BooleanQ[OptionValue[FeynCalc`DropScaleless]],
+   Return[makeFailure["InvalidOption", "TensorDecomposition and DropScaleless must be True or False."]]];
  (* Equal may already have evaluated before this command receives its argument.
     Binary equations share one algebraic job: its files contain the residual,
     and only the returned result is compared with zero. No solver is invoked. *)
@@ -249,8 +256,15 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
      job = Block[{$showExportSummary = False}, CalcFormConverter`CalcFormExport[input, FileNameJoin[{directory, "job.frm"}],
        FeynCalc`Dimension -> OptionValue[FeynCalc`Dimension], FeynCalc`LoopMomenta -> OptionValue[FeynCalc`LoopMomenta],
        CalcFormConverter`DiracAlgebra -> OptionValue[CalcFormConverter`DiracAlgebra],
-       CalcFormConverter`ColourAlgebra -> OptionValue[CalcFormConverter`ColourAlgebra]]];
+       CalcFormConverter`ColourAlgebra -> OptionValue[CalcFormConverter`ColourAlgebra],
+       CalcFormConverter`TensorDecomposition -> OptionValue[CalcFormConverter`TensorDecomposition],
+       CalcFormConverter`ReduceLoopCoefficients -> OptionValue[CalcFormConverter`ReduceLoopCoefficients],
+       CalcFormConverter`ReduceToScalarMasters -> OptionValue[CalcFormConverter`ReduceToScalarMasters],
+       FeynCalc`DropScaleless -> OptionValue[FeynCalc`DropScaleless]]];
      If[FailureQ[job], Throw[retainedFailure["ExportFailed", "FORM export failed; job files were retained.", <|"Cause" -> job|>], $failureTag]];
+     If[TrueQ[OptionValue[CalcFormConverter`TensorDecomposition]] && Length[OptionValue[FeynCalc`LoopMomenta]] === 1, announce["Tensor decomposition enabled"]];
+     If[TrueQ[OptionValue[CalcFormConverter`ReduceLoopCoefficients]], announce["Loop coefficient reduction enabled"]];
+     If[TrueQ[OptionValue[CalcFormConverter`ReduceToScalarMasters]], announce["Scalar master reduction and final collection enabled"]];
      announce["Execute"];
      run = runtimeProcess[formCommand[check["Executable"], job["InputFile"], threads], directory, limit, True, progress];
      If[timing && NumberQ[run["ElapsedSeconds"]], reportCalculation[<|"Stage" -> "execution finished (" <> run["Status"] <> ")", "ElapsedSeconds" -> run["ElapsedSeconds"]|>]];
@@ -259,7 +273,10 @@ CalcFormConverter`CalcFormCalculate[expression_, OptionsPattern[]] := Module[
          "FORM execution did not complete successfully; job files were retained.", <|"Process" -> run|>], $failureTag]];
      announce["Import"];
      If[!FileExistsQ[job["ResultFile"]], Throw[retainedFailure["MissingResult", "FORM did not produce its result file.", <|"Process" -> run|>], $failureTag]];
-     result = CalcFormConverter`CalcFormImport[job["ResultFile"], job["MappingFile"]];
+     result = Block[{$smSummary=<||>}, With[{value=CalcFormConverter`CalcFormImport[job["ResultFile"], job["MappingFile"]]},masterSummary=$smSummary;value]];
+     If[progress && masterSummary=!=<||>,
+       requested=StringCases[Lookup[run,"StandardOutput",""],StartOfLine ~~ "CFC_MASTER_REQUESTED " ~~ digits:DigitCharacter.. :> FromDigits[digits]];
+       reportCalculation[<|"Stage"->("Scalar master reduction: "<>If[requested==={},"",ToString[First[requested]]<>" requested coefficients; "]<>ToString[masterSummary["Masters"]]<>" scalar masters; "<>ToString[masterSummary["Unresolved"]]<>" unresolved coefficients")|>]];
      If[FailureQ[result], retainedFailure["ImportFailed", "The FORM result could not be imported; job files were retained.", <|"Cause" -> result, "Process" -> run|>], result],
      $failureTag],
    retainedFailure["Aborted", "Calculation aborted; job files were retained."]];

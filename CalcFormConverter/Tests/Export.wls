@@ -5,7 +5,7 @@ add["symbols", GreekContext`\[Kappa] OtherContext`\[Kappa] + Global`\[GothicCapi
 add["scalar_abbreviations", (D - 1)^(-1/2) (D - 1)^(-1/2) (m^2 + n^2)^(-2) + 1/SPD[p]];
 add["trace_D", MTD[mu, nu] MTD[mu, nu]];
 add["trace_4", MT[mu, nu] MT[mu, nu]];
-add["component", MTD[mu, nu] FVD[p - l, mu] FVD[p, nu], LoopMomenta -> {l}];
+add["component", MTD[mu, nu] FVD[p - l, mu] FVD[p, nu], TensorDecomposition -> False, LoopMomenta -> {l}];
 add["free_indices", MTD[mu, nu] + FVD[p - 2 l, mu] FVD[p, nu]/s];
 add["dot_products", SPD[p - l, p + 2 l] + SPD[-l]];
 add["denominators", FAD[l, {l-p, m}, {l-p, m}] (SPD[l] + m^2)];

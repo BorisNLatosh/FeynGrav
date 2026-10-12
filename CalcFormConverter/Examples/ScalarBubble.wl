@@ -20,7 +20,7 @@ ScalarBubbleExample[p_, l_, m0_, m2_] := Module[
    importQuadraticGravity[1];
    expression = ScalarBubbleExample[p, l, m0, m2];
    job = CalcFormExport[expression, "/absolute/existing/directory/bubble.frm",
-     LoopMomenta -> {l}];
+     TensorDecomposition -> False, LoopMomenta -> {l}];
 
    Run form on job["InputFile"] separately. Then:
 
@@ -36,7 +36,7 @@ ScalarBubbleExample[p_, l_, m0_, m2_] := Module[
    (* If status["Status"] is "NotFound", explicitly request CalcFormInstall[]. *)
    importQuadraticGravity[1];
    expression = ScalarBubbleExample[p, l, m0, m2];
-   result = CalcFormCalculate[expression, LoopMomenta -> {l},
+   result = CalcFormCalculate[expression, TensorDecomposition -> False, LoopMomenta -> {l},
      WorkingDirectory -> "/tmp", KeepFiles -> True,
      ShowTiming -> True, ShowProgress -> True];
 
@@ -46,7 +46,7 @@ ScalarBubbleExample[p_, l_, m0_, m2_] := Module[
 
    For an end-to-end elapsed-time measurement, use:
    AbsoluteTiming[
-     result = CalcFormCalculate[expression, LoopMomenta -> {l},
+     result = CalcFormCalculate[expression, TensorDecomposition -> False, LoopMomenta -> {l},
        FORMThreads -> 4, ShowTiming -> True, ShowProgress -> True];
    ]
    Timing reports Mathematica kernel CPU time, not total elapsed time.

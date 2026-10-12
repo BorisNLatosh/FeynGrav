@@ -17,6 +17,7 @@
 pgFactorisationQ[data_Association] := data["Mapping"]["Version"] === 1 &&
     AnyTrue[data["Mapping"]["Entries"], #["Kind"] === "Denominator" &];
 pgOutput[data_Association, path_String, rationalPlan_: <||>, dimensionPlan_: <||>] := Module[{template, names, indices, vectors, fallback},
+    If[KeyExistsQ[data,"LoopReductionProcessing"], Return[lrOutput[data,path]]];
     If[!pgFactorisationQ[data], Return["#write <" <> path <> "> \"%E\",cfcResult"]];
     template = Quiet[Check[Import[FileNameJoin[{$moduleDirectory, "Templates", "PropagatorFactors.frm.in"}], "Text"], $Failed]];
     If[!StringQ[template] || !ContainsAll[StringCases[template, RegularExpression["@[A-Z]+@"]], {"@RESULT@", "@DENOMINATORS@", "@INDEXCHECK@", "@COEFFICIENTBRACKET@", "@RINITIAL@", "@RCHECK@", "@RMAXIMUM@", "@REDUCTION@", "@RSKIP@", "@COEFFICIENTOUTPUT@", "@RCLEANUP@", "@DREDUCTION@"}],
@@ -135,6 +136,10 @@ pgReadSummands[stream_, consume_] := Module[
    the coefficient. Only mapped identifiers can create pgDen tokens. *)
 pgDenFactorQ[pgDen[_String]] := True;
 pgDenFactorQ[Power[pgDen[_String], _Integer]] := True;
+pgDenFactorQ[_tdToken] := True;
+pgDenFactorQ[x_lrToken] := True;
+pgDenFactorQ[x_Plus] := lrFactorQ[x];
+pgDenFactorQ[Power[_tdToken, _Integer]] := True;
 pgDenFactorQ[_] := False;
 
 (* Parse a product of completely parenthesised factors separately. Each
@@ -168,7 +173,8 @@ pgParseCoefficient[text_String, parse_] := Module[
    coefficient can still use the established flat parser. Parsing the enclosing
    parentheses as part of one product would unnecessarily disable that path.
    Other accepted expression shapes retain the general parser's diagnostics. *)
-(* Only version-one commuting coefficients use this decomposition. Scan syntax
+(* Only commuting version-one algebra coefficients use this decomposition,
+   including version-six integral groups with that algebra capability set. Scan syntax
    before evaluation, then parse one additive subgroup at a time. Leaf pieces
    still pass through the restricted parser; no identifiers are evaluated here.
    Keep divisions, calls, powers of brackets and malformed shapes on the general
@@ -250,9 +256,11 @@ pgParseNested[text_String, parse_, level_: 0] := Module[
     ]
 ];
 
-pgParse[text_String, values_, dim_] := Module[{trimmed = StringTrim[text], cut, prefix, body, depth = 0, balanced, factor, prepared, parse, positions, levels},
+pgParse[text_String, values_, dim_] := Module[{trimmed = StringTrim[normaliseFORMNumbers[text]], cut, prefix, body, depth = 0, balanced, factor, prepared, parse, positions, levels, prefactorPattern},
     parse[t_] := If[$diracImportLine === None, parseResult[t, values, dim],
         prepared = caPrepareResult[t, values]; parseGeneralResult[prepared[[1]], prepared[[2]], dim]];
+    prefactorPattern = If[$tdImport === <||>,
+        "(?:1|cfd[0-9]+)", "(?:1|cfd[0-9]+|cfcTC\\([0-9,\\s-]+\\))"];
     cut = StringPosition[trimmed, RegularExpression["\\*\\s*\\("], 1];
     If[cut =!= {} && StringEndsQ[trimmed, ")"],
         prefix = StringTake[trimmed, cut[[1, 1]] - 1];
@@ -263,10 +271,13 @@ pgParse[text_String, values_, dim_] := Module[{trimmed = StringTrim[text], cut, 
         balanced = levels === {} || Min[levels] >= 0;
         depth = If[levels === {}, 0, Last[levels]];
         If[balanced && depth === 0 &&
-            StringMatchQ[prefix, RegularExpression["[+-]?\\s*(?:1|cfd[0-9]+)(?:\\s*\\^\\s*[+-]?[0-9]+)?(?:\\s*\\*\\s*cfd[0-9]+(?:\\s*\\^\\s*[+-]?[0-9]+)?)*\\s*"]],
+            (StringContainsQ[prefix, "cfcLRReduced(" | "cfcLRReducedPart("] ||
+            StringMatchQ[prefix,RegularExpression["[+-]?\\s*\\(\\s*[+-]?\\s*"<>prefactorPattern<>"\\s*\\)\\s*"]] ||
+            StringMatchQ[prefix, RegularExpression["[+-]?\\s*" <> prefactorPattern <> "(?:\\s*\\^\\s*[+-]?[0-9]+)?(?:\\s*\\*\\s*" <> prefactorPattern <> "(?:\\s*\\^\\s*[+-]?[0-9]+)?)*\\s*"]]),
             (* Lexical shape is only eligibility. Every identifier is resolved
                through the validated dictionary, never inferred from its name. *)
-            factor = parseGeneralResult[prefix, values, dim];
+            factor = If[StringContainsQ[prefix,"cfcLRReduced"],
+                lrParsePrefix[prefix,values,dim],parseGeneralResult[prefix, values, dim]];
             Return[factor pgParseCoefficient[body, If[TrueQ[$pgNestedParsing] &&
                 StringFreeQ[body, RegularExpression["[^A-Za-z0-9_+*/^(),.\\s-]"]],
                 Function[t, pgParseNestedChecked[t, parse]], parse]]]
@@ -275,37 +286,41 @@ pgParse[text_String, values_, dim_] := Module[{trimmed = StringTrim[text], cut, 
     parse[trimmed]
 ];
 
-pgImport[path_, mapping_, digests_, values_, dim_] := Module[
+pgImport[path_, mapping_, digests_, values_, dim_] := Block[{$lrSharedValues = None}, Module[
     {names, tokens, groups = <||>, implicit = True, consume, parsed,
      factors, prefactor, coefficient, key, rows, result},
     names = Lookup[Select[mapping["Entries"], #["Kind"] === "Denominator" &], "Name", {}];
-    If[names === {}, throwFailure["InvalidMapping", "Grouped output requires mapped denominators."]];
+    If[names === {} && !MemberQ[{6,7,8},mapping["Version"]], throwFailure["InvalidMapping", "Grouped output requires mapped denominators."]];
     tokens = Join[values, Association[(# -> pgDen[#]) & /@ names]];
     consume[text_] := (
         parsed = pgParse[text, tokens, dim];
         factors = If[Head[parsed] === Times, List @@ parsed, {parsed}];
+        If[mapping["Version"] === 6, tdValidateGroup[parsed, factors]];
         prefactor = Times @@ Select[factors, pgDenFactorQ];
         coefficient = Times @@ Select[factors, !pgDenFactorQ[#] &];
-        If[!FreeQ[coefficient, _pgDen],
+        If[!TrueQ[Lookup[$tdImport,"ReductionCoefficientBlocks",False]] && !FreeQ[coefficient, _pgDen],
             throwFailure["InvalidResult", "A propagator occurs inside a grouped coefficient."]];
         (* Validation must visit every coefficient even after an earlier group
            has required explicit endpoints. Do not short-circuit this call. *)
         implicit = caImplicitEligible[coefficient] && implicit;
-        key = ToString[prefactor, InputForm];
+        key = If[TrueQ[Lookup[$tdImport,"ReductionCoefficientBlocks",False]],
+            With[{value=prefactor},HoldComplete[value]],ToString[prefactor, InputForm]];
         If[KeyExistsQ[groups, key],
             rows = groups[key]; AppendTo[rows[[2]], coefficient]; AssociateTo[groups, key -> rows],
             AssociateTo[groups, key -> {prefactor, {coefficient}}]];
         parsed = factors = coefficient = Null
     );
     (* Reassociation is inappropriate for user symbols with arithmetic UpValues. *)
-    Block[{$pgNestedParsing = mapping["Version"] === 1 &&
+    Block[{$pgNestedParsing = tdAlgebraMapping[mapping]["Version"] === 1 &&
         AllTrue[DeleteDuplicates[Cases[{Values[values], dim}, _Symbol, Infinity, Heads -> True]], UpValues[#] === {} &]},
         If[TrueQ[$pgNestedParsing],
             withImportParser[tokens, dim,
-                pgWithStream[path, Function[stream, pgHeader[stream, mapping, digests]; pgReadSummands[stream, consume]]]],
-            pgWithStream[path, Function[stream, pgHeader[stream, mapping, digests]; pgReadSummands[stream, consume]]]]];
+                pgWithStream[path, Function[stream, pgHeader[stream, mapping, digests]; srWithReader[stream, lrReadShared[stream, mapping, tokens, values, dim]; srReadBody[stream, consume, tokens, values, dim]]]]],
+            pgWithStream[path, Function[stream, pgHeader[stream, mapping, digests]; srWithReader[stream, lrReadShared[stream, mapping, tokens, values, dim]; srReadBody[stream, consume, tokens, values, dim]]]]]];
     result = Map[Function[row,
-        (row[[1]] /. pgDen[name_String] :> values[name]) *
-        dcReconstruct[caReconstruct[Total[row[[2]]], implicit]]], Values[groups]];
-    Total[result]
-];
+        (row[[1]] /. {pgDen[name_String] :> values[name], tdToken[a___] :> tdReconstruct[{a}], lrToken[x_] :> lrReconstruct[x]}) *
+        dcReconstruct[caReconstruct[If[TrueQ[Lookup[$tdImport,"ExistingCoefficients",False]],
+            Total[row[[2]]] /. {tdToken[a___] :> tdReconstruct[{a}], pgDen[name_String] :> values[name]}, If[TrueQ[Lookup[$tdImport,"ReductionCoefficientBlocks",False]],
+                Total[row[[2]]] /. pgDen[name_String] :> values[name], Total[row[[2]]]]], implicit]]], Values[groups]];
+    Total[result] /. lrSharedToken[k_Integer] :> $lrSharedValues[k]
+]];

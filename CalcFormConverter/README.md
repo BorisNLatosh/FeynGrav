@@ -10,6 +10,8 @@ A standalone Wolfram Language package for translating supported exact FeynCalc e
   - [Numerator–propagator cancellation](#numeratorpropagator-cancellation)
   - [Bounded coefficient simplification](#bounded-coefficient-simplification)
 - [Automated workflow](#automated-workflow)
+- [One-loop tensor decomposition](#one-loop-tensor-decomposition)
+  - [Scalar master reduction](#scalar-master-reduction)
 - [Timing, progress and parallel execution](#timing-progress-and-parallel-execution)
 - [Explicit installation](#explicit-installation)
 - [Command and option reference](#command-and-option-reference)
@@ -71,14 +73,14 @@ Export to an existing directory:
 
 ```mathematica
 expression = MTD[mu, nu] FVD[l, mu] FVD[p - l, nu] FAD[{l, m}, {p - l, m}];
-job = CalcFormExport[expression, "/tmp/bubble.frm", LoopMomenta -> {l}];
+job = CalcFormExport[expression, "/tmp/bubble.frm", TensorDecomposition -> False, LoopMomenta -> {l}];
 ```
 
 A successful manual export prints a static summary with the complete paths labelled FORM program, Symbol mapping and Expected result. A kernel without a front end prints plain text. The returned association still contains `InputFile`, `MappingFile`, and `ResultFile`. Suppress its separate output while keeping the summary and recording elapsed time with:
 
 ```mathematica
 AbsoluteTiming[
-  job = CalcFormExport[expression, "/tmp/bubble.frm", LoopMomenta -> {l}];
+  job = CalcFormExport[expression, "/tmp/bubble.frm", TensorDecomposition -> False, LoopMomenta -> {l}];
 ]
 ```
 
@@ -108,7 +110,7 @@ Expressions containing ordinary quadratic propagators are automatically grouped 
 FAD[{p, m}] (a + b) + FAD[{p, m}]^2 FAD[q] (c + d)
 ```
 
-rather than distributing each denominator product over its coefficient. Terms without propagators form the unit-prefactor group. Before grouping, the generated programme cancels reducible polynomial numerator scalar products against ordinary propagators. It does not impose kinematics, perform partial fractions or apply integral identities. Eligible commuting coefficients have common numerical and monomial factors extracted separately.
+rather than distributing each denominator product over its coefficient. Terms without propagators form the unit-prefactor group. Before grouping, the generated programme cancels reducible polynomial numerator scalar products against ordinary propagators. This integrand-algebra stage does not impose kinematics, perform partial fractions or apply integral identities; the separately enabled coefficient-reduction stage can apply the latter operations after integration has been represented. Eligible commuting coefficients have common numerical and monomial factors extracted separately.
 
 New grouped results are read incrementally. The importer retains one complete top-level summand's source text at a time, parses it with the existing restricted grammar, and discards its text and tokens before continuing. The final expression and the largest coefficient still need memory. Older saved results keep their existing interpretation, and jobs without propagators retain their existing output path. Re-export and rerun an old job to obtain the new grouped layout; updating the package does not rewrite an existing `.out` file. Do not call `Expand` on a large imported result unless the expanded representation is actually needed.
 
@@ -117,11 +119,11 @@ New grouped results are read incrementally. The importer retains one complete to
 Both export and calculation automatically prepare a bounded basis of denominator polynomials. FORM expresses reducible scalar products through denominators present in each term, cancels their powers, restores unmatched numerator polynomials and then groups the surviving propagator products. For example:
 
 ```mathematica
-CalcFormCalculate[SPD[l] FAD[{l, m}], LoopMomenta -> {l}]
+CalcFormCalculate[SPD[l] FAD[{l, m}], TensorDecomposition -> False, LoopMomenta -> {l}]
 (* 1 + m^2 FCI[FAD[{l, m}]] *)
 ```
 
-The constant term is retained. There are no momentum shifts, scaleless-integral deletions, integrations or partial fractions. Scalar products outside the selected basis remain in the numerator. `LoopMomenta` gives loop-dependent scalar products priority in basis selection; without it, selection uses a deterministic ordering of all scalar products in the denominator routings. The algebra remains valid in either case, but the output basis may differ.
+In this explicitly selected integrand mode, the constant term is retained. There are no momentum shifts, scaleless-integral deletions, integrations or partial fractions. Scalar products outside the selected basis remain in the numerator. `LoopMomenta` gives loop-dependent scalar products priority in basis selection; without it, selection uses a deterministic ordering of all scalar products in the denominator routings. The algebra remains valid in either case, but the output basis may differ.
 
 The current planner allows at most 256 nonempty independent denominator subsets. Before this search, a direct pass cancels matching squares against massless propagators with routing `a p`, where `a` is an exact nonzero rational. This pass handles repeated powers without creating terms. If the basis budget is exceeded, these direct cancellations remain in place. Routing matrices contain exact rational numbers only: no division by a mass difference, external invariant or Gram determinant is introduced. Cancellation does not penetrate opaque inverse-polynomial abbreviations or scalar functions. FORM also retains a hidden copy of the original expression and restores that directly cancelled expression if the candidate exceeds both 16 terms and twice the original expanded term count, or exceeds four times the original propagator-group count. This prevents large structural growth but does not guarantee smaller factored output. These checks apply to the complete job. For eligible version-one tensor jobs, the converter can evaluate independent vector-monomial sectors separately and stop once their accumulated term count already proves that the complete candidate must be rejected. This uses the same growth criterion; it does not abandon a potentially acceptable cancellation. Other jobs compute the complete candidate first. These checks are not execution-time or memory limits.
 
@@ -164,7 +166,7 @@ status = CalcFormCheck[];
 (* If FORM is missing, installation is an explicit separate request: *)
 (* CalcFormInstall[] *)
 
-result = CalcFormCalculate[expression, LoopMomenta -> {l}];
+result = CalcFormCalculate[expression, TensorDecomposition -> False, LoopMomenta -> {l}];
 ```
 
 `CalcFormCheck[FORMExecutable -> Automatic, FORMThreads -> Automatic, TimeConstraint -> 10]` searches the kernel's `PATH` and runs a small arithmetic probe. An explicit executable path takes precedence. Its association reports `Available`, `Status`, `Executable`, `Version`, `RequestedEngine`, `FORMThreads` and installation guidance, plus process diagnostics when a probe ran. `NotFound` means no executable was found; `LaunchFailed`, `ProbeFailed`, `TimedOut` and `Aborted` distinguish other failures. An available executable with an unrecognized banner has `Version -> Missing["NotReported"]`.
@@ -173,14 +175,14 @@ result = CalcFormCalculate[expression, LoopMomenta -> {l}];
 CalcFormCheck[FORMExecutable -> "/usr/bin/form"]
 result = CalcFormCalculate[expression,
   FORMExecutable -> "/usr/bin/form",
-  LoopMomenta -> {l},
+  TensorDecomposition -> False, LoopMomenta -> {l},
   TimeConstraint -> 600,
   WorkingDirectory -> "/tmp",
   KeepFiles -> True
 ];
 ```
 
-Calculation options are `DiracAlgebra -> Automatic`, `ColourAlgebra -> True`, `Dimension -> Automatic`, `LoopMomenta -> {}`, `FORMExecutable -> Automatic`, `TimeConstraint -> Infinity`, `WorkingDirectory -> Automatic`, `KeepFiles -> False`, `ShowTiming -> False`, `ShowProgress -> False`, and `FORMThreads -> Automatic`. The calculation timeout applies to FORM execution; the preceding availability probe has its own ten-second limit. `WorkingDirectory` names an existing parent directory; each call creates its own unique child. `Automatic` uses the system temporary directory. The Mathematica working directory is unchanged.
+Calculation options are `TensorDecomposition -> True`, `ReduceLoopCoefficients -> False`, `ReduceToScalarMasters -> True`, `DropScaleless -> False`, `DiracAlgebra -> Automatic`, `ColourAlgebra -> True`, `Dimension -> Automatic`, `LoopMomenta -> {}`, `FORMExecutable -> Automatic`, `TimeConstraint -> Infinity`, `WorkingDirectory -> Automatic`, `KeepFiles -> False`, `ShowTiming -> False`, `ShowProgress -> False`, and `FORMThreads -> Automatic`. The calculation timeout applies to FORM execution; the preceding availability probe has its own ten-second limit. `WorkingDirectory` names an existing parent directory; each call creates its own unique child. `Automatic` uses the system temporary directory. The Mathematica working directory is unchanged.
 
 Import reconstructs the expression in the Wolfram kernel, so its time is separate from FORM execution. Assign large results with a trailing semicolon, as in these examples, to avoid the additional cost of formatting and displaying the full expression in a notebook.
 
@@ -188,13 +190,154 @@ An algebraic input returns a FeynCalc expression; a binary equality returns `Tru
 
 Successful jobs are deleted unless `KeepFiles -> True`. Retained successful jobs report their path with `CalcFormCalculate::files`. Failed calculation jobs are retained once a job directory has been created. A failure during the initial availability check can occur before there are any job files. `job.frm`, `job.map.json` and `job.out` can then be used with the manual workflow. Never infer a successful calculation solely from a result file: check the returned value.
 
-This workflow performs the template's existing algebra and Lorentz contractions. It does not perform loop integration or integral reduction.
+The examples above explicitly retain integrand algebra. Declaring one loop momentum without disabling tensor decomposition instead returns an integral expressed through coefficient functions, as described below.
+
+## One-loop tensor decomposition
+
+`TensorDecomposition -> True` is the default, but it acts only with an explicitly declared integration variable:
+
+```mathematica
+result = CalcFormCalculate[
+  FVD[q, mu] FVD[q, nu] FAD[{q, m0}, {q + p, m1}],
+  LoopMomenta -> {q}
+];
+```
+
+With `ReduceToScalarMasters -> False`, the result is `I Pi^2` times the metric coefficient `PaVe[0,0,...]` and the external-momentum coefficient `PaVe[1,1,...]`. The default master stage further reduces those coefficients to scalar integrals. This represents the **integral**, not a pointwise-equivalent integrand. Rank-zero integrals are converted too. The normalisation matches FeynCalc's `ToPaVe`; no `(2 Pi)^(-D)` or renormalisation-scale factor is inserted. Equality input is correspondingly interpreted as equality of integrals.
+
+Set `TensorDecomposition -> False` to retain integrand algebra. Empty `LoopMomenta -> {}` also retains that workflow for expressions without saved integral coefficients. Multiple declared loop momenta are rejected when decomposition is enabled.
+
+FORM gathers polynomial loop tensors and produces the sum of distinct metric/chord placements, without averaging factorials or Gram-matrix inversion. Denominator cancellation precedes routing shifts and decomposition. The routing convention is `(q + r_j)^2 - m_j^2`; the first surviving chord is shifted to zero. This assumes a translation-invariant regularisation. Arbitrary finite polynomial ranks are supported structurally, with no promise that large ranks are inexpensive.
+
+Ordinary unit-power coefficients in symbolic `D` use `PaVe` with optional reduction and reordering disabled. Other cases use the inert scalar object
+
+```mathematica
+LoopTensorCoefficient[indices, chords, massesSquared, powers, dimension]
+```
+
+The chord list includes the leading zero; positive tensor labels refer to the subsequent chords. Pairs of zeros denote metrics; `{0}` denotes rank zero. Powers are positive integers. The same `I Pi^2` normalisation applies. Repeated powers are retained by default. The optional reduction described below applies partial fractions and integration-by-parts identities in FORM. Explicit dimensions other than symbolic `D` remain recorded in this object. Both coefficient forms can be passed through subsequent converter calls.
+
+```mathematica
+(* Retain the repeated denominator as a generalised coefficient. *)
+CalcFormCalculate[FAD[{q, m}, {q, m}], LoopMomenta -> {q}]
+
+(* Preserve a formal scaleless integral: this is the default. *)
+CalcFormCalculate[FAD[q], LoopMomenta -> {q}]
+
+(* Explicitly discard demonstrably scaleless integrals. *)
+CalcFormCalculate[FAD[q], LoopMomenta -> {q}, DropScaleless -> True]
+```
+
+`DropScaleless -> False` uses formal coefficients where automatic PaVe evaluation could discard a scaleless term. Empty families denote polynomial vacuum integrals. Odd vacuum tensors vanish by symmetry. With `True`, reconstruction discards polynomial vacuum integrals and massless families whose chord invariants all vanish; undecided cases remain. These objects do not separate ultraviolet and infrared contributions. FeynCalc's global scaleless settings are unchanged.
+
+### Optional reduction of repeated powers
+
+With `ReduceToScalarMasters -> False`, enable `ReduceLoopCoefficients -> True` to lower repeated powers after tensor
+decomposition. It is **off by default** because the reduction may introduce
+inverse mass differences and Cayley determinants. Supply exceptional kinematics
+before export. Import rejects changed scalar-product definitions for a reduction job; re-export under the new kinematics. Substituting into a generic formula afterwards can create an
+indeterminate expression requiring a limit.
+
+```mathematica
+result = CalcFormCalculate[
+  FVD[q, mu] FVD[q, nu] FAD[{q, m, 2}, {q + p, M}],
+  LoopMomenta -> {q}, ReduceLoopCoefficients -> True
+];
+
+(* Reduce a previously computed answer without repeating its tensor algebra.
+   Do not declare LoopMomenta: the input already represents integrals. *)
+reduced = CalcFormCalculate[answer, ReduceLoopCoefficients -> True, ReduceToScalarMasters -> False];
+
+(* Separately authorise the removal of demonstrably scaleless integrals. *)
+reduced = CalcFormCalculate[answer,
+  ReduceLoopCoefficients -> True, ReduceToScalarMasters -> False, DropScaleless -> True];
+```
+
+The supported reduction uses same-route partial fractions, parameter-moment
+identities and fixed-dimension integration by parts. Nonsingular subfamilies
+with up to four distinct momentum routes are reduced to unit-power `PaVe`
+coefficients. Positive tensor labels may become higher-rank metric coefficients;
+this is an equivalent coefficient basis, not evaluation into logarithms or scalar
+masters. There is no hard-coded tensor-rank limit.
+
+`LoopTensorCoefficient` remains for singular subfamilies, preserved scaleless
+integrals, families beyond the supported topology range and nonstandard
+coefficient dimensions. Reduction requires symbolic `D`; other dimensions remain formal in both new integrals and saved expressions. An integer dimension must not be substituted before resolving a zero times an ultraviolet pole. No such contribution is silently set to zero. The
+algorithm can generate scaleless pinches from an originally non-scaleless
+family; `DropScaleless` also governs those terms.
+
+For the coefficient discussed in the example, writing `s = SPD[p]` and `M` for
+the mass, reduction with scaleless terms dropped gives
+
+\[
+C_{00}^{(1,2,1)}(0,-p,-p;0,0,M^2)
+=\left(\frac{D-1}{M^2s}-\frac{1}{M^4}\right)
+ B_{00}(s;0,0)+\frac{B_{00}(s;0,M^2)}{M^4}.
+\]
+
+This generic formula requires nonzero `M` and `s`. With `DropScaleless -> False`,
+it additionally retains the formal massless-tadpole term
+`-LoopTensorCoefficient[{0,0},{0},{0},{2},D]/(M^2 s)`.
+See the [reduction verification report](Tests/Reports/LoopCoefficientReduction.md).
+
+### Scalar master reduction
+
+`ReduceToScalarMasters -> True` is the default for export and calculation. With
+one declared loop momentum, supported tensor integrals through boxes reduce to
+scalar `PaVe[0, ...]` objects: the A0, B0, C0 and D0 basis. This does not evaluate
+those integrals, expand in D - 4 or extract ultraviolet poles.
+
+```mathematica
+answer = CalcFormCalculate[
+  FVD[q, mu] FVD[q, nu] FAD[{q, m0}, {q + p, m1}],
+  LoopMomenta -> {q}];
+coefficients = CalcFormCalculate[expression, LoopMomenta -> {q},
+  ReduceToScalarMasters -> False];
+masters = CalcFormCalculate[coefficients, ReduceToScalarMasters -> True];
+```
+
+Saved tensor `PaVe` and `LoopTensorCoefficient` objects can be reduced without
+reintegrating their multipliers. PaVe families are represented by their supplied
+invariants; no fictitious momentum vectors are introduced. Scalar masters use
+`PaVeAutoOrder -> False` and `PaVeAutoReduce -> False`.
+
+Enabled master reduction includes necessary repeated-power reduction even when
+`ReduceLoopCoefficients` retains its default False. With master reduction off,
+that older option keeps its previous meaning. `TensorDecomposition -> False`
+leaves a newly supplied integrand unintegrated. Algebraic inputs with no integral
+coefficients and no declared loop retain their existing meaning.
+
+Reduction keeps symbolic D exactly. Generic identities may divide by Gram or
+Cayley determinants; specify exceptional kinematics before export rather than
+substituting them into a generic answer. Dedicated zero-momentum bubble
+identities handle equal and unequal masses. Cases without a safe implemented
+identity remain formal, with a partial-reduction message. A saved PaVe family is conservatively retained if a required subfamily has an unresolved singularity or a preserved scaleless multi-line integral; this avoids inventing momentum vectors for a formal remainder. Preserved scaleless
+pinches can also leave `LoopTensorCoefficient` in the answer; `DropScaleless`
+continues to control this independently. Preserving such objects does not
+separate their ultraviolet and infrared divergences.
+
+FORM reduces distinct coefficient keys before reassembling the amplitude. Final
+multipliers are collected by scalar integral and complete rational denominator
+product, with shared blocks and incremental import. Reduction may increase
+rational coefficient size and runtime; it is not a promise of smaller output.
+See the [scalar-master verification report](Tests/Reports/ScalarMasterReduction.md).
+
+
+The manual workflow uses the same options on `CalcFormExport`; the resulting FORM program is standalone. The default decomposition does not reduce repeated powers. Optional coefficient reduction returns ordinary PaVe coefficients where supported; it does not evaluate them analytically, perform Laurent expansions or choose a renormalisation prescription. Loop dependence hidden in unsupported functions, masses, polarisation vectors or opaque scalar abbreviations is rejected.
+
+Large scalar decomposition jobs retain the eligible pre-integration tensor
+optimisations. FORM combines rational coefficients in the dimension after
+decomposition, and the importer reads integral groups incrementally using the
+validated coefficient parser. This reduces intermediate work; the final
+expression must still fit in memory. See the
+[large-case verification](Tests/Reports/TensorDecomposition.md#large-quadratic-gravity-follow-up)
+for measured results and limits.
 
 ## Timing, progress and parallel execution
 
 ```mathematica
 result = CalcFormCalculate[expression,
-  LoopMomenta -> {l},
+  TensorDecomposition -> False, LoopMomenta -> {l},
   FORMThreads -> 4,
   ShowTiming -> True,
   ShowProgress -> True
@@ -224,7 +367,7 @@ Use `AbsoluteTiming` to measure the complete call, including the availability ch
 ```mathematica
 {elapsedSeconds, ignored} = AbsoluteTiming[
   result = CalcFormCalculate[expression,
-    LoopMomenta -> {l}, FORMThreads -> 4, ShowTiming -> True];
+    TensorDecomposition -> False, LoopMomenta -> {l}, FORMThreads -> 4, ShowTiming -> True];
 ];
 ```
 
@@ -297,7 +440,11 @@ The check association always has `Available`, `Status`, `Executable`, `Version`,
 | Option | Accepted values | Export default | Check default | Calculate default | Install default |
 | --- | --- | --- | --- | --- | --- |
 | `Dimension` | `Automatic`, a symbolic dimension other than `I`, or integer at least 2 | `Automatic` | — | `Automatic` | — |
-| `LoopMomenta` | List of distinct unassigned symbols | `{}` | — | `{}` | — |
+| `TensorDecomposition` | `True` or `False` | `True` | — | `True` | — |
+| `ReduceLoopCoefficients` | `True` or `False` | `False` | — | `False` | — |
+| `ReduceToScalarMasters` | `True` or `False` | `True` | — | `True` | — |
+| `DropScaleless` | `True` or `False` | `False` | — | `False` | — |
+| `LoopMomenta` | List of distinct unassigned symbols; one for enabled decomposition | `{}` | — | `{}` | — |
 | `DiracAlgebra` | `Automatic` or `False` | `Automatic` | — | `Automatic` | — |
 | `ColourAlgebra` | `True`, `Automatic` or `False` | `True` | — | `True` | — |
 | `OverwriteTarget` | `True` or `False` | `False` | — | — | — |
@@ -316,7 +463,11 @@ A dash means that command does not accept the option. `CalcFormImport` has no op
 | Export option | Default | Meaning |
 | --- | --- | --- |
 | `Dimension` | `Automatic` | Infer one Lorentz space from the input; purely scalar inputs default to `D`. An explicit value must agree with existing tensor dimensions. |
-| `LoopMomenta` | `{}` | Distinct momentum symbols recorded for later reduction. No loop-count restriction. |
+| `TensorDecomposition` | `True` | Interpret a single declared loop momentum as a one-loop integral; False retains integrand algebra. |
+| `ReduceToScalarMasters` | `True` | Reduce supported coefficients through boxes to scalar PaVe masters, including necessary power lowering. |
+| `ReduceLoopCoefficients` | `False` | Lower repeated powers in FORM; also accepts saved coefficients with no declared loop. May introduce inverse mass differences and Cayley determinants. |
+| `DropScaleless` | `False` | Retain formal scaleless integrals; True discards provably scaleless cases during reconstruction. Also applies when reducing saved coefficients. |
+| `LoopMomenta` | `{}` | Distinct integration-variable symbols. One activates default tensor decomposition; multiple entries require TensorDecomposition -> False. |
 | `DiracAlgebra` | `Automatic` | Simplify and order ordinary open chains and evaluate explicit Dirac traces; `False` selects translation only. |
 | `ColourAlgebra` | `True` | Reduce fundamental SU(N) colour expressions in FORM; `False` preserves colour objects and traces. |
 | `OverwriteTarget` | `False` | Refuse an existing input, mapping, or result path unless replacement is explicitly requested. |
@@ -337,13 +488,13 @@ Invalid arguments, unsupported expressions, incompatible dimensions, invalid map
 - Rank-four Lorentz `LC`, `LCD`, legacy `LeviCivita` and internal `Eps`, with one consistent Lorentz space.
 - Ordinary `GA`, `GAD`, `GS`, `GSD`, ordered Dirac words and supported `DiracTrace` expressions.
 - Fundamental SU(N) `SUNT`, `SUNTF`, `SUNF`, `SUND`, `SUNDelta`, `SUNFDelta`, `SUNTrace`, `SUNN`, `CA`, `CF` and whitelisted `SMP` scalar couplings.
-- Scalar `A0`, `B0`, `C0`, `D0`, with respectively 1, 3, 6 and 10 positional arguments. Options on master functions and general `PaVe` objects are outside the supported vocabulary.
+- Scalar `A0`, `B0`, `C0`, `D0`, with respectively 1, 3, 6 and 10 positional arguments. Options on these shortcut master functions are unsupported. Ordinary tensor `PaVe` objects and `LoopTensorCoefficient` are supported as integral coefficients; scalar master output uses `PaVeAutoOrder -> False` and `PaVeAutoReduce -> False`.
 
 Spinors, explicit Dirac indices, gamma-five/projectors, Cartesian or mixed-space Levi-Civita tensors, unsupported noncommutative products, mixed Lorentz spaces, inexact numbers, nonlinear or symbolically weighted momentum routing, `SFAD`/`CFAD`, and unknown function heads are rejected. Unknown tensors are never automatically classified as scalars. Assigned symbols follow ordinary Wolfram Language evaluation; use unassigned symbols for symbolic inputs and imports.
 
 ### Dimensions and symbol identity
 
-`MT`, `FV`, and `SP` describe four-dimensional objects; `MTD`, `FVD`, and `SPD` describe the symbolic `D` space. The converter rejects mixtures rather than converting between them. Purely scalar input defaults to `D`. A symbolic dimension must be a single symbol: an explicit `D - 4` is an expression and is not accepted. For example, `CalcFormExport[x + 1, file, Dimension -> 4]` selects four dimensions when no tensor dimension contradicts it. `LoopMomenta` records symbols as metadata; it neither integrates them nor imposes kinematics.
+`MT`, `FV`, and `SP` describe four-dimensional objects; `MTD`, `FVD`, and `SPD` describe the symbolic `D` space. The converter rejects mixtures rather than converting between them. Purely scalar input defaults to `D`. A symbolic dimension must be a single symbol: an explicit `D - 4` is an expression and is not accepted. For example, `CalcFormExport[x + 1, file, Dimension -> 4]` selects four dimensions when no tensor dimension contradicts it. `LoopMomenta -> {q}` activates the default one-loop tensor decomposition. Empty LoopMomenta or TensorDecomposition -> False retains integrand algebra. No on-shell kinematics are imposed.
 
 The mapping retains full symbol contexts: ``Left`p`` and ``Right`p`` remain distinct even though their short names match. Greek/script symbols are encoded as data, while FORM receives generated ASCII identifiers. The same symbol used as a scalar, vector and index is registered separately for each role. Identifier numbering belongs to one export; never reuse a name such as `cfv1` across jobs without its mapping.
 
@@ -630,21 +781,50 @@ AbsoluteTiming[result = CalcFormCalculate[expression];]
 This displays the elapsed time and `Null`, rather than formatting the complete result.
 
 
+### Repeated coefficients in large amplitudes
+
+With `ReduceLoopCoefficients -> True`, distinct integral coefficients are
+reduced once, separately from their amplitude prefactors. Linear results are
+collected by the **final** coefficient: contributions to the same PaVe function
+share one multiplier. Within that multiplier, FORM collects complete products
+of exposed rational denominators and spectator propagators, retaining their
+powers. Equivalent shifted families with the same ordered masses and invariants
+share a PaVe key; no extra kinematic identities are imposed.
+
+Large commuting results retain shared numerator factors while their denominator
+products are exposed for collection. The file stores validated definitions and
+integral groups incrementally. Import reconstructs ordinary factored expressions;
+no private sharing objects remain. This is structural simplification, not a
+promise of a globally minimal rational expression. It can increase output size
+and execution time relative to leaving amplitude blocks opaque. Numerators
+with free Lorentz indices retain collection and sharing but bypass the optional
+common-factor pass.
+
+Products of integral coefficients retain the general reduction path. The final
+Mathematica expression and individual groups must still fit in memory. See the
+[verification report](Tests/Reports/DenominatorCollectionInvestigation.md) for
+measured limits and the status of the large-expression checks.
+
 ## Organisation and future reduction
 
 - `CalcFormConverter.wl`: public interface and private implementation, organised into Mathematica initialisation cells. Shared specifications define supported heads, master functions and symbol categories. Export builds conversion data in memory, renders the program and mapping, then writes the files through separate private functions.
 - `PropagatorGroups.wl` and `CoefficientParser.wl`: incremental grouped reading and restricted reconstruction of factored coefficients.
 - `PropagatorCancellation.wl`, `RationalCoefficients.wl` and `DimensionCoefficients.wl`: guarded numerator cancellation and scalar coefficient processing in FORM.
+- `TensorDecomposition.wl`: integral-family metadata, FORM tensor decomposition and coefficient reconstruction.
+- `ScalarMasterReduction.wl`: scalar-master recurrences, invariant-only saved families and partial-reduction diagnostics.
+- `LoopCoefficientReduction.wl`: optional repeated-power reduction and saved-coefficient planning, with a terminating FORM recurrence.
+- `LoopDenominatorGroups.wl` and `Templates/LoopDenominatorGroups.frm.in`: rational-factor translation and FORM collection inside final integral multipliers.
+- `SharedCoefficientReader.wl`: bounded shared-definition records and incremental integral-group reading.
 - `StageSymmetry.wl`: FORM-verified pair symmetries used inside eligible prepared contractions.
 - `Templates/Program.frm.in`: declarations, factor definitions, target expression, processing boundary, dedicated result output and termination.
 - [`Examples/ScalarBubble.wl`](Examples/ScalarBubble.wl): the supplied scalar-projected quadratic-gravity bubble, before symmetry factor and integration measure. Its workflow comments show manual export/import, automated calculation, TFORM, progress and timing. Load FeynGrav and the cubic library with `importQuadraticGravity[1]` before evaluating `ScalarBubbleExample`. Loading the example file only defines the example function; it does not execute FORM.
 - `DiracColour.wl`, `DiracAlgebra.wl`, `ColourAlgebra.wl`: typed translation and independently selectable Dirac/colour processing, with companion templates.
 - `ThirdParty/FORMColour/`: unchanged upstream procedure, attribution and licence; the adapted procedure is embedded in exported files.
 - `FORMRuntime.wl`: executable discovery, arithmetic probe, streamed process logs, automated calculation and explicit installation. Loaded as definitions only in the same private context.
-- `FORMAT.md`: version-one through version-five mapping schemas, result grammar and compatibility policy.
+- `FORMAT.md`: version-one through version-eight mapping schemas, result grammar and compatibility policy.
 - `Tests/`: separate core, FORM round-trip, runtime and FeynGrav integration suites, with a development-only Python driver. Fixed version-one artifacts test compatibility with saved calculations.
 
-Future FORM procedures can be inserted at the marked processing boundary without changing the export/import commands. Numerator cancellation is already implemented as described above. Integral reduction with repeated propagators, exceptional kinematics, integral normalisation, dimensional-regularisation conventions and general one-loop tadpole/bubble/triangle/box reduction remain separate work. Master-integral names are already supported in both directions. Multiple loop momenta can already be recorded; no two-loop reduction is implemented.
+Future FORM procedures can be inserted at the marked processing boundary without changing the export/import commands. Numerator cancellation is already implemented as described above. Optional repeated-power coefficient reduction is available. Scalar-master reduction through boxes is enabled by default, with exceptional-case retention. Analytic evaluation and additional exceptional-kinematics identities remain separate work. Master-integral names are already supported in both directions. Multiple loop momenta can already be recorded; no two-loop reduction is implemented.
 
 ## Development and tests
 

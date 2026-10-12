@@ -109,3 +109,12 @@ The legacy `Libs/Performance_Tests.nb` is replaced by notebook 06. Its hand-made
 Notebook 06 displays a compact environment table and mean/median times for successful measured observations. Public totals, helpers and individual stages have separate charts. First observations and warmups remain in JSON; only unsuccessful observations appear in the diagnostic table. Generated files are checked for presence and readability, without comparisons against previous expressions or byte equality. The generator retains its normal serialisation read-back check. Retained-file notices are suppressed locally; other warnings remain visible.
 
 Notebook 06 shows a progress bar counting completed cases, with the current case and stage. This is not an estimate of remaining time. Ordinary progress output is saved in `progress.log` in the run directory; warnings remain visible. Logging remains included in public-command timing. Reports and the progress log survive working-file cleanup.
+
+The existing converter workloads explicitly use `TensorDecomposition -> False` when declaring loop momenta. They continue to measure integrand algebra; their saved results are not benchmarks of the new one-loop coefficient decomposition.
+
+
+Scalar one-loop master reduction is enabled by default with
+`ReduceToScalarMasters -> True`. Set it to False to retain tensor coefficient
+functions. This includes necessary repeated-power reduction but does not
+evaluate scalar integrals. The benchmark integrand workflows explicitly disable
+this stage. See [the converter guide](../CalcFormConverter/README.md#scalar-master-reduction).

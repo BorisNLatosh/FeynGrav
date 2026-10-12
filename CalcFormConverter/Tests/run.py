@@ -58,6 +58,11 @@ def main():
                 run_kernel('DimensionCoefficients')
                 run_kernel('DimensionPreconditioning')
                 run_kernel('StageSymmetry')
+                run_kernel('TensorDecomposition')
+                run_kernel('LoopCoefficientReduction')
+                run_kernel('LoopDenominatorGroups')
+                run_kernel('LoopCoefficientParameters')
+                run_kernel('ScalarMasterReduction')
                 continue
             run_kernel('Export' if suite == 'form' else 'GravityExport')
             if suite == 'form':

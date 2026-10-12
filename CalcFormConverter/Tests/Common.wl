@@ -16,3 +16,7 @@ add[label_,expr_,opts___] := Module[{job},
 ];
 saveCases[] := Block[{$ContextPath={"System`"}},Put[cases,FileNameJoin[{testDirectory,"cases.wl"}]]];
 finish[label_] := (Print[label,": ",checks," assertions; ",failures," failures."];Export[FileNameJoin[{testDirectory,"test-completed"}],label,"Text"];Quit[If[failures>0,1,0]]);
+
+(* Historical coefficient-only fixtures opt out of the new default stage. *)
+coefficientCalculate[expr_,opts___] := CalcFormCalculate[expr,opts,ReduceToScalarMasters->False];
+coefficientExport[expr_,file_,opts___] := CalcFormExport[expr,file,opts,ReduceToScalarMasters->False];

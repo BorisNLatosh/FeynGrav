@@ -1,17 +1,17 @@
-# Persisted formats, versions 1 through 5
+# Persisted formats, versions 1 through 8
 
 This document describes the JSON mapping and dedicated FORM result consumed by `CalcFormImport`. It is a compatibility contract for saved calculations. Internal helper associations returned by `buildExportData` and `renderExport` are private implementation details and are not this file format.
 
 ## Version and correspondence
 
-The mapping contains `"Format": "CalcFormConverter"` and an integer `"Version"` from 1 through 5. The result begins with `CFC<version> <mapping-digest>`, followed by the FORM expression. For example, a **version-one** result begins with:
+The mapping contains `"Format": "CalcFormConverter"` and an integer `"Version"` from 1 through 8. The result begins with `CFC<version> <mapping-digest>`, followed by the FORM expression. For example, a **version-one** result begins with:
 
 ```text
 CFC1 <mapping-digest>
 <FORM expression>
 ```
 
-The marker is derived from the format version in the implementation. The importer accepts versions 1 through 5; unsupported versions produce `Failure["InvalidMapping", ...]`. Changing the meaning of existing fields, symbol encoding or result grammar requires an explicit compatibility decision and, when incompatible, a new format version. Optional descriptive fields may be added without changing existing meanings.
+The marker is derived from the format version in the implementation. The importer accepts versions 1 through 8; unsupported versions produce `Failure["InvalidMapping", ...]`. Changing the meaning of existing fields, symbol encoding or result grammar requires an explicit compatibility decision and, when incompatible, a new format version. Optional descriptive fields may be added without changing existing meanings.
 
 The mapping is read as UTF-8 text. Its primary digest is Wolfram Language `Hash[jsonText, "SHA256", "HexString"]`. For compatibility with early notebook exports, the importer also accepts the digest of `FromCharacterCode[ToCharacterCode[jsonText, "UTF-8"]]`: those exports hashed the UTF-8 byte string before writing Unicode text. Both checks bind the complete mapping. These are Wolfram string hashes, not a specification to hash arbitrary raw file bytes with an external utility. Even JSON reformatting changes the digest. Preserve the mapping file with its result. This check detects mismatched artifacts, not deliberate tampering.
 
@@ -29,8 +29,11 @@ Choose the highest applicable row below; a newer feature can coexist with and re
 | 3 | Dirac/colour translation without processing or explicit traces requiring later formats | Typed words and reserved open spin line |
 | 4 | Dirac processing or explicit Dirac traces, without version-five colour features | Processing mode and independent trace spin lines |
 | 5 | Processed colour structures or supported colour traces | Colour conventions, processing mode, typed indices/endpoints and procedure identity |
+| 6 | Active one-loop tensor decomposition | Integral conventions, ordered families and grouped coefficient output; AlgebraVersion records the underlying version 1–5 capabilities |
+| 7 | Reduction of existing loop coefficients | Existing coefficient normalisation; external factors are not integrated; underlying algebra capabilities remain separate |
+| 8 | Active scalar-master reduction | Source interpretation, reduction conventions and generic denominator restrictions; underlying algebra capabilities remain separate |
 
-Ordinary epsilon-free scalar/tensor exports remain version one even with the default algebra options. Version selection follows structures present in the input, not just an enabled option. See the version-specific sections below for exact fields and validation. Existing versions are still importable; a documentation reorganisation does not change their meaning.
+Ordinary epsilon-free scalar/tensor exports remain version one when tensor decomposition is inactive. Version selection follows structures present in the input, not just an enabled option. See the version-specific sections below for exact fields and validation. Existing versions are still importable; a documentation reorganisation does not change their meaning.
 
 ## Mapping fields
 
@@ -326,3 +329,161 @@ apply: no value at an original pole is assigned by this representation.
 Remaining version-one coefficients may contain a sum of monomials multiplied by ordinary numerator/denominator quotients in the mapped Lorentz dimension. `DimensionCoefficients.wl` emits this syntax after univariate FORM rational arithmetic. Its private `cfcDimRat` objects never enter output. Unsupported scalar abbreviations retain their recorded meaning. No new mapping fields or parser grammar are required. Direct massless cancellation precedes the guarded general numerator stage, so the latter's fallback does not undo it.
 
 Dimension-only rational functions can also occur internally between prepared tensor stages and before general numerator cancellation. They are removed by the existing dimension coefficient writer. Temporary dimension abbreviations and verified two-index symmetry placeholders are restored within FORM. Symmetry canonicalisation is valid inside the checked contraction, not as an identity for an arbitrary free intermediate tensor. These processing changes introduce no saved mathematical heads or mapping metadata and do not reinterpret older files.
+
+## Version six: one-loop tensor coefficients
+
+Active decomposition writes `Version: 6`, `AlgebraVersion: 1..5`, `Processing: OneLoopTensorDecomposition` and `ResultLayout: IntegralCoefficientGroups`. AlgebraVersion selects the existing epsilon, Dirac and colour validators; a version-six number alone does not imply their presence.
+
+`TensorDecomposition` records encoded `LoopMomentum`, `Normalisation: IntegralEqualsIPiSquaredTimesCoefficient`, `Basis: DistinctSymmetricPlacements`, boolean `DropScaleless`, and `Families`. Each family-table entry contains an encoded `Chord` and `MassSquared`. Import recomputes this table from the authoritative denominator expressions and requires agreement. This table lists distinct normalised loop-dependent denominators before pinches; individual coefficients select surviving entries by positive powers. The first surviving entry is the anchor. Spectator denominators retain their ordinary mapping entries.
+
+The reserved result function is `cfcTC(n1,...,nM,-2,label1,...)`: M nonnegative powers, followed by -2 and sorted tensor labels. Label zero denotes a metric slot and must occur an even number of times. Positive labels refer to active dictionary positions other than the anchor. The empty label sequence is rank zero. `cfcTC(-1,rank)` denotes a polynomial vacuum coefficient with nonnegative even rank.
+
+In version-six integral mode, a nonzero additive group must contain exactly one coefficient token, no undecomposed loop vectors and no surviving loop-dependent denominator identifier. Coefficient powers/products, unknown labels and malformed calls fail. Zero output remains valid. Streams buffer one top-level group and use the existing restricted parser; the flat parser is unchanged. Reconstruction maps labels to local chord positions, computes invariant ordering, and supplies I Pi^2. It applies no coefficient-function reduction.
+
+`IntegralCoefficient` entries (`cfic` prefix) permit subsequent scalar round trips. `LoopTensorCoefficient` has five data fields (encoded label, chord, squared-mass and power lists, then dimension). `TensorPaVe` contains encoded label, invariant and squared-mass lists, reconstructed with optional reduction/reordering disabled. No arbitrary Wolfram evaluation syntax is accepted.
+
+Version-six coefficients may also contain `cfcDimRat(numerator,denominator)`
+from pre-integration dimension compaction. Both arguments must be exact
+polynomials in the recorded Lorentz dimension, with a nonzero denominator.
+The restricted importer restores their quotient; other variables, tensor
+arguments, wrong arity and use outside active decomposition are rejected.
+This internal function is never returned to the user.
+
+
+### Optional reduction metadata
+
+`LoopCoefficientReduction` records `Method: PartialFractionsAndFixedDimensionIBP`,
+`MaximumDistinctChords: 4`, and the informational list `SingularSubfamilies`.
+`Invariants` records encoded squared chord differences in lexicographic unordered-pair order. Import requires them to agree with the current scalar-product definitions before decoding inverse recurrence coefficients. The mathematical output remains the validated `cfcTC` vocabulary. The temporary
+FORM function `cfcIR` must never reach the result; it is not an accepted parser
+head. Scalar recurrence coefficients are ordinary validated abbreviation entries.
+
+## Version seven: reduction of existing coefficients
+
+For reduction of existing coefficient expressions, `TensorDecomposition.Mode`
+is `ExistingCoefficients`, `LoopMomentum` is JSON null, `LoopMomenta` is empty,
+and `Processing` is `ExistingLoopCoefficientReduction`. The family dictionary
+is recomputed from the original `IntegralCoefficient` mapping entries, with
+zero chords ordered before other chords. This mode requires reduction metadata.
+This mode requires version seven. Version-six files retain their existing integral interpretation (absent `Mode`, or `Mode: Integral`); neither older formats nor inactive exports are reinterpreted. Reject a mode/version mismatch rather than silently changing normalisation.
+
+Existing-coefficient mode preserves external constants, products and powers of
+integral coefficients and does **not** insert another `I Pi^2`. Consequently,
+the exactly-one-integral-token condition applies only to integrand decomposition.
+Both modes retain typed label/power validation, incremental reading and
+scaleless checks. Import performs reconstruction only; the reduction runs in FORM.
+
+### Optional compact reduction blocks (versions six and seven)
+
+`LoopCoefficientReduction.CoefficientBlocks` is an optional Boolean field,
+covered by the mapping digest. Absence means false and preserves earlier files.
+When true, `cfcLRReduced(expression)` and `cfcLRReducedPart(expression)` contain
+validated linear combinations of `cfcTC` coefficients with commuting scalar
+factors. The second spelling identifies a piece of an oversized combination;
+both have identical mathematical meaning. Unknown identifiers, incorrect
+arity, nonlinear coefficient products and unrecorded block syntax are rejected.
+
+Earlier grouped writers emitted reduced combinations multiplied by the original amplitude
+brackets, which may contain loop-independent spectator propagators on this
+path. Loop-dependent propagators remain invalid in a completed integral result.
+Reconstruction removes the wrappers without expanding those products.
+The public result heads, coefficient conventions and normalisation are unchanged.
+
+
+### Optional shared coefficient definitions (versions six and seven)
+
+`LoopCoefficientReduction.SharedCoefficientBlocks` is an optional Boolean,
+covered by the mapping digest. Absence is false. True requires
+`CoefficientBlocks: true` and algebra version one. It selects this body layout
+following the ordinary result identity header:
+
+```text
+CFC_SHARED 2
+cfcShare(1)=cfs1+1;
+cfcShare(2)=cfs1^2;
+CFC_BODY
+0+(cfcTC(1,-2))*(cfcShare(1)+2*cfcShare(2))
+```
+
+The count is non-negative; exactly that many definitions follow, each with a distinct positive integer
+identifier. Identifiers need not be consecutive: FORM can reuse an existing
+internal expression entry. Only amplitude blocks are written, rather than FORM's entire temporary-symbol
+registry. A block can become unused when reduction removes its integral family. Each right-hand side uses the ordinary restricted commuting grammar.
+It cannot reference another shared block or an integral token. Unknown
+identifiers and undecomposed loop dependence remain errors. Definitions end
+with a semicolon; the body marker occupies its own line. CRLF is accepted.
+`CFC_SHARED 0` is valid and has no definitions. The importer reads definitions
+incrementally and never executes them as source code.
+
+Each linear body group identifies a final integral coefficient and its complete
+multiplier. The multiplier can refer to shared amplitude blocks using
+`cfcShare(positiveInteger)`. These private references disappear on import;
+the returned expression contains ordinary products and sums. Small jobs and
+matrix jobs can use direct final-key assembly. Older files without the new
+metadata retain their original grammar and interpretation.
+
+
+### Incremental denominator groups (versions six and seven)
+
+Two optional Boolean fields in `LoopCoefficientReduction` refine the layouts
+above. Both default to false and are covered by the existing mapping digest.
+`DenominatorGroups: true` requires `CoefficientBlocks: true` and permits the
+typed scalar calls `cfcLRNum(polynomial)` and `cfcLRDen(polynomial)`. They decode
+to the polynomial and its reciprocal respectively; zero denominators, tensor
+arguments and non-polynomial arguments are rejected.
+
+`IncrementalSharedDefinitions: true` additionally requires
+`SharedCoefficientBlocks: true` and permits references to **earlier** validated
+shared definitions. Self, forward and duplicate definitions remain invalid.
+With that flag the following alternative to `CFC_BODY` is accepted:
+
+```text
+CFC_SHARED 1
+cfcShare(2)=cfs1+1;
+CFC_GROUP_BODY
+CFC_ADD_SHARED 1
+cfcShare(5)=cfcShare(2)^2+1;
+CFC_GROUP
+(cfcTC(1,-2))*(cfcLRDen(cfs2)*cfcShare(5));
+CFC_END
+```
+
+Each group is preceded by its additional-definition count, which may be zero.
+Definitions and groups terminate with semicolons. `CFC_END` is mandatory;
+only whitespace may follow. Its final newline is optional. Shared identifiers
+need not increase: FORM may reuse an older identifier that has not previously
+been written. Availability is determined by definition order, not integer order.
+Legacy `CFC_BODY` output remains valid, including when a small job selects no
+shared definitions. Without the new metadata, earlier files retain the original
+non-recursive dictionary grammar.
+
+
+## Version eight: scalar master reduction
+
+Active scalar-master jobs use version eight. `AlgebraVersion` still identifies
+the independent tensor/epsilon/Dirac/colour vocabulary. `ScalarMasterReduction`
+records the Davydychev–Tarasov method, source interpretation (six for integrands,
+seven for saved coefficients), symbolic D, four-point scope, normalisation,
+generic denominator restrictions and exceptional families. These fields are
+covered by the mapping digest. Earlier versions keep their original semantics;
+import never initiates a new reduction.
+
+Scalar masters use existing rank-zero integral tokens. Recurrence-only objects
+are not accepted by the result parser. The existing grouped/shared incremental
+output grammar remains in use.
+
+A saved PaVe family can use a typed `MasterChord` record containing point count,
+slot and ordered invariant list. It is a private coordinate in the family
+metadata, not a Lorentz vector. Distances are decoded from the FeynCalc invariant
+ordering. Unrelated invariant families are never joined; their cross-distances
+are recorded as `UnrelatedFamilies`, not assigned physical scalar products.
+The dictionary is reconstructed from the saved coefficient entries and checked
+against the mapping before result parsing. Private chord objects cannot be
+returned as physical momenta.
+
+The existing restricted numeric grammar also accepts FORM's decimal-integer
+continuation: a backslash immediately after decimal digits, a newline (LF or
+CRLF), optional horizontal whitespace and further digits. These fragments form
+one integer token. Identifiers and arbitrary expressions cannot be joined by
+this syntax. Continuations may cross reader chunks; only the completed group
+or shared definition is normalised.

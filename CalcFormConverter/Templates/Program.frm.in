@@ -1,6 +1,6 @@
 #-
 * CalcFormConverter format @FORMATVERSION@. Generated file; mapping is stored separately.
-* Lorentz algebra and configured Dirac processing; no integration or on-shell substitutions.
+* Configured Lorentz, Dirac, colour and optional tensor decomposition; no on-shell substitutions.
 Off Statistics;
 @SCALARS@
 Dimension @DIMENSION@;
@@ -15,7 +15,7 @@ Local cfcResult = @EXPRESSION@;
 @MULTIPLICATIONS@
 
 * Processing stage: FORM contracts native Lorentz objects during normalization.
-* Numerator cancellation precedes this final grouping; no loop integration.
+* Numerator cancellation and any declared tensor decomposition precede final grouping.
 @GROUPING@
 .sort
 

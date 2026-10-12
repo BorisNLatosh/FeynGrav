@@ -4,7 +4,7 @@ Get[FileNameJoin[{DirectoryName[DirectoryName[DirectoryName[$InputFileName]]],"F
 importQuadraticGravity[1];
 Get[FileNameJoin[{DirectoryName[DirectoryName[$InputFileName]],"Examples","ScalarBubble.wl"}]];
 expr=ScalarBubbleExample[p,l,m0,m2];
-{seconds,job}=AbsoluteTiming[CalcFormExport[expr,FileNameJoin[{Environment["CFC_TEST_DIR"],"full-bubble.frm"}],LoopMomenta->{l}]];
+{seconds,job}=AbsoluteTiming[CalcFormExport[expr,FileNameJoin[{Environment["CFC_TEST_DIR"],"full-bubble.frm"}],TensorDecomposition -> False, LoopMomenta ->{l}]];
 If[FailureQ[job],Print[job];Quit[1]];
 mapping=Import[job["MappingFile"],"RawJSON"];
 entries=mapping["Entries"];

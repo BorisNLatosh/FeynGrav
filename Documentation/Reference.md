@@ -282,4 +282,16 @@ These are available after main-package loading; the [converter guide](../CalcFor
 | `CalcFormInstall[opts]` | Explicit installation workflow on supported systems; never invoked implicitly. |
 | `CalcFormCalculate[expr, opts]` | Algebraic result, equality result or `Failure`; requires usable FORM/TFORM. |
 
-The default worker setting is `FORMThreads -> Automatic`. Supported Dirac algebra is enabled by `DiracAlgebra -> Automatic`; fundamental SU(N) reduction by `ColourAlgebra -> True`. Disabling either selects preservation for that space, subject to the converter's vocabulary restrictions. No command here performs loop integration.
+The default worker setting is `FORMThreads -> Automatic`. Supported Dirac algebra is enabled by `DiracAlgebra -> Automatic`; fundamental SU(N) reduction by `ColourAlgebra -> True`. Disabling either selects preservation for that space, subject to the converter's vocabulary restrictions. With one explicitly declared loop momentum, `TensorDecomposition -> True` (the default) returns integral coefficient functions with FeynCalc's `I Pi^2` normalisation. `DropScaleless -> False` preserves formal scaleless terms. Empty loop metadata or disabled decomposition retains integrand algebra. Default `ReduceToScalarMasters -> True` reduces supported tensor coefficients through boxes to rank-zero PaVe masters and includes necessary power reduction. False retains coefficient functions. Saved coefficients can be reduced without a new integration variable. Exceptional cases remain explicit and are reported as partial reduction. Masters are not analytically evaluated; see the [converter guide](../CalcFormConverter/README.md#one-loop-tensor-decomposition).
+
+
+### Reducing repeated-power loop coefficients
+
+`CalcFormCalculate[answer, ReduceLoopCoefficients -> True]` can reduce saved
+`LoopTensorCoefficient` expressions without declaring `LoopMomenta` or
+repeating their original tensor calculation. The option defaults to `False`.
+It also applies after active one-loop decomposition. Supported nonsingular
+families reduce to ordinary unit-power PaVe coefficients; this is not analytic
+evaluation. Scaleless terms remain unless `DropScaleless -> True` is specified.
+See the [converter guide](../CalcFormConverter/README.md#optional-reduction-of-repeated-powers)
+for topology limits, singular cases and normalisation.

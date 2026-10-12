@@ -20,7 +20,7 @@ If[(DownValues /@ {QuadraticGravityPropagator,QuadraticGravityVertex})=!=beforeG
 If[(Options /@ {FeynCalc`SUNSimplify,FeynCalc`SUNTrace,FeynCalc`DiracSimplify,FeynCalc`DiracTrace})=!=beforeOptions,Print["FAIL: loading changed FeynCalc options"];Quit[1]];
 If[processCalls=!=0 || !AllTrue[{CalcFormCheck,CalcFormInstall,CalcFormCalculate},DownValues[#]=!={}&],
  Print["FAIL: runtime definitions or process launched during loading"];Quit[1]];
-If[!AllTrue[{CalcFormConverter`ShowTiming,CalcFormConverter`ShowProgress,CalcFormConverter`FORMThreads,CalcFormConverter`DiracAlgebra,CalcFormConverter`ColourAlgebra},StringQ[MessageName[#,"usage"]]&],Print["FAIL: new option help"];Quit[1]];
+If[!AllTrue[{CalcFormConverter`ShowTiming,CalcFormConverter`ShowProgress,CalcFormConverter`FORMThreads,CalcFormConverter`DiracAlgebra,CalcFormConverter`ColourAlgebra,CalcFormConverter`ReduceLoopCoefficients},StringQ[MessageName[#,"usage"]]&],Print["FAIL: new option help"];Quit[1]];
 Print["Automatic loading and namespace isolation passed."];
 Export[FileNameJoin[{Environment["CFC_TEST_DIR"],"test-completed"}],"Loading","Text"];
 Quit[];

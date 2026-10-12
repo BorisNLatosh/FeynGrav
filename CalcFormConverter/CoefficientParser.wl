@@ -5,7 +5,8 @@
 
 (* ::Text:: *)
 (* Loaded in CalcFormConverter`Private`. Used only inside the validated
-   version-one, no-UpValues import environment. It reads one coefficient, not
+   commuting, no-UpValues import environment (version one, or version six
+   with algebra version one). It reads one coefficient, not
    the result file. Rejected attempts return to the general parser, preserving
    ordered diagnostics. All actual factors pass through importFactor and its
    typed dictionary. No result text is interpreted as Wolfram source. *)
@@ -67,8 +68,13 @@ pgCoefficientSyntax[] := pgCoefficientSyntax[] = Compile[
 (* ::Input::Initialization:: *)
 pgParseCoefficientTree[text_String] := Module[
     {tokens, operators, distinct, codes, decoded, generated, held,
-     substitution, operands},
-    tokens = StringCases[text, RegularExpression[$flatFactorPattern <> "|[+*/()\\-]"]];
+     substitution, operands, factorPattern},
+    (* Dimension ratios and integer-argument coefficient calls are complete
+       reusable factors. importFactor still invokes their typed validators;
+       the lexical pattern never grants an identifier mathematical meaning. *)
+    factorPattern = If[$tdImport === <||>, $flatFactorPattern,
+        "(?:cfcTC\\([0-9,\\s-]+\\)|cfcShare\\([0-9\\s]+\\)(?:\\s*\\^\\s*[0-9]+)?|cfcLR(?:Den|Num)\\(\\s*(?:cfcShare\\([0-9\\s]+\\)|[^()]*)\\s*\\)(?:\\s*\\^\\s*[0-9]+)?|cfcDimRat\\([^()]*\\)|" <> $flatFactorPattern <> ")"];
+    tokens = StringCases[text, RegularExpression[factorPattern <> "|[+*/()\\-]"]];
     If[tokens === {} ||
         StringReplace[StringJoin[tokens], WhitespaceCharacter -> ""] =!=
             StringReplace[text, WhitespaceCharacter -> ""], Return[$Failed]];

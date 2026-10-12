@@ -16,12 +16,12 @@
    general cancellation pass; it is not a runtime or memory limit. *)
 $dcfPreconditionMinimumTerms = 1000;
 
-dcfPlan[data_Association] := Module[
+dcfPlan[data_Association, requirePropagators_: True] := Module[
     {dim = data["Mapping"]["Dimension"], entries, dimension, polynomial,
      inverses, names, integer, tag = Unique["dimensionPolynomial"]},
-    If[!pgFactorisationQ[data] || !MatchQ[dim, {"Symbol", _String}], Return[<||>]];
+    If[(TrueQ[requirePropagators] && !pgFactorisationQ[data]) || !MatchQ[dim, {"Symbol", _String}], Return[<||>]];
     entries = data["Mapping"]["Entries"];
-    names = Lookup[Select[entries, #["Kind"] === "Scalar" && #["Expression"] === dim &], "Name", {}];
+    names = Lookup[Select[entries, MemberQ[{"Scalar","Abbreviation"}, #["Kind"]] && #["Expression"] === dim &], "Name", {}];
     If[Length[names] =!= 1, Return[<||>]];
     dimension = First[names];
     integer[{"Integer", s_String}] := integerData[s];

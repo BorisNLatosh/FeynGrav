@@ -27,7 +27,7 @@ inputs = {
  (SPD[l]-m^2)^2 FAD[{l,m}]^3
 };
 Do[
- got=CalcFormCalculate[inputs[[k]],LoopMomenta->{l},FORMThreads->workers];
+ got=CalcFormCalculate[inputs[[k]],TensorDecomposition -> False, LoopMomenta ->{l},FORMThreads->workers];
  assert["algebra "<>ToString[{workers,k}],equal[got,inputs[[k]]]];
  If[FailureQ[got],Print[InputForm[got]]],
  {workers,{1,2}},{k,Length[inputs]}];
@@ -35,12 +35,12 @@ got=CalcFormCalculate[SPD[l]FAD[{l,m}],FORMThreads->1];
 assert["constant retained",got===1+m^2 FCI[FAD[{l,m}]]];
 got=CalcFormCalculate[(SPD[l]-m^2)FAD[{l,m}],FORMThreads->1];
 assert["exact complete cancellation",got===1];
-got=CalcFormCalculate[SPD[l,p]FAD[{l,m1},{l-p,m2}],LoopMomenta->{l},FORMThreads->1];
+got=CalcFormCalculate[SPD[l,p]FAD[{l,m1},{l-p,m2}],TensorDecomposition -> False, LoopMomenta ->{l},FORMThreads->1];
 expected=1/2(FAD[{l-p,m2}]-FAD[{l,m1}]+(SPD[p]+m1^2-m2^2)FAD[{l,m1},{l-p,m2}]);
 assert["bubble numerator removed",FreeQ[got,Pair[Momentum[l,D],Momentum[p,D]]] && equal[got,expected]];
 Do[
  ref=ApartFF[inputs[[k]],{l},FDS->False,DropScaleless->False];
- got=CalcFormCalculate[inputs[[k]],LoopMomenta->{l},FORMThreads->1];
+ got=CalcFormCalculate[inputs[[k]],TensorDecomposition -> False, LoopMomenta ->{l},FORMThreads->1];
  assert["FeynCalc reference "<>ToString[k],equal[got,ref]],{k,{1,2,3,4,5,6,7,8,18}}];
 job=CalcFormExport[SPD[l]FAD[{l,m}],FileNameJoin[{testDirectory,"cancel.frm"}]];
 text=Import[job["InputFile"],"Text"];
@@ -52,7 +52,7 @@ assert["planning budget fallback",equal[got,inputs[[4]]]];
 (* Independent routing families, context separation and growth fallback. *)
 Do[
  ex=(SPD[l,p]+k SPD[q,l])^2 FAD[{l,k m},{q,m},{l-q-p,n}];
- got=CalcFormCalculate[ex,LoopMomenta->{l,q},FORMThreads->2];
+ got=CalcFormCalculate[ex,TensorDecomposition -> False, LoopMomenta ->{l,q},FORMThreads->2];
  assert["two-loop routing "<>ToString[k],equal[got,ex]],{k,1,4}];
 ex=(SPD[CancelOne`p]-m^2) FAD[{CancelOne`p,m}]+SPD[CancelTwo`p] FAD[{CancelTwo`p,n}];
 got=CalcFormCalculate[ex,FORMThreads->1];

@@ -22,6 +22,8 @@ This guide describes implementation and maintenance of CalcFormConverter. Start 
 | Module | Responsibility |
 | --- | --- |
 | `CalcFormConverter.wl` | Common vocabulary, export orchestration, mappings, restricted parsing and reconstruction |
+| `TensorDecomposition.wl` | Integral-family validation, embedded FORM recurrence and typed coefficient reconstruction |
+| `LoopCoefficientReduction.wl` | Optional partial fractions/IBP in FORM, scalar recurrence planning and saved-coefficient mode |
 | `FORMRuntime.wl` | Executable selection, probes, process lifecycle and calculation orchestration |
 | `DiracColour.wl` | Typed matrix words, local noncommutative normalisation and reversible translation |
 | `DiracAlgebra.wl` | Open-chain processing, explicit Dirac traces and spin-line metadata |
@@ -456,7 +458,7 @@ serial/TFORM cases and compare their returned expressions exactly. Temporary sou
 
 ### Early dimension compaction
 
-`renderExport` calls `dcfStageSort[plan, beforeSort]`, passing `pcDirectRules` explicitly as the non-growing pre-sort hook. An empty plan gives an ordinary sort. The dimension module owns abbreviation restoration through `dcfStageRestore[plan]`; the renderer does not insert code by replacing sort strings. Dimension compaction is selected when a version-one dimension plan and prepared tensor factors are both present. Each boundary first sorts ordinary tensor algebra with rational functions inert, enables `PolyRatFun` for the dimension-only rules on the collected terms, then disables it and restores numerical ratios. `ToPolynomial,OnlyFunctions,cfcDimRat` abbreviates only the resulting scalar rational functions during multiplication. `FromPolynomial` restores them before each rational pass and after the last prepared stage. `pcDirectRules` supplies the same non-growing massless identities before each stage sort and in the final direct cancellation pass. Keeping `PolyRatFun` enabled throughout tensor multiplication was tested and rejected as too costly.
+`renderExport` calls `dcfStageSort[plan, beforeSort]`, passing `pcDirectRules` explicitly as the non-growing pre-sort hook. An empty plan gives an ordinary sort. The dimension module owns abbreviation restoration through `dcfStageRestore[plan]`; the renderer does not insert code by replacing sort strings. Dimension compaction is selected when a version-one algebra capability set and prepared tensor factors are both present. Active tensor-decomposition jobs use their `AlgebraVersion` for pre-integration dimension compaction, verified stage symmetries and cancellation-sector planning; their saved mapping and output remain version six. Do not gate these pre-integration plans on the result-format version, or enabling decomposition silently disables the existing large-expression optimisations. Each boundary first sorts ordinary tensor algebra with rational functions inert, enables `PolyRatFun` for the dimension-only rules on the collected terms, then disables it and restores numerical ratios. `ToPolynomial,OnlyFunctions,cfcDimRat` abbreviates only the resulting scalar rational functions during multiplication. `FromPolynomial` restores them before each rational pass and after the last prepared stage. `pcDirectRules` supplies the same non-growing massless identities before each stage sort and in the final direct cancellation pass. Keeping `PolyRatFun` enabled throughout tensor multiplication was tested and rejected as too costly.
 
 `dcfPrecondition` runs after direct massless cancellation and before `pcPlan` processing when an eligible result exceeds the private 1,000-term threshold. The threshold selects work; it is not a time/memory limit. The original general cancellation pass, backup and growth guards are retained. The sector strategy can reject some candidates early; the guards still cannot prevent every expensive candidate.
 
@@ -477,3 +479,263 @@ Cancellation tests instrument temporary generated programs to observe visited
 sectors, accepted assembly, rejection before the final sector and restoration
 of the backup. Both serial FORM and TFORM must produce the whole-expression
 reference result. The shipped programs contain no test instrumentation.
+
+## One-loop tensor decomposition
+
+`tdPrepare` is called after ordinary serialisation, before rendering or publication. It validates the two boolean options, rejects multiple loops and hidden loop dependence, normalises rational routing coefficients and coalesces identical denominators. Small routing expressions may be expanded; the supplied tensor expression is not globally expanded in Wolfram.
+
+`tdProgram` embeds `cfcTensorDecompose` in the generated source. Each monomial acquires a denominator-power tuple. The first active denominator fixes the shift, which applies to the complete numerator. `ToTensor functions` exposes loop occurrences; the recurrence assigns its first slot to an active chord or pairs it with one remaining slot using `distrib_`. Labels are sorted only after recurrence. Vacuum tensors use `dd_`. Odd vacuum ranks are explicitly removed. FORM sorts and brackets the resulting `cfcTC` functions.
+
+The recurrence is independent of rank and has no hand-written high-rank table. Test placement multiplicities before changing it: repeated labels collect algebraically, but distinct metric pairings must each have unit weight. Scalar-master reduction and Gram inversion do not belong here.
+
+`tdAlgebraMapping` selects legacy capability validation. `tdImportSetup`, `tdCall` and `tdValidateGroup` validate metadata and the integral grammar. The streaming propagator reader also accepts typed integral prefactors; final `tdReconstruct` supplies PaVe or the inert generalised coefficient. Scaleless classification takes place here, using known masses and external invariants, without changing global FeynCalc settings. Cache state is import-local.
+
+Tests: `TensorDecomposition.wls` includes independent TID comparisons, repeated-power mass derivatives, convergent radial moments, mixed matrix/epsilon calculations, serial/TFORM agreement and malformed streaming results. Existing integrand benchmarks explicitly disable decomposition. Run the runtime suite outside sandboxes that block Wolfram subprocess creation. See [the verification report](Tests/Reports/TensorDecomposition.md) for completed coverage and limits.
+
+### Definition at degenerate kinematics
+
+For a nonempty family let \(\nu=\sum_j\nu_j\), \(r_0=0\), and
+\[
+\Delta(x)=\sum_jx_jm_j^2-\sum_{i<j}x_ix_j(r_i-r_j)^2,
+\qquad \sum_jx_j=1.
+\]
+In the explicit normalisation \(1/(i\pi^2)\int d^Dq\), the coefficient with
+\(k\) metric pairs and \(t\) chord slots has the parameter definition
+\[
+C_{0^{2k}i_1\cdots i_t}=
+\frac{(-1)^{\nu+k+t}\pi^{D/2-2}\Gamma(\nu-D/2-k)}
+ {2^k\prod_j\Gamma(\nu_j)}
+\int_{x_j\geq0}\!\left[\prod_j dx_j\,x_j^{\nu_j-1}\right]
+\delta\!\left(1-\sum_jx_j\right)
+\left[\prod_{a=1}^{t}x_{i_a}\right]
+[\Delta(x)-i0]^{D/2+k-\nu}.
+\]
+This fixes coefficient labels even when the tensor basis is redundant. It is a
+convention/analytic-continuation definition, not an integration algorithm in
+this release. Scaleless objects remain formal by default. No additional
+renormalisation-scale or measure prefactor is inferred from PaVe notation.
+For empty families, the even-rank coefficient is the formal radial moment
+\(\int d^Dq\,(q^2)^k/[i\pi^2 D(D+2)\cdots(D+2k-2)]\); odd moments vanish.
+
+Version-one-only coefficient compression remains restricted to its established
+vocabulary. Version-six output uses ordinary FORM sorting and integral grouping;
+no speedup or bounded final-expression memory is promised by this extension.
+
+### Tensor-decomposition performance safeguards
+
+Pre-integration plans use `AlgebraVersion`, not the version-six result marker.
+This retains verified tensor-stage symmetries, dimension compaction and
+cancellation-sector separation for eligible commuting Lorentz expressions.
+After decomposition, another dimension-only rational pass collects the
+coefficients produced by metric contractions. Version-six reconstruction
+validates `cfcDimRat` as an exact rational function of the recorded dimension.
+
+The tensor procedure selects an even number of metric slots with native
+`sum_` and `distrib_`, then pairs those slots using `dd_`. The loop tensor is
+symmetric, so sorting its slots places repeated arguments together and lets
+FORM account for their multiplicities. Only the remaining chord assignments
+use the recurrence. This avoids generating metric placements by a recursive
+pairing tree; no rank ceiling or factorial averaging is introduced.
+See the [FORM function reference](https://form-dev.github.io/form-docs/stable/manual/)
+and the [tensor-decomposition verification](Tests/Reports/TensorDecomposition.md).
+
+The grouped reader also selects the existing bounded coefficient parser by
+algebra capability. An integral-coefficient prefactor is split from its scalar
+coefficient, checked by `tdCall`, and retained for group validation. Complete
+`cfcDimRat` calls are reusable lexical factors only inside active decomposition;
+the general parser validates them before they enter the import-local cache.
+Matrix/epsilon/colour coefficients and symbols with arithmetic UpValues retain
+the general path. The reader continues to buffer at most one group, with
+coefficient-sized temporary data, rather than the entire result file.
+
+For the integer-polynomial subset of `cfcDimRat`, `tdFastDimensionRatio` checks
+complete lexical coverage and mandatory signs between monomials, then constructs
+exact powers and sums using `FromDigits`. It never evaluates result text as
+Wolfram code. Denominator-polynomial caching is scoped by `withImportParser`,
+bounded to 512 entries of at most 16 KiB each, and reset between imports.
+Unknown variables, adjacent unsigned monomials, nested calls and other grammar
+return to the general parser.
+
+
+## Repeated-power coefficient reduction
+
+`LoopCoefficientReduction.wl` owns the opt-in `ReduceLoopCoefficients` stage.
+`lrPrepare` follows `tdPrepare`; it either extends an active decomposition job
+or creates the explicitly marked saved-coefficient mode. `lrPlan` prepares
+small exact scalar Cayley matrices, using `Together` and `Inverse` only on those
+matrices. It registers their inverse entries as ordinary scalar abbreviations.
+No amplitude-wide Mathematica simplification or FeynCalc reduction is used.
+
+`lrIsolatedProcessing` collects distinct original integral keys using
+`Keep Brackets`, then hides the amplitude. The unchanged recurrence runs on a
+lookup expression whose terms carry their original key. Canonicalisation
+compares ordered masses and relative chords for formal coefficients, and
+ordered masses and invariants for ordinary unit-power PaVe coefficients.
+`lrOutput` indexes the lookup by the **final** integral key and assembles its
+complete multiplier. Laurent-monomial abbreviations are exposed so native
+mass factors can cancel. The dimension-only scalar pass combines rational
+functions of the dimension. `LoopDenominatorGroups.wl` describes the rational
+abbreviation vocabulary without simplifying it in Wolfram. FORM factors the
+small abbreviation table, normalises reciprocal factors and collects complete
+denominator products in each final multiplier. Scalar identity groups and
+preserved singular families follow the same path. Products of coefficients
+retain the general recurrence.
+
+Large algebra-version-one jobs use shared numerator factors. The embedded
+`LoopDenominatorGroups.frm.in` first exposes denominator factors in the original
+amplitude blocks and recurrence weights separately. Final assembly joins them,
+cancels matching exposed factors and brackets complete denominator products.
+Cheap common-factor extraction retains numerator sharing. `ldgCommonFactors`
+first shields non-polynomial objects with `ToPolynomial` inside the arguments,
+uses `OldFactArg`, then restores them with `FromPolynomial`. This round trip is
+necessary: the tests include a three-term mixed-function/scalar-product argument
+for which unshielded `OldFactArg` in FORM 5.0.2 changes a dot-product power.
+`ldgNegativePowerRules` uses the native left-hand-side syntax `p.q^n?neg_`;
+parenthesising that base as `(p.q)^n?neg_` does not match inverse scalar products.
+Arguments containing free Lorentz indices skip this optional content pass,
+while retaining denominator collection and sharing. The guard temporarily
+represents native metrics with `cfcDGMetric`, because FORM's `occurs` condition
+does not inspect the indices in `d_`. That marker is restored before output.
+Matrix and epsilon jobs keep direct assembly.
+
+The writer records identifiers actually used by each group, using a sparse
+FORM table of previously written identifiers. Allocation ranges are insufficient:
+FORM can reuse an old extra-symbol identifier. It restores temporary polynomial
+aliases before writing definitions and never dumps the entire extra-symbol table.
+
+`SharedCoefficientReader.wl` owns legacy and incremental dictionary reading.
+A 16 KiB buffer handles records across read boundaries. Batches contain at most
+64 records and stop accumulating at 256 KiB; a single record may be larger.
+Speculative batch parsing falls back to ordered parsing on failure. Pending
+truncation errors are reported after earlier complete records have been checked.
+Definitions may reference only earlier validated definitions when authorised by
+metadata. Integral tokens and undecomposed loop dependence are rejected before
+replacement; validated subtrees need not be scanned repeatedly.
+
+Framed integral groups are parsed separately. Definitions and caches are local
+to the import; the existing stream owner closes files on success, failure and
+abort. Reconstruction preserves ordinary products and sums without executing
+result text as Wolfram assignments. These buffers bound temporary text, not the
+size of a coefficient or the final expression.
+
+Earlier `cfcLRReduced`/`cfcLRReducedPart` files remain readable under their
+`CoefficientBlocks` metadata. Those wrappers represent a reduced combination
+times an original amplitude bracket, rather than the new final-key grouping.
+Coefficient reconstruction keeps its existing bounded per-import cache. Future
+algebra must process hidden lookup values as well as the amplitude: changing
+only `cfcResult` after isolation leaves the lookup untouched. See the official
+FORM descriptions of [brackets and extra symbols](https://form-dev.github.io/form-docs/stable/manual/).
+
+Dimension-coefficient compaction runs before isolated reduction, so downstream
+sorts cannot expand the reduced combinations through the amplitude.
+
+All coefficient replacement, power lowering and branching execute in the
+standalone FORM program. The implementation uses these identities:
+
+- For a positive tensor label j,
+  `C[...,j](nu) = -2 nu_j C[...,0,0](nu+e_j)`.
+- Same-route denominators satisfy `D_j-D_i = m_i^2-m_j^2`; partial fractions
+  lower their total power before any matrix recurrence.
+- With `Y_ij = m_i^2+m_j^2-(r_i-r_j)^2` and `d = D+2h`, integration by parts gives
+  `Sum_j Y_ij nu_j J(nu+e_j) = (d-Sum_j nu_j) J(nu)
+   - Sum_j nu_j J(nu+e_j-e_i)`.
+  Select a raised power, solve with the corresponding row of inverse Y, and
+  express every RHS integral at strictly smaller total power. Here `2h` is the
+  number of zero tensor labels. All terms share the same conversion between
+  these scalar integrals and metric coefficients, so no additional pi or
+  dimension-shift normalisation enters the recurrence.
+
+This is a coefficient-basis use of the dimension-shift strategy described by
+[Davydychev and Tarasov's one-loop reduction literature](https://arxiv.org/abs/hep-ph/9907327).
+The explicit recurrence above fixes the implementation's signs and convention.
+Unit-power coefficients with their original tensor labels are left alone.
+The reduction considers at most four distinct routes per active subfamily;
+subsets are generated from route groups, avoiding the full mass-dictionary
+powerset. Singular matrices are skipped. Remaining formal coefficients are
+reconstructed faithfully rather than labelled as fully reduced.
+
+The importer distinguishes integral mode from saved-coefficient mode before
+validating groups or applying normalisation. Caches stay import-local. The
+scalar dictionary also validates planner-generated expressions before files
+are written. `Tests/LoopCoefficientReduction.wls` checks exact identities,
+independent parameter integrals, both execution engines, saved expressions,
+scaleless and singular cases, mapping failures and chunk boundaries.
+
+
+With master reduction disabled, saved-coefficient jobs use version seven because they must not acquire the
+`I Pi^2` factor associated with integrating an integrand. Active decomposition
+continues to use version six. Active master jobs use version eight and record the source interpretation. A mode/version mismatch is an error. Reduction
+metadata freezes scalar-product invariants: validate this snapshot before
+restoring inverse scalar abbreviations, so a changed singular point cannot
+trigger division by zero during decoding.
+
+Convert labelled parameter moments **before** merging coincident denominator
+slots. Their Pochhammer factors depend on the original individual powers;
+merging first changes the answer. The production FORM loop performs one
+lowering step per term followed by `.sort`, with a maximum-reduced change flag
+for TFORM. This combines duplicate intermediate integrals before branching
+again. Direct reduction at a numerical dimension is disabled, since a zero
+recurrence factor can multiply an ultraviolet pole. The focused tests include
+both of these boundary cases. `LoopCoefficientParameters.wls` supplies eight
+independent massive Euclidean triangle/box parameter comparisons, using only
+Wolfram's built-in numerical linear algebra and two fixed quadrature grids.
+
+
+## Scalar-master reduction
+
+`ScalarMasterReduction.wl` supplies private family recurrences and the
+`ReduceToScalarMasters` orchestration. The default enabled stage includes the
+existing power reduction, while disabling it leaves historical behaviour intact.
+
+For h metric pairs the normalised coefficient is (-1/2)^h Pi^(D/2-2) times
+the scalar integral in D + 2h with the dimension-normalised measure. The
+common Pi factor does not change during the recurrence. Positive labels first
+raise powers using the existing parameter identity. Equations (15), (17) and
+(33) of Fleischer–Jegerlehner–Tarasov (hep-ph/9907327) then lower dimensions or
+pinch a line. Each dimension-lowering step has an additional -1/2. Massive
+one-point coefficients use their Gamma-function ratio. At zero momentum, equal
+mass bubble parameter polynomials coalesce exactly; unequal masses use the
+zero-Gram pinch identity. No epsilon expansion is performed.
+
+The planner reuses exact small family matrices, omits incompatible invariant
+families and selects at most one mass per momentum route after partial fractions.
+The existing coefficient-key isolation keeps amplitude multipliers outside the
+recurrence. One recurrence step per module allows FORM sorting to combine
+branches before the next layer. Final assembly reuses denominator collection
+and incremental shared-block output. There is no persistent kinematic cache.
+
+Private `smChord` values encode only ordered invariant distances for saved
+PaVe inputs. They are never declared as FORM vectors. Same-family distances are
+validated; cross-family combinations are excluded. Known singular and scaleless
+input states are protected before positive-label conversion so unsupported
+states can retain their original coefficient interpretation.
+
+The new tests compare with independent PaVeReduce results and analytic
+zero-momentum identities. Existing parameter quadrature tests also exercise
+master reduction. Historical coefficient-only tests opt out explicitly. See the
+verification report for completed checks and outstanding limitations.
+
+Within each recurrence layer, `Bracket+ cfcIR,cfcTC,cfcSMHold` followed by a sort
+and `Keep Brackets` applies the next rule once to each shared intermediate state.
+The original coefficient identifiers stay in the bracket payload. This shares
+work across distinct requested coefficients without exposing amplitude factors.
+The private `$smShareStates` switch exists for equivalence measurements only.
+Family eligibility is cached within each export/import and includes the
+scaleless policy; it is never retained between calls.
+
+FORM can wrap very large exact integers using a backslash followed by a newline.
+`normaliseFORMNumbers` joins only decimal-digit continuations. It runs on an
+individual parsed group or shared definition, never on the entire streamed file.
+Identifier continuation remains invalid. General, grouped and shared readers
+use the same rule. See [the verification report](Tests/Reports/ScalarMasterReduction.md)
+and [raw performance observations](Tests/Reports/ScalarMasterPerformance.json).
+
+Scalar unit-power tokens also merge under permutations of their complete mass
+and invariant-distance graph. Tensor coefficients are excluded from this rule.
+The chosen representative is an existing family, so no new routing is invented.
+
+### Parallel materialisation before integral block expansion
+
+`Templates/LoopDenominatorGroups.frm.in` sorts an extracted integral bracket before substituting original amplitude blocks when `NTHREADS_ > 2`. FORM includes its master in that count. This gives multiple TFORM workers terms to expand; serial FORM and one-worker TFORM skip the barrier. The change affects scheduling only, with no public-option or format change. `Tests/Fixtures/MaterialiseBlocks.frm`, exercised by `LoopDenominatorGroups.wls`, compares baseline and materialised results including cancelled, missing and free-index blocks.
+
+A bounded realistic trial completed FORM after this change, but its import remained incomplete. Sampled per-process RSS limits do not constitute an enforced aggregate memory cap. Do not infer complete-call success from backend completion.

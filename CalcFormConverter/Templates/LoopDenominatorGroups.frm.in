@@ -1,0 +1,199 @@
+* Collect complete denominator products while retaining shared numerators.
+Hide cfcResult;
+.sort
+Local cfcBlocks=cfcShareKeys;
+id cfcShare(cfcDGNum?)=cfcBlock(cfcDGNum)*extrasymbol_(cfcDGNum);
+@NORMALISE@
+.sort
+id cfcLRDen(cfcDGNum?symbol_)=cfcAtom(cfcDGNum);
+id cfcLRDen(cfcDGVector1?.cfcDGVector2?)=cfcAtom(cfcDGVector1.cfcDGVector2);
+ArgToExtraSymbol tonumber,cfcLRNum,cfcLRDen;
+id cfcLRNum(cfcDGNum?)=cfcPolyN(cfcDGNum);
+id cfcLRDen(cfcDGNum?)=cfcPolyD(cfcDGNum);
+repeat;
+id cfcPolyN(cfcDGNum?)*cfcPolyD(cfcDGNum?)=1;
+endrepeat;
+Bracket cfcBlock,cfcPolyD,cfcAtom,@PROPAGATORS@;
+.sort
+Collect cfcNum,cfcNumPart,50;
+.sort
+@COMMON_FACTOR_cfcNum@
+id cfcNum(cfcDGNum?number_)=cfcDGNum;
+id cfcNum(cfcDGNum?symbol_)=cfcDGNum;
+id cfcNum(i_)=i_;
+@UNWRAP_cfcNum@
+id cfcNum(cfcPolyN(?a))=cfcPolyN(?a);
+id cfcNumPart(cfcDGNum?number_)=cfcDGNum;
+id cfcNumPart(cfcDGNum?symbol_)=cfcDGNum;
+id cfcNumPart(i_)=i_;
+@UNWRAP_cfcNumPart@
+id cfcNumPart(cfcPolyN(?a))=cfcPolyN(?a);
+.sort
+Off OldFactArg;
+ArgToExtraSymbol tonumber,cfcNum,cfcNumPart;
+id cfcNum(cfcDGNum?)=cfcShare(cfcDGNum);
+id cfcNumPart(cfcDGNum?)=cfcShare(cfcDGNum);
+Bracket+ cfcBlock;
+.sort
+Hide cfcBlocks;
+Local cfcDGWeights=cfcLRWork;
+id cfcLRKey()=cfcResult[1];
+id cfcLRKey(?a)=cfcResult[cfcTC(?a)];
+id cfcShare(cfcDGNum?)=cfcOriginal(cfcDGNum);
+@WEIGHT_PREPARATION@
+@NORMALISE@
+.sort
+id cfcLRDen(cfcDGNum?symbol_)=cfcAtom(cfcDGNum);
+id cfcLRDen(cfcDGVector1?.cfcDGVector2?)=cfcAtom(cfcDGVector1.cfcDGVector2);
+ArgToExtraSymbol tonumber,cfcLRNum,cfcLRDen;
+id cfcLRNum(cfcDGNum?)=cfcPolyN(cfcDGNum);
+id cfcLRDen(cfcDGNum?)=cfcPolyD(cfcDGNum);
+repeat;
+id cfcPolyN(cfcDGNum?)*cfcPolyD(cfcDGNum?)=1;
+endrepeat;
+Bracket cfcTC,cfcOriginal,cfcPolyD,cfcAtom,@PROPAGATORS@;
+.sort
+Collect cfcWeight,cfcWeightPart,50;
+.sort
+@COMMON_FACTOR_cfcWeight@
+id cfcWeight(cfcDGNum?number_)=cfcDGNum;
+id cfcWeight(cfcDGNum?symbol_)=cfcDGNum;
+id cfcWeight(i_)=i_;
+@UNWRAP_cfcWeight@
+id cfcWeight(cfcPolyN(?a))=cfcPolyN(?a);
+id cfcWeightPart(cfcDGNum?number_)=cfcDGNum;
+id cfcWeightPart(cfcDGNum?symbol_)=cfcDGNum;
+id cfcWeightPart(i_)=i_;
+@UNWRAP_cfcWeightPart@
+id cfcWeightPart(cfcPolyN(?a))=cfcPolyN(?a);
+.sort
+Off OldFactArg;
+ArgToExtraSymbol tonumber,cfcWeight,cfcWeightPart;
+id cfcWeightPart(cfcDGNum?)=cfcWeight(cfcDGNum);
+.sort
+id cfcWeight(cfcDGNum?)=cfcShare(cfcDGNum);
+Bracket+ cfcTC;
+.sort
+Hide cfcDGWeights;
+Local cfcRefs=cfcDGWeights+cfcBlocks;
+Bracket cfcShare,cfcPolyN,cfcPolyD;
+.sort
+Collect cfcNum,cfcNumPart,50;
+id cfcNum(?a)=1;
+id cfcNumPart(?a)=1;
+id cfcPolyN(cfcDGNum?)=cfcShare(cfcDGNum);
+id cfcPolyD(cfcDGNum?)=cfcShare(cfcDGNum);
+ChainIn cfcShare;
+id,all cfcShare(?a,cfcDGNum?,?b)=cfcRef(cfcDGNum);
+.sort
+DropCoefficient;
+if (count(cfcRef,1)==0); Discard; endif;
+.sort
+Hide cfcRefs;
+#$cnt=termsin_(cfcRefs);
+#write <@RESULT@> "CFC_SHARED %$",$cnt
+#do key=cfcRefs
+Local def=`key';
+id cfcRef(cfcDGNum?$index)=extrasymbol_(cfcDGNum);
+id cfcPolyN(cfcDGNum?)=cfcLRNum(extrasymbol_(cfcDGNum));
+id cfcPolyD(cfcDGNum?)=cfcLRDen(extrasymbol_(cfcDGNum));
+ModuleOption noparallel;
+.sort
+#write <@RESULT@> "cfcShare(`$index')=%E;",def
+Fill cfcKnown(`$index')=1;
+Drop def;
+.sort
+#enddo
+#write <@RESULT@> "CFC_GROUP_BODY"
+#do key=cfcLRFinalKeys
+Local kval=`key';
+Local piece=cfcDGWeights[`key'];
+* Materialise the bracket before expanding original blocks. Otherwise a new
+* expression supplies one seed term and its expansion can occupy one worker.
+* NTHREADS_ includes the master; serial FORM and one-worker TFORM need no barrier.
+#if `NTHREADS_' > 2
+.sort
+#endif
+id cfcOriginal(cfcDGNum?)=cfcBlocks[cfcBlock(cfcDGNum)];
+id cfcAtom(cfcDGNum?)=1/cfcDGNum;
+repeat;
+id cfcPolyN(cfcDGNum?)*cfcPolyD(cfcDGNum?)=1;
+endrepeat;
+.sort
+@NEGATIVE_POWERS@
+id cfcPolyN(cfcDGNum?)=cfcShare(cfcDGNum);
+id cfcPolyD(cfcDGNum?)=cfcLRDen(cfcShare(cfcDGNum));
+Bracket cfcLRDen,@PROPAGATORS@;
+.sort
+Skip kval;
+Collect cfcFinal,cfcFinalPart,50;
+.sort
+@COMMON_FACTOR_cfcFinal@
+id cfcFinal(cfcDGNum?number_)=cfcDGNum;
+id cfcFinal(cfcDGNum?symbol_)=cfcDGNum;
+id cfcFinal(i_)=i_;
+@UNWRAP_cfcFinal@
+id cfcFinal(cfcShare(?a))=cfcShare(?a);
+id cfcFinalPart(cfcDGNum?number_)=cfcDGNum;
+id cfcFinalPart(cfcDGNum?symbol_)=cfcDGNum;
+id cfcFinalPart(i_)=i_;
+@UNWRAP_cfcFinalPart@
+id cfcFinalPart(cfcShare(?a))=cfcShare(?a);
+.sort
+Off OldFactArg;
+ArgToExtraSymbol tonumber,cfcFinal,cfcFinalPart;
+id cfcFinal(cfcDGNum?)=cfcShare(cfcDGNum);
+id cfcFinalPart(cfcDGNum?)=cfcShare(cfcDGNum);
+.sort
+NSkip;
+Hide kval,piece;
+.sort
+Local cfcPending=piece;
+Bracket cfcShare;
+.sort
+Collect cfcNum,cfcNumPart,50;
+id cfcNum(?a)=1;
+id cfcNumPart(?a)=1;
+ChainIn cfcShare;
+id,all cfcShare(?a,cfcDGNum?,?b)=cfcRef(cfcDGNum);
+.sort
+DropCoefficient;
+if (count(cfcRef,1)==0); Discard; endif;
+id cfcRef(cfcDGNum?)=cfcRef(cfcDGNum)*cfcKnown(cfcDGNum);
+if (count(cfcKnown,1)==0); Discard; endif;
+id cfcKnown(?a)=1;
+.sort
+Hide cfcPending;
+#$newCount=termsin_(cfcPending);
+#write <@RESULT@> "CFC_ADD_SHARED %$",$newCount
+#do cfcNew=cfcPending
+Local cfcNewDef=`cfcNew';
+id cfcRef(cfcDGNum?$index)=extrasymbol_(cfcDGNum);
+id cfcPolyN(cfcDGNum?)=cfcLRNum(extrasymbol_(cfcDGNum));
+id cfcPolyD(cfcDGNum?)=cfcLRDen(extrasymbol_(cfcDGNum));
+ModuleOption noparallel;
+.sort
+#write <@RESULT@> "cfcShare(`$index')=%E;",cfcNewDef
+Fill cfcKnown(`$index')=1;
+Drop cfcNewDef;
+.sort
+#enddo
+Unhide cfcPending;
+Drop cfcPending;
+.sort
+Unhide kval,piece;
+Bracket cfcLRDen,@PROPAGATORS@;
+.sort
+#write <@RESULT@> "CFC_GROUP"
+#write <@RESULT@> "+(%E)*(",kval
+#write <@RESULT@> "%E",piece
+#write <@RESULT@> ");"
+Drop kval,piece;
+.sort
+#enddo
+#write <@RESULT@> "CFC_END"
+Unhide cfcBlocks,cfcRefs,cfcDGWeights,cfcShareKeys;
+Drop cfcBlocks,cfcRefs,cfcDGWeights,cfcShareKeys;
+.sort
+Unhide cfcResult;
+.sort

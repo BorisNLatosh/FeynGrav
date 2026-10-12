@@ -104,10 +104,10 @@ assert["progress preserves timeout cleanup",progressRun["Status"]==="TimedOut" &
 
 parent=CreateDirectory[FileNameJoin[{root,"jobs with spaces"}]];
 expr=MTD[mu,nu] FVD[p-l,mu] FVD[p,nu] FAD[{l,m}] + I/3;
-auto=CalcFormCalculate[expr,LoopMomenta->{l},WorkingDirectory->parent];
+auto=CalcFormCalculate[expr,TensorDecomposition -> False, LoopMomenta ->{l},WorkingDirectory->parent];
 assert["automated vs FeynCalc",!FailureQ[auto] && Simplify[Contract[ExpandScalarProduct[FeynAmpDenominatorExplicit[FCI[auto-expr]]]]]===0];
 assert["successful cleanup",FileNames["*",parent]==={}];
-kept=Quiet[CalcFormCalculate[expr,LoopMomenta->{l},WorkingDirectory->parent,KeepFiles->True],CalcFormCalculate::files];
+kept=Quiet[CalcFormCalculate[expr,TensorDecomposition -> False, LoopMomenta ->{l},WorkingDirectory->parent,KeepFiles->True],CalcFormCalculate::files];
 firstJob=First[FileNames["calcform-job-*",parent]];
 assert["retained successful job",And@@(FileExistsQ[FileNameJoin[{firstJob,#}]]& /@ {"job.frm","job.map.json","job.out","stdout.log","stderr.log"})];
 assert["manual import equals automated",kept===CalcFormImport[FileNameJoin[{firstJob,"job.out"}],FileNameJoin[{firstJob,"job.map.json"}]]];

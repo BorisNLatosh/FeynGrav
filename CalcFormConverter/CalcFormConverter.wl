@@ -21,7 +21,7 @@ BeginPackage["CalcFormConverter`", {"FeynCalc`"}];
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormExport::usage ="CalcFormExport[expr, file, opts] exports an exact supported FeynCalc expression, including ordinary Dirac words, SU(N) colour structures and traces and rank-four single-space Lorentz Eps tensors, to a complete FORM program and a reversible JSON mapping. Prints a readable file summary and returns an association with InputFile, MappingFile and ResultFile. Options: Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. The generated program simplifies ordinary open chains and evaluates explicit DiracTrace expressions; DiracAlgebra -> False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour expressions; False preserves them and unevaluated SUNTrace. Dimension dependence can be compacted between prepared tensor stages and before general numerator cancellation. Propagator products are grouped automatically. Eligible small scalar coefficients undergo rational cancellation and numerator/denominator factorisation in FORM. Remaining version-one coefficients can simplify rational dependence on the symbolic Lorentz dimension alone; other cases retain common-factor extraction and momentum grouping. A direct massless monomial pass followed by a bounded denominator-basis stage cancels polynomial numerators against ordinary propagators before grouping, retaining constant terms and momentum routing. No Mathematica Simplify is called. No FORM process or integral reduction is performed.";
+CalcFormConverter`CalcFormExport::usage ="CalcFormExport[expr, file, opts] exports an exact supported FeynCalc expression, including ordinary Dirac words, SU(N) colour structures and traces and rank-four single-space Lorentz Eps tensors, to a complete FORM program and a reversible JSON mapping. Prints a readable file summary and returns an association with InputFile, MappingFile and ResultFile. Options: TensorDecomposition -> True, ReduceLoopCoefficients -> False, ReduceToScalarMasters -> True, DropScaleless -> False, Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True. The generated program simplifies ordinary open chains and evaluates explicit DiracTrace expressions; DiracAlgebra -> False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour expressions; False preserves them and unevaluated SUNTrace. Dimension dependence can be compacted between prepared tensor stages and before general numerator cancellation. Propagator products are grouped automatically. Eligible small scalar coefficients undergo rational cancellation and numerator/denominator factorisation in FORM. Remaining version-one coefficients can simplify rational dependence on the symbolic Lorentz dimension alone; other cases retain common-factor extraction and momentum grouping. A direct massless monomial pass followed by a bounded denominator-basis stage cancels polynomial numerators against ordinary propagators before grouping, retaining constant terms and momentum routing. No Mathematica Simplify is called. Export launches no FORM process. With exactly one declared loop momentum and TensorDecomposition -> True, the generated program decomposes the integral into coefficient functions with FeynCalc normalisation I Pi^2. DropScaleless -> False retains formal scaleless integrals; True drops provably scaleless cases. TensorDecomposition -> False retains integrand algebra. ReduceLoopCoefficients -> True lowers repeated propagator powers in FORM where supported, also for saved LoopTensorCoefficient expressions without a declared loop. It may introduce inverse mass differences and Cayley determinants; singular and scaleless families can remain formal. Linear reduced results collect complete rational denominator products within each final integral multiplier in FORM. ReduceToScalarMasters -> True (the default) reduces supported tensor coefficients through boxes to rank-zero PaVe masters and includes required power reduction. False disables that stage. Scalar integrals are not analytically evaluated.";
 
 
 (* ::Input::Initialization:: *)
@@ -29,7 +29,7 @@ CalcFormConverter`ColourAlgebra::usage = "ColourAlgebra selects SU(N) reduction 
 
 CalcFormConverter`DiracAlgebra::usage = "DiracAlgebra selects ordinary open-chain simplification and explicit trace evaluation in FORM (Automatic), or translation only (False).";
 
-CalcFormConverter`CalcFormImport::usage = "CalcFormImport[resultFile, mappingFile] reads the dedicated result of an exported FORM program and reconstructs FeynCalc internal notation. It does not execute Wolfram Language source or run tensor/integral reduction. Epsilon results require the exported $LeviCivitaSign setting. Versions one through five are supported. New grouped results are read incrementally and retain propagator products and coefficient factors; the final expression and individual coefficients still require kernel memory. Version-four results distinguish processed open chains from preserved explicit traces; import performs scalar Casimir presentation for processed colour jobs but no Dirac or colour tensor reduction.";
+CalcFormConverter`CalcFormImport::usage = "CalcFormImport[resultFile, mappingFile] reads the dedicated result of an exported FORM program and reconstructs FeynCalc internal notation. It does not execute Wolfram Language source or run tensor/integral reduction. Epsilon results require the exported $LeviCivitaSign setting. Versions one through eight are supported. Version-eight master jobs retain the recorded integral or saved-coefficient normalisation and report unreduced coefficients. Version-seven saved-coefficient jobs preserve their existing normalisation. Version-six integral groups reconstruct PaVe or LoopTensorCoefficient with I Pi^2 normalisation and the recorded scaleless setting. New grouped results are read incrementally and retain propagator products and coefficient factors; the final expression and individual coefficients still require kernel memory. Version-four results distinguish processed open chains from preserved explicit traces; import performs scalar Casimir presentation for processed colour jobs but no Dirac or colour tensor reduction.";
 
 
 (* ::Input::Initialization:: *)
@@ -41,7 +41,12 @@ CalcFormConverter`CalcFormInstall::usage = "CalcFormInstall[opts] explicitly att
 
 
 (* ::Input::Initialization:: *)
-CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. For a binary equality lhs == rhs, it calculates lhs - rhs and compares the imported residual with zero; the result may remain symbolic. True and False are returned directly. Options include Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress, FORMThreads, DiracAlgebra and ColourAlgebra. Failed jobs are retained. Polynomial numerators are cancelled against ordinary propagators using a direct massless monomial pass followed by a bounded independent-basis stage; no momentum shifts or scaleless removal are applied. Dimension dependence can be compacted between prepared tensor stages and before general cancellation. Surviving propagator products are grouped automatically and imported incrementally. Eligible small scalar coefficients are rationally simplified and factorised in FORM; remaining version-one coefficients can simplify rational dependence on the symbolic Lorentz dimension alone. Other cases retain the existing grouped path. No Mathematica Simplify is called. DiracAlgebra -> Automatic simplifies ordinary open chains and evaluates explicit DiracTrace expressions; False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour structures; False preserves colour objects and unevaluated SUNTrace.";
+CalcFormConverter`TensorDecomposition::usage = "TensorDecomposition is an option for CalcFormExport and CalcFormCalculate, default True. With exactly one declared LoopMomenta entry, interpret the expression as a one-loop integral and decompose its polynomial numerator into coefficient functions in FORM. False retains integrand algebra.";
+CalcFormConverter`ReduceToScalarMasters::usage = "ReduceToScalarMasters is an option for CalcFormExport and CalcFormCalculate, default True. It reduces supported one-loop coefficients through boxes to scalar PaVe masters in FORM and includes necessary repeated-power reduction. False retains the existing coefficient basis. Exceptional or scaleless coefficients can remain formal. No scalar integral evaluation or dimensional expansion is performed.";
+CalcFormConverter`ReduceLoopCoefficients::usage = "ReduceLoopCoefficients is an option for CalcFormExport and CalcFormCalculate, default False. Enabled ReduceToScalarMasters includes this reduction regardless of this option. With master reduction off, True lowers repeated propagator powers in one-loop coefficients through partial fractions and integration-by-parts identities executed in FORM. It can also process existing LoopTensorCoefficient expressions without declaring a loop momentum. For symbolic D, subfamilies with at most four distinct routes use ordinary PaVe coefficients where possible; scaleless, singular and unsupported families remain formal. Linear results are collected by final integral coefficient, with rational dimension coefficients simplified in FORM and shared amplitude blocks for large commuting expressions. Denominators inside those shared blocks are not globally collected. Generic reductions may introduce inverse mass differences and Cayley determinants. No analytic integral evaluation is performed.";
+CalcFormConverter`LoopTensorCoefficient::usage = "LoopTensorCoefficient[indices, chords, massesSquared, powers, dimension] is an inert normalised one-loop tensor coefficient. Chords begin with zero and label denominators (q+chord)^2-massSquared; powers are positive integers. Paired zero labels denote metrics; {0} denotes a scalar. Empty families preserve polynomial vacuum integrals. The unnormalised integral carries I Pi^2. CalcFormCalculate[..., ReduceLoopCoefficients -> True] can lower supported repeated powers. ReduceToScalarMasters -> True (the default) additionally reduces supported coefficients through boxes to scalar PaVe masters.";
+
+CalcFormConverter`CalcFormCalculate::usage = "CalcFormCalculate[expr, opts] exports, executes FORM and imports its result. For a binary equality lhs == rhs, it calculates lhs - rhs and compares the imported residual with zero; the result may remain symbolic. True and False are returned directly. Options include TensorDecomposition (default True), ReduceLoopCoefficients (default False), ReduceToScalarMasters (default True), DropScaleless (default False), Dimension, LoopMomenta, FORMExecutable, TimeConstraint, WorkingDirectory, KeepFiles, ShowTiming, ShowProgress, FORMThreads, DiracAlgebra and ColourAlgebra. Failed jobs are retained. Polynomial numerators are cancelled against ordinary propagators using a direct massless monomial pass followed by a bounded independent-basis stage; in integrand mode no momentum shifts or scaleless removal are applied. With exactly one LoopMomenta entry, enabled TensorDecomposition performs routing shifts and covariant decomposition in FORM and returns I Pi^2 times coefficient functions. DropScaleless -> False preserves formal scaleless terms; True drops demonstrably scaleless terms. ReduceLoopCoefficients -> True optionally reduces repeated-power coefficients in FORM, including saved coefficient expressions with empty LoopMomenta; it does not analytically evaluate integrals. ReduceToScalarMasters -> True (the default) includes necessary power reduction and reduces supported coefficients through boxes to scalar PaVe masters. It also accepts saved PaVe coefficients without interpreting their multipliers as integrands. Exceptional cases can remain formal with a partial-reduction message. Linear reduced results collect complete rational denominator products within each final integral multiplier in FORM. Otherwise empty LoopMomenta keeps integrand algebra; multiple loop momenta require TensorDecomposition -> False. Equality then means equality of integrals. Dimension dependence can be compacted between prepared tensor stages and before general cancellation. Surviving propagator products are grouped automatically and imported incrementally. Eligible small scalar coefficients are rationally simplified and factorised in FORM; remaining version-one coefficients can simplify rational dependence on the symbolic Lorentz dimension alone. Other cases retain the existing grouped path. No Mathematica Simplify is called. DiracAlgebra -> Automatic simplifies ordinary open chains and evaluates explicit DiracTrace expressions; False selects translation only. ColourAlgebra -> True (the default) or Automatic reduces fundamental SU(N) colour structures; False preserves colour objects and unevaluated SUNTrace.";
 
 
 (* ::Input::Initialization:: *)
@@ -143,6 +148,7 @@ throwFailure[tag_String, message_String, data_ : <||>] :=
 
 (* ::Input::Initialization:: *)
 Options[CalcFormConverter`CalcFormExport] = {
+    CalcFormConverter`TensorDecomposition -> True, CalcFormConverter`ReduceLoopCoefficients -> False, CalcFormConverter`ReduceToScalarMasters -> True, FeynCalc`DropScaleless -> False,
     (*FeynCalc owns these two option symbols. Qualifying them preserves their historical identity while making it independent of context.*)
     FeynCalc`Dimension -> Automatic,
     FeynCalc`LoopMomenta -> {},
@@ -562,6 +568,7 @@ scalarQ[x_] := Which[
 	(*Accept scalar symbols except indeterminate or infinite quantities. Pi and E remain mapped symbols. The imaginary unit I has head Complex and is handled by the exact-complex branch above.*)
 	Head[x] === Symbol, ! MemberQ[{Indeterminate, Infinity, ComplexInfinity}, x],
     Head[x] === SMP, namedCouplingQ[x],
+    MemberQ[{CalcFormConverter`LoopTensorCoefficient, PaVe}, Head[x]], tdCoefficientQ[x],
 	(*Accept scalar products of supported linear momenta. Direct scalar products are emitted as native FORM vector dots; scalar products inside an opaque abbreviation remain in that abbreviation's mapping definition.*)
 	MatchQ[x, Pair[_Momentum, _Momentum]], AllTrue[List @@ x, linearMomentumQ],
 	(*Compound exact expressions: a Plus (sum of scalars) or Times (product of scalars, including the coefficient times scalar case) is scalar if ALL of its arguments are scalars. This is the recursion that walks sums and products to their leaves, and it is also what lets e.g. Times[2, Pair[...]] be handled.*)
@@ -874,6 +881,7 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
 		Head[x] === Complex && scalarQ[x], "(" <> emit[Re[x]] <> "+i_*" <> emit[Im[x]] <> ")",
 		(*Scalar symbol (includes I -> i_ via scalar).*)
 		Head[x] === Symbol && scalarQ[x], scalar[x],
+		Head[x] === CalcFormConverter`LoopTensorCoefficient || Head[x] === PaVe, register["IntegralCoefficient", x],
 		(*A sum becomes a #define macro, so the (possibly long) expression is named once and referenced thereafter. This is why emission order determines macro numbering.*)
 		Head[x] === Plus, makeMacro[StringRiffle[emit /@ (List @@ x), "+"]],
 		(*Products are parenthesized with explicit *.*)
@@ -961,7 +969,7 @@ renderExport[data_Association, result_String, template_String] :=
   Module[
      (*Projections of the single big association produced by buildExportData. entries is the ordered registry table; declaration/json/digest/program are scalars built below.*)
     {entries = data["Mapping"]["Entries"], declaration, json, digest, 
-    program, templateNames, unknownTemplateNames, rationalPlan, cancellationPlan, dimensionPlan, symmetryPlan, stagedDimensionQ, stageSort},
+    program, templateNames, unknownTemplateNames, rationalPlan, cancellationPlan, dimensionPlan, symmetryPlan, stagedDimensionQ, stageSort, algebraData},
      (*The template contract is enforced HERE, not only where the shipped template is read, because this function is the one that accepts an arbitrary template. Without this check a template missing a placeholder would silently render a program that omits a declaration or directive -- a FORM-level failure far from its cause. Required and unknown placeholders are rejected against the original template before any values are inserted.*)
      templateNames = templatePlaceholderNames[template];
      If[! AllTrue[$requiredTemplatePlaceholders, 
@@ -985,9 +993,14 @@ renderExport[data_Association, result_String, template_String] :=
      If[names === {}, "", type <> " " <> StringRiffle[names, ","] <> ";"]
        ];
      rationalPlan = rcPlan[data];
-     dimensionPlan = dcfPlan[data];
-     cancellationPlan = pcPlan[data];
-     symmetryPlan = ssPlan[data];
+     (* Tensor decomposition changes the saved result vocabulary, not the
+        algebra before integration. Plan pre-decomposition optimisations from
+        the recorded algebra capabilities, while keeping version-six output. *)
+     algebraData = If[KeyExistsQ[data, "TensorProcessing"],
+         Join[data, <|"Mapping" -> tdAlgebraMapping[data["Mapping"]]|>], data];
+     dimensionPlan = dcfPlan[algebraData];
+     cancellationPlan = pcPlan[algebraData];
+     symmetryPlan = ssPlan[algebraData];
      stagedDimensionQ = dimensionPlan =!= <||> && data["Preparations"] =!= {};
      (* Each stage owns its sort boundaries. Supply the shared non-growing
         cancellation identities through an explicit hook; the dimension module
@@ -1006,7 +1019,7 @@ renderExport[data_Association, result_String, template_String] :=
       "@RESULTMARKER@" -> resultMarker[data["Mapping"]["Version"]],
           (*Declare the FORM functions for the masters (A0..D0). The names come from $masterSpecByFORMName, i.e. the "FORMName" fields of the spec table -- again, no name is hard-coded here.*)
           "@FUNCTIONS@" -> 
-       "CFunctions " <> StringRiffle[Keys[$masterSpecByFORMName], ","] <> ";" <> daDeclarations[data] <> caDeclarations[data] <> Lookup[rationalPlan, "Declarations", ""] <> Lookup[cancellationPlan, "Declarations", ""] <> Lookup[dimensionPlan, "Declarations", ""] <> Lookup[symmetryPlan, "Declarations", ""],
+       "CFunctions " <> StringRiffle[Keys[$masterSpecByFORMName], ","] <> ";" <> daDeclarations[data] <> caDeclarations[data] <> Lookup[rationalPlan, "Declarations", ""] <> Lookup[cancellationPlan, "Declarations", ""] <> Lookup[dimensionPlan, "Declarations", ""] <> Lookup[symmetryPlan, "Declarations", ""] <> Lookup[data, "TensorDeclarations", ""],
           (*Declarations grouped by class, driven by $kindSpecs. Note "Symbols" covers Scalars, Abbreviations and Denominators -- they share a FORM class by design.*)
           "@SCALARS@" -> declaration["Symbols"], 
       "@DIMENSION@" -> data["DimensionName"],
@@ -1030,9 +1043,15 @@ renderExport[data_Association, result_String, template_String] :=
           "@MULTIPLICATIONS@" -> 
        StringJoin[MapIndexed[(stageSort <>
          If[symmetryPlan === <||>, "", symmetryPlan["Boundaries"][[First[#2]]]] <>
-         "Multiply " <> #1 <> ";\n") &, data["Multiplications"]]] <> If[stagedDimensionQ, stageSort <> dcfStageRestore[dimensionPlan], ""] <> caProcessing[data] <> If[KeyExistsQ[data["Mapping"], "EpsilonConvention"], "contract 0;\n", ""] <> daProcessing[data] <> pcDirectProcessing[data] <> If[cancellationPlan === <||>, "", dcfPrecondition[dimensionPlan]] <> Lookup[cancellationPlan, "Processing", ""],
+         "Multiply " <> #1 <> ";\n") &, data["Multiplications"]]] <> If[stagedDimensionQ, stageSort <> dcfStageRestore[dimensionPlan], ""] <> caProcessing[data] <> If[KeyExistsQ[data["Mapping"], "EpsilonConvention"], "contract 0;\n", ""] <> daProcessing[data] <> pcDirectProcessing[data] <> If[cancellationPlan === <||>, "", dcfPrecondition[dimensionPlan]] <> Lookup[cancellationPlan, "Processing", ""] <> Lookup[data, "TensorProcessing", ""] <>
+         If[KeyExistsQ[data, "TensorProcessing"] && dimensionPlan =!= <||>,
+             dcfStageSort[dimensionPlan] <> dcfStageRestore[dimensionPlan], ""] <> Lookup[data,"LoopReductionProcessing",""],
           "@GROUPING@" -> With[{denominators = Lookup[Select[entries, #["Kind"] === "Denominator" &], "Name", {}]},
-              If[denominators === {}, "", If[pgFactorisationQ[data], "Bracket+ ", "Bracket "] <> StringRiffle[denominators, ","] <> ";"]],
+              If[KeyExistsQ[data, "TensorProcessing"],
+                  If[KeyExistsQ[data,"LoopReductionProcessing"], "#if `$cfcLRNonlinear' == 0\nBracket+ cfcTC;\n#else\n", ""] <>
+                  "Bracket " <> StringRiffle[Prepend[denominators,"cfcTC"], ","] <> ";" <>
+                  If[KeyExistsQ[data,"LoopReductionProcessing"],"\n#endif",""],
+                  If[denominators === {}, "", If[pgFactorisationQ[data], "Bracket+ ", "Bracket "] <> StringRiffle[denominators, ","] <> ";"]]],
           (*The result path. Windows backslashes are normalized because FORM expects forward slashes there; Unix paths are preserved literally, including backslashes. Quoting is the template's job.*)
           "@RESULT@" -> If[$OperatingSystem === "Windows", 
              StringReplace[result, "\\" -> "/"], result], 
@@ -1335,7 +1354,7 @@ CalcFormConverter`CalcFormExport[expression_, file_String,
       OptionValue[FeynCalc`LoopMomenta], OptionValue[CalcFormConverter`DiracAlgebra], OptionValue[CalcFormConverter`ColourAlgebra]];
         (*Step 3: render the FORM program. readProgramTemplate[] does the one piece of file I/O this stage needs (reading the template); the result path comes from paths, so the .out filename is fixed before the program text is generated.*)
         rendered = 
-     renderExport[data, paths["ResultFile"], readProgramTemplate[]];
+     renderExport[smPrepare[tdPrepare[data, OptionValue[CalcFormConverter`TensorDecomposition], OptionValue[FeynCalc`DropScaleless]], OptionValue[CalcFormConverter`ReduceToScalarMasters], OptionValue[CalcFormConverter`ReduceLoopCoefficients], OptionValue[FeynCalc`DropScaleless], OptionValue[FeynCalc`Dimension]], paths["ResultFile"], readProgramTemplate[]];
         (*Step 4: publish both files before announcing success. Preserve any
           returned failure, including transaction cleanup/recovery diagnostics. *)
         result = writeExport[paths, rendered, overwrite];
@@ -1376,7 +1395,7 @@ SetAttributes[withImportParser, HoldAll];
 withImportParser[values_, dim_, body_] := Block[
     {$importParserActive = True, $importParserValues = values,
      $importParserDimension = dim, $importFactorCache = <||>,
-     $importClassCache = <||>, $importFactorBytes = 0, $importClassBytes = 0,
+     $importClassCache = <||>, $tdRatioDenominators = <||>, $importFactorBytes = 0, $importClassBytes = 0,
      $flatParserMinimumCharacters = Min[32, $flatParserMinimumCharacters],
      $flatParserMinimumReusePerDistinctFactor = Min[1, $flatParserMinimumReusePerDistinctFactor]},
     body
@@ -1390,8 +1409,13 @@ importFactor[t_String] := Module[{value, bytes},
     If[KeyExistsQ[$importParserValues, t],
         value = $importParserValues[t];
         If[FreeQ[value, _vectorToken | _indexToken | _caAToken | _caFToken], Return[value]]];
+    If[StringStartsQ[t, "cfcShare(" | "cfcLRDen("],
+        value = srFastFactor[t];
+        If[value =!= $Failed, Return[value]]];
     If[KeyExistsQ[$importFactorCache, t], Return[$importFactorCache[t]]];
-    value = parseGeneralResult[t, $importParserValues, $importParserDimension];
+    value = If[$tdImport =!= <||> && StringStartsQ[t, "cfcDimRat("],
+        tdFastDimensionRatio[t], $Failed];
+    If[value === $Failed, value = parseGeneralResult[t, $importParserValues, $importParserDimension]];
     If[StringLength[t] <= 512,
         bytes = ByteCount[value] + ByteCount[t] + 256;
         If[bytes <= 16384 && bytes <= $importParserCacheBytes,
@@ -1417,11 +1441,17 @@ importTokenClass[t_String, compoundPattern_] := Module[{value, bytes},
     value
 ];
 
+(* FORM can wrap a long exact integer using backslash-newline plus indentation.
+   Join only numeric tokens, never identifiers or arbitrary source lines. The
+   bounded expression/record reader owns chunk boundaries before this step. *)
+normaliseFORMNumbers[text_String] := If[!StringContainsQ[text,"\\"],text,
+    StringReplace[text,RegularExpression["(?<![A-Za-z0-9_])([0-9]+)\\\\\\r?\\n[ \\t]*(?=[0-9])"] -> "$1"]];
+
 parseGeneralResult[text_String, values_Association, dim_] := Module[
      {tokens, pos = 1, peek, take, expect, atom, power, unary, 
     product, sum,
        scalarValue, entryValue, call, dot, result, tokenPattern, 
-    stripped, classes,
+    stripped, classes, source=normaliseFORMNumbers[text],
        tokenCount, compoundPattern, compoundValue},
      (*Lexing, part 1 -- what can be one token. Only COMPLETE component/metric calls are made composite: cfvN(cfiM) and d_(cfiM,cfiN). Everything else is lexed piecewise. The input text is tokenized as-is (not whitespace-stripped first), precisely so whitespace cannot glue separate identifier fragments into one token. Dots are deliberately left as ordinary operator tokens, which is what lets the dot-chain validation below run left-to-right.*)
      (* Local recursive functions refer to one another and to token storage.
@@ -1435,8 +1465,8 @@ s*,\\s*cfi[0-9]+\\s*\\))";
      tokenPattern = 
     RegularExpression[
      compoundPattern <> "|[A-Za-z][A-Za-z0-9_]*|[0-9]+|[+*/^(),.\\-]"];
-     stripped = StringReplace[text, WhitespaceCharacter -> ""];
-     tokens = StringCases[text, tokenPattern];
+     stripped = StringReplace[source, WhitespaceCharacter -> ""];
+     tokens = StringCases[source, tokenPattern];
      (*Coverage check: the concatenation of ALL tokens, with whitespace removed, must equal the whitespace-stripped input. If not, some character was never tokenized -- i.e. the result contains syntax this parser does not know -- and the whole parse is rejected up front rather than misinterpreted. An empty token list is rejected for the same reason.*)
      If[StringReplace[StringJoin[tokens], WhitespaceCharacter -> ""] =!= 
       stripped || tokens === {}, 
@@ -1473,6 +1503,12 @@ s*,\\s*cfi[0-9]+\\s*\\))";
       "Unknown identifier in FORM result.", <|"Identifier" -> n|>]];
      (*call[n, args]: resolve a function application. The Which is an exact whitelist of accepted (name, argument-type) shapes: d_ with two index tokens -> metric Pair a DECLARED VECTOR name with one index token -> momentum component, i.e. Pair[Momentum[v, dim], LorentzIndex[i, dim]] a master FORM name whose arguments pass -> the master masterArgumentsQ (arity + scalar-ness) head applied Anything else is an unsupported function or a type error.*)
      call[n_, args_] := Which[
+     n === "cfcTC", tdCall[args],
+     n === "cfcShare", lrSharedCall[args],
+     n === "cfcLRNum", ldgScalarCall[args, False],
+     n === "cfcLRDen", ldgScalarCall[args, True],
+     MemberQ[{"cfcLRReduced","cfcLRReducedPart"},n], lrReducedCall[args],
+     n === "cfcDimRat", tdDimensionRatio[args],
      MemberQ[{"cfcCT", "cfcCTr", "cfcCF", "cfcCD"}, n] || (n === "d_" && !FreeQ[args, _caAToken | _caFToken]), caCall[n, args],
      MemberQ[{"g_", "gi_"}, n], dcGammaCall[n, args, dim],
      n === "e_" && $epsilonImportFactor =!= None && Length[args] === 4 &&
@@ -1846,7 +1882,7 @@ decodeEntries[entries_List, dim_:Automatic] := Association[
 CalcFormConverter`CalcFormImport[resultFile_String, 
    mappingFile_String] := Catch[
      Module[{json, mapping, text, lines, digest, entries, dim, names, grouped,
-     values},
+     values, algebraMapping},
         (*Read the mapping as UTF-8 text first. Legacy results retain their text reader; grouped results use an owned, bounded byte stream. Read failures do not catch user aborts.*)
         json = 
      Quiet[Check[
@@ -1863,9 +1899,11 @@ CalcFormConverter`CalcFormImport[resultFile_String,
         (*Identity gate: it must be an association, must declare this format name and a supported integer format version; and Lookup with a None default handles a missing key without a message.*)
         If[! AssociationQ[mapping] || 
       Lookup[mapping, "Format", None] =!= $formatName ||
-             !MemberQ[{1, 2, 3, 4, 5}, Lookup[mapping, "Version", None]],
+             !MemberQ[{1, 2, 3, 4, 5, 6, 7, 8}, Lookup[mapping, "Version", None]],
            throwFailure["InvalidMapping", "Unsupported mapping format or version."]];
-        grouped = Lookup[mapping, "ResultLayout", None] === "PropagatorGroups";
+        smValidateMapping[mapping];
+        algebraMapping = tdAlgebraMapping[mapping];
+        grouped = MemberQ[{"PropagatorGroups", "IntegralCoefficientGroups"}, Lookup[mapping, "ResultLayout", None]];
         If[KeyExistsQ[mapping, "ResultLayout"] && !grouped,
             throwFailure["InvalidMapping", "Unknown result layout."]];
         digest = Hash[#, "SHA256", "HexString"] & /@
@@ -1883,10 +1921,10 @@ CalcFormConverter`CalcFormImport[resultFile_String,
         If[! ListQ[entries] || ! AllTrue[entries, AssociationQ], 
      throwFailure["InvalidMapping", "Invalid mapping entries."]];
         (*Identifier validation: every entry must have a name that obeys validEntryNameQ (kind prefix + digits), names must be unique, and every entry must carry an "Expression" key to decode. Note Lookup threads over the list of associations with a {} default, so a missing "Name" surfaces as Missing here rather than as a message.*)
-        If[mapping["Version"] < 3 && AnyTrue[entries,
+        If[algebraMapping["Version"] < 3 && AnyTrue[entries,
             MemberQ[{"ColourTensor", "ColourWord", "NamedCoupling"}, Lookup[#, "Kind", None]] &],
             throwFailure["InvalidMapping", "Dirac/colour entries require version three."]];
-        If[mapping["Version"] < 5 && AnyTrue[entries, MemberQ[$caKinds, Lookup[#, "Kind", None]] &],
+        If[algebraMapping["Version"] < 5 && AnyTrue[entries, MemberQ[$caKinds, Lookup[#, "Kind", None]] &],
             throwFailure["InvalidMapping", "New colour entries require version five."]];
         names = Lookup[entries, "Name", {}];
         If[! DuplicateFreeQ[names] || ! AllTrue[entries,
@@ -1899,10 +1937,14 @@ CalcFormConverter`CalcFormImport[resultFile_String,
        MatchQ[dim, _Symbol | _Integer] || (IntegerQ[dim] && dim < 2) || 
       dim === I, throwFailure["InvalidMapping", "Invalid mapped dimension."]];
         (*Only now decode every mapped value: name -> value, with vectors and indices wrapped in their typed tokens.*)
-        values = decodeEntries[entries, dim];
+        values = If[KeyExistsQ[mapping,"LoopCoefficientReduction"], None, decodeEntries[entries, dim]];
         (*Hand the result text (everything after the marker line) to the parser together with the symbol table and dimension.*)
-        Block[{$importParserActive = False, $caImport = <||>, $epsilonImportFactor = None, $diracImportLine = None, $daImportLines = <||>, $daImportMode = False},
-            If[mapping["Version"] >= 3,
+        Block[{$smEnabled = (mapping["Version"]===8), $smEligibilityCache=<||>, $smDropScaleless=Lookup[Lookup[mapping,"TensorDecomposition",<||>],"DropScaleless",False], $tdImport = <||>, $tdCoefficientCache = <||>, $lrScalarCache = <||>, $lrScalarCacheBytes = 0, $importParserActive = False, $caImport = <||>, $epsilonImportFactor = None, $diracImportLine = None, $daImportLines = <||>, $daImportMode = False},
+            tdImportSetup[mapping, dim];
+            (* Check frozen reduction kinematics before decoding inverse scalar
+               coefficients: changed exceptional invariants must not evaluate 1/0. *)
+            If[values === None, values = decodeEntries[entries, dim]];
+            If[algebraMapping["Version"] >= 3,
                 If[!MemberQ[{True, False}, Lookup[mapping, "EpsilonPresent", None]] ||
                     Lookup[mapping, "EpsilonPresent", None] =!= KeyExistsQ[mapping, "EpsilonConvention"],
                     throwFailure["InvalidMapping", "Invalid version-three epsilon metadata."]];
@@ -1923,10 +1965,10 @@ CalcFormConverter`CalcFormImport[resultFile_String,
                     ]
                 ]
             ];
-            If[mapping["Version"] >= 4, daValidateMetadata[mapping, entries]];
-            If[mapping["Version"] === 5, caValidateMetadata[mapping, entries]];
+            If[algebraMapping["Version"] >= 4, daValidateMetadata[algebraMapping, entries]];
+            If[algebraMapping["Version"] === 5, caValidateMetadata[algebraMapping, entries]];
             If[grouped,
-                Return[pgImport[resultFile, mapping, digest, values, dim]]];
+                Return[smImportResult[pgImport[resultFile, mapping, digest, values, dim],mapping]]];
             If[$diracImportLine === None,
                 parseResult[StringRiffle[Rest[lines], "\n"], values, dim],
                 With[{prepared = caPrepareResult[StringRiffle[Rest[lines], "\n"], values]},
@@ -1962,6 +2004,11 @@ Get[FileNameJoin[{$moduleDirectory, "RationalCoefficients.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "DimensionCoefficients.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "PropagatorCancellation.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "StageSymmetry.wl"}]];
+Get[FileNameJoin[{$moduleDirectory, "TensorDecomposition.wl"}]];
+Get[FileNameJoin[{$moduleDirectory, "LoopCoefficientReduction.wl"}]];
+Get[FileNameJoin[{$moduleDirectory, "ScalarMasterReduction.wl"}]];
+Get[FileNameJoin[{$moduleDirectory, "LoopDenominatorGroups.wl"}]];
+Get[FileNameJoin[{$moduleDirectory, "SharedCoefficientReader.wl"}]];
 Get[FileNameJoin[{$moduleDirectory, "FORMRuntime.wl"}]];
 
 
