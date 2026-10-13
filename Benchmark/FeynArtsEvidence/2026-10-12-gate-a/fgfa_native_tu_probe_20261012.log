@@ -1,0 +1,35 @@
+OMP: Warning #179: Function Can't set size of SHM failed:
+"START=""Mon 12 Oct 2026 11:09:59"" kernel=""15.0.1 for Linux x86 (64-bit) (July 2, 2026)"
+Style["Loading FeynCalc from /home/latosh/.Wolfram/Applications/FeynCalc/", "Text"]
+$PrePrint is set to FeynCalcForm. Use FI and FC to change the display format.
+Style["FeynCalc ", "Text", Bold]Style["10.2.1 (stable version). For help, use the ", "Text"]Style[DisplayForm[ButtonBox["online documentation,", ButtonData :> {URL["https://feyncalc.github.io/referenceDev"], None}, BaseStyle -> "Hyperlink", ButtonNote -> "https://feyncalc.github.io/referenceDev"]], "Text"]Style[" visit the ", "Text"]Style[DisplayForm[ButtonBox["forum", ButtonData :> {URL["https://github.com/FeynCalc/feyncalc/discussions"], None}, BaseStyle -> "Hyperlink", ButtonNote -> "https://github.com/FeynCalc/feyncalc/discussions/"]], "Text"]Style[" and have a look at the supplied ", "Text"]Style[DisplayForm[ButtonBox["examples.", BaseStyle -> "Hyperlink", ButtonFunction :> SystemOpen[FileNameJoin[{$FeynCalcDirectory, "Examples"}]], Evaluator -> Automatic, Method -> "Preemptive"]], "Text"]Style[" The PDF-version of the manual can be downloaded ", "Text"]Style[DisplayForm[ButtonBox["here.", ButtonData :> {URL["https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf"], None}, BaseStyle -> "Hyperlink", ButtonNote -> "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf"]], "Text"]
+Style["If you use FeynCalc in your research, please evaluate FeynCalcHowToCite[] to learn how to cite this software.", "Text"]
+Style["Please keep in mind that the proper academic attribution of our work is crucial to ensure the future development of this package!", {"Text", Italic}]
+Style["Loading FeynArts from /home/latosh/.Wolfram/Applications/FeynCalc/FeynArts", "Text"]
+
+$FAVerbose::shdw: Symbol $FAVerbose appears in multiple contexts {FeynArts`, Global`}; definitions in context FeynArts` may shadow or be shadowed by other definitions.
+Style["FeynArts ", "Text", Bold]Style["3.12 (27 Mar 2025) patched for use with FeynCalc, for documentation see the ", "Text"]Style[DisplayForm[ButtonBox["manual", BaseStyle -> "Hyperlink", ButtonFunction :> SystemOpen[First[FileNames[{"*.pdf", "*.PDF"}, FileNameJoin[{$FeynArtsDirectory, "manual"}]]]], Evaluator -> Automatic, Method -> "Preemptive"]], "Text"]Style[" or visit ", "Text"]Style[DisplayForm[ButtonBox["www.feynarts.de.", ButtonData :> {URL["http://www.feynarts.de/"], None}, BaseStyle -> "Hyperlink", ButtonNote -> "www.feynarts.de/"]], "Text"]
+Style["If you use FeynArts in your research, please cite", "Text"]
+Style[" • T. Hahn, Comput. Phys. Commun., 140, 418-431, 2001, arXiv:hep-ph/0012260", "Text"]
+"LOAD="Null
+"FApath=""/home/latosh/.Wolfram/Applications/FeynCalc/FeynArts/"" FCpath=""/home/latosh/.Wolfram/Applications/FeynCalc/Kernel/init.m"
+""
+"""loading ""generic"" model file ""/tmp/fgfa_native_tu_probe_20261012.gen"
+"> $GenericMixing is OFF"
+"generic model "{"fgfa_native_tu_probe_20261012"}" initialized"
+""
+"""loading ""classes"" model file ""/tmp/fgfa_native_tu_probe_20261012.mod"
+"> "4" particles (incl. antiparticles) in "3" classes"
+"> $CounterTerms are ON"
+"> "2" vertices"
+"classes model "{"fgfa_native_tu_probe_20261012"}" initialized"
+"MODEL="True
+"KIN="InputForm[{{Lorentz, Lorentz}, {Lorentz}, {S, T, U}, {T[1], U[1], -U[1], S[1]}}]
+"COUPLINGS="InputForm[{C[T[1], S[1], S[1]] == {{I*gg}, {0}}, C[T[1], -U[1], U[1]] == {{I*gh}}}]
+"Tinternal="InputForm[PV[I/2*(FAMetricTensor[Index[Lorentz, 1], Index[Lorentz, 4]]*FAMetricTensor[Index[Lorentz, 2], Index[Lorentz, 3]] + FAMetricTensor[Index[Lorentz, 1], Index[Lorentz, 3]]*FAMetricTensor[Index[Lorentz, 2], Index[Lorentz, 4]])*FAPropagatorDenominator[p, Mass[T[1]]]]]
+"Texternal="InputForm[PV[FAPolarizationTensor[T[1], p, Index[Lorentz, 1], Index[Lorentz, 2]]]]
+"Uinternal="InputForm[PV[I*FAMetricTensor[Index[Lorentz, 1], Index[Lorentz, 2]]*FAPropagatorDenominator[p, Mass[U[1]]]]]
+"FCinternalT="InputForm[PV[I/2*FeynAmpDenominator[PropagatorDenominator[Momentum[p], Mass[T[1]]]]*(Pair[LorentzIndex[Lor1], LorentzIndex[Lor4]]*Pair[LorentzIndex[Lor2], LorentzIndex[Lor3]] + Pair[LorentzIndex[Lor1], LorentzIndex[Lor3]]*Pair[LorentzIndex[Lor2], LorentzIndex[Lor4]])]]
+"FCinternalU="InputForm[PV[I*FeynAmpDenominator[PropagatorDenominator[Momentum[p], Mass[U[1]]]]*Pair[LorentzIndex[Lor1], LorentzIndex[Lor2]]]]
+"FCexternalT="InputForm[PV[FAPolarizationTensor[T[1], p, LorentzIndex[Lor1], LorentzIndex[Lor2]]]]
+"DONE=""Mon 12 Oct 2026 11:10:01"

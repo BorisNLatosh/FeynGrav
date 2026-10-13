@@ -1,0 +1,940 @@
+Notebook[
+ {Cell[CellGroupData[{Cell["Tree-level graviton scattering with FeynArts", 
+      "Title", ExpressionUUID -> "14a74f86-b215-4b20-94e3-aff4e139f2e7"], 
+     Cell["Generate and display all four off-shell 2 -> 2 graviton tree \
+diagrams with FeynArts: the three exchange channels and the quartic contact. \
+Attach unconstrained external polarisation tensors, contract each \
+contribution, and store their sum in \[ScriptCapitalM]. No mass-shell, \
+transversality, tracelessness or helicity conditions are imposed.", "Text", 
+      ExpressionUUID -> "dc7be9f0-e01f-482e-b16b-a401a43db518"], 
+     Cell[CellGroupData[{Cell["1. Initialisation", "Section", 
+         ExpressionUUID -> "66979d8e-122c-4326-a3d4-6b1c333b6c2c"], 
+        Cell["Start with a fresh kernel (especially after running the \
+previous on-shell version) and evaluate the two cells below with Shift+Enter. \
+The first loads FeynGrav, which loads FeynCalc and CalcFormConverter, and \
+asks FeynCalc to load the installed patched FeynArts. The saved pure-GR model \
+uses gauge parameter 2 and contains the cubic and quartic graviton \
+interactions and gravitational ghosts. GenericModel is given explicitly \
+because the classes file does not name its generic model and the FeynArts \
+default is the stock \"Lorentz\" file. No diagrams are generated and FORM is \
+not executed here. Opening this notebook executes nothing.", "Text", 
+         ExpressionUUID -> "3f444fd2-0054-4d3a-9b81-971cc7884bc8"], 
+        Cell[CellGroupData[{Cell[BoxData[{RowBox[{RowBox[{"$LoadAddOns", "=", 
+                  RowBox[{"{", "\"FeynArts\"", "}"}]}], ";"}], "\n", 
+              RowBox[{RowBox[{"<<", "\"FeynGrav`\""}], ";"}]}], "Code", 
+            InitializationCell -> False, CellChangeTimes -> 
+             {4.00081504920359*^9}, CellLabel -> "In[1]:=", 
+            ExpressionUUID -> "2da8c400-44f9-4e33-b46c-24d635d8fb3d"], 
+           Cell[CellGroupData[{Cell[BoxData[FormBox[InterpretationBox[
+                  RowBox[{StyleBox["\"FeynCalc \"", "Text", StripOnInput -> 
+                      False, FontWeight -> Bold], "\[InvisibleSpace]", 
+                    StyleBox[
+                     "\"10.2.1 (stable version). For help, use the \"", 
+                     "Text", StripOnInput -> False], "\[InvisibleSpace]", 
+                    StyleBox[TagBox[ButtonBox[RowBox[{RowBox[{"online", " ", 
+                          "documentation"}], ","}], BaseStyle -> "Hyperlink", 
+                       ButtonData :> {URL[
+                          "https://feyncalc.github.io/referenceDev"], None}, 
+                       ButtonNote -> 
+                        "https://feyncalc.github.io/referenceDev"], 
+                      DisplayForm], "Text", StripOnInput -> False], 
+                    "\[InvisibleSpace]", StyleBox["\" visit the \"", "Text", 
+                     StripOnInput -> False], "\[InvisibleSpace]", StyleBox[
+                     TagBox[ButtonBox["forum", BaseStyle -> "Hyperlink", 
+                       ButtonData :> {URL[
+                          "https://github.com/FeynCalc/feyncalc/discussions"]\
+, None}, ButtonNote -> "https://github.com/FeynCalc/feyncalc/discussions/"], 
+                      DisplayForm], "Text", StripOnInput -> False], 
+                    "\[InvisibleSpace]", StyleBox[
+                     "\" and have a look at the supplied \"", "Text", 
+                     StripOnInput -> False], "\[InvisibleSpace]", StyleBox[
+                     TagBox[ButtonBox[RowBox[{"examples", "."}], BaseStyle -> 
+                        "Hyperlink", ButtonFunction :> SystemOpen[
+                         FileNameJoin[{FeynCalc`$FeynCalcDirectory, 
+                          "Examples"}]], Evaluator -> Automatic, Method -> 
+                        "Preemptive"], DisplayForm], "Text", StripOnInput -> 
+                      False], "\[InvisibleSpace]", StyleBox[
+                     "\" The PDF-version of the manual can be downloaded \"", 
+                     "Text", StripOnInput -> False], "\[InvisibleSpace]", 
+                    StyleBox[TagBox[ButtonBox[RowBox[{"here", "."}], 
+                       BaseStyle -> "Hyperlink", ButtonData :> {URL["https://\
+github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManu\
+al.pdf"], None}, ButtonNote -> "https://github.com/FeynCalc/feyncalc-manual/r\
+eleases/download/dev-manual/FeynCalcManual.pdf"], DisplayForm], "Text", 
+                     StripOnInput -> False]}], Style["FeynCalc ", "Text", 
+                   Bold]Style["10.2.1 (stable version). For help, use the ", 
+                   "Text"]Style[DisplayForm[ButtonBox[
+                     "online documentation,", ButtonData :> 
+                      {URL["https://feyncalc.github.io/referenceDev"], None}, 
+                     BaseStyle -> "Hyperlink", ButtonNote -> 
+                      "https://feyncalc.github.io/referenceDev"]], 
+                   "Text"]Style[" visit the ", "Text"]Style[DisplayForm[
+                    ButtonBox["forum", ButtonData :> {URL[
+                        "https://github.com/FeynCalc/feyncalc/discussions"], 
+                       None}, BaseStyle -> "Hyperlink", ButtonNote -> 
+                      "https://github.com/FeynCalc/feyncalc/discussions/"]], 
+                   "Text"]Style[" and have a look at the supplied ", 
+                   "Text"]Style[DisplayForm[ButtonBox["examples.", 
+                     BaseStyle -> "Hyperlink", ButtonFunction :> SystemOpen[
+                       FileNameJoin[{FeynCalc`$FeynCalcDirectory, 
+                         "Examples"}]], Evaluator -> Automatic, Method -> 
+                      "Preemptive"]], "Text"]Style[
+                   " The PDF-version of the manual can be downloaded ", 
+                   "Text"]Style[DisplayForm[ButtonBox["here.", ButtonData :> 
+                      {URL["https://github.com/FeynCalc/feyncalc-manual/relea\
+ses/download/dev-manual/FeynCalcManual.pdf"], None}, BaseStyle -> 
+                      "Hyperlink", ButtonNote -> "https://github.com/FeynCalc\
+/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf"]], "Text"], 
+                  Editable -> False], TraditionalForm]], "Print", 
+               CellChangeTimes -> {4.000818284409306*^9}, CellLabel -> 
+                "During evaluation of In[1]:=", ExpressionUUID -> 
+                "9f39ea3a-8be3-4bd9-8244-b4d2b94ebab3"], Cell[BoxData[
+                FormBox[StyleBox["\"If you use FeynCalc in your research, \
+please evaluate FeynCalcHowToCite[] to learn how to cite this software.\"", 
+                  "Text", StripOnInput -> False], TraditionalForm]], "Print", 
+               CellChangeTimes -> {4.000818284411626*^9}, CellLabel -> 
+                "During evaluation of In[1]:=", ExpressionUUID -> 
+                "4f8aa7d3-e6c8-497f-8582-c963ad42ff9b"], Cell[BoxData[
+                FormBox[StyleBox["\"Please keep in mind that the proper \
+academic attribution of our work is crucial to ensure the future development \
+of this package!\"", "Text", StripOnInput -> False, FontSlant -> Italic], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818284412788*^9}, CellLabel -> 
+                "During evaluation of In[1]:=", ExpressionUUID -> 
+                "6cf63a8f-4865-4ba5-b81c-90a81942486a"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{StyleBox["\"FeynArts \"", 
+                     "Text", StripOnInput -> False, FontWeight -> Bold], 
+                    "\[InvisibleSpace]", StyleBox["\"3.12 (27 Mar 2025) \
+patched for use with FeynCalc, for documentation see the \"", "Text", 
+                     StripOnInput -> False], "\[InvisibleSpace]", StyleBox[
+                     TagBox[ButtonBox["manual", BaseStyle -> "Hyperlink", 
+                       ButtonFunction :> SystemOpen[First[FileNames[{"*.pdf", 
+                          "*.PDF"}, FileNameJoin[
+                          {FeynCalc`$FeynArtsDirectory, "manual"}]]]], 
+                       Evaluator -> Automatic, Method -> "Preemptive"], 
+                      DisplayForm], "Text", StripOnInput -> False], 
+                    "\[InvisibleSpace]", StyleBox["\" or visit \"", "Text", 
+                     StripOnInput -> False], "\[InvisibleSpace]", StyleBox[
+                     TagBox[ButtonBox[RowBox[{"www", ".", "feynarts", ".", 
+                         "de", "."}], BaseStyle -> "Hyperlink", ButtonData :> 
+                        {URL["http://www.feynarts.de/"], None}, ButtonNote -> 
+                        "www.feynarts.de/"], DisplayForm], "Text", 
+                     StripOnInput -> False]}], Style["FeynArts ", "Text", 
+                   Bold]Style["3.12 (27 Mar 2025) patched for use with \
+FeynCalc, for documentation see the ", "Text"]Style[DisplayForm[ButtonBox[
+                     "manual", BaseStyle -> "Hyperlink", ButtonFunction :> 
+                      SystemOpen[First[FileNames[{"*.pdf", "*.PDF"}, 
+                         FileNameJoin[{FeynCalc`$FeynArtsDirectory, 
+                          "manual"}]]]], Evaluator -> Automatic, Method -> 
+                      "Preemptive"]], "Text"]Style[" or visit ", "Text"]Style[
+                   DisplayForm[ButtonBox["www.feynarts.de.", ButtonData :> 
+                      {URL["http://www.feynarts.de/"], None}, BaseStyle -> 
+                      "Hyperlink", ButtonNote -> "www.feynarts.de/"]], 
+                   "Text"], Editable -> False], TraditionalForm]], "Print", 
+               CellChangeTimes -> {4.000818284454047*^9}, CellLabel -> 
+                "During evaluation of In[1]:=", ExpressionUUID -> 
+                "d0caf0fa-5300-47fb-8799-849c54b23bf9"], Cell[BoxData[
+                FormBox[StyleBox[
+                  "\"If you use FeynArts in your research, please cite\"", 
+                  "Text", StripOnInput -> False], TraditionalForm]], "Print", 
+               CellChangeTimes -> {4.000818284455339*^9}, CellLabel -> 
+                "During evaluation of In[1]:=", ExpressionUUID -> 
+                "53bb8b59-2f94-4178-9e5b-ca29a684be5f"], Cell[BoxData[
+                FormBox[StyleBox["\" \[Bullet] T. Hahn, Comput. Phys. \
+Commun., 140, 418-431, 2001, arXiv:hep-ph/0012260\"", "Text", StripOnInput -> 
+                   False], TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818284456029*^9}, CellLabel -> 
+                "During evaluation of In[1]:=", ExpressionUUID -> 
+                "75e8ad10-f391-4000-b8c4-6babca603f11"], Cell[BoxData[
+                FormBox[StyleBox["\"FeynGrav 4.1\"", StripOnInput -> False, 
+                  FontSize -> 16, FontWeight -> Bold], TraditionalForm]], 
+               "Print", CellChangeTimes -> {4.000818284456708*^9}, 
+               CellLabel -> "During evaluation of In[1]:=", ExpressionUUID -> 
+                "5df68343-1e47-42e6-b980-8bcbedc8fbd0"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{StyleBox["\"FeynGrav: \"", 
+                     StripOnInput -> False, FontWeight -> Bold], 
+                    "\[InvisibleSpace]", "\"Use \"", "\[InvisibleSpace]", 
+                    ButtonBox[StyleBox["\"FeynGravCommands\"", 
+                      StripOnInput -> False, LineColor -> RGBColor[0, 0, 1], 
+                      FrontFaceColor -> RGBColor[0, 0, 1], BackFaceColor -> 
+                       RGBColor[0, 0, 1], GraphicsColor -> RGBColor[0, 0, 1], 
+                      FontVariations -> {"Underline" -> True}, FontColor -> 
+                       RGBColor[0, 0, 1]], Appearance -> None, 
+                     ButtonFunction :> FeynGrav`FeynGravCommands[], 
+                     Evaluator -> Automatic, Method -> "Preemptive"], 
+                    "\[InvisibleSpace]", 
+                    "\" to print the list of all commands.\""}], 
+                  Style["FeynGrav: ", Bold]"Use "Button[Style[
+                    "FeynGravCommands", Underlined, RGBColor[0, 0, 1]], 
+                   FeynGrav`FeynGravCommands[], Appearance -> 
+                    None]" to print the list of all commands.", Editable -> 
+                   False], TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.0008182844574423*^9}, CellLabel -> 
+                "During evaluation of In[1]:=", ExpressionUUID -> 
+                "fba14759-59d0-477e-87f4-cd5628f959fb"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{StyleBox["\"FeynGrav: \"", 
+                     StripOnInput -> False, FontWeight -> Bold], 
+                    "\[InvisibleSpace]", "\"On initialisation, the package \
+only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal \
+couplings up to the second order. To import additional libraries, use the \
+\\\"import*\\\" command.\""}], Style["FeynGrav: ", Bold]"On initialisation, \
+the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 \
+with minimal couplings up to the second order. To import additional \
+libraries, use the \"import*\" command.", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818284458375*^9}, CellLabel -> 
+                "During evaluation of In[1]:=", ExpressionUUID -> 
+                "034f18b0-4e7c-4a09-b98e-b900e9f350a4"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{StyleBox[
+                     "\"FeynGrav: Core publications on FeynGrav are \"", 
+                     StripOnInput -> False, FontWeight -> Bold], 
+                    "\[InvisibleSpace]", TemplateBox[{StyleBox[TemplateBox[
+                        {"\"Class.Quant.Grav. 39 (2022) 16, 165006\"", 
+                         "https://doi.org/10.1088/1361-6382/ac7e15"}, 
+                        "HyperlinkURL"], RGBColor[0, 0, 1], Underlined, 
+                       StripOnInput -> False], "\", \"", StyleBox[TemplateBox[
+                        {"\"Comput.Phys.Commun. 292 (2023) 108871\"", 
+                         "https://doi.org/10.1016/j.cpc.2023.108871"}, 
+                        "HyperlinkURL"], RGBColor[0, 0, 1], Underlined, 
+                       StripOnInput -> False], "\", \"", StyleBox[TemplateBox[
+                        {"\"Comput.Phys.Commun. 310 (2025) 109508\"", 
+                         "https://doi.org/10.1016/j.cpc.2025.109508"}, 
+                        "HyperlinkURL"], RGBColor[0, 0, 1], Underlined, 
+                       StripOnInput -> False], "\", \"", StyleBox[TemplateBox[
+                        {"\"arXiv:2510.17320\"", 
+                         "https://doi.org/10.48550/arXiv.2510.17320"}, 
+                        "HyperlinkURL"], RGBColor[0, 0, 1], Underlined, 
+                       StripOnInput -> False]}, "RowDefault"]}], 
+                  Style["FeynGrav: Core publications on FeynGrav are ", 
+                   Bold]Row[{Style[Hyperlink[
+                      "Class.Quant.Grav. 39 (2022) 16, 165006", 
+                      "https://doi.org/10.1088/1361-6382/ac7e15"], RGBColor[
+                      0, 0, 1], Underlined], ", ", Style[Hyperlink[
+                      "Comput.Phys.Commun. 292 (2023) 108871", 
+                      "https://doi.org/10.1016/j.cpc.2023.108871"], 
+                     RGBColor[0, 0, 1], Underlined], ", ", Style[Hyperlink[
+                      "Comput.Phys.Commun. 310 (2025) 109508", 
+                      "https://doi.org/10.1016/j.cpc.2025.109508"], 
+                     RGBColor[0, 0, 1], Underlined], ", ", Style[Hyperlink[
+                      "arXiv:2510.17320", 
+                      "https://doi.org/10.48550/arXiv.2510.17320"], 
+                     RGBColor[0, 0, 1], Underlined]}], Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.0008182844594173*^9}, CellLabel -> 
+                "During evaluation of In[1]:=", ExpressionUUID -> 
+                "9a16953c-b500-4043-a0be-74d91e731e80"]}, Open]]}, Open]], 
+        Cell[CellGroupData[{Cell[BoxData[{RowBox[{RowBox[{"grModel", "=", 
+                  "\"PureGR\""}], ";"}], "\[IndentingNewLine]", 
+              RowBox[{RowBox[{"InitializeModel", "[", RowBox[{"grModel", ",", 
+                    RowBox[{"GenericModel", "\[Rule]", "grModel"}]}], "]"}], 
+                ";"}]}], "Input", CellChangeTimes -> {4.0008150534267397*^9, 
+              4.0008171645179873*^9}, CellLabel -> "In[3]:=", 
+            ExpressionUUID -> "41642cfa-ffbe-4ce4-ac10-74c85809b4c0"], 
+           Cell[CellGroupData[{Cell[BoxData[FormBox["\"\"", 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.0008182853449306*^9}, CellLabel -> 
+                "During evaluation of In[3]:=", ExpressionUUID -> 
+                "86c01b75-e2a9-45a7-9b2e-1ed0415128f4"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"\"", 
+                    "\[InvisibleSpace]", "\"loading \"", "\[InvisibleSpace]", 
+                    "\"generic\"", "\[InvisibleSpace]", "\" model file \"", 
+                    "\[InvisibleSpace]", "\"/home/latosh/.Wolfram/Application\
+s/FeynGrav/FeynArts/Models/PureGR.gen\""}], 
+                  """loading ""generic"" model file ""/home/latosh/.Wolfram/A\
+pplications/FeynGrav/FeynArts/Models/PureGR.gen", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818285346664*^9}, CellLabel -> 
+                "During evaluation of In[3]:=", ExpressionUUID -> 
+                "db97d4de-66f4-4509-8775-bfd6b3e43e20"], Cell[BoxData[
+                FormBox["\"> $GenericMixing is OFF\"", TraditionalForm]], 
+               "Print", CellChangeTimes -> {4.000818287293544*^9}, 
+               CellLabel -> "During evaluation of In[3]:=", ExpressionUUID -> 
+                "51531ab9-25cd-4be5-b5bc-94993b72438d"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"generic model \"", 
+                    "\[InvisibleSpace]", RowBox[{"{", "\"PureGR\"", "}"}], 
+                    "\[InvisibleSpace]", "\" initialized\""}], 
+                  "generic model "{"PureGR"}" initialized", Editable -> 
+                   False], TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818287294586*^9}, CellLabel -> 
+                "During evaluation of In[3]:=", ExpressionUUID -> 
+                "6007dc10-28e3-4f26-a4d2-0f44eb1cee70"], Cell[BoxData[
+                FormBox["\"\"", TraditionalForm]], "Print", 
+               CellChangeTimes -> {4.000818287295225*^9}, CellLabel -> 
+                "During evaluation of In[3]:=", ExpressionUUID -> 
+                "4a72a0af-df4b-40d6-aec8-2119a1d9a3a1"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"\"", 
+                    "\[InvisibleSpace]", "\"loading \"", "\[InvisibleSpace]", 
+                    "\"classes\"", "\[InvisibleSpace]", "\" model file \"", 
+                    "\[InvisibleSpace]", "\"/home/latosh/.Wolfram/Application\
+s/FeynGrav/FeynArts/Models/PureGR.mod\""}], 
+                  """loading ""classes"" model file ""/home/latosh/.Wolfram/A\
+pplications/FeynGrav/FeynArts/Models/PureGR.mod", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818287295659*^9}, CellLabel -> 
+                "During evaluation of In[3]:=", ExpressionUUID -> 
+                "18456045-e4ca-4b0e-a629-74cf2a6a9e8a"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> \"", 
+                    "\[InvisibleSpace]", "3", "\[InvisibleSpace]", 
+                    "\" particles (incl. antiparticles) in \"", 
+                    "\[InvisibleSpace]", "2", "\[InvisibleSpace]", 
+                    "\" classes\""}], 
+                  "> "3" particles (incl. antiparticles) in "2" classes", 
+                  Editable -> False], TraditionalForm]], "Print", 
+               CellChangeTimes -> {4.000818287309*^9}, CellLabel -> 
+                "During evaluation of In[3]:=", ExpressionUUID -> 
+                "b974fc0d-cf50-433c-96d4-2684f5eecc6b"], Cell[BoxData[
+                FormBox["\"> $CounterTerms are ON\"", TraditionalForm]], 
+               "Print", CellChangeTimes -> {4.00081828736084*^9}, 
+               CellLabel -> "During evaluation of In[3]:=", ExpressionUUID -> 
+                "b4100a0e-9df2-4dbe-a668-d2b2d4f33c41"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> \"", 
+                    "\[InvisibleSpace]", "3", "\[InvisibleSpace]", 
+                    "\" vertices\""}], "> "3" vertices", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.0008182873618603*^9}, CellLabel -> 
+                "During evaluation of In[3]:=", ExpressionUUID -> 
+                "8efde5a3-369f-4776-b7fd-82af889be9e3"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"classes model \"", 
+                    "\[InvisibleSpace]", RowBox[{"{", "\"PureGR\"", "}"}], 
+                    "\[InvisibleSpace]", "\" initialized\""}], 
+                  "classes model "{"PureGR"}" initialized", Editable -> 
+                   False], TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818287362419*^9}, CellLabel -> 
+                "During evaluation of In[3]:=", ExpressionUUID -> 
+                "5b02494a-bfbe-4d48-b517-880592b9ff31"]}, Open]]}, Open]]}, 
+       Open]], Cell[CellGroupData[
+       {Cell["2. Generate and display the contributing diagrams", "Section", 
+         ExpressionUUID -> "f00c30cd-8060-465d-aa98-9050a865affb"], 
+        Cell["Including both cubic and quartic vertices generates the s-, t- \
+and u-channel exchanges and the four-graviton contact. Do not select a single \
+channel. The diagram sheet is displayed before CreateFeynAmp or any FORM \
+calculation is called.", "Text", ExpressionUUID -> 
+          "6162d8d6-59be-41c6-a914-361541dbb910"], 
+        Cell[CellGroupData[{Cell[BoxData[RowBox[{RowBox[{"treeTopologies", 
+                 "=", RowBox[{"CreateTopologies", "[", RowBox[{"0", ",", 
+                     RowBox[{"2", "\[Rule]", "2"}], ",", RowBox[
+                      {"Adjacencies", "\[Rule]", RowBox[{"{", RowBox[{"3", 
+                          ",", "4"}], "}"}]}]}], "]"}]}], ";", RowBox[
+                {"treeInsertions", "=", RowBox[{"InsertFields", "[", 
+                   RowBox[{"treeTopologies", ",", RowBox[{RowBox[{"{", 
+                         RowBox[{RowBox[{"T", "[", "1", "]"}], ",", RowBox[
+                          {"T", "[", "1", "]"}]}], "}"}], "\[Rule]", 
+                       RowBox[{"{", RowBox[{RowBox[{"T", "[", "1", "]"}], 
+                          ",", RowBox[{"T", "[", "1", "]"}]}], "}"}]}], ",", 
+                     RowBox[{"Model", "\[Rule]", "grModel"}], ",", RowBox[
+                      {"GenericModel", "\[Rule]", "grModel"}], ",", 
+                     RowBox[{"InsertionLevel", "\[Rule]", RowBox[{"{", 
+                         "Classes", "}"}]}]}], "]"}]}], ";"}]], "Input", 
+            InitializationCell -> False, CellLabel -> "In[5]:=", 
+            ExpressionUUID -> "a15cd941-9daa-4850-887e-c1d5563e47a4"], 
+           Cell[CellGroupData[{Cell[BoxData[FormBox["\"\"", 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.0008182873985367*^9}, CellLabel -> 
+                "During evaluation of In[5]:=", ExpressionUUID -> 
+                "8d14a87b-7532-4171-ad5c-0fe9400e5ba4"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[
+                   {"\"inserting at level(s) \"", "\[InvisibleSpace]", 
+                    RowBox[{"{", "Classes", "}"}]}], "inserting at level(s) "{
+                   FeynArts`Classes}, Editable -> False], TraditionalForm]], 
+               "Print", CellChangeTimes -> {4.000818287399541*^9}, 
+               CellLabel -> "During evaluation of In[5]:=", ExpressionUUID -> 
+                "83928c95-f58d-4c49-a2e3-4e66c66e8d2f"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "1", "\[InvisibleSpace]", "\": \"", 
+                    "\[InvisibleSpace]", "\"1 Classes insertion\""}], 
+                  "> Top. "1": ""1 Classes insertion", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818287400436*^9}, CellLabel -> 
+                "During evaluation of In[5]:=", ExpressionUUID -> 
+                "0c6a96df-6e55-45eb-af9f-f3d1cc553fc9"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "2", "\[InvisibleSpace]", "\": \"", 
+                    "\[InvisibleSpace]", "\"1 Classes insertion\""}], 
+                  "> Top. "2": ""1 Classes insertion", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818287402747*^9}, CellLabel -> 
+                "During evaluation of In[5]:=", ExpressionUUID -> 
+                "c2f5ce52-ab87-43b0-a16f-51aac25aebd3"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "3", "\[InvisibleSpace]", "\": \"", 
+                    "\[InvisibleSpace]", "\"1 Classes insertion\""}], 
+                  "> Top. "3": ""1 Classes insertion", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.00081828740374*^9}, CellLabel -> 
+                "During evaluation of In[5]:=", ExpressionUUID -> 
+                "1be9e93f-7af4-4d1b-8170-03b46497dd12"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "4", "\[InvisibleSpace]", "\": \"", 
+                    "\[InvisibleSpace]", "\"1 Classes insertion\""}], 
+                  "> Top. "4": ""1 Classes insertion", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818287404962*^9}, CellLabel -> 
+                "During evaluation of In[5]:=", ExpressionUUID -> 
+                "dd115996-739f-4c75-9558-bfd3244d3491"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"in total: \"", 
+                    "\[InvisibleSpace]", "\"4 Classes insertions\""}], 
+                  "in total: ""4 Classes insertions", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.0008182874055643*^9}, CellLabel -> 
+                "During evaluation of In[5]:=", ExpressionUUID -> 
+                "8b159cbf-e23f-4f44-af39-65611cbee5fb"]}, Open]]}, Open]], 
+        Cell[CellGroupData[{Cell[BoxData[RowBox[{RowBox[{"diagramGraphics", 
+                 "=", RowBox[{"Paint", "[", RowBox[{"treeInsertions", ",", 
+                     RowBox[{"ColumnsXRows", "\[Rule]", RowBox[{"{", RowBox[
+                          {"2", ",", "2"}], "}"}]}], ",", RowBox[
+                      {"Numbering", "\[Rule]", "Simple"}], ",", RowBox[
+                      {"SheetHeader", "\[Rule]", 
+                       "\"Four-graviton tree diagrams\""}], ",", RowBox[
+                      {"AutoEdit", "\[Rule]", "False"}], ",", RowBox[
+                      {"DisplayFunction", "\[Rule]", "Identity"}]}], "]"}]}], 
+               ";", RowBox[{"diagramSheets", "=", RowBox[{"Show", "[", 
+                   "diagramGraphics", "]"}]}], ";", RowBox[{"diagramSheet", 
+                 "=", RowBox[{"Show", "[", RowBox[{RowBox[{"First", "[", 
+                       "diagramSheets", "]"}], ",", RowBox[{"ImageSize", 
+                       "\[Rule]", "640"}]}], "]"}]}]}]], "Input", 
+            InitializationCell -> False, CellLabel -> "In[6]:=", 
+            ExpressionUUID -> "13237a29-67c5-4276-b61b-1266a4b4177a"], 
+           Cell[CellGroupData[{Cell[BoxData[FormBox[InterpretationBox[
+                  RowBox[{"\"> Top. \"", "\[InvisibleSpace]", "1", 
+                    "\[InvisibleSpace]", "\" \"", "\[InvisibleSpace]", 
+                    "\"aebe/cede/0.m\"", "\[InvisibleSpace]", "\", \"", 
+                    "\[InvisibleSpace]", "\"0 diagrams\""}], 
+                  "> Top. "1" ""aebe/cede/0.m"", ""0 diagrams", Editable -> 
+                   False], TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818287408864*^9}, CellLabel -> 
+                "During evaluation of In[6]:=", ExpressionUUID -> 
+                "1d04494e-3c25-4d07-9a53-4bab3ea77fcd"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "2", "\[InvisibleSpace]", "\" \"", 
+                    "\[InvisibleSpace]", "\"aebe/cfdf/ef.m\"", 
+                    "\[InvisibleSpace]", "\", \"", "\[InvisibleSpace]", 
+                    "\"0 diagrams\""}], 
+                  "> Top. "2" ""aebe/cfdf/ef.m"", ""0 diagrams", Editable -> 
+                   False], TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818287409635*^9}, CellLabel -> 
+                "During evaluation of In[6]:=", ExpressionUUID -> 
+                "e7011b5c-5d41-4797-81ab-5e6fd0990d7a"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "3", "\[InvisibleSpace]", "\" \"", 
+                    "\[InvisibleSpace]", "\"aebf/cedf/ef.m\"", 
+                    "\[InvisibleSpace]", "\", \"", "\[InvisibleSpace]", 
+                    "\"0 diagrams\""}], 
+                  "> Top. "3" ""aebf/cedf/ef.m"", ""0 diagrams", Editable -> 
+                   False], TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818287410253*^9}, CellLabel -> 
+                "During evaluation of In[6]:=", ExpressionUUID -> 
+                "e21d5d7e-5f53-4779-a41c-3ca4b0536c55"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "4", "\[InvisibleSpace]", "\" \"", 
+                    "\[InvisibleSpace]", "\"aebf/cfde/ef.m\"", 
+                    "\[InvisibleSpace]", "\", \"", "\[InvisibleSpace]", 
+                    "\"0 diagrams\""}], 
+                  "> Top. "4" ""aebf/cfde/ef.m"", ""0 diagrams", Editable -> 
+                   False], TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.0008182874106827*^9}, CellLabel -> 
+                "During evaluation of In[6]:=", ExpressionUUID -> 
+                "08414bfc-9b54-47cf-9afa-b21e93168df5"]}, Open]]}, Open]], 
+        Cell["Paint supplies the actual inserted FeynArts diagrams. The four \
+numbers identify the contact and three exchange contributions; they are not \
+extra multiplicative weights. FeynArts already supplies the graph factors.", 
+         "Text", ExpressionUUID -> "d300d3e2-1441-4454-b220-221ff9c5c3ae"]}, 
+       Open]], Cell[CellGroupData[
+       {Cell["3. Build the four off-shell amplitudes", "Section", 
+         ExpressionUUID -> "abf8b48b-3f95-4714-ba67-0a4717f65159"], 
+        Cell["Use incoming momenta p1,p2 and outgoing momenta p3,p4. All \
+virtualities and scalar products remain symbolic. MomentumConservation -> \
+True supplies internal routing at each vertex without imposing mass-shell \
+conditions or eliminating an external momentum. Truncated -> True removes \
+external propagators; polarisations are attached explicitly in the next \
+cell.", "Text", ExpressionUUID -> "ed144ddd-09e4-41e1-a993-199ac60484cc"], 
+        Cell[CellGroupData[{Cell[BoxData[RowBox[{RowBox[{"treeRawAmplitude", 
+                 "=", RowBox[{"CreateFeynAmp", "[", RowBox[{"treeInsertions", 
+                     ",", RowBox[{"PreFactor", "\[Rule]", "1"}], ",", 
+                     RowBox[{"GaugeRules", "\[Rule]", RowBox[{"{", "}"}]}], 
+                     ",", RowBox[{"MomentumConservation", "\[Rule]", 
+                       "True"}], ",", RowBox[{"Truncated", "\[Rule]", 
+                       "True"}]}], "]"}]}], ";", RowBox[{"diagramTensors", 
+                 "=", RowBox[{"FCFAConvert", "[", RowBox[{"treeRawAmplitude", 
+                     ",", RowBox[{"IncomingMomenta", "\[Rule]", RowBox[
+                        {"{", RowBox[{"p1", ",", "p2"}], "}"}]}], ",", 
+                     RowBox[{"OutgoingMomenta", "\[Rule]", RowBox[{"{", 
+                         RowBox[{"p3", ",", "p4"}], "}"}]}], ",", RowBox[
+                      {"LorentzIndexNames", "\[Rule]", RowBox[{"{", RowBox[
+                          {"\[Mu]1", ",", "\[Nu]1", ",", "\[Mu]2", ",", 
+                          "\[Nu]2", ",", "\[Mu]3", ",", "\[Nu]3", ",", 
+                          "\[Mu]4", ",", "\[Nu]4", ",", "\[Alpha]1", ",", 
+                          "\[Beta]1", ",", "\[Alpha]2", ",", "\[Beta]2"}], 
+                         "}"}]}], ",", RowBox[{"ChangeDimension", "\[Rule]", 
+                       "D"}]}], "]"}]}], ";"}]], "Input", 
+            InitializationCell -> False, CellChangeTimes -> 
+             {{4.000817917840981*^9, 4.000817971857566*^9}}, 
+            CellLabel -> "In[7]:=", ExpressionUUID -> 
+             "e282d4c1-2225-4341-99df-111dde6fddda"], 
+           Cell[CellGroupData[{Cell[BoxData[FormBox["\"\"", 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.0008182874204187*^9}, CellLabel -> 
+                "During evaluation of In[7]:=", ExpressionUUID -> 
+                "38976ff2-f9a8-43d0-b5f8-72b76a139209"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[
+                   {"\"creating amplitudes at level(s) \"", 
+                    "\[InvisibleSpace]", RowBox[{"{", "Classes", "}"}]}], 
+                  "creating amplitudes at level(s) "{FeynArts`Classes}, 
+                  Editable -> False], TraditionalForm]], "Print", 
+               CellChangeTimes -> {4.0008182874212503*^9}, CellLabel -> 
+                "During evaluation of In[7]:=", ExpressionUUID -> 
+                "34caccde-3e1e-43f1-849e-a651b3fe6678"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "1", "\[InvisibleSpace]", "\": \"", 
+                    "\[InvisibleSpace]", "\"1 Classes amplitude\""}], 
+                  "> Top. "1": ""1 Classes amplitude", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818289033473*^9}, CellLabel -> 
+                "During evaluation of In[7]:=", ExpressionUUID -> 
+                "17802654-74c3-42ab-b7d4-4afcdc35bde1"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "2", "\[InvisibleSpace]", "\": \"", 
+                    "\[InvisibleSpace]", "\"1 Classes amplitude\""}], 
+                  "> Top. "2": ""1 Classes amplitude", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818289102684*^9}, CellLabel -> 
+                "During evaluation of In[7]:=", ExpressionUUID -> 
+                "b6c8439e-0ff4-4873-8233-66dd60a8803a"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "3", "\[InvisibleSpace]", "\": \"", 
+                    "\[InvisibleSpace]", "\"1 Classes amplitude\""}], 
+                  "> Top. "3": ""1 Classes amplitude", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818289172694*^9}, CellLabel -> 
+                "During evaluation of In[7]:=", ExpressionUUID -> 
+                "4c960d1d-6901-4641-97a0-2e87c22bfb3d"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"> Top. \"", 
+                    "\[InvisibleSpace]", "4", "\[InvisibleSpace]", "\": \"", 
+                    "\[InvisibleSpace]", "\"1 Classes amplitude\""}], 
+                  "> Top. "4": ""1 Classes amplitude", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.0008182892429323*^9}, CellLabel -> 
+                "During evaluation of In[7]:=", ExpressionUUID -> 
+                "9112252e-0e3f-4b3c-a924-c688191bb414"], Cell[BoxData[
+                FormBox[InterpretationBox[RowBox[{"\"in total: \"", 
+                    "\[InvisibleSpace]", "\"4 Classes amplitudes\""}], 
+                  "in total: ""4 Classes amplitudes", Editable -> False], 
+                 TraditionalForm]], "Print", CellChangeTimes -> 
+                {4.000818289252982*^9}, CellLabel -> 
+                "During evaluation of In[7]:=", ExpressionUUID -> 
+                "cb3b5a40-08b1-4abe-ac1d-a3a40ec43d31"]}, Open]]}, Open]], 
+        Cell["PolarizationTensorD represents the formal factorised tensor \
+epsilon^mu epsilon^nu. Neither p.epsilon nor epsilon.epsilon is set to zero; \
+no normalisation or helicity is chosen. I and -I specify incoming \
+polarisations and conjugated outgoing polarisations, not helicities.", 
+         "Text", ExpressionUUID -> "12c3725a-e338-47f6-af42-3770b19c9779"], 
+        Cell[BoxData[RowBox[{RowBox[{"externalTensors", "=", 
+              RowBox[{RowBox[{"PolarizationTensorD", "[", RowBox[{"p1", ",", 
+                    "\[Mu]1", ",", "\[Nu]1", ",", "\[ImaginaryI]"}], "]"}], 
+                " ", RowBox[{"PolarizationTensorD", "[", RowBox[{"p2", ",", 
+                    "\[Mu]2", ",", "\[Nu]2", ",", "\[ImaginaryI]"}], "]"}], 
+                " ", RowBox[{"PolarizationTensorD", "[", RowBox[{"p3", ",", 
+                    "\[Mu]3", ",", "\[Nu]3", ",", RowBox[{"-", 
+                      "\[ImaginaryI]"}]}], "]"}], " ", RowBox[
+                 {"PolarizationTensorD", "[", RowBox[{"p4", ",", "\[Mu]4", 
+                    ",", "\[Nu]4", ",", RowBox[{"-", "\[ImaginaryI]"}]}], 
+                  "]"}]}]}], ";"}]], "Input", InitializationCell -> False, 
+         CellChangeTimes -> {{4.000815787333487*^9, 4.00081581360179*^9}, 
+           {4.000818110670472*^9, 4.0008181318058863*^9}}, 
+         CellLabel -> "In[8]:=", ExpressionUUID -> 
+          "292e61ba-7c0b-4706-879e-3651b86b9c85"]}, Open]], 
+     Cell[CellGroupData[
+       {Cell["4. Contract each diagram and form the total \[ScriptCapitalM]", 
+         "Section", ExpressionUUID -> 
+          "6f6a6ff3-9c0d-44ad-aa3e-184e1d958b39"], Cell["Contract the \
+diagrams separately with FORM to limit intermediate expression sizes. The \
+list diagramAmplitudes retains the individual scalar-product expressions. No \
+scalar-product assignments, helicity tables, mass-shell conditions or extra \
+graph factors are introduced. Each contraction uses CalcFormCalculate with \
+its default options: the Lorentz dimension is inferred from the expression, \
+which carries symbolic D, and successful FORM jobs are cleaned up \
+automatically. The results are checked for a surviving Lorentz index or an \
+unconverted head before the total is formed.", "Text", ExpressionUUID -> 
+          "f555f0c6-1f7b-41fa-96e0-e41d00c29ecc"], 
+        Cell[BoxData[RowBox[{RowBox[{RowBox[{"theAmplitude", "[", 
+                RowBox[{"p1_", ",", "p2_", ",", "p3_", ",", "p4_"}], "]"}], 
+              "=", RowBox[{RowBox[{RowBox[{"(", RowBox[{RowBox[
+                       {"CalcFormCalculate", "[", RowBox[{RowBox[
+                          {"FeynAmpDenominatorExplicit", "[", "#1", "]"}], 
+                          " ", "externalTensors"}], "]"}], "&"}], ")"}], 
+                  "/@", "diagramTensors"}], "//", "Total"}]}], ";"}]], 
+         "Input", InitializationCell -> False, CellChangeTimes -> 
+          {{4.000817255306489*^9, 4.000817259238511*^9}, 
+           {4.000817545853169*^9, 4.00081755040644*^9}, 
+           {4.000817694794487*^9, 4.0008177195108356*^9}}, 
+         CellLabel -> "In[9]:=", ExpressionUUID -> 
+          "571a1c11-feb5-4f90-af0c-802cd772764d"], Cell["The complete \
+polarisation-contracted, amputated off-shell tree expression is stored in \
+\[ScriptCapitalM] (Mathematica's ScriptCapitalM symbol). Its preview below is \
+shortened only for display. This is not yet an on-shell physical scattering \
+amplitude: the external virtualities, longitudinal contractions and trace \
+terms remain unconstrained. No loop measure or spin sum is included.", 
+         "Text", CellChangeTimes -> {{4.000817266878055*^9, 
+            4.000817267051003*^9}, {4.000817323113295*^9, 
+            4.000817323283*^9}}, ExpressionUUID -> 
+          "460c06eb-23a9-45da-93f4-23d0e7b522bf"], 
+        Cell[CellGroupData[{Cell[BoxData[RowBox[{"Short", "[", RowBox[
+                {RowBox[{"theAmplitude", "[", RowBox[{"p1", ",", "p2", ",", 
+                     "p3", ",", "p4"}], "]"}], ",", "4"}], "]"}]], "Input", 
+            InitializationCell -> False, CellChangeTimes -> 
+             {4.0008175367496243*^9, {4.0008175696549*^9, 
+               4.0008175725948753*^9}, {4.00081770034799*^9, 
+               4.0008177242688923*^9}}, CellLabel -> "In[10]:=", 
+            ExpressionUUID -> "b38003f3-6baf-42ba-89af-09ce7a135c34"], 
+           Cell[BoxData[FormBox[TagBox[RowBox[{FractionBox[RowBox[
+                   {"\[ImaginaryI]", " ", "D", " ", RowBox[{"(", RowBox[
+                       {FormBox[FormBox["p1", TraditionalForm], 
+                         TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                         TraditionalForm], FormBox[RowBox[{SuperscriptBox[
+                          FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "*"], "(", FormBox["p4", TraditionalForm], ")"}], 
+                         TraditionalForm]}], ")"}], " ", RowBox[{"(", 
+                      RowBox[{FormBox[FormBox["p2", TraditionalForm], 
+                         TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                         TraditionalForm], FormBox[RowBox[{SuperscriptBox[
+                          FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "*"], "(", FormBox["p4", TraditionalForm], ")"}], 
+                         TraditionalForm]}], ")"}], " ", SuperscriptBox[
+                     RowBox[{FormBox["\"(\"", TraditionalForm], FormBox[
+                        RowBox[{FormBox[FormBox["p3", TraditionalForm], 
+                          TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                          TraditionalForm], FormBox[RowBox[{SuperscriptBox[
+                          FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "*"], "(", FormBox["p3", TraditionalForm], ")"}], 
+                          TraditionalForm]}], TraditionalForm], FormBox[
+                        "\")\"", TraditionalForm]}], "2"], " ", 
+                    SuperscriptBox[RowBox[{FormBox["\"(\"", TraditionalForm], 
+                       FormBox[RowBox[{FormBox[RowBox[{FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "(", 
+                          FormBox["p1", TraditionalForm], ")"}], 
+                          TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                          TraditionalForm], FormBox[RowBox[{FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "(", 
+                          FormBox["p2", TraditionalForm], ")"}], 
+                          TraditionalForm]}], TraditionalForm], FormBox[
+                        "\")\"", TraditionalForm]}], "2"], " ", 
+                    SuperscriptBox["\[Kappa]", "2"]}], RowBox[
+                   {RowBox[{"(", RowBox[{"D", "-", "2"}], ")"}], " ", 
+                    RowBox[{"(", RowBox[{SuperscriptBox[FormBox[FormBox["p2", 
+                          TraditionalForm], TraditionalForm], "2"], "-", 
+                        RowBox[{"2", " ", RowBox[{"(", RowBox[{FormBox[
+                          FormBox["p2", TraditionalForm], TraditionalForm], 
+                          FormBox["\"\[CenterDot]\"", TraditionalForm], 
+                          FormBox[FormBox["p3", TraditionalForm], 
+                          TraditionalForm]}], ")"}]}], "+", SuperscriptBox[
+                         FormBox[FormBox["p3", TraditionalForm], 
+                          TraditionalForm], "2"]}], ")"}]}]], "-", 
+                 FractionBox[RowBox[{"2", " ", "\[ImaginaryI]", " ", 
+                    RowBox[{"(", RowBox[{FormBox[FormBox["p1", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                         "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                         RowBox[{SuperscriptBox[FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "*"], "(", 
+                          FormBox["p4", TraditionalForm], ")"}], 
+                         TraditionalForm]}], ")"}], " ", RowBox[{"(", 
+                      RowBox[{FormBox[FormBox["p2", TraditionalForm], 
+                         TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                         TraditionalForm], FormBox[RowBox[{SuperscriptBox[
+                          FormBox[RowBox[{"\[LeftSkeleton]", "3", 
+                          "\[RightSkeleton]"}], TraditionalForm], "*"], "(", 
+                          FormBox["p4", TraditionalForm], ")"}], 
+                         TraditionalForm]}], ")"}], " ", SuperscriptBox[
+                     RowBox[{FormBox["\"(\"", TraditionalForm], FormBox[
+                        RowBox[{FormBox[FormBox[RowBox[{"\[LeftSkeleton]", 
+                          "2", "\[RightSkeleton]"}], TraditionalForm], 
+                          TraditionalForm], RowBox[{"\[LeftSkeleton]", "1", 
+                          "\[RightSkeleton]"}], RowBox[{"\[LeftSkeleton]", 
+                          "1", "\[RightSkeleton]"}]}], TraditionalForm], 
+                       FormBox["\")\"", TraditionalForm]}], "2"], " ", 
+                    SuperscriptBox[RowBox[{FormBox["\"(\"", TraditionalForm], 
+                       FormBox[RowBox[{FormBox[RowBox[{FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "(", 
+                          FormBox["p1", TraditionalForm], ")"}], 
+                          TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                          TraditionalForm], FormBox[RowBox[{FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "(", 
+                          FormBox["p2", TraditionalForm], ")"}], 
+                          TraditionalForm]}], TraditionalForm], FormBox[
+                        "\")\"", TraditionalForm]}], "2"], " ", 
+                    SuperscriptBox["\[Kappa]", "2"]}], RowBox[
+                   {RowBox[{"(", RowBox[{"D", "-", "2"}], ")"}], " ", 
+                    RowBox[{"(", RowBox[{SuperscriptBox[FormBox[FormBox["p2", 
+                          TraditionalForm], TraditionalForm], "2"], "-", 
+                        RowBox[{"2", " ", RowBox[{"(", RowBox[{FormBox[
+                          FormBox["p2", TraditionalForm], TraditionalForm], 
+                          FormBox["\"\[CenterDot]\"", TraditionalForm], 
+                          FormBox[FormBox["p3", TraditionalForm], 
+                          TraditionalForm]}], ")"}]}], "+", SuperscriptBox[
+                         FormBox[FormBox["p3", TraditionalForm], 
+                          TraditionalForm], "2"]}], ")"}]}]], "+", 
+                 RowBox[{"\[LeftSkeleton]", "23356", "\[RightSkeleton]"}], 
+                 "+", FractionBox[RowBox[{"\[ImaginaryI]", " ", "D", " ", 
+                    RowBox[{"\[LeftSkeleton]", "6", "\[RightSkeleton]"}], 
+                    " ", SuperscriptBox["\[Kappa]", "2"]}], RowBox[
+                   {RowBox[{"(", RowBox[{"D", "-", "2"}], ")"}], " ", 
+                    RowBox[{"(", RowBox[{SuperscriptBox[FormBox[FormBox["p3", 
+                          TraditionalForm], TraditionalForm], "2"], "+", 
+                        RowBox[{"2", " ", RowBox[{"(", RowBox[{FormBox[
+                          FormBox["p3", TraditionalForm], TraditionalForm], 
+                          FormBox["\"\[CenterDot]\"", TraditionalForm], 
+                          FormBox[FormBox["p4", TraditionalForm], 
+                          TraditionalForm]}], ")"}]}], "+", SuperscriptBox[
+                         FormBox[FormBox["p4", TraditionalForm], 
+                          TraditionalForm], "2"]}], ")"}]}]], "-", 
+                 FractionBox[RowBox[{"2", " ", "\[ImaginaryI]", " ", 
+                    RowBox[{"(", RowBox[{FormBox[FormBox["p1", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                         "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                         RowBox[{FormBox["\"\[CurlyEpsilon]\"", 
+                          TraditionalForm], "(", FormBox["p2", 
+                          TraditionalForm], ")"}], TraditionalForm]}], ")"}], 
+                    " ", RowBox[{"(", RowBox[{FormBox[FormBox["p2", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                         "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                         RowBox[{FormBox["\"\[CurlyEpsilon]\"", 
+                          TraditionalForm], "(", FormBox["p1", 
+                          TraditionalForm], ")"}], TraditionalForm]}], ")"}], 
+                    " ", RowBox[{"(", RowBox[{FormBox[FormBox["p3", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                         "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                         RowBox[{FormBox["\"\[CurlyEpsilon]\"", 
+                          TraditionalForm], "(", FormBox["p1", 
+                          TraditionalForm], ")"}], TraditionalForm]}], ")"}], 
+                    " ", RowBox[{"(", RowBox[{FormBox[FormBox["p3", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                         "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                         RowBox[{FormBox["\"\[CurlyEpsilon]\"", 
+                          TraditionalForm], "(", FormBox["p2", 
+                          TraditionalForm], ")"}], TraditionalForm]}], ")"}], 
+                    " ", SuperscriptBox[FormBox[RowBox[{SuperscriptBox[
+                         FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                         "*"], "(", FormBox["p3", TraditionalForm], ")"}], 
+                      TraditionalForm], "2"], " ", SuperscriptBox[FormBox[
+                      RowBox[{SuperscriptBox[FormBox["\"\[CurlyEpsilon]\"", 
+                          TraditionalForm], "*"], "(", FormBox["p4", 
+                         TraditionalForm], ")"}], TraditionalForm], "2"], 
+                    " ", SuperscriptBox["\[Kappa]", "2"]}], RowBox[
+                   {RowBox[{"(", RowBox[{"D", "-", "2"}], ")"}], " ", 
+                    RowBox[{"(", RowBox[{SuperscriptBox[FormBox[FormBox["p3", 
+                          TraditionalForm], TraditionalForm], "2"], "+", 
+                        RowBox[{"2", " ", RowBox[{"(", RowBox[{FormBox[
+                          FormBox["p3", TraditionalForm], TraditionalForm], 
+                          FormBox["\"\[CenterDot]\"", TraditionalForm], 
+                          FormBox[FormBox["p4", TraditionalForm], 
+                          TraditionalForm]}], ")"}]}], "+", SuperscriptBox[
+                         FormBox[FormBox["p4", TraditionalForm], 
+                          TraditionalForm], "2"]}], ")"}]}]]}], Short[#1, 
+                 4] & ], TraditionalForm]], "Output", CellChangeTimes -> 
+             {4.0008183214658947*^9}, CellLabel -> "Out[10]//Short=", 
+            ExpressionUUID -> "be0c1c3c-781a-40d7-8d66-9b9c53c576fe"]}, 
+          Open]], Cell[CellGroupData[
+          {Cell[BoxData[RowBox[{RowBox[{"theAmplitude", "[", RowBox[
+                  {"p1", ",", "p2", ",", "p3", ",", "p4"}], "]"}], "//", 
+               "Length"}]], "Input", CellChangeTimes -> 
+             {{4.00081781893118*^9, 4.000817819973631*^9}}, 
+            CellLabel -> "In[11]:=", ExpressionUUID -> 
+             "f1edf20b-9178-45fa-bb9b-92977d96044f"], 
+           Cell[BoxData[FormBox["15576", TraditionalForm]], "Output", 
+            CellChangeTimes -> {4.000818322233632*^9}, CellLabel -> 
+             "Out[11]=", ExpressionUUID -> 
+             "3594a4ee-8bff-4f80-983f-abdf54f5423e"]}, Open]], 
+        Cell[CellGroupData[{Cell[BoxData[RowBox[{RowBox[
+                {RowBox[{"theAmplitude", "[", RowBox[{"p1", ",", "p2", ",", 
+                     "p3", ",", "p4"}], "]"}], "==", RowBox[{"theAmplitude", 
+                   "[", RowBox[{"p2", ",", "p1", ",", "p3", ",", "p4"}], 
+                   "]"}]}], "//", "CalcFormCalculate"}]], "Input", 
+            CellChangeTimes -> {{4.000818631388637*^9, 
+               4.0008186633282213*^9}}, CellLabel -> "In[38]:=", 
+            ExpressionUUID -> "efba0773-9a21-462d-b27e-004396736212"], 
+           Cell[BoxData[FormBox[TemplateBox[<|"shortenedBoxes" -> 
+                 TagBox[RowBox[{RowBox[{RowBox[{"-", FractionBox[RowBox[
+                          {"\[ImaginaryI]", " ", "D", " ", RowBox[{"(", 
+                          RowBox[{FormBox[FormBox["p1", TraditionalForm], 
+                          TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                          TraditionalForm], FormBox[RowBox[{SuperscriptBox[
+                          FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "*"], "(", FormBox["p3", TraditionalForm], ")"}], 
+                          TraditionalForm]}], ")"}], " ", RowBox[{"(", 
+                          RowBox[{FormBox[FormBox["p2", TraditionalForm], 
+                          TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                          TraditionalForm], FormBox[RowBox[{SuperscriptBox[
+                          FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "*"], "(", FormBox["p3", TraditionalForm], ")"}], 
+                          TraditionalForm]}], ")"}], " ", RowBox[
+                          {SuperscriptBox[RowBox[{FormBox["\"(\"", 
+                          TraditionalForm], FormBox[RowBox[{FormBox[FormBox[
+                          "p2", TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          RowBox[{SuperscriptBox[FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "*"], "(", 
+                          FormBox["p4", TraditionalForm], ")"}], 
+                          TraditionalForm]}], TraditionalForm], FormBox[
+                          "\")\"", TraditionalForm]}], 2]}], " ", RowBox[
+                          {SuperscriptBox[RowBox[{FormBox["\"(\"", 
+                          TraditionalForm], FormBox[RowBox[{FormBox[RowBox[
+                          {FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "(", FormBox["p1", TraditionalForm], ")"}], 
+                          TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                          TraditionalForm], FormBox[RowBox[{FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "(", 
+                          FormBox["p2", TraditionalForm], ")"}], 
+                          TraditionalForm]}], TraditionalForm], FormBox[
+                          "\")\"", TraditionalForm]}], 2]}], " ", 
+                          SuperscriptBox["\[Kappa]", "2"]}], RowBox[{"2", 
+                          " ", RowBox[{"(", RowBox[{"D", "-", "2"}], ")"}], 
+                          " ", RowBox[{"(", RowBox[{FormBox[FormBox["p2", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p4", TraditionalForm], TraditionalForm]}], 
+                          ")"}]}]]}], "+", FractionBox[RowBox[
+                        {"\[ImaginaryI]", " ", RowBox[{"(", RowBox[{FormBox[
+                          FormBox["p1", TraditionalForm], TraditionalForm], 
+                          FormBox["\"\[CenterDot]\"", TraditionalForm], 
+                          FormBox[RowBox[{SuperscriptBox[FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "*"], "(", 
+                          FormBox["p3", TraditionalForm], ")"}], 
+                          TraditionalForm]}], ")"}], " ", RowBox[{"(", 
+                          RowBox[{FormBox[FormBox["p2", TraditionalForm], 
+                          TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                          TraditionalForm], FormBox[RowBox[{SuperscriptBox[
+                          FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "*"], "(", FormBox["p3", TraditionalForm], ")"}], 
+                          TraditionalForm]}], ")"}], " ", RowBox[
+                          {SuperscriptBox[RowBox[{FormBox["\"(\"", 
+                          TraditionalForm], FormBox[RowBox[{FormBox[FormBox[
+                          "p2", TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          RowBox[{SuperscriptBox[FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "*"], "(", 
+                          FormBox["p4", TraditionalForm], ")"}], 
+                          TraditionalForm]}], TraditionalForm], FormBox[
+                          "\")\"", TraditionalForm]}], 2]}], " ", RowBox[
+                          {SuperscriptBox[RowBox[{FormBox["\"(\"", 
+                          TraditionalForm], FormBox[RowBox[{FormBox[RowBox[
+                          {FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "(", FormBox["p1", TraditionalForm], ")"}], 
+                          TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                          TraditionalForm], FormBox[RowBox[{FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "(", 
+                          FormBox["p2", TraditionalForm], ")"}], 
+                          TraditionalForm]}], TraditionalForm], FormBox[
+                          "\")\"", TraditionalForm]}], 2]}], " ", 
+                         SuperscriptBox["\[Kappa]", "2"]}], RowBox[
+                        {RowBox[{"(", RowBox[{"D", "-", "2"}], ")"}], " ", 
+                         RowBox[{"(", RowBox[{FormBox[FormBox["p2", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p4", TraditionalForm], TraditionalForm]}], 
+                          ")"}]}]], "+", TemplateBox[{"8573"}, 
+                       "OutputSizeLimit`Skeleton"], "+", FractionBox[
+                       RowBox[{"\[ImaginaryI]", " ", RowBox[{"(", RowBox[
+                          {FormBox[FormBox["p1", TraditionalForm], 
+                          TraditionalForm], FormBox["\"\[CenterDot]\"", 
+                          TraditionalForm], FormBox[FormBox["p2", 
+                          TraditionalForm], TraditionalForm]}], ")"}], " ", 
+                         RowBox[{"(", RowBox[{FormBox[FormBox["p1", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p3", TraditionalForm], TraditionalForm]}], 
+                          ")"}], " ", SuperscriptBox[FormBox[RowBox[
+                          {FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "(", FormBox["p1", TraditionalForm], ")"}], 
+                          TraditionalForm], 2], " ", SuperscriptBox[FormBox[
+                          RowBox[{FormBox["\"\[CurlyEpsilon]\"", 
+                          TraditionalForm], "(", FormBox["p2", 
+                          TraditionalForm], ")"}], TraditionalForm], 2], " ", 
+                         SuperscriptBox[FormBox[RowBox[{SuperscriptBox[
+                          FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "*"], "(", FormBox["p3", TraditionalForm], ")"}], 
+                          TraditionalForm], 2], " ", SuperscriptBox[FormBox[
+                          RowBox[{SuperscriptBox[FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "*"], "(", 
+                          FormBox["p4", TraditionalForm], ")"}], 
+                          TraditionalForm], 2], " ", SuperscriptBox[
+                          "\[Kappa]", "2"]}], RowBox[{"2", " ", RowBox[
+                          {"(", RowBox[{"D", "-", "2"}], ")"}], " ", RowBox[
+                          {"(", RowBox[{FormBox[FormBox["p1", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p4", TraditionalForm], TraditionalForm]}], 
+                          ")"}]}]], "+", FractionBox[RowBox[{"\[ImaginaryI]", 
+                         " ", "D", " ", RowBox[{"(", RowBox[{FormBox[FormBox[
+                          "p1", TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p2", TraditionalForm], TraditionalForm]}], 
+                          ")"}], " ", RowBox[{"(", RowBox[{FormBox[FormBox[
+                          "p2", TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p3", TraditionalForm], TraditionalForm]}], 
+                          ")"}], " ", SuperscriptBox[FormBox[RowBox[
+                          {FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "(", FormBox["p1", TraditionalForm], ")"}], 
+                          TraditionalForm], 2], " ", SuperscriptBox[FormBox[
+                          RowBox[{FormBox["\"\[CurlyEpsilon]\"", 
+                          TraditionalForm], "(", FormBox["p2", 
+                          TraditionalForm], ")"}], TraditionalForm], 2], " ", 
+                         SuperscriptBox[FormBox[RowBox[{SuperscriptBox[
+                          FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "*"], "(", FormBox["p3", TraditionalForm], ")"}], 
+                          TraditionalForm], 2], " ", SuperscriptBox[FormBox[
+                          RowBox[{SuperscriptBox[FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "*"], "(", 
+                          FormBox["p4", TraditionalForm], ")"}], 
+                          TraditionalForm], 2], " ", SuperscriptBox[
+                          "\[Kappa]", "2"]}], RowBox[{"4", " ", RowBox[
+                          {"(", RowBox[{"D", "-", "2"}], ")"}], " ", RowBox[
+                          {"(", RowBox[{FormBox[FormBox["p2", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p4", TraditionalForm], TraditionalForm]}], 
+                          ")"}]}]], "-", FractionBox[RowBox[{"\[ImaginaryI]", 
+                         " ", RowBox[{"(", RowBox[{FormBox[FormBox["p1", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p2", TraditionalForm], TraditionalForm]}], 
+                          ")"}], " ", RowBox[{"(", RowBox[{FormBox[FormBox[
+                          "p2", TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p3", TraditionalForm], TraditionalForm]}], 
+                          ")"}], " ", SuperscriptBox[FormBox[RowBox[
+                          {FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "(", FormBox["p1", TraditionalForm], ")"}], 
+                          TraditionalForm], 2], " ", SuperscriptBox[FormBox[
+                          RowBox[{FormBox["\"\[CurlyEpsilon]\"", 
+                          TraditionalForm], "(", FormBox["p2", 
+                          TraditionalForm], ")"}], TraditionalForm], 2], " ", 
+                         SuperscriptBox[FormBox[RowBox[{SuperscriptBox[
+                          FormBox["\"\[CurlyEpsilon]\"", TraditionalForm], 
+                          "*"], "(", FormBox["p3", TraditionalForm], ")"}], 
+                          TraditionalForm], 2], " ", SuperscriptBox[FormBox[
+                          RowBox[{SuperscriptBox[FormBox[
+                          "\"\[CurlyEpsilon]\"", TraditionalForm], "*"], "(", 
+                          FormBox["p4", TraditionalForm], ")"}], 
+                          TraditionalForm], 2], " ", SuperscriptBox[
+                          "\[Kappa]", "2"]}], RowBox[{"2", " ", RowBox[
+                          {"(", RowBox[{"D", "-", "2"}], ")"}], " ", RowBox[
+                          {"(", RowBox[{FormBox[FormBox["p2", 
+                          TraditionalForm], TraditionalForm], FormBox[
+                          "\"\[CenterDot]\"", TraditionalForm], FormBox[
+                          FormBox["p4", TraditionalForm], TraditionalForm]}], 
+                          ")"}]}]]}], "\[LongEqual]", "0"}], 
+                  Short[#1, 8] & ], "line" -> 38, "sessionID" -> 
+                 19367228598800905591, "byteCount" -> 13677368, "size" -> 8, 
+                "stored" -> False, "expr" -> Missing["NotStored"], 
+                "wrap" -> OutputSizeLimit`Defer, "version" -> 1|>, 
+               "OutputSizeLimitTemplate"], TraditionalForm]], "Output", 
+            CellChangeTimes -> {{4.000818643984179*^9, 
+               4.000818669366727*^9}}, CellLabel -> "Out[38]=", 
+            ExpressionUUID -> "5ce4902f-8c58-4202-9990-62752084e219"]}, 
+          Open]]}, Open]]}, Open]]}, InitializationCellEvaluation -> False, 
+ WindowSize -> {1435.5, 851.25}, WindowMargins -> 
+  {{-2.25, Automatic}, {Automatic, -22.5}}, 
+ WindowTitle -> "Tree-level graviton scattering with FeynArts", 
+ Magnification :> 1.1*Inherited, FrontEndVersion -> 
+  "15.0 for Linux x86 (64-bit) (July 2, 2026)", 
+ StyleDefinitions -> "Default.nb", ExpressionUUID -> 
+  "1a03c30d-5f92-4e9f-8eaa-103a7f415e46"]

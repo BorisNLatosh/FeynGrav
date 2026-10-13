@@ -1,0 +1,11 @@
+$HistoryLength=0;$LoadFeynArts=True;
+Get["/home/latosh/.Wolfram/Applications/FeynGrav/FeynGrav.wl"];
+Print["PACKAGES_BEFORE=",MemberQ[$Packages,"FeynArts`"]," PATH_BEFORE=",InputForm[$ContextPath]];
+Get["/home/latosh/.Wolfram/Applications/FeynGrav/FeynArtsIntegration/FeynArtsIntegration.wl"];
+Print["PATH_AFTER=",InputForm[$ContextPath]];
+name="FGPureGR5a149c98161e2b2e";dir="/tmp/fgfa_puregr_finite_20261014b";
+FeynArts`$ModelPath=Prepend[FeynArts`$ModelPath,dir];
+r=TimeConstrained[FeynArts`InitializeModel[name,FeynArts`GenericModel->name],45,$TimedOut];
+Print["INIT_HEAD=",Head[r]," INIT_FULL=",ToString[FullForm[r],InputForm]];
+Print["GENERIC_COUNT=",Length[FeynArts`M$GenericCouplings]," CLASS_COUNT=",Length[FeynArts`M$CouplingMatrices]];
+Quit[0];

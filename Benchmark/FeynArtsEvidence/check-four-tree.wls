@@ -1,0 +1,25 @@
+(* Small 2->2 pure-GR tree: all quartic contact plus three exchange channels. *)
+$HistoryLength=0;$LoadFeynArts=True;Get["/home/latosh/.Wolfram/Applications/FeynGrav/FeynGrav.wl"];
+name="FGPureGR5a149c98161e2b2e";dir="/tmp/fgfa_puregr_finite_20261014b";
+FeynArts`$ModelPath=Prepend[FeynArts`$ModelPath,dir];
+If[FeynArts`InitializeModel[name,FeynArts`GenericModel->name]=!=True,Print["FAIL init"];Quit[2]];
+top=TimeConstrained[FeynArts`CreateTopologies[0,2->2,FeynArts`Adjacencies->{3,4}],15,$TimedOut];
+Print["TOPOLOGY_COUNT=",If[top===$TimedOut,$TimedOut,Length[List@@top]]];
+If[top===$TimedOut,Quit[3]];
+ins=TimeConstrained[FeynArts`InsertFields[top,{FeynArts`T[1],FeynArts`T[1]}->{FeynArts`T[1],FeynArts`T[1]},FeynArts`Model->name,FeynArts`GenericModel->name,FeynArts`InsertionLevel->{FeynArts`Classes}],20,$TimedOut];
+Print["INSERTION_COUNT=",If[ins===$TimedOut,$TimedOut,Length[Cases[ins,_FeynArts`FeynmanGraph,Infinity]]]];
+If[ins===$TimedOut,Quit[4]];
+amp=TimeConstrained[FeynArts`CreateFeynAmp[ins,FeynArts`PreFactor->1,FeynArts`Truncated->True],30,$TimedOut];
+If[amp===$TimedOut,Print["AMP_TIMED_OUT"];Quit[5]];
+Print["FA_DIAGRAMS=",Length[Cases[amp,_FeynArts`FAFeynAmp,Infinity]]," FA_BYTES=",ByteCount[amp]];
+fc=TimeConstrained[FCFAConvert[amp,IncomingMomenta->{p1,p2},OutgoingMomenta->{q1,q2},ChangeDimension->D,Contract->False,List->True,Prefactor->1],40,$TimedOut];
+If[fc===$TimedOut,Print["CONVERT_TIMED_OUT"];Quit[6]];
+Print["FC_COUNT=",Length[fc]," FC_BYTES=",ByteCount[fc]," RESIDUAL_FA=",Count[fc,_FeynArts`C|_Global`FAPolarizationTensor,Infinity]];
+den=(Cases[#,_FeynCalc`PropagatorDenominator,Infinity]&) /@ fc;
+Print["DENOMINATOR_COUNTS=",Length/@den];Print["DENOMINATOR_ROUTING=",InputForm[den]];
+contact=Pick[fc,Length/@den,0];Print["CONTACT_COUNT=",Length[contact]];
+source=FeynGrav`GravitonVertex[Lor1,Lor2,p1,Lor3,Lor4,p2,Lor5,Lor6,-q1,Lor7,Lor8,-q2];
+exact=If[Length[contact]===1,TimeConstrained[Expand[First[contact]-source],25,$TimedOut],$Failed];
+Print["CONTACT_EXACT=",TrueQ[exact===0]," RESIDUAL_BYTES=",ByteCount[exact]];
+Print["EXCHANGES=",Count[Length/@den,1]];
+Quit[If[Length[fc]===4&&Length[contact]===1&&Count[Length/@den,1]===3&&TrueQ[exact===0],0,7]];

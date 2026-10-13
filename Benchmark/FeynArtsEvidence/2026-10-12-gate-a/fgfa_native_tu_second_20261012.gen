@@ -1,0 +1,31 @@
+(* Disposable model: native rank-2 T and Lorentz-vector U; no expensive vertices. *)
+KinematicIndices[T] = {Lorentz,Lorentz};
+KinematicIndices[U] = {Lorentz};
+KinematicIndices[S] = {};
+$FermionLines = True;
+P$NonCommuting = U;
+P$ChainBuildOrder = {U};
+Attributes[FAMetricTensor] = {Orderless};
+M$GenericPropagators = {
+ AnalyticalPropagator[External][s1 T[j1,mom,{li1,li2}]] ==
+    FAPolarizationTensor[T[j1],mom,li1,li2],
+ AnalyticalPropagator[Internal][s1 T[j1,mom,{li1,li2}->{li3,li4}]] ==
+    I FAPropagatorDenominator[mom,Mass[T[j1]]] *
+    (FAMetricTensor[li1,li3] FAMetricTensor[li2,li4] +
+     FAMetricTensor[li1,li4] FAMetricTensor[li2,li3])/2,
+ AnalyticalPropagator[External][s1 U[j1,mom,{li1}]] == 1,
+ AnalyticalPropagator[Internal][s1 U[j1,mom,{li1}->{li2}]] ==
+    I FAPropagatorDenominator[mom,Mass[U[j1]]] FAMetricTensor[li1,li2],
+ AnalyticalPropagator[External][s1 S[j1,mom]] == 1,
+ AnalyticalPropagator[Internal][s1 S[j1,mom]] ==
+    I FAPropagatorDenominator[mom,Mass[S[j1]]]
+};
+M$GenericCouplings = {
+ AnalyticalCoupling[s1 T[j1,mom1,{li1,li2}],s2 S[j2,mom2],s3 S[j3,mom3]] ==
+   G[1][s1 T[j1],s2 S[j2],s3 S[j3]] .
+     {FAMetricTensor[li1,li2], FAFourVector[mom2,li1] FAFourVector[mom3,li2] + FAFourVector[mom3,li1] FAFourVector[mom2,li2]},
+ AnalyticalCoupling[s1 T[j1,mom1,{li1,li2}],s2 U[j2,mom2,{li3}],s3 U[j3,mom3,{li4}]] ==
+   G[1][s1 T[j1],s2 U[j2],s3 U[j3]] . {FAMetricTensor[li1,li2] FAMetricTensor[li3,li4]}
+};
+M$TruncationRules = {_FAPolarizationTensor -> 1};
+M$LastGenericRules = {};

@@ -1,0 +1,96 @@
+Running as unit: fgfa-rename-1791827409-147692.scope; invocation ID: 03019b4373db4d3f8120f4dad7f5ebcd
+AGGREGATE_CAP=1073741824 SWAP_MAX=0 OOM_GROUP=1
+TOTAL_CELLS=83 INPUT_LIKE_CELLS=9
+BEGIN_CELL=1 STYLE=Code
+Loading FeynCalc from /home/latosh/.Wolfram/Applications/FeynCalc/
+$PrePrint is set to FeynCalcForm. Use FI and FC to change the display format.
+FeynCalc 10.2.1 (stable version). For help, use the DisplayForm[ButtonBox[online documentation,, ButtonData :> {URL[https://feyncalc.github.io/referenceDev], None}, BaseStyle -> Hyperlink, ButtonNote -> https://feyncalc.github.io/referenceDev]] visit the DisplayForm[ButtonBox[forum, ButtonData :> {URL[https://github.com/FeynCalc/feyncalc/discussions], None}, BaseStyle -> Hyperlink, ButtonNote -> https://github.com/FeynCalc/feyncalc/discussions/]] and have a look at the supplied DisplayForm[ButtonBox[examples., BaseStyle -> Hyperlink, ButtonFunction :> SystemOpen[FileNameJoin[{$FeynCalcDirectory, Examples}]], Evaluator -> Automatic, Method -> Preemptive]] The PDF-version of the manual can be downloaded DisplayForm[ButtonBox[here., ButtonData :> {URL[https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf], None}, BaseStyle -> Hyperlink, ButtonNote -> https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf]]
+If you use FeynCalc in your research, please evaluate FeynCalcHowToCite[] to learn how to cite this software.
+Please keep in mind that the proper academic attribution of our work is crucial to ensure the future development of this package!
+Loading FeynArts from /home/latosh/.Wolfram/Applications/FeynCalc/FeynArts
+FeynArts 3.12 (27 Mar 2025) patched for use with FeynCalc, for documentation see the DisplayForm[ButtonBox[manual, BaseStyle -> Hyperlink, ButtonFunction :> SystemOpen[First[FileNames[{*.pdf, *.PDF}, FileNameJoin[{$FeynArtsDirectory, manual}]]]], Evaluator -> Automatic, Method -> Preemptive]] or visit DisplayForm[ButtonBox[www.feynarts.de., ButtonData :> {URL[http://www.feynarts.de/], None}, BaseStyle -> Hyperlink, ButtonNote -> www.feynarts.de/]]
+If you use FeynArts in your research, please cite
+ • T. Hahn, Comput. Phys. Commun., 140, 418-431, 2001, arXiv:hep-ph/0012260
+FeynGrav 4.1
+FeynGrav: Use Button[FeynGravCommands, FeynGravCommands[], Appearance -> None] to print the list of all commands.
+FeynGrav: On initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the "import*" command.
+FeynGrav: Core publications on FeynGrav are Hyperlink[Class.Quant.Grav. 39 (2022) 16, 165006, https://doi.org/10.1088/1361-6382/ac7e15], Hyperlink[Comput.Phys.Commun. 292 (2023) 108871, https://doi.org/10.1016/j.cpc.2023.108871], Hyperlink[Comput.Phys.Commun. 310 (2025) 109508, https://doi.org/10.1016/j.cpc.2025.109508], Hyperlink[arXiv:2510.17320, https://doi.org/10.48550/arXiv.2510.17320]
+END_CELL=1 SECONDS=3.552316
+BEGIN_CELL=2 STYLE=Input
+
+loading generic model file /home/latosh/.Wolfram/Applications/FeynGrav/FeynArts/Models/PureGR.gen
+> $GenericMixing is OFF
+generic model {PureGR} initialized
+
+loading classes model file /home/latosh/.Wolfram/Applications/FeynGrav/FeynArts/Models/PureGR.mod
+> 3 particles (incl. antiparticles) in 2 classes
+> $CounterTerms are ON
+> 3 vertices
+classes model {PureGR} initialized
+END_CELL=2 SECONDS=2.231202
+BEGIN_CELL=3 STYLE=Input
+
+inserting at level(s) {Classes}
+> Top. 1: 1 Classes insertion
+> Top. 2: 1 Classes insertion
+> Top. 3: 1 Classes insertion
+> Top. 4: 1 Classes insertion
+in total: 4 Classes insertions
+END_CELL=3 SECONDS=0.007027
+BEGIN_CELL=4 STYLE=Input
+> Top. 1 aebe/cede/0.m, 0 diagrams
+> Top. 2 aebe/cfdf/ef.m, 0 diagrams
+> Top. 3 aebf/cedf/ef.m, 0 diagrams
+> Top. 4 aebf/cfde/ef.m, 0 diagrams
+END_CELL=4 SECONDS=0.013845
+BEGIN_CELL=5 STYLE=Input
+
+creating amplitudes at level(s) {Classes}
+> Top. 1: 1 Classes amplitude
+> Top. 2: 1 Classes amplitude
+> Top. 3: 1 Classes amplitude
+> Top. 4: 1 Classes amplitude
+in total: 4 Classes amplitudes
+END_CELL=5 SECONDS=39.376592
+BEGIN_CELL=6 STYLE=Input
+END_CELL=6 SECONDS=0.00022
+BEGIN_CELL=7 STYLE=Input
+
+CalcFormCalculate::files: FORM job files are retained in /tmp/fgfa-four-tree-offshell-bdfec32c-b680-489a-90a9-7ae93fe751ef/calcform-job-c92085c6-3d5c-407b-b257-498591b62922.
+
+CalcFormCalculate::files: FORM job files are retained in /tmp/fgfa-four-tree-offshell-bdfec32c-b680-489a-90a9-7ae93fe751ef/calcform-job-371b67d8-bce5-4209-8d2e-9d79a4f0a6e5.
+
+CalcFormCalculate::files: FORM job files are retained in /tmp/fgfa-four-tree-offshell-bdfec32c-b680-489a-90a9-7ae93fe751ef/calcform-job-246f9681-e9b3-4c73-b0bf-4507adbf6981.
+
+General::stop: Further output of CalcFormCalculate::files will be suppressed during this calculation.
+END_CELL=7 SECONDS=5.693411
+BEGIN_CELL=8 STYLE=Input
+END_CELL=8 SECONDS=0.012573
+BEGIN_CELL=9 STYLE=Input
+END_CELL=9 SECONDS=0.002888
+PASS every input and code cell evaluated
+PASS model directory used is the packaged one
+PASS model loaded by name from the package
+CONTEXTS=InputForm[{FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`}]
+PASS all unqualified names resolve in the FeynArts context
+PASS four diagrams generated
+PASS one contact and three exchanges
+PASS three expected off-shell routes
+PASS four scalar FORM results
+PASS ScriptCapitalM equals the sum
+PASS contact equals the FeynGrav quartic source
+PASS diagram graphics produced before the amplitudes
+PASS off-shell input retained in the total
+PASS longitudinal terms retained in the total
+PASS trace terms retained in the total
+PASS the notebook imposes no transversality option
+PASS no FeynArts context prefixes remain
+REMAINING_QUALIFIED_NAMES=InputForm[{FeynGrav`}]
+PASS only the package-load line keeps a context
+PASS no benchmark path left in the notebook
+PASS no integration convenience wrapper
+MODELPATH_HEAD=InputForm[/home/latosh/.Wolfram/Applications/FeynGrav/FeynArts/Models]
+TOTAL_BYTES=44768576
+CGROUP_MEMORY_PEAK=318828544
+CGROUP_MEMORY_EVENTS=low 0; high 0; max 0; oom 0; oom_kill 0; oom_group_kill 0
+COMPLETED checks=19 failures=0

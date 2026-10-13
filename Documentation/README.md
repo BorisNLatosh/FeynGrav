@@ -8,6 +8,7 @@ This documentation describes the development source checked on 6 October 2026, w
 | --- | --- | --- |
 | New user | [Installation and requirements](../README.md#requirements) | [Function reference](Reference.md), then [example notebooks](../Examples/README.md) |
 | FORM user | [Converter guide](../CalcFormConverter/README.md) | Supported vocabulary, conventions and troubleshooting in that guide; [benchmarks](../Benchmark/README.md) for local timings |
+| Pure-GR FeynArts user | [Optional bridge and exact scope](../FeynArtsIntegration/README.md) | Explicit finite-model build, complete three-/four-graviton tree construction and per-diagram converter algebra; the pinned one-loop 1PI two-point integrand is available, but FORM loop algebra/reduction is not |
 | Library developer | [Interaction-rule contracts](../Rules/README.md) | [Library generation](../Libs/Generator.md); use a separate fresh kernel from ordinary FeynGrav calculations |
 | Maintainer | [Converter architecture and tests](../CalcFormConverter/DEVELOPER.md) | [Saved formats](../CalcFormConverter/FORMAT.md), verification records below |
 

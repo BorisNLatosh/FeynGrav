@@ -1,0 +1,96 @@
+Running as unit: fgfa-nocontext3-1791824780-141757.scope; invocation ID: 144551310dae4926bb4341279ad314bb
+AGGREGATE_CAP=1073741824 SWAP_MAX=0 OOM_GROUP=1
+TOTAL_CELLS=81 INPUT_LIKE_CELLS=9
+BEGIN_CELL=1 STYLE=Code
+Loading FeynCalc from /home/latosh/.Wolfram/Applications/FeynCalc/
+$PrePrint is set to FeynCalcForm. Use FI and FC to change the display format.
+FeynCalc 10.2.1 (stable version). For help, use the DisplayForm[ButtonBox[online documentation,, ButtonData :> {URL[https://feyncalc.github.io/referenceDev], None}, BaseStyle -> Hyperlink, ButtonNote -> https://feyncalc.github.io/referenceDev]] visit the DisplayForm[ButtonBox[forum, ButtonData :> {URL[https://github.com/FeynCalc/feyncalc/discussions], None}, BaseStyle -> Hyperlink, ButtonNote -> https://github.com/FeynCalc/feyncalc/discussions/]] and have a look at the supplied DisplayForm[ButtonBox[examples., BaseStyle -> Hyperlink, ButtonFunction :> SystemOpen[FileNameJoin[{$FeynCalcDirectory, Examples}]], Evaluator -> Automatic, Method -> Preemptive]] The PDF-version of the manual can be downloaded DisplayForm[ButtonBox[here., ButtonData :> {URL[https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf], None}, BaseStyle -> Hyperlink, ButtonNote -> https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf]]
+If you use FeynCalc in your research, please evaluate FeynCalcHowToCite[] to learn how to cite this software.
+Please keep in mind that the proper academic attribution of our work is crucial to ensure the future development of this package!
+Loading FeynArts from /home/latosh/.Wolfram/Applications/FeynCalc/FeynArts
+FeynArts 3.12 (27 Mar 2025) patched for use with FeynCalc, for documentation see the DisplayForm[ButtonBox[manual, BaseStyle -> Hyperlink, ButtonFunction :> SystemOpen[First[FileNames[{*.pdf, *.PDF}, FileNameJoin[{$FeynArtsDirectory, manual}]]]], Evaluator -> Automatic, Method -> Preemptive]] or visit DisplayForm[ButtonBox[www.feynarts.de., ButtonData :> {URL[http://www.feynarts.de/], None}, BaseStyle -> Hyperlink, ButtonNote -> www.feynarts.de/]]
+If you use FeynArts in your research, please cite
+ • T. Hahn, Comput. Phys. Commun., 140, 418-431, 2001, arXiv:hep-ph/0012260
+FeynGrav 4.1
+FeynGrav: Use Button[FeynGravCommands, FeynGravCommands[], Appearance -> None] to print the list of all commands.
+FeynGrav: On initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the "import*" command.
+FeynGrav: Core publications on FeynGrav are Hyperlink[Class.Quant.Grav. 39 (2022) 16, 165006, https://doi.org/10.1088/1361-6382/ac7e15], Hyperlink[Comput.Phys.Commun. 292 (2023) 108871, https://doi.org/10.1016/j.cpc.2023.108871], Hyperlink[Comput.Phys.Commun. 310 (2025) 109508, https://doi.org/10.1016/j.cpc.2025.109508], Hyperlink[arXiv:2510.17320, https://doi.org/10.48550/arXiv.2510.17320]
+
+importGravitons::shdw: Symbol importGravitons appears in multiple contexts {FeynGrav`, Global`}; definitions in context FeynGrav` may shadow or be shadowed by other definitions.
+END_CELL=1 SECONDS=3.613305
+BEGIN_CELL=2 STYLE=Input
+
+loading generic model file /home/latosh/.Wolfram/Applications/FeynGrav/Benchmark/FeynArtsEvidence/model-first-2026-10-12/model/FGPureGR5a149c98161e2b2e.gen
+> $GenericMixing is OFF
+generic model {/home/latosh/.Wolfram/Applications/FeynGrav/Examples/../Benchmark/FeynArtsEvidence/model-first-2026-10-12/model/FGPureGR5a149c98161e2b2e} initialized
+
+loading classes model file /home/latosh/.Wolfram/Applications/FeynGrav/Benchmark/FeynArtsEvidence/model-first-2026-10-12/model/FGPureGR5a149c98161e2b2e.mod
+> 3 particles (incl. antiparticles) in 2 classes
+> $CounterTerms are ON
+> 3 vertices
+classes model {/home/latosh/.Wolfram/Applications/FeynGrav/Examples/../Benchmark/FeynArtsEvidence/model-first-2026-10-12/model/FGPureGR5a149c98161e2b2e} initialized
+END_CELL=2 SECONDS=2.286096
+BEGIN_CELL=3 STYLE=Input
+
+inserting at level(s) {Classes}
+> Top. 1: 1 Classes insertion
+> Top. 2: 1 Classes insertion
+> Top. 3: 1 Classes insertion
+> Top. 4: 1 Classes insertion
+in total: 4 Classes insertions
+END_CELL=3 SECONDS=0.007142
+BEGIN_CELL=4 STYLE=Input
+> Top. 1 aebe/cede/0.m, 0 diagrams
+> Top. 2 aebe/cfdf/ef.m, 0 diagrams
+> Top. 3 aebf/cedf/ef.m, 0 diagrams
+> Top. 4 aebf/cfde/ef.m, 0 diagrams
+END_CELL=4 SECONDS=0.014944
+BEGIN_CELL=5 STYLE=Input
+
+creating amplitudes at level(s) {Classes}
+> Top. 1: 1 Classes amplitude
+> Top. 2: 1 Classes amplitude
+> Top. 3: 1 Classes amplitude
+> Top. 4: 1 Classes amplitude
+in total: 4 Classes amplitudes
+END_CELL=5 SECONDS=34.737957
+BEGIN_CELL=6 STYLE=Input
+END_CELL=6 SECONDS=0.00021
+BEGIN_CELL=7 STYLE=Input
+
+CalcFormCalculate::files: FORM job files are retained in /tmp/fgfa-four-tree-offshell-ca3f9846-6aec-4383-9f75-1bdaad979187/calcform-job-1d24e5c4-b8cd-4de4-b495-280027276c3d.
+
+CalcFormCalculate::files: FORM job files are retained in /tmp/fgfa-four-tree-offshell-ca3f9846-6aec-4383-9f75-1bdaad979187/calcform-job-91db934b-e6eb-4c51-a96c-34fea05bc7e8.
+
+CalcFormCalculate::files: FORM job files are retained in /tmp/fgfa-four-tree-offshell-ca3f9846-6aec-4383-9f75-1bdaad979187/calcform-job-e3f02cf5-16b6-4f1a-91d8-7d376ec629aa.
+
+General::stop: Further output of CalcFormCalculate::files will be suppressed during this calculation.
+END_CELL=7 SECONDS=5.630211
+BEGIN_CELL=8 STYLE=Input
+END_CELL=8 SECONDS=0.015707
+BEGIN_CELL=9 STYLE=Input
+END_CELL=9 SECONDS=0.003189
+PASS every input and code cell evaluated
+CONTEXTS=InputForm[{FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`, FeynArts`}]
+PASS all stripped names resolve in the FeynArts context
+PASS model loaded from the simplified cell
+PASS four diagrams generated
+PASS one contact and three exchanges
+PASS three expected off-shell routes
+PASS four scalar FORM results
+PASS ScriptCapitalM equals the sum
+CONTACT_INDICES=InputForm[{LorentzIndex[mu1, D], LorentzIndex[mu2, D], LorentzIndex[mu3, D], LorentzIndex[nu4, D], LorentzIndex[mu4, D], LorentzIndex[nu3, D], LorentzIndex[nu1, D], LorentzIndex[nu2, D]}]
+PASS contact equals the FeynGrav quartic source
+PASS diagram graphics produced before the amplitudes
+PASS off-shell input retained in the total
+PASS longitudinal terms retained in the total
+PASS trace terms retained in the total
+PASS no FeynArts context prefixes remain
+REMAINING_QUALIFIED_NAMES=InputForm[{FeynGrav`}]
+PASS only the package-load line keeps a context
+PASS no integration convenience wrapper
+MODEL_DIRECTORY=InputForm[/home/latosh/.Wolfram/Applications/FeynGrav/Examples/../Benchmark/FeynArtsEvidence/model-first-2026-10-12/model/] MODEL_NAME=FGPureGR5a149c98161e2b2e
+TOTAL_BYTES=52101824
+CGROUP_MEMORY_PEAK=318636032
+CGROUP_MEMORY_EVENTS=low 0; high 0; max 0; oom 0; oom_kill 0; oom_group_kill 0
+COMPLETED checks=16 failures=0

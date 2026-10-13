@@ -102,6 +102,19 @@ Additional precomputed libraries are distributed in the [FeynGrav Libraries data
 
 The [library generator](Libs/Generator.wl) is a separate developer tool for producing vertex libraries. Most users can work with the supplied or downloaded libraries.
 
+## FeynArts models
+
+`FeynArts/Models` ships FeynArts model files for the conventional pure-gravity rules, mirroring the location FeynCalc uses for its own models. Loading FeynArts together with FeynGrav puts that directory on FeynArts' `$ModelPath`, so the model is available by name:
+
+```wl
+$LoadAddOns = {"FeynArts"};
+<< FeynGrav`;
+
+InitializeModel["PureGR", GenericModel -> "PureGR"];
+```
+
+`GenericModel` is required because the classes file does not name its generic model and the FeynArts default is the stock `"Lorentz"` file. The snapshot covers the cubic and quartic graviton interactions and the oriented ghost coupling at gauge parameter 2 with symbolic `D`. See [FeynArts/Models/README.md](FeynArts/Models/README.md) for details and hashes, and [Examples/Graviton_Scattering_Tree_Level_FeynArt.nb](Examples/Graviton_Scattering_Tree_Level_FeynArt.nb) for a worked off-shell four-graviton tree calculation.
+
 ## CalcFormConverter
 
 CalcFormConverter loads automatically with FeynGrav and can also be loaded independently. It supports exact Lorentz tensors and polarisation vectors, rank-four single-space epsilon tensors, ordinary Dirac chains and traces, fundamental SU(N) colour tensors and traces, ordinary quadratic propagators, and scalar `A0` through `D0` notation. Supported Dirac and colour processing are enabled by default. External spinors, gamma-five, mixed Lorentz spaces and general Lie groups remain outside this interface.
@@ -149,6 +162,7 @@ The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, i
 | [Rules](Rules) | Interaction-rule construction, structural validation and projector utilities. |
 | [Libs](Libs) | Precomputed vertex libraries and the [library generator](Libs/Generator.md), which uses CalcFormConverter. |
 | [Examples](Examples) | Calculation notebooks. |
+| [FeynArts/Models](FeynArts/Models/README.md) | FeynArts model files for the pure-gravity rules. |
 | [Documentation](Documentation/README.md) | Main-package reference, documentation routes and verification records. |
 | [Benchmark](Benchmark/README.md) | Reproducible converter and library-generation measurements. |
 | [CalcFormConverter](CalcFormConverter) | Converter, FORM runtime, templates, documentation, examples, and tests. |

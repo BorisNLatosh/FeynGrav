@@ -1096,6 +1096,20 @@ initializationResult = Module[{results, failed},
 ];
 
 
+(* Make the models shipped in FeynArts/Models findable when patched FeynArts is
+   already loaded. FeynGrav never loads FeynArts itself, so this only extends an
+   existing search path and does nothing when FeynArts is absent. Request
+   FeynArts while loading FeynGrav ($LoadAddOns = {"FeynArts"} or
+   $LoadFeynArts = True) for the registration to happen. *)
+FeynGravModelDirectory = FileNameJoin[{packageDirectory, "FeynArts", "Models"}];
+
+If[MemberQ[$Packages, "FeynArts`"] &&
+   DirectoryQ[FeynGravModelDirectory] &&
+   !MemberQ[ExpandFileName /@ FeynArts`$ModelPath, ExpandFileName[FeynGravModelDirectory]],
+    PrependTo[FeynArts`$ModelPath, FeynGravModelDirectory]
+];
+
+
 End[];
 
 

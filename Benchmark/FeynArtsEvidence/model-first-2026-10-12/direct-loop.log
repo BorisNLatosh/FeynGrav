@@ -1,0 +1,61 @@
+Running as unit: fgfa-direct-loop-1791808355-99773.scope; invocation ID: 8caf68a5b2b8472aa2349fe55f7b214b
+AGGREGATE_CAP=1073741824 SWAP_MAX=0 OOM_GROUP=1
+CHECKOUT=/home/latosh/.Wolfram/Applications/FeynGrav/ UTC=Mon 12 Oct 2026 12:32:36
+MODEL=FGPureGR5a149c98161e2b2e MODEL_HASHES_VERIFIED=True
+Loading FeynCalc from /home/latosh/.Wolfram/Applications/FeynCalc/
+$PrePrint is set to FeynCalcForm. Use FI and FC to change the display format.
+FeynCalc 10.2.1 (stable version). For help, use the DisplayForm[ButtonBox[online documentation,, ButtonData :> {URL[https://feyncalc.github.io/referenceDev], None}, BaseStyle -> Hyperlink, ButtonNote -> https://feyncalc.github.io/referenceDev]] visit the DisplayForm[ButtonBox[forum, ButtonData :> {URL[https://github.com/FeynCalc/feyncalc/discussions], None}, BaseStyle -> Hyperlink, ButtonNote -> https://github.com/FeynCalc/feyncalc/discussions/]] and have a look at the supplied DisplayForm[ButtonBox[examples., BaseStyle -> Hyperlink, ButtonFunction :> SystemOpen[FileNameJoin[{$FeynCalcDirectory, Examples}]], Evaluator -> Automatic, Method -> Preemptive]] The PDF-version of the manual can be downloaded DisplayForm[ButtonBox[here., ButtonData :> {URL[https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf], None}, BaseStyle -> Hyperlink, ButtonNote -> https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf]]
+If you use FeynCalc in your research, please evaluate FeynCalcHowToCite[] to learn how to cite this software.
+Please keep in mind that the proper academic attribution of our work is crucial to ensure the future development of this package!
+Loading FeynArts from /home/latosh/.Wolfram/Applications/FeynCalc/FeynArts
+FeynArts 3.12 (27 Mar 2025) patched for use with FeynCalc, for documentation see the DisplayForm[ButtonBox[manual, BaseStyle -> Hyperlink, ButtonFunction :> SystemOpen[First[FileNames[{*.pdf, *.PDF}, FileNameJoin[{$FeynArtsDirectory, manual}]]]], Evaluator -> Automatic, Method -> Preemptive]] or visit DisplayForm[ButtonBox[www.feynarts.de., ButtonData :> {URL[http://www.feynarts.de/], None}, BaseStyle -> Hyperlink, ButtonNote -> www.feynarts.de/]]
+If you use FeynArts in your research, please cite
+ • T. Hahn, Comput. Phys. Commun., 140, 418-431, 2001, arXiv:hep-ph/0012260
+FeynGrav 4.1
+FeynGrav: Use Button[FeynGravCommands, FeynGravCommands[], Appearance -> None] to print the list of all commands.
+FeynGrav: On initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the "import*" command.
+FeynGrav: Core publications on FeynGrav are Hyperlink[Class.Quant.Grav. 39 (2022) 16, 165006, https://doi.org/10.1088/1361-6382/ac7e15], Hyperlink[Comput.Phys.Commun. 292 (2023) 108871, https://doi.org/10.1016/j.cpc.2023.108871], Hyperlink[Comput.Phys.Commun. 310 (2025) 109508, https://doi.org/10.1016/j.cpc.2025.109508], Hyperlink[arXiv:2510.17320, https://doi.org/10.48550/arXiv.2510.17320]
+
+loading generic model file /home/latosh/.Wolfram/Applications/FeynGrav/Benchmark/FeynArtsEvidence/model-first-2026-10-12/model/FGPureGR5a149c98161e2b2e.gen
+> $GenericMixing is OFF
+generic model {FGPureGR5a149c98161e2b2e} initialized
+
+loading classes model file /home/latosh/.Wolfram/Applications/FeynGrav/Benchmark/FeynArtsEvidence/model-first-2026-10-12/model/FGPureGR5a149c98161e2b2e.mod
+> 3 particles (incl. antiparticles) in 2 classes
+> $CounterTerms are ON
+> 3 vertices
+classes model {FGPureGR5a149c98161e2b2e} initialized
+
+inserting at level(s) {Classes}
+> Top. 1: 1 Classes insertion
+> Top. 2: 2 Classes insertions
+in total: 3 Classes insertions
+PASS two 1PI topology types
+INSERTION_INVENTORY=InputForm[{<|Key -> {1, 1, 1}, Family -> GravitonTadpole, Fields -> {T[1]}, Valences -> {4}, FeynArtsSymmetryDenominator -> 2|>, <|Key -> {2, 1, 1}, Family -> GravitonBubble, Fields -> {T[1], T[1]}, Valences -> {3, 3}, FeynArtsSymmetryDenominator -> 2|>, <|Key -> {2, 2, 1}, Family -> GhostBubble, Fields -> {-U[1], U[1]}, Valences -> {3, 3}, FeynArtsSymmetryDenominator -> 1|>}]
+PASS one tadpole and two distinct bubbles
+PASS unique graph identities
+
+creating amplitudes at level(s) {Classes}
+> Top. 1: 1 Classes amplitude
+> Top. 2: 2 Classes amplitudes
+in total: 3 Classes amplitudes
+PASS three converted 1PI contributions
+PASS independent symmetry factors agree with insertion
+PASS tadpole routing retained
+PASS graviton bubble routes
+PASS ghost bubble routes
+PASS source-product factorisation intact
+PASS tadpole source propagator with graph half
+PASS tadpole exact source quartic
+PASS graviton bubble source propagators with graph half
+PASS graviton bubble first cubic source
+PASS graviton bubble second cubic source
+PASS ghost bubble source propagators with one closed-loop minus
+PASS ghost bubble first cubic source
+PASS ghost bubble second cubic source
+PASS no external wavefunction markers
+ALL_THREE_SOURCE_PRODUCTS_EXACT=True NO_LOOP_MEASURE=True NO_TADPOLE_DELETION=True FORM_EXECUTED=False
+PASS no convenience integration package loaded
+CGROUP_MEMORY_PEAK=280158208
+CGROUP_MEMORY_EVENTS=low 0; high 0; max 0; oom 0; oom_kill 0; oom_group_kill 0
+COMPLETED checks=19 failures=0

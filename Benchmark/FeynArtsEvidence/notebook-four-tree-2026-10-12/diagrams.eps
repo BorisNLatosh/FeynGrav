@@ -1,0 +1,192 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 432 504 
+%%Pages: 1 
+%%PageOrder: Ascend
+%%DocumentNeededResources: font Helvetica Palatino-Italic Symbol
+%%DocumentSuppliedResources: procset FeynArts.pro
+%%Creator: FeynArts
+%%EndComments
+
+%%BeginProlog
+%%BeginResource: procset FeynArts.pro
+/FeynArtsDict 100 dict def FeynArtsDict begin /DiagramBorder 1 def
+/DiagramCanvas 20 def /DiagramSize DiagramBorder dup add DiagramCanvas
+add def /LabelFont /Palatino-Italic def /LabelFontSize 2 def
+/PropagatorThickness .11 def /VertexThickness PropagatorThickness 8 mul
+def /CounterThickness PropagatorThickness 3 mul def /CrossWidth 1 def
+/OnePIWidth //CrossWidth def /ArrowLength 1.2 def /ArrowHeight .4 def
+/DampingConst ArrowLength .65 mul dup mul dup mul def /ScalarDashing [
+.66 ] def /GhostDashing [ .11 .66 ] def /NPoints 10 def /NCrestsSine .5
+def /NCrestsCycles .65 def /SineAmp .25 def /CyclesAmp .6 def
+/CyclesBreadth .16 def /Degree 3.141592653589793 180 div def /acos { dup
+dup mul 1 exch sub sqrt exch atan } bind def /asin { dup dup mul 1 exch
+sub sqrt atan } bind def /polar { 3 -1 roll sub /y exch def exch sub /x
+exch def x dup mul y dup mul add sqrt y x atan } bind def /stm matrix def
+/yoff -1 def /Layout { dup floor //DiagramSize mul /yoff exch def
+//DiagramSize mul /ymax exch def //DiagramSize mul /xmax exch def /height
+exch 3 index sub def /width exch 3 index sub def translate ymax width mul
+xmax height mul div abs dup 1 gt { width exch div width /width 2 index
+def sub -.5 mul 0 } { height mul height /height 2 index def sub -.5 mul 0
+exch } ifelse translate width xmax div height ymax div scale //stm
+currentmatrix pop /xoff //DiagramBorder def /yoff yoff //DiagramSize sub
+//DiagramBorder add def } bind def /Advance { yoff 0 lt {
+(Too many diagrams for the chosen sheet layout.) error } if //stm
+setmatrix xoff yoff translate /xoff xoff //DiagramSize add dup xmax ge {
+pop /yoff yoff //DiagramSize sub def //DiagramBorder } if def } bind def
+/dfont /Helvetica findfont //LabelFontSize .8 mul scalefont def /Diagram
+{ Advance //dfont setfont dup stringwidth pop //DiagramCanvas exch sub .5
+mul -.5 moveto show } bind def /Vert { /cto exch def /y exch def /x exch
+def 1 setlinecap cto 0 eq { x y moveto 0 0 rlineto //VertexThickness
+setlinewidth stroke } { cto 0 gt { x y moveto //CrossWidth .5 mul dup
+rmoveto //CrossWidth dup neg dup dup rlineto exch dup 0 rmoveto rlineto
+//CounterThickness setlinewidth stroke //PropagatorThickness setlinewidth
+2 1 cto { .25 mul .55 add //CrossWidth mul x y 3 -1 roll 0 360 arc stroke
+} for } { newpath x y //OnePIWidth 0 360 arc gsave cto .3 mul 1.1 add dup
+0 lt { pop 0 } if setgray fill grestore //PropagatorThickness
+setlinewidth stroke } ifelse } ifelse } bind def /Prop { /toy exch def
+/tox exch def /fromy exch def /fromx exch def fromx tox eq fromy toy eq
+and { /midy exch def /midx exch def /ctrx fromx midx add .5 mul def /ctry
+fromy midy add .5 mul def fromx fromy ctrx ctry polar /ommc exch def /rad
+exch def /dir ommc 90 add def /dphi 180 def } { /height exch def fromx
+fromy tox toy polar /dir exch def .5 mul /lab exch def /ommc dir 90
+height 0 ge { sub } { add } ifelse def /cosommc ommc cos def /sinommc
+ommc sin def /midx fromx tox add .5 mul def /midy fromy toy add .5 mul
+def /ctrx midx def /ctry midy def height 0 eq { /rad 20000 def /dphi lab
+rad div asin def -1 } { /h height abs def /dphi h 1 atan dup add def /rad
+lab dphi sin div def height 0 lt { /dphi dphi neg def } if h lab mul dup
+cosommc mul midx add /midx exch def sinommc mul midy add /midy exch def h
+1 gt { 1 } { -1 } ifelse } ifelse rad dup mul lab dup mul sub sqrt mul
+dup cosommc mul ctrx add /ctrx exch def sinommc mul ctry add /ctry exch
+def } ifelse /arrow exch def arrow 0 eq { /damping { pop 1 } def } {
+/damping { ommc sub abs //Degree mul rad mul dup mul dup mul dup
+//DampingConst add div } bind def } ifelse /pcs 0 def dup {
+//FeynArtsDict exch known { /pcs pcs 1 add def } if } forall /phi ommc
+dphi sub def /dphi dphi dup add pcs div def //PropagatorThickness
+setlinewidth 1 setlinecap gsave fromx fromy moveto exec stroke arrow 0 ne
+{ newpath rad 20000 ge { //ArrowLength arrow mul dup dir cos mul /x exch
+def dir sin mul /y exch def x .5 mul midx add y .5 mul midy add moveto x
+/x cosommc //ArrowHeight mul def x add neg y /y sinommc //ArrowHeight mul
+def y add neg rlineto x dup add y dup add rlineto } { ommc dir sub sin 0
+le { /arrow arrow neg def } if /rad rad dup add def /ctrx ctrx dup add
+midx sub def /ctry ctry dup add midy sub def /dphi //ArrowLength .5 mul
+rad atan arrow mul def ommc dphi sub dup cos rad mul ctrx add /tipx exch
+def sin rad mul ctry add /tipy exch def ommc dphi add dup /sinommc exch
+sin def /cosommc exch cos def rad //ArrowHeight sub arrowarc arrow 1 eq {
+arc } { arcn } ifelse rad //ArrowHeight add arrowarc exch arrow 1 eq {
+arcn } { arc } ifelse } ifelse closepath fill } if grestore } bind def
+/arrowarc { dup cosommc mul ctrx add /tailx exch def sinommc mul ctry add
+/taily exch def tailx tipx sub tipy taily sub dup dup mul 2 index dup mul
+add dup .25 mul rad dup mul exch sub exch div sqrt arrow mul dup 3 -1
+roll mul tailx tipx add .5 mul add /midx exch def mul taily tipy add .5
+mul add /midy exch def midx midy rad tipy midy sub tipx midx sub atan
+taily midy sub tailx midx sub atan } bind def /Straight { rad 20000 lt {
+ctrx ctry rad phi phi dphi add dphi 0 ge { arc } { arcn } ifelse } { phi
+dphi add dup cos rad mul ctrx add exch sin rad mul ctry add lineto }
+ifelse /phi phi dphi add def } bind def /Dash { currentpoint stroke
+moveto 0 setdash Straight currentpoint stroke moveto [ ] 0 setdash } bind
+def /ScalarDash { //ScalarDashing Dash } bind def /GhostDash {
+//GhostDashing Dash } bind def /Sine { /a dphi abs //Degree mul rad mul
+def /omega //NCrestsSine a mul round dup 1 lt { pop 1 } if .5 add dup add
+180 mul def 0 1 //NPoints a mul floor div 1 { /n exch def /a phi n dphi
+mul add def rad a damping //SineAmp mul n omega mul sin mul sub dup a cos
+mul ctrx add exch a sin mul ctry add lineto } for /phi phi dphi add def }
+bind def /rshift CyclesAmp SineAmp sub def /phadj rshift CyclesAmp div
+acos def /sinphadj phadj sin def /Cycles { /a dphi abs //Degree mul rad
+mul def /omega //NCrestsCycles a mul round dup 1 lt { pop 1 } if 180 mul
+//phadj add dup add def /phamp //CyclesBreadth 180 mul rad div dphi 0 lt
+{ neg } if def 0 1 //NPoints a mul dup add floor div 1 { /n exch def n
+omega mul //phadj sub dup cos //CyclesAmp mul //rshift sub rad add /a
+exch def sin n dup add 1 sub //sinphadj mul sub phamp mul phi add n dphi
+mul add dup cos a mul ctrx add exch sin a mul ctry add lineto } for /phi
+phi dphi add def } bind def /lfont //LabelFont findfont def /sfont
+/Symbol findfont def /slant //lfont dup /FontInfo known { /FontInfo get
+dup /ItalicAngle known { /ItalicAngle get sin -.5 mul } { pop 0 } ifelse
+} { pop 0 } ifelse def /Label { /fsize exch //LabelFontSize mul def
+/super .38 def /putchar { false charpath } bind def /chardim {
+flattenpath pathbbox /height exch def 3 -1 roll sub /width exch def pop
+/icorr font //sfont eq { 0 } { //slant height mul } ifelse def } bind def
+/font //lfont def newpath 0 0 moveto 4 index exec flattenpath pathbbox
+newpath 2 index sub 5 -1 roll 1 add mul -.5 mul 6 -1 roll add 3 -1 roll
+sub exch 2 index sub 4 -1 roll 1 add mul -.5 mul 4 -1 roll add 3 -1 roll
+sub exch moveto /putchar { show } bind def /chardim { } def /font //lfont
+def exec newpath } bind def /$ { /font //sfont def } bind def /# { font
+fsize scalefont setfont putchar currentpoint /y exch def /x exch def
+chardim /font //lfont def } bind def /_ { font fsize .66 mul scalefont
+setfont /super .5 def x .042 fsize mul add y .133 fsize mul sub moveto
+putchar /font //lfont def } bind def /^ { font fsize .66 mul scalefont
+setfont x .083 fsize mul add y super fsize mul add moveto putchar /font
+//lfont def } bind def /~ { font fsize scalefont setfont dup stringwidth
+height add .44 fsize mul sub y add exch -.8 mul width .45 mul sub icorr
+add x add exch moveto putchar /font //lfont def } bind def end
+%%EndResource
+%%EndProlog
+
+%%BeginSetup
+%%IncludeResource: font Helvetica
+%%IncludeResource: font Palatino-Italic
+%%IncludeResource: font Symbol
+FeynArtsDict begin
+%%EndSetup
+2 2.3 Layout
+{ (Four-graviton tree diagrams)# } 22. 47.96 0 0 1.2 Label
+
+(1) Diagram
+% aebe/cede/0.m
+{ Sine } 0 0. 0. 15. 10. 10. Prop
+{ (h)# } 4.78682 11.5936 1 1 1 Label
+{ Sine } 0 0. 0. 5. 10. 10. Prop
+{ (h)# } 5.21318 6.59364 -1 1 1 Label
+{ Sine } 0 0. 20 15. 10. 10. Prop
+{ (h)# } 14.7868 13.4064 1 -1 1 Label
+{ Sine } 0 0. 20 5. 10. 10. Prop
+{ (h)# } 15.2132 8.40636 -1 -1 1 Label
+10. 10. 0 Vert
+
+(2) Diagram
+% aebe/cfdf/ef.m
+{ Sine } 0 0. 0. 15. 6. 10. Prop
+{ (h)# } 2.48771 11.7893 1 1 1 Label
+{ Sine } 0 0. 0. 5. 6. 10. Prop
+{ (h)# } 3.51229 6.78926 -1 1 1 Label
+{ Sine } 0 0. 20 15. 14. 10. Prop
+{ (h)# } 16.4877 13.2107 1 -1 1 Label
+{ Sine } 0 0. 20 5. 14. 10. Prop
+{ (h)# } 17.5123 8.21074 -1 -1 1 Label
+{ Sine } 0 0. 6. 10. 14. 10. Prop
+{ (h)# } 10. 8.93 0 1 1 Label
+6. 10. 0 Vert
+14. 10. 0 Vert
+
+(3) Diagram
+% aebf/cedf/ef.m
+{ Sine } 0 0. 0. 15. 10. 14. Prop
+{ (h)# } 4.84577 13.4377 0 1 1 Label
+{ Sine } 0 0. 0. 5. 10. 6. Prop
+{ (h)# } 5.15423 4.43769 0 1 1 Label
+{ Sine } 0 0. 20 15. 10. 14. Prop
+{ (h)# } 14.8458 15.5623 0 -1 1 Label
+{ Sine } 0 0. 20 5. 10. 6. Prop
+{ (h)# } 15.1542 6.56231 0 -1 1 Label
+{ Sine } 0 0. 10. 14. 10. 6. Prop
+{ (h)# } 8.93 10. 1 0 1 Label
+10. 14. 0 Vert
+10. 6. 0 Vert
+
+(4) Diagram
+% aebf/cfde/ef.m
+{ Sine } 0 0. 0. 15. 10. 14. Prop
+{ (h)# } 4.84577 13.4377 0 1 1 Label
+{ Sine } 0 0. 0. 5. 10. 6. Prop
+{ (h)# } 5.15423 4.43769 0 1 1 Label
+{ Sine } 0 0. 20 15. 10. 6. Prop
+{ (h)# } 16.8119 13.2061 1 -1 1 Label
+{ Sine } 0 0. 20 5. 10. 14. Prop
+{ (h)# } 17.6867 8.20511 -1 -1 1 Label
+{ Sine } 0 0. 10. 14. 10. 6. Prop
+{ (h)# } 9.0301 10. 1 0 1 Label
+10. 14. 0 Vert
+10. 6. 0 Vert
+
+%%Trailer
+end
+%%EOF

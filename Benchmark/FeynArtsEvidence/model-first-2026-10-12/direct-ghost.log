@@ -1,0 +1,57 @@
+Running as unit: fgfa-direct-ghost-1791808256-99694.scope; invocation ID: 0fd8e600217545118ae7b488a7aec68d
+AGGREGATE_CAP=1073741824 SWAP_MAX=0 OOM_GROUP=1
+CHECKOUT=/home/latosh/.Wolfram/Applications/FeynGrav/ UTC=Mon 12 Oct 2026 12:30:57
+MODEL=FGPureGR5a149c98161e2b2e MODEL_HASHES_VERIFIED=True
+Loading FeynCalc from /home/latosh/.Wolfram/Applications/FeynCalc/
+$PrePrint is set to FeynCalcForm. Use FI and FC to change the display format.
+FeynCalc 10.2.1 (stable version). For help, use the DisplayForm[ButtonBox[online documentation,, ButtonData :> {URL[https://feyncalc.github.io/referenceDev], None}, BaseStyle -> Hyperlink, ButtonNote -> https://feyncalc.github.io/referenceDev]] visit the DisplayForm[ButtonBox[forum, ButtonData :> {URL[https://github.com/FeynCalc/feyncalc/discussions], None}, BaseStyle -> Hyperlink, ButtonNote -> https://github.com/FeynCalc/feyncalc/discussions/]] and have a look at the supplied DisplayForm[ButtonBox[examples., BaseStyle -> Hyperlink, ButtonFunction :> SystemOpen[FileNameJoin[{$FeynCalcDirectory, Examples}]], Evaluator -> Automatic, Method -> Preemptive]] The PDF-version of the manual can be downloaded DisplayForm[ButtonBox[here., ButtonData :> {URL[https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf], None}, BaseStyle -> Hyperlink, ButtonNote -> https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-manual/FeynCalcManual.pdf]]
+If you use FeynCalc in your research, please evaluate FeynCalcHowToCite[] to learn how to cite this software.
+Please keep in mind that the proper academic attribution of our work is crucial to ensure the future development of this package!
+Loading FeynArts from /home/latosh/.Wolfram/Applications/FeynCalc/FeynArts
+FeynArts 3.12 (27 Mar 2025) patched for use with FeynCalc, for documentation see the DisplayForm[ButtonBox[manual, BaseStyle -> Hyperlink, ButtonFunction :> SystemOpen[First[FileNames[{*.pdf, *.PDF}, FileNameJoin[{$FeynArtsDirectory, manual}]]]], Evaluator -> Automatic, Method -> Preemptive]] or visit DisplayForm[ButtonBox[www.feynarts.de., ButtonData :> {URL[http://www.feynarts.de/], None}, BaseStyle -> Hyperlink, ButtonNote -> www.feynarts.de/]]
+If you use FeynArts in your research, please cite
+ • T. Hahn, Comput. Phys. Commun., 140, 418-431, 2001, arXiv:hep-ph/0012260
+FeynGrav 4.1
+FeynGrav: Use Button[FeynGravCommands, FeynGravCommands[], Appearance -> None] to print the list of all commands.
+FeynGrav: On initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the "import*" command.
+FeynGrav: Core publications on FeynGrav are Hyperlink[Class.Quant.Grav. 39 (2022) 16, 165006, https://doi.org/10.1088/1361-6382/ac7e15], Hyperlink[Comput.Phys.Commun. 292 (2023) 108871, https://doi.org/10.1016/j.cpc.2023.108871], Hyperlink[Comput.Phys.Commun. 310 (2025) 109508, https://doi.org/10.1016/j.cpc.2025.109508], Hyperlink[arXiv:2510.17320, https://doi.org/10.48550/arXiv.2510.17320]
+
+loading generic model file /home/latosh/.Wolfram/Applications/FeynGrav/Benchmark/FeynArtsEvidence/model-first-2026-10-12/model/FGPureGR5a149c98161e2b2e.gen
+> $GenericMixing is OFF
+generic model {FGPureGR5a149c98161e2b2e} initialized
+
+loading classes model file /home/latosh/.Wolfram/Applications/FeynGrav/Benchmark/FeynArtsEvidence/model-first-2026-10-12/model/FGPureGR5a149c98161e2b2e.mod
+> 3 particles (incl. antiparticles) in 2 classes
+> $CounterTerms are ON
+> 3 vertices
+classes model {FGPureGR5a149c98161e2b2e} initialized
+PASS oriented ghost propagator equals source
+
+inserting at level(s) {Classes}
+> Top. 1: 1 Classes insertion
+in total: 1 Classes insertion
+
+creating amplitudes at level(s) {Classes}
+> Top. 1: 1 Classes amplitude
+in total: 1 Classes amplitude
+PASS one ghost vertex for external order 1
+PASS source vertex with expected external Grassmann sign 1
+PASS wrong Grassmann sign is nonzero 1
+EXTERNAL_FIELD_ORDER=InputForm[{-U[1], U[1]}]
+
+inserting at level(s) {Classes}
+> Top. 1: 1 Classes insertion
+in total: 1 Classes insertion
+
+creating amplitudes at level(s) {Classes}
+> Top. 1: 1 Classes amplitude
+in total: 1 Classes amplitude
+PASS one ghost vertex for external order 2
+PASS source vertex with expected external Grassmann sign 2
+PASS wrong Grassmann sign is nonzero 2
+EXTERNAL_FIELD_ORDER=InputForm[{U[1], -U[1]}]
+EXTERNAL_GHOST_DIAGNOSTIC_ONLY=True FORM_EXECUTED=False
+PASS no convenience integration package loaded
+CGROUP_MEMORY_PEAK=280317952
+CGROUP_MEMORY_EVENTS=low 0; high 0; max 0; oom 0; oom_kill 0; oom_group_kill 0
+COMPLETED checks=8 failures=0
