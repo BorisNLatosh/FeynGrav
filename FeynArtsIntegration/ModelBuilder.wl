@@ -2,7 +2,8 @@
 Begin["FeynGrav`FeynArtsIntegration`Private`"];
 $faSourceRoot = DirectoryName[DirectoryName[$InputFileName]];
 ClearAll[faModelFailure, faEncode, faPropagator, faBasisRecord, faModelCore,
-  faBuildModel, faDependencyCheck, faRoleFreeQ];
+  faBuildModel, faDependencyCheck, faRoleFreeQ, faGravitonOrderValues,
+  faValidGravitonOrderQ, faOrderSpecification, faImportedOrderFailure];
 faModelFailure[tag_, text_, data_: <||>] := Failure[tag,
   Join[<|"MessageTemplate" -> text, "Stage" -> "ModelBuild"|>, data]];
 (* The encoder exposes ONLY FeynArts kinematic placeholder symbols unqualified;
@@ -54,7 +55,8 @@ faBasisRecord[e_, family_String] := Module[{b, translated},
     "TermCount" -> b["TermCount"],
     "RuleSHA256" -> Hash[e, "SHA256", "HexString"]|>
 ];
-faModelCore[name_, g3_, g4_, g5_, gh_, hp_, up_] := Module[{tensor, ghost, generic, classes, classrows},
+faModelCore[name_, gravitonBases_List, gh_, hp_, up_] := Module[
+  {tensor, ghost, gravitonGeneric, gravitonClasses, generic, classes, classrows},
   tensor[n_Integer] := "AnalyticalCoupling[" <> StringRiffle[Table[
     "s" <> ToString[i] <> " T[j" <> ToString[i] <> ",mom" <> ToString[i] <>
       ",{li" <> ToString[2 i - 1] <> ",li" <> ToString[2 i] <> "}]", {i, n}], ","] <> "]==G[1][" <>
@@ -62,6 +64,11 @@ faModelCore[name_, g3_, g4_, g5_, gh_, hp_, up_] := Module[{tensor, ghost, gener
   (* Explicit antighost slot 2, ghost slot 3; source cubic function takes ghost FIRST. *)
   ghost = "AnalyticalCoupling[s1 T[j1,mom1,{li1,li2}],s2 U[j2,mom2,{li3}],s3 U[j3,mom3,{li4}]]==G[1][s1 T[j1],s2 U[j2],s3 U[j3]].";
   classrows[c_] := faEncode[List /@ c];
+  (* One generic coupling and one classes row per requested graviton valence. *)
+  gravitonGeneric = Table[tensor[3 + i - 1] <> faEncode[gravitonBases[[i]]["Vector"]],
+    {i, Length[gravitonBases]}];
+  gravitonClasses = Table["C[" <> StringRiffle[ConstantArray["T[1]", 3 + i - 1], ","] <> "]==" <>
+    classrows[gravitonBases[[i]]["Coefficients"]], {i, Length[gravitonBases]}];
   generic = "(* Original pure-GR model; FeynGrav rules snapshotted by explicit build. *)\n" <>
     "KinematicIndices[T]={Lorentz,Lorentz}; KinematicIndices[U]={Lorentz};\n" <>
     "$FermionLines=True; P$NonCommuting=U; P$ChainBuildOrder={U};\n" <>
@@ -71,26 +78,55 @@ faModelCore[name_, g3_, g4_, g5_, gh_, hp_, up_] := Module[{tensor, ghost, gener
     "AnalyticalPropagator[Internal][s1 T[j1,mom,{li1,li2}->{li3,li4}]]==" <> faEncode[hp] <> "," <>
     "AnalyticalPropagator[External][s1 U[j1,mom,{li1}]]==1," <>
     "AnalyticalPropagator[Internal][s1 U[j1,mom,{li1}->{li2}]]==" <> faEncode[up] <> "};\n" <>
-    "M$GenericCouplings={" <> tensor[3] <> faEncode[g3["Vector"]] <> "," <>
-      tensor[4] <> faEncode[g4["Vector"]] <> "," <>
-      tensor[5] <> faEncode[g5["Vector"]] <> "," <>
-      ghost <> faEncode[gh["Vector"]] <> "};\n" <>
+    "M$GenericCouplings={" <>
+      StringRiffle[Join[gravitonGeneric, {ghost <> faEncode[gh["Vector"]]}], ","] <> "};\n" <>
     "M$GenericCouplings=CloseKinematicVector/@M$GenericCouplings;\n" <>
     "M$TruncationRules={_Global`FAPolarizationTensor->1}; M$LastGenericRules={};\n";
   classes = "M$ClassesDescription={" <>
     "T[1]=={SelfConjugate->True,Mass->0,PropagatorLabel->\"h\",PropagatorType->Sine}," <>
     "U[1]=={SelfConjugate->False,Mass->0,PropagatorLabel->\"c\",PropagatorType->GhostDash,PropagatorArrow->Forward}};\n" <>
     "M$CouplingMatrices={" <>
-    "C[T[1],T[1],T[1]]==" <> classrows[g3["Coefficients"]] <> "," <>
-    "C[T[1],T[1],T[1],T[1]]==" <> classrows[g4["Coefficients"]] <> "," <>
-    "C[T[1],T[1],T[1],T[1],T[1]]==" <> classrows[g5["Coefficients"]] <> "," <>
-    "C[T[1],-U[1],U[1]]==" <> classrows[gh["Coefficients"]] <> "};\n" <>
+      StringRiffle[Join[gravitonClasses,
+        {"C[T[1],-U[1],U[1]]==" <> classrows[gh["Coefficients"]]}], ","] <> "};\n" <>
     "M$CouplingMatrices=CloseCouplingVector/@M$CouplingMatrices; M$LastModelRules={};\n";
   {generic, classes}
 ];
-faBuildModel[target_String] := Module[
-  {dep, parent, stage, imp, indices, momenta, rules, basis, props, hash, name,
-    contents, gen, mod, manifest, success},
+(* Order selection. Order n mirrors importGravitons[n] and means graviton
+   couplings with up to n + 2 legs: order 2 is the cubic/quartic snapshot that
+   the packaged PureGR model uses, order 3 adds the five-graviton vertex. The
+   ghost sector is part of every order. *)
+faGravitonOrderValues = {2, 3};
+faValidGravitonOrderQ[order_] := MemberQ[faGravitonOrderValues, order];
+faOrderSpecification[order_Integer] := <|
+  "GravitonOrder" -> order, "ImportOrder" -> order,
+  "GravitonOrders" -> Range[order], "LegCounts" -> Range[3, order + 2],
+  "Families" -> If[order >= 3, {"TTT", "TTTT", "TTTTT", "TUU"}, {"TTT", "TTTT", "TUU"}],
+  "BasisLabels" -> Join[{"ThreeGraviton", "FourGraviton", "FiveGraviton"}[[1 ;; order]], {"GravitonGhost"}]|>;
+(* importGravitons[n] caps silently at the highest installed order, so the
+   recorded orders are compared with the requested ones and any shortfall fails
+   before rule construction instead of publishing a truncated snapshot. *)
+faImportedOrderFailure[info_, spec_] := Module[{recorded},
+  If[! AssociationQ[info],
+    Return[faModelFailure["LibraryInformationUnavailable",
+      "The graviton import did not record library information, so the requested order is unverified."]]];
+  recorded = Lookup[Lookup[info, "Orders", <||>], "GravitonVertex", {}];
+  If[recorded =!= spec["GravitonOrders"],
+    Return[faModelFailure["LibraryOrderUnavailable",
+      "The requested graviton order is not installed: importGravitons caps at the highest available order, so continuing would publish a snapshot without the requested vertices.",
+      <|"Requested" -> spec["GravitonOrders"], "Imported" -> recorded,
+        "RequiredLibrary" -> "Libs/GravitonVertex_" <> ToString[spec["GravitonOrder"]]|>]]];
+  If[Lookup[info, "ChangedSettings", {"Unverified"}] =!= {},
+    Return[faModelFailure["IncompleteLibrary", "Imported library settings do not match the fixed model."]]];
+  True
+];
+faBuildModel[target_String, order_] := Module[
+  {dep, parent, stage, imp, info, libFail, spec, gravitonBases, indices, momenta,
+    rules, basis, props, hash, name, contents, gen, mod, manifest, success},
+  (* Validate the requested order before any dependency, import or rule work. *)
+  If[! faValidGravitonOrderQ[order],
+    Return[faModelFailure["InvalidGravitonOrder",
+      "Supply GravitonOrder -> 2 (default: cubic and quartic gravitons plus the ghost sector) or GravitonOrder -> 3 (adds the five-graviton vertex).",
+      <|"Requested" -> order, "Supported" -> faGravitonOrderValues|>]]];
   If[! StringStartsQ[target, "/"] || ExpandFileName[target] =!= target,
     Return[faModelFailure["InvalidModelPath", "Supply a normalised absolute, new model directory (no relative components)."]]];
   parent = DirectoryName[target];
@@ -100,23 +136,23 @@ faBuildModel[target_String] := Module[
   If[StringStartsQ[ExpandFileName[target], FileNameJoin[{$faSourceRoot, "Libs"}] <> "/"] ||
       StringStartsQ[ExpandFileName[target], ExpandFileName[ToString[FeynArts`$FeynArtsDir]]],
     Return[faModelFailure["ForbiddenDestination", "Do not build inside shipped libraries or the installed FeynArts package."]]];
-  imp = FeynGrav`importGravitons[3]; If[FailureQ[imp], Return[imp]];
+  spec = faOrderSpecification[order];
+  imp = FeynGrav`importGravitons[spec["ImportOrder"]]; If[FailureQ[imp], Return[imp]];
   imp = FeynGrav`FeynGravLibraryInformation[FeynGrav`importGravitons];
-  If[! AssociationQ[imp] || Lookup[Lookup[imp, "Orders", <||>], "GravitonVertex", {}] =!= {1, 2, 3} ||
-      Lookup[imp, "ChangedSettings", {"Unverified"}] =!= {},
-    Return[faModelFailure["IncompleteLibrary", "Actual imported graviton orders or settings do not match the fixed model."]]];
-  indices = Table[Symbol["FeynArts`li" <> ToString[i]], {i, 10}];
-  momenta = Table[Symbol["FeynArts`mom" <> ToString[i]], {i, 5}];
-  rules = {
-    FeynGrav`GravitonVertex @@ Flatten[Transpose[{Partition[indices[[1 ;; 6]], 2], momenta[[1 ;; 3]]}]],
-    FeynGrav`GravitonVertex @@ Flatten[Transpose[{Partition[indices[[1 ;; 8]], 2], momenta[[1 ;; 4]]}]],
-    FeynGrav`GravitonVertex @@ Flatten[Transpose[{Partition[indices[[1 ;; 10]], 2], momenta[[1 ;; 5]]}]],
-    FeynGrav`GravitonGhostVertex[indices[[1]], indices[[2]], momenta[[1]],
-      indices[[4]], momenta[[3]], indices[[3]], momenta[[2]]]
-  };
+  libFail = faImportedOrderFailure[imp, spec]; If[FailureQ[libFail], Return[libFail]];
+  (* Slot tables cover the requested order only; the quintic slots exist only
+     for GravitonOrder -> 3, so the default build never evaluates a
+     five-graviton rule. *)
+  indices = Table[Symbol["FeynArts`li" <> ToString[i]], {i, 2 (order + 2)}];
+  momenta = Table[Symbol["FeynArts`mom" <> ToString[i]], {i, order + 2}];
+  rules = Join[
+    Table[FeynGrav`GravitonVertex @@ Flatten[Transpose[
+        {Partition[indices[[1 ;; 2 legs]], 2], momenta[[1 ;; legs]]}]], {legs, spec["LegCounts"]}],
+    {FeynGrav`GravitonGhostVertex[indices[[1]], indices[[2]], momenta[[1]],
+      indices[[4]], momenta[[3]], indices[[3]], momenta[[2]]]}];
   If[AnyTrue[rules, FailureQ],
     Return[faModelFailure["MissingRule", "One or more source vertices were not available."]]];
-  basis = MapThread[faBasisRecord, {rules, {"ThreeGraviton", "FourGraviton", "FiveGraviton", "GravitonGhost"}}];
+  basis = MapThread[faBasisRecord, {rules, spec["BasisLabels"]}];
   If[AnyTrue[basis, FailureQ], Return[First[Select[basis, FailureQ]]]];
   props = {faPropagator[FeynCalc`FCI[FeynGrav`GravitonPropagator[indices[[1]],indices[[2]],indices[[3]],indices[[4]],FeynArts`mom]],FeynArts`mom],
     faPropagator[FeynCalc`FCI[FeynGrav`GhostVectorPropagator[indices[[1]],indices[[2]],FeynArts`mom]],FeynArts`mom]};
@@ -125,12 +161,13 @@ faBuildModel[target_String] := Module[
   (* The model name is a fixed, symbol-safe identifier. The snapshot is pinned by
      "SnapshotSHA256" in the manifest and by the per-file hashes, not by the name. *)
   name = "PureGR";
-  contents = faModelCore[name, Sequence @@ basis, Sequence @@ props];
+  gravitonBases = Most[basis];
+  contents = faModelCore[name, gravitonBases, Last[basis], Sequence @@ props];
   stage = CreateDirectory[FileNameJoin[{parent, ".fgfa-stage-" <> CreateUUID[]}]];
   gen = FileNameJoin[{stage, name <> ".gen"}]; mod = FileNameJoin[{stage, name <> ".mod"}];
   manifest = <|"Schema" -> 1, "Profile" -> "PureGR", "ModelName" -> name,
     "FixedGauge" -> 2, "LorentzDimension" -> "Symbolic D", "FieldClasses" -> {"T[1]", "U[1]", "-U[1]"},
-    "InteractionFamilies" -> {"TTT", "TTTT", "TTTTT", "TUU"}, "GravitonOrders" -> {1, 2, 3},
+    "InteractionFamilies" -> spec["Families"], "GravitonOrders" -> spec["GravitonOrders"],
     "RuleSHA256" -> (Lookup[#, "RuleSHA256"] & /@ basis), "SnapshotSHA256" -> hash,
     "LibrarySources" -> imp["Files"], "FeynArtsVersion" -> ToString[FeynArts`$FeynArtsVersionNumber]|>;
   success = Quiet[Check[
@@ -158,7 +195,25 @@ faBuildModel[target_String] := Module[
     "Manifest" -> FileNameJoin[{ExpandFileName[target], "manifest.json"}],
     "VertexBasisSizes" -> Lookup[basis, "TermCount"], "GhostLoopEnabled" -> False|>
 ];
-faBuildModel[___] := faModelFailure["InvalidModelPath", "Supply one absolute, new model directory."];
-FeynGrav`FeynArtsIntegration`FeynGravBuildModel[target_String] := faBuildModel[target];
-FeynGrav`FeynArtsIntegration`FeynGravBuildModel[___] := faBuildModel[];
+faBuildModel[___] := faModelFailure["InvalidModelPath",
+  "Supply one absolute, new model directory and at most a GravitonOrder -> 2 or 3 option."];
+(* Public entry point. The default order is the inexpensive cubic/quartic
+   snapshot; the five-graviton vertex exists only for an explicit
+   GravitonOrder -> 3 request. *)
+Options[FeynGrav`FeynArtsIntegration`FeynGravBuildModel] = {
+  FeynGrav`FeynArtsIntegration`GravitonOrder -> 2};
+FeynGrav`FeynArtsIntegration`FeynGravBuildModel[target_String, opts : (_Rule ...)] := Module[{unknown},
+  (* An unrecognised option is reported, never ignored: a mistyped order option
+     must not silently fall back to the default. *)
+  unknown = Complement[First /@ {opts},
+    First /@ Options[FeynGrav`FeynArtsIntegration`FeynGravBuildModel]];
+  If[unknown =!= {},
+    Return[faModelFailure["InvalidOption",
+      "Only GravitonOrder -> 2 or 3 is accepted.",
+      <|"UnknownOptions" -> unknown|>]]];
+  faBuildModel[target, FeynGrav`FeynArtsIntegration`GravitonOrder /. {opts} /.
+    Options[FeynGrav`FeynArtsIntegration`FeynGravBuildModel]]];
+FeynGrav`FeynArtsIntegration`FeynGravBuildModel[___] :=
+  faModelFailure["InvalidOption",
+    "Use FeynGravBuildModel[absoluteNewDirectory] with the optional GravitonOrder -> 2 or 3."];
 End[];

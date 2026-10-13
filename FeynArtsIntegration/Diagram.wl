@@ -1,6 +1,7 @@
 (* Explicit tree-only graph construction and patched FCFAConvert adapter. *)
 Begin["FeynGrav`FeynArtsIntegration`Private`"];
-ClearAll[faDiagramFailure, faValidModel, faBuildTree, faResidualFA];
+ClearAll[faDiagramFailure, faValidModel, faBuildTree, faResidualFA,
+  faTopologyKey, faRequestedTopologies, faInsertedTopologies, faMissingInsertions];
 faDiagramFailure[tag_, text_, data_: <||>] := Failure[tag,
   Join[<|"MessageTemplate" -> text, "Stage" -> "FeynArtsTree"|>, data]];
 faValidModel[model_] := Module[{directory, name, manifestPath, manifest, files, hashes, orders, families},
@@ -40,9 +41,20 @@ faValidModel[model_] := Module[{directory, name, manifestPath, manifest, files, 
 ];
 faResidualFA[expr_] := untranslatedQ[expr] ||
   ! FreeQ[expr, _Global`FAFourVector | _Global`FAMetricTensor | _Global`FAScalarProduct];
+(* FeynArts drops a topology for which the model supplies no vertex, so an
+   insertion list shorter than the topology list is a silent truncation, not a
+   short process. Topologies are identified by their propagator skeleton and
+   compared one by one: equal counts do not prove that the same topologies
+   survived, so a count comparison alone is not a completeness criterion. *)
+faTopologyKey[topology_] := Sort[Cases[List @@ topology,
+  FeynArts`Propagator[type_][from_, to_, ___] :> {type, from, to}, Infinity]];
+faRequestedTopologies[top_] := Cases[top, HoldPattern[FeynArts`Topology[_][___]], {1}];
+faInsertedTopologies[ins_] := Cases[ins, HoldPattern[Rule[topology_, _]] :> topology, {1}];
+faMissingInsertions[top_, ins_] := With[{inserted = faTopologyKey /@ faInsertedTopologies[ins]},
+  Select[faRequestedTopologies[top], ! MemberQ[inserted, faTopologyKey[#]] &]];
 faBuildTree[model_, spec_, inMom_List, outMom_List] := Module[
   {check, validated, ni, no, n, name, directory, top, ins, fa, fc, raw,
-    amount, ids, rows, denominators},
+    amount, ids, rows, denominators, missingTopologies, requestedTopologies},
   (* Validate BEFORE model loading or diagram enumeration. *)
   check = FeynGrav`FeynArtsIntegration`FeynGravValidateProcess[spec];
   If[FailureQ[check], Return[check]];
@@ -66,6 +78,15 @@ faBuildTree[model_, spec_, inMom_List, outMom_List] := Module[
       spec["Incoming"] -> spec["Outgoing"], FeynArts`Model -> name,
       FeynArts`GenericModel -> name, FeynArts`InsertionLevel -> {FeynArts`Classes}], 30, $TimedOut];
     If[ins === $TimedOut, Return[faDiagramFailure["InsertionTimeout", "Tree field insertion timed out."]]];
+    (* Stop before amplitude construction when field insertion dropped a topology. *)
+    requestedTopologies = faRequestedTopologies[top];
+    missingTopologies = faMissingInsertions[top, ins];
+    If[missingTopologies =!= {},
+      Return[faDiagramFailure["IncompleteInsertion",
+        "The model supplied no insertion for one or more requested topologies, so the amplitude would be silently incomplete.",
+        <|"RequestedTopologies" -> Length[requestedTopologies],
+          "InsertedTopologies" -> Length[faInsertedTopologies[ins]],
+          "MissingPositions" -> Flatten[Position[requestedTopologies, #] & /@ missingTopologies]|>]]];
     fa = TimeConstrained[FeynArts`CreateFeynAmp[ins,
       FeynArts`PreFactor -> 1, FeynArts`Truncated -> True], 60, $TimedOut];
     If[fa === $TimedOut, Return[faDiagramFailure["AmplitudeTimeout", "Tree amplitude construction timed out."]]];
