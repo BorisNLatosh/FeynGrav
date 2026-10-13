@@ -38,7 +38,7 @@ faBasisWalk[e_, cap_] := Which[
       <|HoldComplete[] -> 1|>, e[[2]]],
   True, faBasisError["Unsupported operation enclosing a Lorentz kinematic atom."]
 ];
-faExtractVertex[e_, cap_Integer : 12000] /; 0 < cap <= 12000 := Catch[Module[
+faExtractVertex[e_, cap_Integer : 100000] /; 0 < cap <= 100000 := Catch[Module[
   {map, keys, coefficients, monomials},
   map = faBasisWalk[e, cap]; keys = Keys[map]; coefficients = Values[map];
   monomials = Times @@ List @@ # & /@ keys;
@@ -49,7 +49,7 @@ faExtractVertex[e_, cap_Integer : 12000] /; 0 < cap <= 12000 := Catch[Module[
     "Reconstruction" -> Total[MapThread[Times, {monomials, coefficients}]]|>
 ], "FGBasis"];
 faExtractVertex[___] := Failure["InvalidVertexBasisLimit",
-  <|"MessageTemplate" -> "Basis limit must be a positive integer not exceeding 12000.", "Stage" -> "VertexBasis"|>];
+  <|"MessageTemplate" -> "Basis limit must be a positive integer not exceeding 100000.", "Stage" -> "VertexBasis"|>];
 
 (* The installed FeynCalc-patched FCPrepareFAAmp recognises these exact heads. *)
 faAtom[FeynCalc`Pair[FeynCalc`LorentzIndex[a_, D], FeynCalc`LorentzIndex[b_, D]]] := Global`FAMetricTensor[a, b];

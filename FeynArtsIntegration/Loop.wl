@@ -49,7 +49,7 @@ faBuildLoop[model_, spec_, inMom_List, outMom_List, loopMom_List] := Module[
   name = verified["ModelName"]; directory = verified["Directory"]; loop = First[loopMom];
   raw = CheckAbort[Block[{FeynArts`$ModelPath = Prepend[FeynArts`$ModelPath, directory]},
     If[TimeConstrained[FeynArts`InitializeModel[name, FeynArts`GenericModel -> name,
-          FeynArts`Reinitialize -> False], 90, $TimedOut] =!= True,
+          FeynArts`Reinitialize -> False], 600, $TimedOut] =!= True,
       Return[faLoopFailure["ModelLoadFailed", "The verified model did not initialise within the bounded time."]]];
     top = TimeConstrained[FeynArts`CreateTopologies[1, 1 -> 1,
       FeynArts`Adjacencies -> {3, 4}, FeynArts`CTOrder -> 0,

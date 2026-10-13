@@ -3,7 +3,7 @@ Begin["FeynGrav`FeynArtsIntegration`Private`"];
 ClearAll[faDiagramFailure, faValidModel, faBuildTree, faResidualFA];
 faDiagramFailure[tag_, text_, data_: <||>] := Failure[tag,
   Join[<|"MessageTemplate" -> text, "Stage" -> "FeynArtsTree"|>, data]];
-faValidModel[model_] := Module[{directory, name, manifestPath, manifest, files, hashes},
+faValidModel[model_] := Module[{directory, name, manifestPath, manifest, files, hashes, orders, families},
   If[! AssociationQ[model] ||
       ! AllTrue[{"Directory", "ModelName", "Manifest"}, KeyExistsQ[model, #] &],
     Return[faDiagramFailure["InvalidModel", "Supply a model returned by FeynGravBuildModel."]]];
@@ -17,12 +17,16 @@ faValidModel[model_] := Module[{directory, name, manifestPath, manifest, files, 
   If[model["Manifest"] =!= manifestPath || ! And @@ (FileExistsQ /@ Prepend[files, manifestPath]),
     Return[faDiagramFailure["InvalidModel", "The model manifest or one model file is missing."]]];
   manifest = Quiet[Check[Import[manifestPath, "RawJSON"], $Failed]];
+  (* The fixed profile is accepted both at quartic order and with the quintic coupling present. *)
+  orders = If[AssociationQ[manifest], Lookup[manifest, "GravitonOrders", None], None];
+  families = Which[orders === {1, 2}, {"TTT", "TTTT", "TUU"},
+    orders === {1, 2, 3}, {"TTT", "TTTT", "TTTTT", "TUU"}, True, None];
   If[! AssociationQ[manifest] || Lookup[manifest, "Schema", 0] =!= 1 ||
       Lookup[manifest, "Profile", None] =!= "PureGR" ||
       Lookup[manifest, "FixedGauge", None] =!= 2 ||
       Lookup[manifest, "ModelName", None] =!= name ||
-      Lookup[manifest, "GravitonOrders", None] =!= {1, 2} ||
-      Lookup[manifest, "InteractionFamilies", None] =!= {"TTT", "TTTT", "TUU"} ||
+      families === None ||
+      Lookup[manifest, "InteractionFamilies", None] =!= families ||
       Lookup[manifest, "FieldClasses", None] =!= {"T[1]", "U[1]", "-U[1]"},
     Return[faDiagramFailure["InvalidModel", "The model manifest does not match the fixed finite pure-GR profile."]]];
   hashes = Lookup[manifest, "ModelFileSHA256", Missing["Unstamped"]];
@@ -53,7 +57,7 @@ faBuildTree[model_, spec_, inMom_List, outMom_List] := Module[
   name = validated["ModelName"]; directory = validated["Directory"];
   raw = CheckAbort[Block[{FeynArts`$ModelPath = Prepend[FeynArts`$ModelPath, directory]},
     If[TimeConstrained[FeynArts`InitializeModel[name, FeynArts`GenericModel -> name,
-          FeynArts`Reinitialize -> False], 90, $TimedOut] =!= True,
+          FeynArts`Reinitialize -> False], 600, $TimedOut] =!= True,
       Return[faDiagramFailure["ModelLoadFailed", "The saved model did not initialise within the bounded model-load time."]]];
     top = TimeConstrained[FeynArts`CreateTopologies[0, ni -> no,
       FeynArts`Adjacencies -> {3, 4}], 30, $TimedOut];

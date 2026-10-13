@@ -10,8 +10,8 @@ faModelFailure[tag_, text_, data_: <||>] := Failure[tag,
 faEncode[e_] := Block[{$Context = "FeynGrav`FeynArtsIntegration`Private`",
     $ContextPath = {"System`", "FeynArts`"}}, ToString[e, InputForm]];
 faRoleFreeQ[] := And @@ (OwnValues[#] === {} & /@ Join[
-   Table[Symbol["FeynArts`li" <> ToString[i]], {i, 8}],
-   Append[Table[Symbol["FeynArts`mom" <> ToString[i]], {i, 4}], FeynArts`mom]]);
+   Table[Symbol["FeynArts`li" <> ToString[i]], {i, 10}],
+   Append[Table[Symbol["FeynArts`mom" <> ToString[i]], {i, 5}], FeynArts`mom]]);
 faDependencyCheck[] := Module[{path},
   If[! MemberQ[$Packages, "FeynGrav`"],
     Return[faModelFailure["FeynGravNotLoaded", "Load FeynGrav in a fresh kernel before building the model."]]];
@@ -41,7 +41,7 @@ faPropagator[e_, mom_Symbol] := Module[{den, out},
 faBasisRecord[e_, family_String] := Module[{b, translated},
   If[! FreeQ[e, FeynGrav`GravitonVertex | FeynGrav`GravitonGhostVertex],
     Return[faModelFailure["UnevaluatedSourceRule", "A source vertex remained unevaluated; no self-contained snapshot can be published.", <|"Family" -> family|>]]];
-  b = faExtractVertex[e, 12000];
+  b = faExtractVertex[e, 100000];
   If[FailureQ[b], Return[b]];
   (* Structural equality is exact for the stored source expressions; not independent physics proof. *)
   If[b["Reconstruction"] =!= e && ! TrueQ[Expand[b["Reconstruction"] - e] === 0],
@@ -54,7 +54,7 @@ faBasisRecord[e_, family_String] := Module[{b, translated},
     "TermCount" -> b["TermCount"],
     "RuleSHA256" -> Hash[e, "SHA256", "HexString"]|>
 ];
-faModelCore[name_, g3_, g4_, gh_, hp_, up_] := Module[{tensor, ghost, generic, classes, classrows},
+faModelCore[name_, g3_, g4_, g5_, gh_, hp_, up_] := Module[{tensor, ghost, generic, classes, classrows},
   tensor[n_Integer] := "AnalyticalCoupling[" <> StringRiffle[Table[
     "s" <> ToString[i] <> " T[j" <> ToString[i] <> ",mom" <> ToString[i] <>
       ",{li" <> ToString[2 i - 1] <> ",li" <> ToString[2 i] <> "}]", {i, n}], ","] <> "]==G[1][" <>
@@ -73,6 +73,7 @@ faModelCore[name_, g3_, g4_, gh_, hp_, up_] := Module[{tensor, ghost, generic, c
     "AnalyticalPropagator[Internal][s1 U[j1,mom,{li1}->{li2}]]==" <> faEncode[up] <> "};\n" <>
     "M$GenericCouplings={" <> tensor[3] <> faEncode[g3["Vector"]] <> "," <>
       tensor[4] <> faEncode[g4["Vector"]] <> "," <>
+      tensor[5] <> faEncode[g5["Vector"]] <> "," <>
       ghost <> faEncode[gh["Vector"]] <> "};\n" <>
     "M$GenericCouplings=CloseKinematicVector/@M$GenericCouplings;\n" <>
     "M$TruncationRules={_Global`FAPolarizationTensor->1}; M$LastGenericRules={};\n";
@@ -82,6 +83,7 @@ faModelCore[name_, g3_, g4_, gh_, hp_, up_] := Module[{tensor, ghost, generic, c
     "M$CouplingMatrices={" <>
     "C[T[1],T[1],T[1]]==" <> classrows[g3["Coefficients"]] <> "," <>
     "C[T[1],T[1],T[1],T[1]]==" <> classrows[g4["Coefficients"]] <> "," <>
+    "C[T[1],T[1],T[1],T[1],T[1]]==" <> classrows[g5["Coefficients"]] <> "," <>
     "C[T[1],-U[1],U[1]]==" <> classrows[gh["Coefficients"]] <> "};\n" <>
     "M$CouplingMatrices=CloseCouplingVector/@M$CouplingMatrices; M$LastModelRules={};\n";
   {generic, classes}
@@ -98,22 +100,23 @@ faBuildModel[target_String] := Module[
   If[StringStartsQ[ExpandFileName[target], FileNameJoin[{$faSourceRoot, "Libs"}] <> "/"] ||
       StringStartsQ[ExpandFileName[target], ExpandFileName[ToString[FeynArts`$FeynArtsDir]]],
     Return[faModelFailure["ForbiddenDestination", "Do not build inside shipped libraries or the installed FeynArts package."]]];
-  imp = FeynGrav`importGravitons[2]; If[FailureQ[imp], Return[imp]];
+  imp = FeynGrav`importGravitons[3]; If[FailureQ[imp], Return[imp]];
   imp = FeynGrav`FeynGravLibraryInformation[FeynGrav`importGravitons];
-  If[! AssociationQ[imp] || Lookup[Lookup[imp, "Orders", <||>], "GravitonVertex", {}] =!= {1, 2} ||
+  If[! AssociationQ[imp] || Lookup[Lookup[imp, "Orders", <||>], "GravitonVertex", {}] =!= {1, 2, 3} ||
       Lookup[imp, "ChangedSettings", {"Unverified"}] =!= {},
     Return[faModelFailure["IncompleteLibrary", "Actual imported graviton orders or settings do not match the fixed model."]]];
-  indices = Table[Symbol["FeynArts`li" <> ToString[i]], {i, 8}];
-  momenta = Table[Symbol["FeynArts`mom" <> ToString[i]], {i, 4}];
+  indices = Table[Symbol["FeynArts`li" <> ToString[i]], {i, 10}];
+  momenta = Table[Symbol["FeynArts`mom" <> ToString[i]], {i, 5}];
   rules = {
     FeynGrav`GravitonVertex @@ Flatten[Transpose[{Partition[indices[[1 ;; 6]], 2], momenta[[1 ;; 3]]}]],
-    FeynGrav`GravitonVertex @@ Flatten[Transpose[{Partition[indices, 2], momenta}]],
+    FeynGrav`GravitonVertex @@ Flatten[Transpose[{Partition[indices[[1 ;; 8]], 2], momenta[[1 ;; 4]]}]],
+    FeynGrav`GravitonVertex @@ Flatten[Transpose[{Partition[indices[[1 ;; 10]], 2], momenta[[1 ;; 5]]}]],
     FeynGrav`GravitonGhostVertex[indices[[1]], indices[[2]], momenta[[1]],
       indices[[4]], momenta[[3]], indices[[3]], momenta[[2]]]
   };
   If[AnyTrue[rules, FailureQ],
     Return[faModelFailure["MissingRule", "One or more source vertices were not available."]]];
-  basis = MapThread[faBasisRecord, {rules, {"ThreeGraviton", "FourGraviton", "GravitonGhost"}}];
+  basis = MapThread[faBasisRecord, {rules, {"ThreeGraviton", "FourGraviton", "FiveGraviton", "GravitonGhost"}}];
   If[AnyTrue[basis, FailureQ], Return[First[Select[basis, FailureQ]]]];
   props = {faPropagator[FeynCalc`FCI[FeynGrav`GravitonPropagator[indices[[1]],indices[[2]],indices[[3]],indices[[4]],FeynArts`mom]],FeynArts`mom],
     faPropagator[FeynCalc`FCI[FeynGrav`GhostVectorPropagator[indices[[1]],indices[[2]],FeynArts`mom]],FeynArts`mom]};
@@ -127,7 +130,7 @@ faBuildModel[target_String] := Module[
   gen = FileNameJoin[{stage, name <> ".gen"}]; mod = FileNameJoin[{stage, name <> ".mod"}];
   manifest = <|"Schema" -> 1, "Profile" -> "PureGR", "ModelName" -> name,
     "FixedGauge" -> 2, "LorentzDimension" -> "Symbolic D", "FieldClasses" -> {"T[1]", "U[1]", "-U[1]"},
-    "InteractionFamilies" -> {"TTT", "TTTT", "TUU"}, "GravitonOrders" -> {1, 2},
+    "InteractionFamilies" -> {"TTT", "TTTT", "TTTTT", "TUU"}, "GravitonOrders" -> {1, 2, 3},
     "RuleSHA256" -> (Lookup[#, "RuleSHA256"] & /@ basis), "SnapshotSHA256" -> hash,
     "LibrarySources" -> imp["Files"], "FeynArtsVersion" -> ToString[FeynArts`$FeynArtsVersionNumber]|>;
   success = Quiet[Check[
@@ -141,7 +144,7 @@ faBuildModel[target_String] := Module[
   If[! TrueQ[success], Return[faModelFailure["ModelWriteFailed", "Staged bundle could not be written; staging retained.", <|"Staging" -> stage|>]]];
   (* Ensure FeynArts genuinely accepts all field and coupling definitions before publication. *)
   success = Quiet[Check[Block[{FeynArts`$ModelPath = Prepend[FeynArts`$ModelPath, stage]},
-    TimeConstrained[FeynArts`InitializeModel[name, FeynArts`GenericModel -> name], 90, $TimedOut]], $Failed]];
+    TimeConstrained[FeynArts`InitializeModel[name, FeynArts`GenericModel -> name], 600, $TimedOut]], $Failed]];
   If[success =!= True,
     Return[faModelFailure["ModelValidationFailed", "FeynArts rejected or timed out on the staged bundle; staging retained.", <|"Staging" -> stage, "Diagnostic" -> success|>]]];
   If[FileExistsQ[target],
