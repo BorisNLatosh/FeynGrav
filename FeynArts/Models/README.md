@@ -40,4 +40,4 @@ The two model files match the SHA-256 values recorded in `manifest.json`:
 - generic `.gen`: `9fff5547d9bb9cb9c548f5861699844006fe8dc7cdcc56620004c6deb48f67d9`
 - classes `.mod`: `536144daf0106bf49c9d7c56e6858a447ba68c8287edb704272836606e5828a0`
 
-They were originally built and verified under `Benchmark/FeynArtsEvidence/model-first-2026-10-12/`, whose duplicate copy has since been removed; this directory is now the single source. Renaming the files did not alter their bytes, so these hashes still apply; the rename and its checks are recorded in `Benchmark/FeynArtsEvidence/model-rename-puregr-2026-10-12/`, and the packaged copy's initialisation by name in `Benchmark/FeynArtsEvidence/model-relocation-2026-10-12/`.
+They were originally generated from the existing FeynGrav graviton and ghost rules and verified against them; this directory is now the single source. Renaming the files to `PureGR` did not alter their bytes, so the hashes above still apply.
