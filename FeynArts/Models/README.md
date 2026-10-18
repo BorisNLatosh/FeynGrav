@@ -1,43 +1,62 @@
-# FeynGrav FeynArts models
+# Supplied FeynArts models
 
-This directory mirrors the role of `FeynCalc/FeynArts/Models`: it holds the FeynArts model files that ship with FeynGrav, so they live inside the package tree instead of a benchmark directory.
+Each model has the same self-contained bundle layout:
 
-## Contents
+```text
+FeynArts/Models/
+├── README.md
+├── PureGR/
+├── GRScalar/
+├── GRScalarPotential/
+├── GRJohn/
+└── GREsGB/
+```
 
-| File | Role |
-| --- | --- |
-| `PureGR.gen` | Generic model: kinematic structure and propagators for the pure-GR snapshot |
-| `PureGR.mod` | Classes model: `T[1]` graviton, oriented `U[1]`/`-U[1]` ghost and antighost, cubic and quartic couplings |
-| `manifest.json` | Provenance: gauge, dimension, field classes, interaction families, source-library hashes and model-file hashes |
+Each model directory contains `<Model>.gen`, `<Model>.mod`, `manifest.json` and `README.md`.
 
-The model is conventional pure GR in the metric parametrisation `g = eta + kappa h`, at fixed gauge parameter `GaugeFixingEpsilon = 2`, with symbolic dimension `D` and unassigned `kappa`. It contains the cubic and quartic graviton interactions and the oriented cubic ghost coupling, and it is the exact snapshot verified by the model-first checks.
+| Model | Contents through $\kappa^2$ | Guide |
+| --- | --- | --- |
+| `PureGR` | Conventional GR and its gravitational ghosts | [PureGR](PureGR/README.md) |
+| `GRScalar` | The same GR sector plus one real minimally coupled scalar of symbolic mass | [GRScalar](GRScalar/README.md) |
+| `GRScalarPotential` | Massive scalar with independent positive cubic and quartic potential couplings; includes five- and six-leg contacts | [GRScalarPotential](GRScalarPotential/README.md) |
+| `GRJohn` | Massive scalar with the John derivative interaction | [GRJohn](GRJohn/README.md) |
+| `GREsGB` | Massive scalar with independent linear and quadratic scalar–Gauss–Bonnet couplings | [GREsGB](GREsGB/README.md) |
 
-The files were originally named `FGPureGR5a149c98161e2b2e`, spelling out the first 16 hex digits of the snapshot hash. They are now `PureGR`: a short name in FeynArts' own style (`SM`, `MSSM`, `Lorentz`), and a genuine symbol so that `PureGR` also parses as an identifier rather than a pattern. The snapshot is still pinned, by `SnapshotSHA256` and `ModelFileSHA256` in `manifest.json`.
+For every supplied model, `<Model>.gen` contains its kinematic structures and propagators; `<Model>.mod` contains fields and coupling coefficients; `manifest.json` records provenance and hashes; `README.md` documents use and verification limits. Future models should follow this layout. The directory name and the `.gen`/`.mod` basenames must agree. Developer builders remain in `FeynArtsIntegration/` and write their files into the explicitly chosen model directory.
 
-## Loading
+## Common loading workflow
 
-FeynArts finds model files on `$ModelPath`. FeynGrav adds this directory to that path automatically when patched FeynArts is already loaded, so no path handling is needed:
+Start a fresh kernel with FeynCalc-patched FeynArts available:
 
 ```wl
 $LoadAddOns = {"FeynArts"};
 << FeynGrav`;
-
-InitializeModel["PureGR", GenericModel -> "PureGR"];
+FeynArts`InitializeModel["PureGR", FeynArts`GenericModel -> "PureGR"];
 ```
 
-Request FeynArts while loading FeynGrav (`$LoadAddOns = {"FeynArts"}` before `<< FeynGrav``, or the legacy `$LoadFeynArts = True`); if FeynArts is loaded only afterwards, add this directory to `$ModelPath` yourself:
+Use the chosen name from the table in both positions to load that model instead, starting a fresh kernel when switching models. Switching after a conversion in the same kernel produced FeynArts warnings in the checked environment; that workflow is not verified. FeynGrav registers the immediate model folders containing matching `.gen` and `.mod` files in ``FeynArts`$ModelPath`` when FeynArts is already loaded. Registration neither loads FeynArts nor initialises a model and does not add duplicate paths.
+
+To use the files without loading FeynGrav, or when FeynArts was loaded later, prepend the selected model folder explicitly:
 
 ```wl
-PrependTo[$ModelPath, FileNameJoin[{$UserBaseDirectory, "Applications", "FeynGrav", "FeynArts", "Models"}]];
+$LoadAddOns = {"FeynArts"};
+Needs["FeynCalc`"];
+root = DirectoryName[FindFile["FeynGrav`"]];
+modelName = "GRScalar"; (* or "PureGR" *)
+modelDirectory = FileNameJoin[{root, "FeynArts", "Models", modelName}];
+FeynArts`$ModelPath = Prepend[
+  DeleteCases[FeynArts`$ModelPath, modelDirectory], modelDirectory];
+FeynArts`InitializeModel[modelName, FeynArts`GenericModel -> modelName];
 ```
 
-`GenericModel` must be given explicitly. FeynArts' `InitializeModel[modname]` loads `modname.mod` **plus** the generic model named by the `GenericModel` option, whose default is the stock `"Lorentz"` file; this classes file does not name its own generic model.
+Both model files are self-contained; the manifest's historical absolute source paths are not loading dependencies. Supply `GenericModel` explicitly. Construct diagrams through native FeynArts as shown in each guide; the optional integration companion remains a pure-GR interface.
 
-## Provenance and integrity
+## Migration from the flat PureGR directory
 
-The two model files match the SHA-256 values recorded in `manifest.json`:
+PureGR's `.gen`, `.mod` and manifest moved unchanged from `FeynArts/Models/` to `FeynArts/Models/PureGR/`. Update manually configured model/manifest paths and restart the kernel. No duplicate flat model files or forwarding stubs are kept. Existing notebook input that loads FeynGrav and selects PureGR by name continues to work; its saved output may still show the old historical path.
 
-- generic `.gen`: `9fff5547d9bb9cb9c548f5861699844006fe8dc7cdcc56620004c6deb48f67d9`
-- classes `.mod`: `536144daf0106bf49c9d7c56e6858a447ba68c8287edb704272836606e5828a0`
+The [layout verification](../../Documentation/Verification/ModelLayout.md) records the focused registration/loading check. Existing algebra checks remain in the [PureGR](../../Documentation/Verification/PureGRTreeRelease.md) and [GRScalar](../../Documentation/Verification/GRScalarTreeRelease.md) reports. Loop and general on-shell/Ward validation remain outside this tree delivery.
 
-They were originally generated from the existing FeynGrav graviton and ghost rules and verified against them; this directory is now the single source. Renaming the files to `PureGR` did not alter their bytes, so the hashes above still apply.
+## Scalar extension verification
+
+`GREsGB` is supplied after correction of its two-graviton source and stored library. Nine source/regeneration checks, six construction checks and twenty native checks passed. Higher-order EsGB source routines remain outside this delivery. See [scalar-model verification](../../Documentation/Verification/ScalarModelExtensions.md). John has exact independent conformal-projection checks, not a full independent component proof.

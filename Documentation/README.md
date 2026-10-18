@@ -1,6 +1,6 @@
 # FeynGrav documentation
 
-This documentation describes the development source checked on 6 October 2026, with the conventions report added on 9 October and converter optimisation documentation reviewed on 10 October 2026. Installed releases may differ; consult `?FunctionName` and `Options[FunctionName]` in your kernel. Begin a new kernel after changing package files.
+This documentation describes the development source checked on 6 October 2026, with the conventions report added on 9 October and converter optimisation documentation reviewed on 10 October 2026. The native PureGR and GRScalar tree guides and their scoped verification records were updated on 18 October 2026. Installed releases may differ; consult `?FunctionName` and `Options[FunctionName]` in your kernel. Begin a new kernel after changing package files.
 
 ## Choose a route
 
@@ -8,13 +8,17 @@ This documentation describes the development source checked on 6 October 2026, w
 | --- | --- | --- |
 | New user | [Installation and requirements](../README.md#requirements) | [Function reference](Reference.md), then [example notebooks](../Examples/README.md) |
 | FORM user | [Converter guide](../CalcFormConverter/README.md) | Supported vocabulary, conventions and troubleshooting in that guide; [benchmarks](../Benchmark/README.md) for local timings |
-| Pure-GR FeynArts user | [Optional bridge and exact scope](../FeynArtsIntegration/README.md) | Explicit finite-model build, complete three-/four-graviton tree construction and per-diagram converter algebra; the pinned one-loop 1PI two-point integrand is available, but FORM loop algebra/reduction is not |
+| FeynArts user | [Supplied model guides](../FeynArts/Models/README.md) | Ready-to-use PureGR trees and [GRScalar mixed trees](../FeynArts/Models/GRScalar/README.md); [optional pure-GR bridge](../FeynArtsIntegration/README.md). Loop compatibility is deferred; the corrected PureGR snapshot is rejected by the unchanged bridge loop gate. |
 | Library developer | [Interaction-rule contracts](../Rules/README.md) | [Library generation](../Libs/Generator.md); use a separate fresh kernel from ordinary FeynGrav calculations |
 | Maintainer | [Converter architecture and tests](../CalcFormConverter/DEVELOPER.md) | [Saved formats](../CalcFormConverter/FORMAT.md), verification records below |
 
 The reference covers main-package commands, public gauge parameters and the automatically loaded Nieuwenhuizen helpers. Generator-side routines have separate signatures: do not substitute them for library-backed main-package functions simply because their short names match.
 
 ## Verification and history
+
+- [Uniform model folders](Verification/ModelLayout.md): common layout, automatic registration and fresh-kernel loading checks.
+- [PureGR tree release](Verification/PureGRTreeRelease.md): accepted ghost convention and native three-/four-graviton source checks; loop compatibility deferred.
+- [GRScalar tree release](Verification/GRScalarTreeRelease.md): scalar mass, contact and exchange checks, model identities and bounded execution; physical amplitude and loop limits.
 
 - [Conventions report checks](Verification/Conventions.md): current settings, held import records, static rendering and representative curvature/Fourier checks.
 - [Documentation checks](Verification/DocumentationVerification.md): coverage, links, representative commands and preservation checks for this update.
@@ -26,3 +30,7 @@ The reference covers main-package commands, public gauge parameters and the auto
 User guides describe supported behaviour. Verification reports record what was tested at a particular stage; an earlier report is not evidence that every later revision was rerun through the same checks. Documentation is ordinary Markdown: no site build, network service or native Mathematica F1 installation is required.
 
 For library-generation timings, use [benchmark 06](../Benchmark/06_Library_Generation.nb) and the [benchmark guide](../Benchmark/README.md). Start in a fresh kernel, separate from the main-package workflow.
+
+## Native scalar extensions — 18 October 2026
+
+`GRScalarPotential`, `GRJohn` and `GREsGB` are supplied alongside PureGR and GRScalar, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](../FeynArts/Models/README.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.

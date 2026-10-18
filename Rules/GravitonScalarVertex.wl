@@ -81,7 +81,9 @@ I (Global`\[Kappa])^(Length[indexArray]/2) ( - (1/2) RuleValidation`RuleRequire[
     ];
 
 
-(* Power law potential. *)
+(* Power law potential. CTensorGeneral is an averaged Taylor coefficient.
+   Differentiating n identical graviton fields supplies n!, independently of
+   the scalar factorial already cancelled in lambda phi^p/p!. *)
 
 
 Clear[GravitonScalarPotentialVertexUncontracted];
@@ -91,7 +93,7 @@ GravitonScalarPotentialVertexUncontracted[indexArray_, \[Lambda]_] :=
         GravitonScalarPotentialVertexUncontracted[indexArray, \[Lambda]],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}},
         (
-I (Global`\[Kappa])^(Length[indexArray]/2) \[Lambda] RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]]
+I Factorial[Length[indexArray]/2] (Global`\[Kappa])^(Length[indexArray]/2) \[Lambda] RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]]
         ), True
     ];
 
@@ -103,7 +105,7 @@ GravitonScalarPotentialVertex[indexArray_, \[Lambda]_] :=
         GravitonScalarPotentialVertex[indexArray, \[Lambda]],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}},
         (
-I (Global`\[Kappa])^(Length[indexArray]/2) \[Lambda] FeynCalcInternal[RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]]] //Expand
+I Factorial[Length[indexArray]/2] (Global`\[Kappa])^(Length[indexArray]/2) \[Lambda] FeynCalcInternal[RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]]] //Expand
         ), True
     ];
 

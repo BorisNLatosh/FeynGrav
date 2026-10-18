@@ -104,7 +104,7 @@ The [library generator](Libs/Generator.wl) is a separate developer tool for prod
 
 ## FeynArts models
 
-`FeynArts/Models` ships FeynArts model files for the conventional pure-gravity rules, mirroring the location FeynCalc uses for its own models. Loading FeynArts together with FeynGrav puts that directory on FeynArts' `$ModelPath`, so the model is available by name:
+`FeynArts/Models` contains one folder per model, each with matching `.gen`, `.mod`, `manifest.json` and `README.md` files. Loading FeynArts together with FeynGrav registers these model folders on FeynArts' `$ModelPath`, so both supplied models are available by name:
 
 ```wl
 $LoadAddOns = {"FeynArts"};
@@ -113,7 +113,9 @@ $LoadAddOns = {"FeynArts"};
 InitializeModel["PureGR", GenericModel -> "PureGR"];
 ```
 
-`GenericModel` is required because the classes file does not name its generic model and the FeynArts default is the stock `"Lorentz"` file. The snapshot covers the cubic and quartic graviton interactions and the oriented ghost coupling at gauge parameter 2 with symbolic `D`. See [FeynArts/Models/README.md](FeynArts/Models/README.md) for details and hashes, and [Examples/Graviton_Scattering_Tree_Level_FeynArt.nb](Examples/Graviton_Scattering_Tree_Level_FeynArt.nb) for a worked off-shell four-graviton tree calculation.
+`GenericModel` is required because the classes file does not name its generic model and the FeynArts default is the stock `"Lorentz"` file. The snapshot covers the cubic and quartic graviton interactions and the oriented ghost coupling at gauge parameter 2 with symbolic `D`. The ordinary ghost line is `-I MTD[mu,nu] FAD[p]`. This release is ready for three-/four-graviton trees; loop compatibility checks are deferred and the optional bridge deliberately rejects the new snapshot's loop requests. Start a fresh kernel after updating the model. See the [PureGR guide](FeynArts/Models/PureGR/README.md) for details and hashes, and [Examples/Graviton_Scattering_Tree_Level_FeynArt.nb](Examples/Graviton_Scattering_Tree_Level_FeynArt.nb) for a worked off-shell four-graviton tree calculation.
+
+A separate [GRScalar model](FeynArts/Models/GRScalar/README.md) adds one real minimally coupled scalar of arbitrary symbolic mass, including `TSS` and `TTSS` through $\kappa^2$. It is supplied ready for the tested native tree workflows; no rebuild is needed. Use `InitializeModel["GRScalar", GenericModel -> "GRScalar"]` with the same loading workflow; its guide also shows explicit path registration without loading FeynGrav. The optional pure-GR bridge is unchanged; scalar self-interactions, non-minimal couplings and loop validation are outside this model.
 
 ## CalcFormConverter
 
@@ -162,7 +164,7 @@ The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, i
 | [Rules](Rules) | Interaction-rule construction, structural validation and projector utilities. |
 | [Libs](Libs) | Precomputed vertex libraries and the [library generator](Libs/Generator.md), which uses CalcFormConverter. |
 | [Examples](Examples) | Calculation notebooks. |
-| [FeynArts/Models](FeynArts/Models/README.md) | FeynArts model files for the pure-gravity rules. |
+| [FeynArts/Models](FeynArts/Models/README.md) | Native PureGR and GRScalar model bundles and tree-use guides. |
 | [Documentation](Documentation/README.md) | Main-package reference, documentation routes and verification records. |
 | [Benchmark](Benchmark/README.md) | Reproducible converter and library-generation measurements. |
 | [CalcFormConverter](CalcFormConverter) | Converter, FORM runtime, templates, documentation, examples, and tests. |
@@ -232,3 +234,7 @@ When using FeynGrav in published work, cite the publications relevant to the ver
 Follow the citation guidance of FeynCalc and FORM when using those packages as well.
 
 FeynGrav is distributed under the GNU General Public Licence version 3; see [Licence](LICENSE). Separately downloaded datasets carry the licence stated on their distribution page.
+
+## Native scalar extensions — 18 October 2026
+
+`GRScalarPotential`, `GRJohn` and `GREsGB` are supplied alongside PureGR and GRScalar, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](FeynArts/Models/README.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.

@@ -19,6 +19,14 @@ DisplayInitializationMessages[] := Module[{},
   Print[Style["FeynGrav: ", Bold], 
         "On initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the \"import*\" command."];
 
+  Print[Style["FeynGrav: ", Bold],
+        "FeynArts support is available through FeynCalc-patched FeynArts. Supplied models for tree-level diagram construction, with vertices through order \[Kappa]^2:"];
+  Print["  PureGR: general relativity with gravitational ghosts.\n",
+        "  GRScalar: general relativity with one real, minimally coupled scalar of arbitrary mass.\n",
+        "  GRScalarPotential: the massive scalar with independent cubic and quartic potential couplings.\n",
+        "  GRJohn: the massive scalar with the John derivative interaction.\n",
+        "  GREsGB: the massive scalar with independent linear and quadratic scalar-Gauss-Bonnet couplings."];
+
   Print[Style["FeynGrav: Core publications on FeynGrav are ", Bold], 
       Row[{Style[Hyperlink["Class.Quant.Grav. 39 (2022) 16, 165006", 
                           "https://doi.org/10.1088/1361-6382/ac7e15"], Blue, Underlined], 
@@ -369,6 +377,14 @@ FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 
 \[Kappa] =. ;
 
+
+ScalarMass::usage = "ScalarMass is the unassigned scalar mass parameter in the native FeynArts scalar models. Specialise it by replacement after conversion.";
+ScalarLambda3::usage = "ScalarLambda3 is the independent coupling of the positive cubic scalar potential term phi^3/3! in GRScalarPotential.";
+ScalarLambda4::usage = "ScalarLambda4 is the independent coupling of the positive quartic scalar potential term phi^4/4! in GRScalarPotential.";
+JohnBeta::usage = "JohnBeta multiplies G^(mu nu) partial_mu phi partial_nu phi in GRJohn, without an additional factor of one half.";
+
+GaussBonnetG1::usage = "GaussBonnetG1 is the independent coupling of phi times the Gauss-Bonnet invariant in the native GREsGB model.";
+GaussBonnetG2::usage = "GaussBonnetG2 is the independent coupling of phi^2/2! times the Gauss-Bonnet invariant in the native GREsGB model.";
 
 Begin["`Private`"];
 
@@ -1029,7 +1045,7 @@ ProcaPropagator[\[Mu]_,\[Nu]_,p_,m_] = (-I)(MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\
 GravitonPropagator[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := I FAD[p] NieuwenhuizenOperator[FeynGrav`GaugeFixingEpsilon/2 , 1 , (D-5)/(D-2) , ( (D-1)(FeynGrav`GaugeFixingEpsilon-1) -FeynGrav`GaugeFixingEpsilon)/(D-2) , -1/(D-2) ,\[Mu],\[Nu],\[Alpha],\[Beta],p] //FeynAmpDenominatorCombine//Simplify ;
 
 
-GhostVectorPropagator[\[Mu]_,\[Nu]_,p_] := (I) MTD[\[Mu],\[Nu]] FAD[p];
+GhostVectorPropagator[\[Mu]_,\[Nu]_,p_] := (-I) MTD[\[Mu],\[Nu]] FAD[p];
 
 
 GravitonPropagatorMassive[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_,m_]:=(-I)FAD[{p,m}] ( 1/2 ( (MTD[\[Mu],\[Alpha]]-FVD[p,\[Mu]]FVD[p,\[Alpha]]/m^2)(MTD[\[Nu],\[Beta]]-FVD[p,\[Nu]]FVD[p,\[Beta]]/m^2)+(MTD[\[Mu],\[Beta]]-FVD[p,\[Mu]]FVD[p,\[Beta]]/m^2)(MTD[\[Nu],\[Alpha]]-FVD[p,\[Nu]]FVD[p,\[Alpha]]/m^2) ) - 1/(D-1) (MTD[\[Mu],\[Nu]]-FVD[p,\[Mu]]FVD[p,\[Nu]]/m^2)(MTD[\[Alpha],\[Beta]]-FVD[p,\[Alpha]]FVD[p,\[Beta]]/m^2) ) //FeynAmpDenominatorCombine;
@@ -1096,17 +1112,24 @@ initializationResult = Module[{results, failed},
 ];
 
 
-(* Make the models shipped in FeynArts/Models findable when patched FeynArts is
-   already loaded. FeynGrav never loads FeynArts itself, so this only extends an
-   existing search path and does nothing when FeynArts is absent. Request
-   FeynArts while loading FeynGrav ($LoadAddOns = {"FeynArts"} or
-   $LoadFeynArts = True) for the registration to happen. *)
+(* Register self-contained model folders under FeynArts/Models when patched
+   FeynArts is already loaded. Each folder contains matching <Name>.gen and
+   <Name>.mod files. This only extends an existing search path: it never loads
+   FeynArts or initialises a model. Request FeynArts while loading FeynGrav
+   ($LoadAddOns = {"FeynArts"} or $LoadFeynArts = True) for registration. *)
 FeynGravModelDirectory = FileNameJoin[{packageDirectory, "FeynArts", "Models"}];
 
-If[MemberQ[$Packages, "FeynArts`"] &&
-   DirectoryQ[FeynGravModelDirectory] &&
-   !MemberQ[ExpandFileName /@ FeynArts`$ModelPath, ExpandFileName[FeynGravModelDirectory]],
-    PrependTo[FeynArts`$ModelPath, FeynGravModelDirectory]
+If[MemberQ[$Packages, "FeynArts`"] && DirectoryQ[FeynGravModelDirectory],
+    Module[{directories, registered = ExpandFileName /@ FeynArts`$ModelPath},
+        directories = Select[Sort[FileNames["*", FeynGravModelDirectory]],
+            Function[directory,
+                DirectoryQ[directory] && And @@ (
+                    FileExistsQ[FileNameJoin[{directory, FileNameTake[directory] <> #}]] & /@
+                        {".gen", ".mod"})]];
+        FeynArts`$ModelPath = Join[
+            Select[directories, !MemberQ[registered, ExpandFileName[#]] &],
+            FeynArts`$ModelPath]
+    ]
 ];
 
 

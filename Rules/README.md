@@ -273,3 +273,11 @@ Separate pre-existing problems remain in the four-and-higher-graviton branch:
 its final `GammaTensor` call has five arguments instead of six, and the preceding
 calls contain inconsistent index and graviton-slot references. Those terms need
 a separate formula review; the order-three check does not validate that branch.
+
+## Scalar-potential differentiation normalisation
+
+The contracted and uncontracted scalar-potential routines include the n-graviton differentiation factor n! multiplying the averaged expansion tensor. This is independent of scalar multiplicity: a potential lambda phi^s/s! has no remaining scalar factorial in its vertex. The order-two stored potential library was corrected on 18 October 2026; kinetic libraries were unchanged. See [verification](../Documentation/Verification/ScalarModelExtensions.md).
+
+## Gauss–Bonnet order-two correction
+
+The two-graviton `ScalarGaussBonnet` rule now contracts complete linearised Riemann, Ricci and scalar curvatures. The previous `TensorT` contraction omitted curvature subtraction terms and was not repairable by an overall factor. Only `Libs/ScalarGaussBonnet_2` was regenerated. Higher-order branches and libraries retain their historical implementation and require a separate mathematical audit. See [verification](../Documentation/Verification/ScalarModelExtensions.md). Restart or reimport after replacing an already loaded old library.

@@ -30,6 +30,8 @@ ScalarGaussBonnet::usage =
 
 ScalarGaussBonnet::usage = ScalarGaussBonnet::usage <> " Returns the scalar-Gauss-Bonnet interaction rule for at least two graviton triples. Around a flat background each curvature starts at first order in the graviton perturbation, so the curvature-squared Gauss-Bonnet combination starts at second order. The one-graviton contribution vanishes; it is not a missing interaction rule. The current implementation requires at least six list entries and returns Failure for a one-graviton call rather than returning the known zero.";
 
+ScalarGaussBonnet::usage = ScalarGaussBonnet::usage <> " The two-graviton branch uses complete linearised curvatures and has been checked against the independent Gauss-Bonnet action. Higher-order branches retain legacy contractions and require a separate mathematical audit; the order-two correction does not validate them.";
+
 (* Keep helpers and memoised definitions local to this rule package. *)
 
 (* Structural failures are returned as values; callers should use FailureQ. *)
@@ -128,6 +130,29 @@ ScalarGaussBonnet[gravitonParameters_] :=
         ScalarGaussBonnet[gravitonParameters],
         {{1, "Array", 3, 6, Infinity}},
         (
+(* At order two only products of linearised curvatures contribute.
+   Form their complete antisymmetrisations before contraction; the legacy
+   TensorT contraction is not the Gauss-Bonnet invariant at this order.
+   The factor two differentiates the two identical graviton fields.
+   Higher-order branches are retained pending a separate derivation. *)
+If[Length[gravitonParameters] == 6,
+    Module[{curvature, a, b, c, d, r1, r2, ric1, ric2, scalar1, scalar2},
+        curvature = Function[{aa, bb, cc, dd, momentum, mu, nu},
+            Module[{ell},
+                Contract[FVD[momentum, ell] (
+                    -FVD[momentum, cc] RuleValidation`RuleRequire[GammaTensor[aa, dd, bb, ell, mu, nu]]
+                    +FVD[momentum, dd] RuleValidation`RuleRequire[GammaTensor[aa, cc, bb, ell, mu, nu]]
+                )]
+            ]
+        ];
+        r1 = curvature[a, b, c, d, gravitonParameters[[3]], gravitonParameters[[1]], gravitonParameters[[2]]];
+        r2 = curvature[a, b, c, d, gravitonParameters[[6]], gravitonParameters[[4]], gravitonParameters[[5]]];
+        ric1 = Contract[MTD[a, c] r1];
+        ric2 = Contract[MTD[a, c] r2];
+        scalar1 = Contract[MTD[b, d] ric1];
+        scalar2 = Contract[MTD[b, d] ric2];
+        2 I Global`\[Kappa]^2 Contract[r1 r2 - 4 ric1 ric2 + scalar1 scalar2]
+    ],
 I Power[Global`\[Kappa],Length[gravitonParameters]/3] 4*
 		Total[RuleValidation`RuleRequire[
 			RuleValidation`RuleRequire[Map[
@@ -135,6 +160,7 @@ I Power[Global`\[Kappa],Length[gravitonParameters]/3] 4*
 				Flatten/@Permutations[Partition[gravitonParameters,3]]
 			]]
 		]]
+]
         ), True
     ];
 
