@@ -19,7 +19,7 @@ FeynGravValidateProcess[spec_] := Module[{keys, incoming, outgoing, loop, onePI}
   If[! SubsetQ[{"Model", "Incoming", "Outgoing", "LoopOrder", "OneParticleIrreducible"}, keys] ||
      ! SubsetQ[keys, {"Model", "Incoming", "Outgoing", "LoopOrder"}],
     Return[failure["InvalidProcess", "Process keys must be Model, Incoming, Outgoing, LoopOrder and optionally OneParticleIrreducible.", <|"Keys" -> keys|>]]];
-  If[spec["Model"] =!= "PureGR", Return[failure["UnsupportedModel", "Only the fixed PureGR profile is allowed."]]];
+  If[spec["Model"] =!= "GR", Return[failure["UnsupportedModel", "Only the fixed GR profile is allowed."]]];
   incoming = spec["Incoming"]; outgoing = spec["Outgoing"];
   loop = spec["LoopOrder"]; onePI = Lookup[spec, "OneParticleIrreducible", False];
   If[! ListQ[incoming] || ! ListQ[outgoing] ||

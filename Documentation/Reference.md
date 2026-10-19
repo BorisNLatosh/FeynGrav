@@ -67,7 +67,7 @@ These definitions require no additional vertex library. All tensor indices are D
 | `ProcaPropagator[mu, nu, p, m]` | Massive-vector propagator, with numerator `-I (MTD[mu,nu] - FVD[p,mu] FVD[p,nu]/m^2)`. Its massless limit cannot be obtained by substituting `m = 0`. |
 | `GravitonPropagator[mu, nu, alpha, beta, p]` | General-relativity propagator using the current `GaugeFixingEpsilon`, initially 2. |
 | `GravitonPropagatorMassive[mu, nu, alpha, beta, p, m]` | Massive-gravity propagator with the implemented `1/(D-1)` trace subtraction. Requires nonsingular mass and dimension choices; `m = 0` is not a massless-propagator shortcut. |
-| `GhostVectorPropagator[mu, nu, p]` | Conventional gravitational Faddeev–Popov source propagator `-I MTD[mu,nu] FAD[p]` (ordered ghost–antighost contraction). The shipped `PureGR` model has the same negative line; its [tree-level release](../FeynArtsIntegration/README.md#current-tree-release--18-october-2026) defers loop compatibility checks. |
+| `GhostVectorPropagator[mu, nu, p]` | Conventional gravitational Faddeev–Popov source propagator `-I MTD[mu,nu] FAD[p]` (ordered ghost–antighost contraction). The shipped `GR` model has the same negative line; its [tree-level release](../FeynArtsIntegration/README.md#current-tree-release--18-october-2026) defers loop compatibility checks. |
 | `GhostVectorPropagatorHD[mu, nu, p]` | Ghost propagator for higher-derivative gauge fixing; depends on `GaugeFixingEpsilonHD0` and `GaugeFixingEpsilonHD1`, including their inverse combinations. |
 | `QuadraticGravityPropagator[mu, nu, alpha, beta, p, m0, m2]` | Quadratic-gravity propagator with conventional gauge fixing, using the current `GaugeFixingEpsilon`. |
 | `QuadraticGravityPropagatorHD[mu, nu, alpha, beta, p, m0, m2]` | Quadratic-gravity propagator with higher-derivative gauge fixing, using all three HD gauge parameters. |
@@ -88,19 +88,19 @@ The listed libraries are loaded through order 2 during successful package initia
 
 | Command | Arguments and returned interaction | Library preparation |
 | --- | --- | --- |
-| `GravitonScalarVertex[pairs, p1, p2, m]` | Two incoming scalar momenta and their mass; minimal scalar coupling to `n` gravitons. | `importScalars[n]` |
-| `GravitonScalarPotentialVertex[pairs, lambda]` | Scalar-potential vertex with the supplied potential coupling; no scalar momentum arguments. The convention is the potential monomial `lambda phi^r/r!`. | `importScalars[n]` |
-| `GravitonFermionVertex[triples, p1, p2, m]` | Incoming fermion and antifermion momenta, then mass; returns a Dirac-matrix expression. | `importFermions[n]` |
-| `GravitonMassiveVectorVertex[pairs, lambda1, p1, lambda2, p2, m]` | Each vector is specified by index then momentum, followed by their mass. | `importVectors[n]` |
-| `GravitonVectorVertex[triples, lambda1, p1, lambda2, p2]` | Massless-vector vertex; depends on the vector gauge value used during import. | `importVectors[n]` |
-| `GravitonVectorGhostVertex[pairs, p1, p2]` | Two incoming momenta of the massless-vector Faddeev–Popov ghosts. | `importVectors[n]` |
+| `GravitonScalarVertex[pairs, p1, p2, m]` | Two incoming scalar momenta and their mass; minimal scalar coupling to `n` gravitons. | `FeynGravImportScalars[n]` |
+| `GravitonScalarPotentialVertex[pairs, lambda]` | Scalar-potential vertex with the supplied potential coupling; no scalar momentum arguments. The convention is the potential monomial `lambda phi^r/r!`. | `FeynGravImportScalars[n]` |
+| `GravitonFermionVertex[triples, p1, p2, m]` | Incoming fermion and antifermion momenta, then mass; returns a Dirac-matrix expression. | `FeynGravImportFermions[n]` |
+| `GravitonMassiveVectorVertex[pairs, lambda1, p1, lambda2, p2, m]` | Each vector is specified by index then momentum, followed by their mass. | `FeynGravImportVectors[n]` |
+| `GravitonVectorVertex[triples, lambda1, p1, lambda2, p2]` | Massless-vector vertex; depends on the vector gauge value used during import. | `FeynGravImportVectors[n]` |
+| `GravitonVectorGhostVertex[pairs, p1, p2]` | Two incoming momenta of the massless-vector Faddeev–Popov ghosts. | `FeynGravImportVectors[n]` |
 
 ### Graviton self-interactions and gravitational ghosts
 
 | Command | Arguments and returned interaction | Availability |
 | --- | --- | --- |
-| `GravitonVertex[mu1, nu1, p1, ..., mur, nur, pr]` | `r >= 3` graviton legs supplied as separate arguments, **not a list**. Each leg has index–index–momentum order. | `importGravitons[r-2]`; three- and four-leg vertices are loaded initially. |
-| `QuadraticGravityVertex[triples, m0, m2]` | `r >= 3` graviton legs in one flat list, followed by the two quadratic-gravity mass parameters. | `importQuadraticGravity[r-2]`; not loaded initially. |
+| `GravitonVertex[mu1, nu1, p1, ..., mur, nur, pr]` | `r >= 3` graviton legs supplied as separate arguments, **not a list**. Each leg has index–index–momentum order. | `FeynGravImportGravitons[r-2]`; three- and four-leg vertices are loaded initially. |
+| `QuadraticGravityVertex[triples, m0, m2]` | `r >= 3` graviton legs in one flat list, followed by the two quadratic-gravity mass parameters. | `FeynGravImportQuadraticGravity[r-2]`; not loaded initially. |
 | `GravitonGhostVertex[rho, sigma, k, mu, p1, nu, p2]` | One graviton `(rho,sigma,k)` and two gravitational ghost legs `(mu,p1)`, `(nu,p2)`; all momenta incoming. | Direct definition, no extra import. |
 | `GravitonGhostVertexHD[rho, sigma, k, mu, p1, nu, p2]` | Same leg order with higher-derivative ghost gauge fixing; depends on `GaugeFixingEpsilonHD0` and `GaugeFixingEpsilonHD1`. | Direct definition, no extra import. |
 
@@ -108,7 +108,7 @@ The ghost commands implement these fixed signatures; they do not generate arbitr
 
 ### SU(N) Yang–Mills interactions
 
-Call `importSUNYM[n]` first. Colour labels are adjoint indices; all momenta are incoming. Gluon and ghost argument orders differ, so use the explicit signatures below.
+Call `FeynGravImportSUNYM[n]` first. Colour labels are adjoint indices; all momenta are incoming. Gluon and ghost argument orders differ, so use the explicit signatures below.
 
 | Command | Arguments and returned interaction |
 | --- | --- |
@@ -125,12 +125,12 @@ Each row requires its sector importer. There are no optional vertex arguments; c
 
 | Command | Scalar count and leg structure | Preparation |
 | --- | --- | --- |
-| `HorndeskiG2[pairs, momenta, b, lambda]` | `s = a + 2 b` scalar momenta; graviton indices only. | `importHorndeskiG2[]` |
-| `HorndeskiG3[triples, momenta, b, lambda]` | `s = a + 2 b + 1`; graviton triples. | `importHorndeskiG3[]` |
-| `HorndeskiG4[triples, momenta, b, lambda]` | `s = a + 2 b`; graviton triples. | `importHorndeskiG4[]` |
-| `HorndeskiG5[triples, momenta, b, lambda]` | `s = a + 2 b + 1`; graviton triples. | `importHorndeskiG5[]` |
-| `GravitonAxionVectorVertex[pairs, lambda1, p1, lambda2, p2, theta]` | Two vector index–momentum groups and axion coupling `theta`; no axion momentum argument. | `importAxionVectorVertex[n]` |
-| `ScalarGaussBonnet[triples, g]` | `n >= 2` graviton legs, followed by the scalar–Gauss–Bonnet coupling; no separate scalar momentum argument. | `importScalarGaussBonnet[n]` |
+| `HorndeskiG2[pairs, momenta, b, lambda]` | `s = a + 2 b` scalar momenta; graviton indices only. | `FeynGravImportHorndeskiG2[]` |
+| `HorndeskiG3[triples, momenta, b, lambda]` | `s = a + 2 b + 1`; graviton triples. | `FeynGravImportHorndeskiG3[]` |
+| `HorndeskiG4[triples, momenta, b, lambda]` | `s = a + 2 b`; graviton triples. | `FeynGravImportHorndeskiG4[]` |
+| `HorndeskiG5[triples, momenta, b, lambda]` | `s = a + 2 b + 1`; graviton triples. | `FeynGravImportHorndeskiG5[]` |
+| `GravitonAxionVectorVertex[pairs, lambda1, p1, lambda2, p2, theta]` | Two vector index–momentum groups and axion coupling `theta`; no axion momentum argument. | `FeynGravImportAxionVectorVertex[n]` |
+| `ScalarGaussBonnet[triples, g]` | `n >= 2` graviton legs, followed by the scalar–Gauss–Bonnet coupling; no separate scalar momentum argument. | `FeynGravImportScalarGaussBonnet[n]` |
 
 For the Horndeski monomial `lambda phi^a X^b`, `a` and `b` are non-negative integers. The library filename encodes `a`, `b` and graviton count `n`; the vertex call must match an installed triple. These wrappers do not automatically generate missing combinations. Generator-specific selection filters and rule limitations are documented separately.
 
@@ -192,30 +192,32 @@ There are no `LongForm` options. Projector constructors accept symbolic expressi
 
 ## Library importers
 
-Imports read local extensionless files; they neither download nor generate them. Successful calls normally return `Null` after installing definitions. They support `printOutput -> False`; set it to `True` for inventory and progress messages. Legacy private `printOutput` remains accepted, with an explicit public option taking precedence. A non-Boolean resolved option returns `Failure`.
+**Importer naming update:** the former `import…` commands are now `FeynGravImport…`, retaining their suffixes and argument signatures. Replace `printOutput` (including its old private form) with `Verbose`. Old names are not compatibility aliases. Restart the kernel after updating to avoid retaining previous definitions. Imports are silent by default; use, for example, `FeynGravImportScalars[2, Verbose -> True]` to print diagnostics. `FeynGravLibraryInformation` accepts the renamed symbols and reports their fully qualified names. Historical reports and saved notebook outputs retain their original spelling.
+
+Imports read local extensionless files; they neither download nor generate them. Successful calls normally return `Null` after installing definitions. They use `Verbose -> False` by default. Set `Verbose -> True` to print inventory and progress messages. Unknown options and non-Boolean values return `Failure`.
 
 For order-limited importers, omitted `n` defaults to 2. Except for Gauss–Bonnet, `n` must be a positive integer. The requested maximum is capped by the installed families, but missing intermediate files cause failure. Failed reads or invalid orders preserve previously installed definitions. A successful lower-order reimport replaces the family's definitions through the selected order; it does not retain previously loaded higher orders.
 
 | Command | Files and order convention |
 | --- | --- |
-| `importGravitons[n : 2, opts]` | `GravitonVertex_j`, `1 <= j <= n`; `j + 2` graviton legs. Loaded initially with 2. |
-| `importScalars[n : 2, opts]` | Scalar kinetic and potential files for 1 through `n` graviton pairs. Loaded initially with 2. |
-| `importFermions[n : 2, opts]` | Fermion files for 1 through `n` graviton triples. Loaded initially with 2. |
-| `importVectors[n : 2, opts]` | Massive vector, massless vector and vector ghost files through `n`. Loaded initially with 2. |
-| `importSUNYM[n : 2, opts]` | Six Yang–Mills file families: two-, three- and four-gluon, quark–gluon, ghost and gluon–ghost. |
-| `importAxionVectorVertex[n : 2, opts]` | Axion–vector files through `n` graviton pairs. |
-| `importQuadraticGravity[n : 2, opts]` | `QuadraticGravityVertex_j`, where `j + 2` is the number of graviton legs. |
-| `importScalarGaussBonnet[n : 2, opts]` | Files for 2 through `n` graviton triples; requires `n >= 2`. |
-| `importHorndeskiG2[opts]` | All available G2 files; no order argument. |
-| `importHorndeskiG3[opts]` | All available G3 files; no order argument. |
-| `importHorndeskiG4[opts]` | All available G4 files; no order argument. |
-| `importHorndeskiG5[opts]` | All available G5 files; no order argument. |
+| `FeynGravImportGravitons[n : 2, opts]` | `GravitonVertex_j`, `1 <= j <= n`; `j + 2` graviton legs. Loaded initially with 2. |
+| `FeynGravImportScalars[n : 2, opts]` | Scalar kinetic and potential files for 1 through `n` graviton pairs. Loaded initially with 2. |
+| `FeynGravImportFermions[n : 2, opts]` | Fermion files for 1 through `n` graviton triples. Loaded initially with 2. |
+| `FeynGravImportVectors[n : 2, opts]` | Massive vector, massless vector and vector ghost files through `n`. Loaded initially with 2. |
+| `FeynGravImportSUNYM[n : 2, opts]` | Six Yang–Mills file families: two-, three- and four-gluon, quark–gluon, ghost and gluon–ghost. |
+| `FeynGravImportAxionVectorVertex[n : 2, opts]` | Axion–vector files through `n` graviton pairs. |
+| `FeynGravImportQuadraticGravity[n : 2, opts]` | `QuadraticGravityVertex_j`, where `j + 2` is the number of graviton legs. |
+| `FeynGravImportScalarGaussBonnet[n : 2, opts]` | Files for 2 through `n` graviton triples; requires `n >= 2`. |
+| `FeynGravImportHorndeskiG2[opts]` | All available G2 files; no order argument. |
+| `FeynGravImportHorndeskiG3[opts]` | All available G3 files; no order argument. |
+| `FeynGravImportHorndeskiG4[opts]` | All available G4 files; no order argument. |
+| `FeynGravImportHorndeskiG5[opts]` | All available G5 files; no order argument. |
 
-`n : 2` above describes the default; actual calls use `importScalars[]` or `importScalars[2]`. Horndeski filenames have the form `HorndeskiG2_a_b_n`, and the installed files determine the accepted vertex signatures. Use `printOutput -> True` to inspect that selection. Avoid assuming every requested model/order is distributed.
+`n : 2` above describes the default; actual calls use `FeynGravImportScalars[]` or `FeynGravImportScalars[2]`. Horndeski filenames have the form `HorndeskiG2_a_b_n`, and the installed files determine the accepted vertex signatures. Use `Verbose -> True` to inspect that selection. Avoid assuming every requested model/order is distributed.
 
 ## Library import records
 
-`FeynGravLibraryInformation[]` returns an association keyed by fully qualified importer names. `FeynGravLibraryInformation[importVectors]` selects the last successful vector import; pass the importer symbol without `[]`. Unknown importers or malformed query arguments return `Failure`. Families with no recorded import return `Missing["NotRecorded"]`.
+`FeynGravLibraryInformation[]` returns an association keyed by fully qualified importer names. `FeynGravLibraryInformation[FeynGravImportVectors]` selects the last successful vector import; pass the importer symbol without `[]`. Unknown importers or malformed query arguments return `Failure`. Families with no recorded import return `Missing["NotRecorded"]`.
 
 Every successful import, including initialisation, publishes its record together with the new vertex definitions. A failed or aborted import preserves both. Reimporting replaces the record for that importer, so it describes the currently installed import rather than accumulating a history. Package reloads preserve records for optional families that are not reimported.
 
@@ -235,7 +237,7 @@ Snapshots cover `FeynGrav`'s gravitational coupling and `D` for every importer, 
 Values are wrapped in `HoldComplete` to prevent an unassigned symbol in an old record from acquiring a later assignment. Do not release that hold to reconstruct past settings: it allows evaluation in the current session.
 
 ```mathematica
-information = FeynGravLibraryInformation[importVectors];
+information = FeynGravLibraryInformation[FeynGravImportVectors];
 information["Settings"]
 information["ChangedSettings"]
 ```
@@ -255,8 +257,8 @@ These are public symbols, not functions or options. Initialisation assigns or cl
 | `GaugeFixingEpsilonHD` | Unassigned | Overall higher-derivative graviton gauge contribution. |
 | `GaugeFixingEpsilonHD0` | Unassigned | HD graviton/ghost propagators and ghost vertex. |
 | `GaugeFixingEpsilonHD1` | Unassigned | HD longitudinal coefficient in those propagators and ghost vertex; represents the surviving longitudinal combination in the package convention. |
-| `GaugeFixingEpsilonVector` | `-1` | Massless-vector libraries during `importVectors`. Set before reimporting to change imported dependence. |
-| `GaugeFixingEpsilonSUNYM` | `-1` | Yang–Mills libraries during `importSUNYM`. Set before importing. |
+| `GaugeFixingEpsilonVector` | `-1` | Massless-vector libraries during `FeynGravImportVectors`. Set before reimporting to change imported dependence. |
+| `GaugeFixingEpsilonSUNYM` | `-1` | Yang–Mills libraries during `FeynGravImportSUNYM`. Set before importing. |
 | ``FeynGrav`\[Kappa]`` | Symbolic | Gravitational coupling appearing in package expressions. The corresponding Unicode symbol is `κ`. |
 
 Changing a gauge parameter after a library import cannot restore symbolic dependence already replaced during that import. Restarting or reloading can reset initialised defaults. These symbols themselves perform no parameter validation or singularity diagnosis.
@@ -286,6 +288,12 @@ The default worker setting is `FORMThreads -> Automatic`. Supported Dirac algebr
 
 ## Native scalar extensions — 18 October 2026
 
-`GRScalarPotential`, `GRJohn` and `GREsGB` are supplied alongside PureGR and GRScalar, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](../FeynArts/Models/README.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.
+`Single-Scalar-Tensor-Minimal-Coupling`, `John` and `Einstein-scalar-Gauss-Bonnet` are supplied alongside `GR`, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](../FeynArts/Models/README.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.
 
-The native EsGB model uses unassigned `GaussBonnetG1` and `GaussBonnetG2` for the positive terms phi G and phi^2 G / 2!, respectively. `ScalarMass` remains independent. Select `Model -> "GREsGB"` and `GenericModel -> "GREsGB"`; specialise parameters by replacement after conversion. Two TTS vertices generate g1-squared diagrams of total order kappa^4 even though each vertex is at most order kappa^2. The [model guide](../FeynArts/Models/GREsGB/README.md) gives the exact action and native recipe.
+The native EsGB model uses unassigned `GaussBonnetG1` and `GaussBonnetG2` for the positive terms phi G and phi^2 G / 2!, respectively. `ScalarMass` remains independent. Select `Model -> "Einstein-scalar-Gauss-Bonnet"` and `GenericModel -> "Einstein-scalar-Gauss-Bonnet"`; specialise parameters by replacement after conversion. Two TTS vertices generate g1-squared diagrams of total order kappa^4 even though each vertex is at most order kappa^2. The [model guide](../FeynArts/Models/Einstein-scalar-Gauss-Bonnet/README.md) gives the exact action and native recipe.
+
+## Citation guidance
+
+`FeynGravHowToCite[]` prints the four FeynGrav references with links, followed by a reminder to cite dependencies when used, and returns `Null`. Cite the publications relevant to the version and features used. Notebook references are clickable; a kernel without a front end prints citation text and URLs. No libraries, settings, network requests or calculations are involved. Any supplied arguments return `Failure["InvalidArgumentCount", ...]`. The command appears in `FeynGravCommands[]` and in startup help.
+
+The initialisation banner identifies the default import requests: cubic/quartic gravity and matter interactions with up to two gravitons. It lists the four supported FeynArts models by their descriptive names, without initialising them. The banner uses FeynCalc-style text with automatic wrapping and links to the help commands; publication references are shown by `FeynGravHowToCite[]`. Actual import failures remain reported by the existing initialisation diagnostics; consult `FeynGravLibraryInformation[]` for successful imports.

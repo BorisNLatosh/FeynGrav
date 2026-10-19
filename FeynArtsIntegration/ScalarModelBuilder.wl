@@ -3,23 +3,23 @@
    Output must be a new directory. Model files require no builder at run time. *)
 $HistoryLength=0;
 buildRepo=DirectoryName[DirectoryName[$InputFileName]];
-If[!MemberQ[{"GRScalarPotential","GRJohn","GREsGB"},buildModel],Print["Unknown model"];Exit[2]];
-args=Select[$ScriptCommandLine,StringQ[#]&&StringStartsQ[#,"/"]&];
+If[!MemberQ[{"Single-Scalar-Tensor-Minimal-Coupling","John","Einstein-scalar-Gauss-Bonnet"},buildModel],Print["Unknown model"];Exit[2]];
+buildCommandLineArguments=Select[$ScriptCommandLine,StringQ[#]&&StringStartsQ[#,"/"]&];
 buildTarget=Environment["FG_MODEL_TARGET"];
-If[!StringQ[buildTarget],buildTarget=If[Length[args]>=2,Last[args],""]];
+If[!StringQ[buildTarget],buildTarget=If[Length[buildCommandLineArguments]>=2,Last[buildCommandLineArguments],""]];
 If[!StringQ[buildTarget]||!StringStartsQ[buildTarget,"/"]||FileExistsQ[buildTarget]||!DirectoryQ[DirectoryName[buildTarget]],Print["Supply a fresh absolute output directory"];Exit[2]];
 $LoadAddOns={"FeynArts"};Get[FileNameJoin[{buildRepo,"FeynGrav.wl"}]];
 Get[FileNameJoin[{buildRepo,"FeynArtsIntegration","FeynArtsIntegration.wl"}]];
 SetAttributes[need,HoldRest];
 need[label_,e_]:=Module[{v=Check[e,$Failed]},If[!TrueQ[v],Print["BUILD-FAIL ",label];Exit[1]]];
 need["settings",OwnValues[D]==={}&&OwnValues[FeynGrav`\[Kappa]]==={}&&FeynGrav`GaugeFixingEpsilon===2];
-need["imports",!FailureQ[FeynGrav`importGravitons[2]]&&!FailureQ[FeynGrav`importScalars[2]]];
+need["imports",!FailureQ[FeynGrav`FeynGravImportGravitons[2]]&&!FailureQ[FeynGrav`FeynGravImportScalars[2]]];
 faEncode[e_] := FeynGrav`FeynArtsIntegration`Private`faEncode[e];
 faBasisRecord[e_, f_] := FeynGrav`FeynArtsIntegration`Private`faBasisRecord[e, f];
 faPropagator[e_, m_] := FeynGrav`FeynArtsIntegration`Private`faPropagator[e, m];
 faTranslateMonomial[e_] := FeynGrav`FeynArtsIntegration`Private`faTranslateMonomial[e];
 faExtractVertex[e_, c_] := FeynGrav`FeynArtsIntegration`Private`faExtractVertex[e, c];
-faModelFailure[args___] := FeynGrav`FeynArtsIntegration`Private`faModelFailure[args];
+faModelFailure[args___] := FeynGrav`FeynArtsIntegration`Private`faModelFailure[buildCommandLineArguments];
 
 scalarMass = FeynGrav`ScalarMass;
 jSym = Symbol["FeynArts`j1"];
@@ -43,17 +43,17 @@ rules = <|
 
 minimalRules=rules;
 Switch[buildModel,
- "GRScalarPotential",
+ "Single-Scalar-Tensor-Minimal-Coupling",
  Do[AppendTo[rules,StringJoin[ConstantArray["T",nh],ConstantArray["S",ns]] ->
    If[nh==0,I couplingSymbol,FeynGrav`GravitonScalarPotentialVertex[Take[indices,2 nh],couplingSymbol]]],
    {ns,{3,4}},{couplingSymbol,{If[ns==3,FeynGrav`ScalarLambda3,FeynGrav`ScalarLambda4]}},{nh,0,2}],
- "GRJohn",
- need["G5 import",!FailureQ[FeynGrav`importHorndeskiG5[]]];
+ "John",
+ need["G5 import",!FailureQ[FeynGrav`FeynGravImportHorndeskiG5[]]];
  Do[family=If[nh==1,"TSS","TTSS"];
    grav=Flatten[Table[{indices[[2 j-1]],indices[[2 j]],momenta[[j]]},{j,nh}]];
    rules[family]=rules[family]+FeynGrav`HorndeskiG5[grav,{momenta[[nh+1]],momenta[[nh+2]]},0,-FeynGrav`JohnBeta],{nh,1,2}],
- "GREsGB",
- need["GB import",!FailureQ[FeynGrav`importScalarGaussBonnet[2]]];
+ "Einstein-scalar-Gauss-Bonnet",
+ need["GB import",!FailureQ[FeynGrav`FeynGravImportScalarGaussBonnet[2]]];
  grav=Flatten[Table[{indices[[2 j-1]],indices[[2 j]],momenta[[j]]},{j,2}]];
  AppendTo[rules,"TTS"->FeynGrav`ScalarGaussBonnet[grav,FeynGrav`GaussBonnetG1]];
  rules["TTSS"]=rules["TTSS"]+FeynGrav`ScalarGaussBonnet[grav,FeynGrav`GaussBonnetG2]];
@@ -119,13 +119,13 @@ classesText = "M$ClassesDescription={" <>
 CreateDirectory[buildTarget];
 Export[FileNameJoin[{buildTarget,buildModel<>".gen"}],genericText,"Text"];
 Export[FileNameJoin[{buildTarget,buildModel<>".mod"}],classesText,"Text"];
-sourceImporters={FeynGrav`importGravitons,FeynGrav`importScalars};
-If[buildModel=="GRJohn",AppendTo[sourceImporters,FeynGrav`importHorndeskiG5]];
-If[buildModel=="GREsGB",AppendTo[sourceImporters,FeynGrav`importScalarGaussBonnet]];
+sourceImporters={FeynGrav`FeynGravImportGravitons,FeynGrav`FeynGravImportScalars};
+If[buildModel=="John",AppendTo[sourceImporters,FeynGrav`FeynGravImportHorndeskiG5]];
+If[buildModel=="Einstein-scalar-Gauss-Bonnet",AppendTo[sourceImporters,FeynGrav`FeynGravImportScalarGaussBonnet]];
 manifest=<|"Schema"->1,"Profile"->buildModel,"ModelName"->buildModel,"FixedGauge"->2,
  "LorentzDimension"->"Symbolic D","FieldClasses"->{"T[1]","U[1]","-U[1]","S[1]"},
  "InteractionFamilies"->families,"GravitonOrders"->{1,2},"VertexOrderCutoff"->2,
- "Parameters"->Switch[buildModel,"GRScalarPotential",{"FeynGrav`ScalarLambda3","FeynGrav`ScalarLambda4"},"GRJohn",{"FeynGrav`JohnBeta"},"GREsGB",{"FeynGrav`GaussBonnetG1","FeynGrav`GaussBonnetG2"}],"ScalarMassSymbol"->"FeynGrav`ScalarMass",
+ "Parameters"->Switch[buildModel,"Single-Scalar-Tensor-Minimal-Coupling",{"FeynGrav`ScalarLambda3","FeynGrav`ScalarLambda4"},"John",{"FeynGrav`JohnBeta"},"Einstein-scalar-Gauss-Bonnet",{"FeynGrav`GaussBonnetG1","FeynGrav`GaussBonnetG2"}],"ScalarMassSymbol"->"FeynGrav`ScalarMass",
  "LibrarySources"->Flatten[(FeynGrav`FeynGravLibraryInformation[#]["Files"]&/@sourceImporters)],
  "RuleSHA256"->Lookup[basisList,"RuleSHA256"],"FeynArtsVersion"->ToString[FeynArts`$FeynArtsVersionNumber],
  "FeynGravSHA256"->FileHash[FileNameJoin[{buildRepo,"FeynGrav.wl"}],"SHA256","HexString"],

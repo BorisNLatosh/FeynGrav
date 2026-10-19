@@ -78,25 +78,25 @@ The installer accepts ordinary ZIP archives; encrypted, split, ZIP64 and link-co
 
 FeynGrav loads FeynCalc if necessary, along with its own rules, default interaction libraries, and CalcFormConverter. Loading does not probe or install FORM or launch a FORM process. Restart the kernel after updating package files.
 
-Use `FeynGravCommands[]` to list available commands. Mathematica's `?FunctionName` syntax displays usage information, including `?GravitonVertex`, `?importGravitons`, and `?CalcFormCalculate`. Calculation workflows are provided in the [examples](#examples).
+Use `FeynGravCommands[]` to list available commands. Mathematica's `?FunctionName` syntax displays usage information, including `?GravitonVertex`, `?FeynGravImportGravitons`, and `?CalcFormCalculate`. Calculation workflows are provided in the [examples](#examples).
 
 ## Interaction libraries
 
-At initialisation, FeynGrav calls `importGravitons[2]`, `importScalars[2]`, `importFermions[2]`, and `importVectors[2]`. Additional sectors and higher orders must be loaded explicitly.
+At initialisation, FeynGrav calls `FeynGravImportGravitons[2]`, `FeynGravImportScalars[2]`, `FeynGravImportFermions[2]`, and `FeynGravImportVectors[2]`. Additional sectors and higher orders must be loaded explicitly.
 
 | Commands | Meaning of the requested order `n` |
 | --- | --- |
-| `importGravitons[n]`, `importQuadraticGravity[n]` | Load vertex libraries through order `n`; order `n` supplies a vertex with `n + 2` graviton legs. |
-| `importScalars[n]`, `importFermions[n]`, `importVectors[n]` | Load matter vertices with up to `n` graviton legs. |
-| `importSUNYM[n]`, `importAxionVectorVertex[n]` | Load the corresponding matter interactions with up to `n` graviton legs. |
-| `importScalarGaussBonnet[n]` | Load vertices with 2 through `n` graviton legs; the flat-background interaction begins at two. |
-| `importHorndeskiG2[]` through `importHorndeskiG5[]` | Load all available libraries for the selected Horndeski sector. |
+| `FeynGravImportGravitons[n]`, `FeynGravImportQuadraticGravity[n]` | Load vertex libraries through order `n`; order `n` supplies a vertex with `n + 2` graviton legs. |
+| `FeynGravImportScalars[n]`, `FeynGravImportFermions[n]`, `FeynGravImportVectors[n]` | Load matter vertices with up to `n` graviton legs. |
+| `FeynGravImportSUNYM[n]`, `FeynGravImportAxionVectorVertex[n]` | Load the corresponding matter interactions with up to `n` graviton legs. |
+| `FeynGravImportScalarGaussBonnet[n]` | Load vertices with 2 through `n` graviton legs; the flat-background interaction begins at two. |
+| `FeynGravImportHorndeskiG2[]` through `FeynGravImportHorndeskiG5[]` | Load all available libraries for the selected Horndeski sector. |
 
-The order-limited import commands load up to the available order when the requested maximum is higher than the installed libraries. They read local files; they do not download missing libraries. Use their `printOutput -> True` option to report available and imported orders. Consult each command's usage message for its interface.
+The order-limited import commands load up to the available order when the requested maximum is higher than the installed libraries. They read local files; they do not download missing libraries. Imports are silent by default (`Verbose -> False`). Use `Verbose -> True` to report available and imported orders. Consult each command's usage message for its interface.
 
 Use `FeynGravConventions[]` for a readable report of geometry, Fourier, dimension, gauge, polarisation, algebra and diagram conventions. It distinguishes fixed definitions from current settings and shows loaded orders and settings changed since import. The command prints static mathematical output (plain text in a kernel without a front end), returns `Null`, and changes no settings. See the [conventions report](Documentation/Reference.md#conventions-report).
 
-Use `FeynGravLibraryInformation[]` to inspect the last successful imports: source paths and hashes, actual orders, import times and relevant settings. `FeynGravLibraryInformation[importVectors]` selects one importer and identifies settings changed since that import. See [library import records](Documentation/Reference.md#library-import-records) for the scope and limitations.
+Use `FeynGravLibraryInformation[]` to inspect the last successful imports: source paths and hashes, actual orders, import times and relevant settings. `FeynGravLibraryInformation[FeynGravImportVectors]` selects one importer and identifies settings changed since that import. See [library import records](Documentation/Reference.md#library-import-records) for the scope and limitations.
 
 Additional precomputed libraries are distributed in the [FeynGrav Libraries dataset](https://data.mendeley.com/datasets/9xrw2jjrbr/2). Download the required files and place them directly in `FeynGrav/Libs`, preserving names such as `GravitonVertex_3`, then invoke the appropriate import command. The dataset predates version 4: use compatible interaction libraries and retain the current package's ghost rules, which were revised in version 4. Availability varies by sector; the dataset is not a guarantee that every requested order exists.
 
@@ -110,12 +110,12 @@ The [library generator](Libs/Generator.wl) is a separate developer tool for prod
 $LoadAddOns = {"FeynArts"};
 << FeynGrav`;
 
-InitializeModel["PureGR", GenericModel -> "PureGR"];
+InitializeModel["GR", GenericModel -> "GR"];
 ```
 
-`GenericModel` is required because the classes file does not name its generic model and the FeynArts default is the stock `"Lorentz"` file. The snapshot covers the cubic and quartic graviton interactions and the oriented ghost coupling at gauge parameter 2 with symbolic `D`. The ordinary ghost line is `-I MTD[mu,nu] FAD[p]`. This release is ready for three-/four-graviton trees; loop compatibility checks are deferred and the optional bridge deliberately rejects the new snapshot's loop requests. Start a fresh kernel after updating the model. See the [PureGR guide](FeynArts/Models/PureGR/README.md) for details and hashes, and [Examples/Graviton_Scattering_Tree_Level_FeynArt.nb](Examples/Graviton_Scattering_Tree_Level_FeynArt.nb) for a worked off-shell four-graviton tree calculation.
+`GenericModel` is required because the classes file does not name its generic model and the FeynArts default is the stock `"Lorentz"` file. The snapshot covers the cubic and quartic graviton interactions and the oriented ghost coupling at gauge parameter 2 with symbolic `D`. The ordinary ghost line is `-I MTD[mu,nu] FAD[p]`. This release is ready for three-/four-graviton trees; loop compatibility checks are deferred and the optional bridge deliberately rejects the new snapshot's loop requests. Start a fresh kernel after updating the model. See the [GR guide](FeynArts/Models/GR/README.md) for details and hashes, and [Examples/04. Graviton_Scattering_Tree_Level_FeynArts.nb](Examples/04.%20Graviton_Scattering_Tree_Level_FeynArts.nb) for a worked off-shell four-graviton tree calculation.
 
-A separate [GRScalar model](FeynArts/Models/GRScalar/README.md) adds one real minimally coupled scalar of arbitrary symbolic mass, including `TSS` and `TTSS` through $\kappa^2$. It is supplied ready for the tested native tree workflows; no rebuild is needed. Use `InitializeModel["GRScalar", GenericModel -> "GRScalar"]` with the same loading workflow; its guide also shows explicit path registration without loading FeynGrav. The optional pure-GR bridge is unchanged; scalar self-interactions, non-minimal couplings and loop validation are outside this model.
+A separate [Single-Scalar-Tensor-Minimal-Coupling model](FeynArts/Models/Single-Scalar-Tensor-Minimal-Coupling/README.md) adds one real minimally coupled scalar of arbitrary symbolic mass, including `TSS` and `TTSS` through $\kappa^2$. It is supplied ready for the tested native tree workflows; no rebuild is needed. Use `InitializeModel["Single-Scalar-Tensor-Minimal-Coupling", GenericModel -> "Single-Scalar-Tensor-Minimal-Coupling"]` with the same loading workflow; its guide also shows explicit path registration without loading FeynGrav. The optional pure-GR bridge is unchanged; independent positive cubic and quartic scalar self-interactions are included. Setting both couplings to zero gives the minimal massive scalar sector. Non-minimal couplings and loop validation are outside this model.
 
 ## CalcFormConverter
 
@@ -137,19 +137,23 @@ See the [user guide](CalcFormConverter/README.md) for workflows, supported expre
 
 ## Examples
 
-The [Examples directory](Examples) contains complete notebooks. Run their setup cells before the calculation cells; these establish libraries, kinematics, and conventions.
+The [examples guide](Examples/README.md) lists the numbered notebooks in their suggested reading order, with requirements and scope. Run each notebook in a fresh kernel and evaluate its setup cells before its calculation cells.
 
-| Notebook | Topic |
-| --- | --- |
-| [Scalars_Gravitational_Scattering_Tree_Level.nb](Examples/Scalars_Gravitational_Scattering_Tree_Level.nb) | Tree-level scalar scattering through gravity. |
-| [Graviton_Scattering_Tree_Level.nb](Examples/Graviton_Scattering_Tree_Level.nb) | Tree-level graviton scattering and polarisation contractions; FORM calculation cells require FORM/TFORM. |
-| [Nieuwenhuizen_Operators.nb](Examples/Nieuwenhuizen_Operators.nb) | Algebra of the Nieuwenhuizen operators. |
-| [Graviton_Self_Energy.nb](Examples/Graviton_Self_Energy.nb) | Graviton contributions to the graviton self-energy. |
-| [Graviton_Self_Energy_Matter_Contribution.nb](Examples/Graviton_Self_Energy_Matter_Contribution.nb) | Matter contributions to the graviton self-energy; setup includes `importSUNYM[]`. |
-| [Matter_Self_Energy_Graviton_Contribution.nb](Examples/Matter_Self_Energy_Graviton_Contribution.nb) | Gravitational contributions to matter self-energies; setup includes `importSUNYM[]`. |
-| [Graviton_Scalar_Vertex_at_First_Loop.nb](Examples/Graviton_Scalar_Vertex_at_First_Loop.nb) | A one-loop graviton–scalar vertex calculation. |
+| No. | Notebook | Topic |
+| --- | --- | --- |
+| 01 | [01. Nieuwenhuizen_Operators.nb](Examples/01.%20Nieuwenhuizen_Operators.nb) | Spin projectors and operator algebra. |
+| 02 | [02. Scalars_Gravitational_Scattering_Tree_Level.nb](Examples/02.%20Scalars_Gravitational_Scattering_Tree_Level.nb) | Tree-level gravitational scattering of scalars. |
+| 03 | [03. Graviton_Scattering_Tree_Level.nb](Examples/03.%20Graviton_Scattering_Tree_Level.nb) | Tree-level graviton scattering. |
+| 04 | [04. Graviton_Scattering_Tree_Level_FeynArts.nb](Examples/04.%20Graviton_Scattering_Tree_Level_FeynArts.nb) | Tree-level graviton scattering with FeynArts. |
+| 05 | [05. Graviton_Self_Energy.nb](Examples/05.%20Graviton_Self_Energy.nb) | One-loop graviton self-energy. |
+| 06 | [06. Matter_Self_Energy_Graviton_Contribution.nb](Examples/06.%20Matter_Self_Energy_Graviton_Contribution.nb) | Gravitational corrections to matter propagators. |
+| 07 | [07. Graviton_Self_Energy_Matter_Contribution.nb](Examples/07.%20Graviton_Self_Energy_Matter_Contribution.nb) | Matter contributions to the graviton self-energy. |
+| 08 | [08. Graviton_Scalar_Vertex_One_Loop.nb](Examples/08.%20Graviton_Scalar_Vertex_One_Loop.nb) | One-loop scalar–graviton vertex. |
+| 09 | [09. Scalar_Scattering_Tree_Level_FeynArts.nb](Examples/09.%20Scalar_Scattering_Tree_Level_FeynArts.nb) | Massive scalar scattering with gravity and cubic/quartic self-interactions, using FeynArts. |
+| 10 | [10. Scalar_Scattering_John_Tree_Level_FeynArts.nb](Examples/10.%20Scalar_Scattering_John_Tree_Level_FeynArts.nb) | On-shell scalar scattering with the John interaction, using FeynArts. |
+| 11 | [11. Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb](Examples/11.%20Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb) | EsGB scalar annihilation into gravitons; diagnostic example with unresolved longitudinal checks in the minimal sector. |
 
-The converter's [ScalarBubble.wl](CalcFormConverter/Examples/ScalarBubble.wl) demonstrates manual and automated FORM workflows for a scalar-projected quadratic-gravity bubble. It requires the cubic quadratic-gravity library, loaded with `importQuadraticGravity[1]`, and FORM/TFORM for execution.
+The converter's [ScalarBubble.wl](CalcFormConverter/Examples/ScalarBubble.wl) demonstrates manual and automated FORM workflows for a scalar-projected quadratic-gravity bubble. It requires the cubic quadratic-gravity library, loaded with `FeynGravImportQuadraticGravity[1]`, and FORM/TFORM for execution.
 
 ## Benchmarks
 
@@ -164,7 +168,7 @@ The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, i
 | [Rules](Rules) | Interaction-rule construction, structural validation and projector utilities. |
 | [Libs](Libs) | Precomputed vertex libraries and the [library generator](Libs/Generator.md), which uses CalcFormConverter. |
 | [Examples](Examples) | Calculation notebooks. |
-| [FeynArts/Models](FeynArts/Models/README.md) | Native PureGR and GRScalar model bundles and tree-use guides. |
+| [FeynArts/Models](FeynArts/Models/README.md) | Four native gravity/scalar model bundles and tree-use guides. |
 | [Documentation](Documentation/README.md) | Main-package reference, documentation routes and verification records. |
 | [Benchmark](Benchmark/README.md) | Reproducible converter and library-generation measurements. |
 | [CalcFormConverter](CalcFormConverter) | Converter, FORM runtime, templates, documentation, examples, and tests. |
@@ -172,7 +176,7 @@ The [Benchmark notebooks](Benchmark/README.md) measure export, FORM execution, i
 ## Troubleshooting and support
 
 - **The package cannot be found:** check that `FeynGrav.wl` is directly inside `$UserBaseDirectory/Applications/FeynGrav`, and that FeynCalc loads in the same kernel.
-- **A vertex remains unevaluated or a library cannot be loaded:** check the argument syntax, required sector, and installed library order. Enable `printOutput -> True` on the relevant import command to inspect what is available.
+- **A vertex remains unevaluated or a library cannot be loaded:** check the argument syntax, required sector, and installed library order. Use `Verbose -> True` on the relevant import command to inspect what is available.
 - **FORM works in a terminal but cannot be found in Mathematica:** the kernel may have a different `PATH`. Supply the absolute executable path using `FORMExecutable` when checking or calculating. Multiple workers require a working TFORM executable.
 - **A FORM calculation returns `Failure`:** inspect the complete failure, including its nested cause, stage, job directory, and log paths. Failed jobs retain diagnostic files. See the [converter troubleshooting guide](CalcFormConverter/README.md#troubleshooting).
 - **Definitions appear inconsistent after an update:** restart the kernel and rerun the notebook's setup cells.
@@ -224,6 +228,8 @@ Planned release tag: `v4.1.0`.
 
 ## Citations and licence
 
+Evaluate `FeynGravHowToCite[]` to print the reference list and links in your session. Like `FeynCalcHowToCite[]`, it prints guidance and returns `Null`; it does not fetch information online.
+
 When using FeynGrav in published work, cite the publications relevant to the version and features used:
 
 - Boris Latosh, [FeynGrav](https://doi.org/10.1088/1361-6382/ac7e15), *Classical and Quantum Gravity* **39** (2022), 165006.
@@ -237,4 +243,4 @@ FeynGrav is distributed under the GNU General Public Licence version 3; see [Lic
 
 ## Native scalar extensions — 18 October 2026
 
-`GRScalarPotential`, `GRJohn` and `GREsGB` are supplied alongside PureGR and GRScalar, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](FeynArts/Models/README.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.
+`Single-Scalar-Tensor-Minimal-Coupling`, `John` and `Einstein-scalar-Gauss-Bonnet` are supplied alongside `GR`, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](FeynArts/Models/README.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.

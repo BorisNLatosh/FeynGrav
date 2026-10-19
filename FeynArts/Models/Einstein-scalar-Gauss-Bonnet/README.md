@@ -1,12 +1,12 @@
 # Einstein–scalar–Gauss–Bonnet model
 
-`GREsGB` contains GR and one real scalar of arbitrary symbolic mass, with action
+`Einstein-scalar-Gauss-Bonnet` contains GR and one real scalar of arbitrary symbolic mass, with action
 
 $$S=\int d^4x\sqrt{-g}\left[-\frac{2R}{\kappa^2}+\frac12g^{\mu\nu}\partial_\mu\phi\partial_\nu\phi-\frac12m^2\phi^2+\left(g_1\phi+\frac{g_2}{2!}\phi^2\right)\mathcal G\right]+S_{\mathrm{gf}}+S_{\mathrm{FP}},$$
 
 $$\mathcal G=R_{abcd}R^{abcd}-4R_{ab}R^{ab}+R^2.$$
 
-The parameter symbols are ``FeynGrav`ScalarMass``, ``FeynGrav`GaussBonnetG1`` and ``FeynGrav`GaussBonnetG2``. They remain unassigned; specialise them by replacement after conversion. Expansion is about flat space and zero scalar background, with g = eta + kappa h. GaugeFixingEpsilon = 2 and the accepted negative gravitational ghost propagator are inherited from PureGR. All vertex momenta are incoming. Symbolic D provides a dimensional-regularisation continuation of the four-dimensional action; no 1/(D-4) rescaling or four-dimensional curvature identity is used.
+The parameter symbols are ``FeynGrav`ScalarMass``, ``FeynGrav`GaussBonnetG1`` and ``FeynGrav`GaussBonnetG2``. They remain unassigned; specialise them by replacement after conversion. Expansion is about flat space and zero scalar background, with g = eta + kappa h. GaugeFixingEpsilon = 2 and the accepted negative gravitational ghost propagator are inherited from GR. All vertex momenta are incoming. Symbolic D provides a dimensional-regularisation continuation of the four-dimensional action; no 1/(D-4) rescaling or four-dimensional curvature identity is used.
 
 ## Vertex inventory
 
@@ -17,23 +17,25 @@ The parameter symbols are ``FeynGrav`ScalarMass``, ``FeynGrav`GaussBonnetG1`` an
 | TTSS | Minimal massive scalar coupling plus kappa-squared g2 Gauss–Bonnet contribution |
 | TTS | kappa-squared g1 Gauss–Bonnet contribution |
 
-The two scalar factorial cancels under differentiation. There are no lower-order Gauss–Bonnet vertices and no additional propagator or mass insertion. Both zero couplings recover GRScalar.
+The two scalar factorial cancels under differentiation. There are no lower-order Gauss–Bonnet vertices and no additional propagator or mass insertion. Setting both Gauss–Bonnet couplings to zero recovers the minimal massive scalar sector, equivalent to the unified scalar model with both potential couplings zero.
 
 The cutoff is **per vertex**, through kappa squared. A diagram may contain two TTS vertices and therefore be proportional to kappa to the fourth power and g1 squared. The native model does not remove those diagrams.
 
 ## Native workflow
+
+[Example 11](../../../Examples/11.%20Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb) shows scalar–scalar to graviton–graviton scattering. The minimal-contact normalisation defect has been corrected: both generic on-shell graviton Ward identities now pass for the rebuilt bundle. The updated notebook includes both generic Ward checks and was evaluated in a fresh kernel; stale calculation outputs were removed. See [the correction record](../../../Documentation/Verification/ScalarWardCorrection.md).
 
 Use a fresh kernel and FeynCalc-patched FeynArts:
 
 ```wl
 $LoadAddOns = {"FeynArts"};
 Needs["FeynGrav`"];
-FeynArts`InitializeModel["GREsGB", FeynArts`GenericModel -> "GREsGB"];
+FeynArts`InitializeModel["Einstein-scalar-Gauss-Bonnet", FeynArts`GenericModel -> "Einstein-scalar-Gauss-Bonnet"];
 top = FeynArts`CreateTopologies[0, 2 -> 2,
   FeynArts`Adjacencies -> {3, 4}];
 ins = FeynArts`InsertFields[top,
   {FeynArts`S[1], FeynArts`S[1]} -> {FeynArts`T[1], FeynArts`T[1]},
-  FeynArts`Model -> "GREsGB", FeynArts`GenericModel -> "GREsGB",
+  FeynArts`Model -> "Einstein-scalar-Gauss-Bonnet", FeynArts`GenericModel -> "Einstein-scalar-Gauss-Bonnet",
   FeynArts`InsertionLevel -> {FeynArts`Classes}];
 raw = FeynArts`CreateFeynAmp[ins,
   FeynArts`PreFactor -> 1, FeynArts`GaugeRules -> {},
@@ -60,4 +62,13 @@ The corrected order-two library agrees exactly with an independent linearised-cu
 
 This model has no loop validation, no general physical on-shell amplitude proof and no higher-order EsGB vertices. Higher-order source routines retain the legacy contraction and require a separate audit; this delivery makes no claim about them. Do not reuse already imported old EsGB rules: restart the kernel or explicitly reimport the corrected library.
 
-The developer command `FeynArtsIntegration/BuildGREsGB.wl` takes a fresh absolute output directory. Normal model use requires neither that script, FORM nor interaction-library generation.
+The developer command `FeynArtsIntegration/BuildEinsteinScalarGaussBonnet.wl` takes a fresh absolute output directory. Normal model use requires neither that script, FORM nor interaction-library generation.
+
+## Minimal scalar normalisation update — 19 October 2026
+
+The rebuilt bundle uses the corrected two-graviton minimal scalar contact. Both
+graviton Ward identities for scalar–scalar to graviton–graviton scattering pass
+exactly with symbolic D, mass and model couplings. This supersedes earlier
+statements that these particular on-shell checks had not been performed; it
+does not add loop validation. Restart the kernel before loading the updated
+model. See [the verification record](../../../Documentation/Verification/ScalarWardCorrection.md).

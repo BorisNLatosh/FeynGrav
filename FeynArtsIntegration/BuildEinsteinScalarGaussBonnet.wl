@@ -1,3 +1,3 @@
 (* Explicit developer build; supply a new absolute target directory. *)
-buildModel="GRJohn";
+buildModel="Einstein-scalar-Gauss-Bonnet";
 Get[FileNameJoin[{DirectoryName[$InputFileName],"ScalarModelBuilder.wl"}]];

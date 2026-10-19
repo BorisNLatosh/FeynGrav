@@ -17,7 +17,7 @@ ScalarBubbleExample[p_, l_, m0_, m2_] := Module[
 
 (* Example commands, to evaluate explicitly:
 
-   importQuadraticGravity[1];
+   FeynGravImportQuadraticGravity[1];
    expression = ScalarBubbleExample[p, l, m0, m2];
    job = CalcFormExport[expression, "/absolute/existing/directory/bubble.frm",
      LoopMomenta -> {l}];
@@ -34,7 +34,7 @@ ScalarBubbleExample[p_, l_, m0_, m2_] := Module[
 
    status = CalcFormCheck[];
    (* If status["Status"] is "NotFound", explicitly request CalcFormInstall[]. *)
-   importQuadraticGravity[1];
+   FeynGravImportQuadraticGravity[1];
    expression = ScalarBubbleExample[p, l, m0, m2];
    result = CalcFormCalculate[expression, LoopMomenta -> {l},
      WorkingDirectory -> "/tmp", KeepFiles -> True,

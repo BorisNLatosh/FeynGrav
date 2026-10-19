@@ -42,6 +42,9 @@ HorndeskiG2Uncontracted::usage = HorndeskiG2Uncontracted::usage <> " Supported s
 
 Begin["`Private`"];
 
+(* Averaged metric-density coefficients require n! when differentiated into
+   n labelled graviton legs. Do not apply it again to permutation sums. *)
+
 
 Clear[MomentaWrapper];
 
@@ -88,12 +91,14 @@ HorndeskiG2[gravitonParameters_, scalarMomenta_, b_] :=
         HorndeskiG2[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 2, 0, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b, Infinity}},
         (
+Factorial[Length[gravitonParameters]/2] (
 Total[RuleValidation`RuleRequire[
 			RuleValidation`RuleRequire[Map[
 				I (Global`\[Kappa])^(Length[gravitonParameters]/2) Power[-1,b] RuleValidation`RuleRequire[CTensorGeneral[RuleValidation`RuleRequire[DummyArray2[b]],gravitonParameters]] RuleValidation`RuleRequire[MomentaWrapper[#[[;;2b]]]] & ,
 				Permutations[scalarMomenta]
 			]]
 		]] //Contract
+)
         ), True
     ];
 
@@ -105,12 +110,14 @@ HorndeskiG2Uncontracted[gravitonParameters_, scalarMomenta_, b_] :=
         HorndeskiG2Uncontracted[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 2, 0, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b, Infinity}},
         (
+Factorial[Length[gravitonParameters]/2] (
 Total[RuleValidation`RuleRequire[
 			RuleValidation`RuleRequire[Map[
 				I (Global`\[Kappa])^(Length[gravitonParameters]/2) Power[-1,b] RuleValidation`RuleRequire[CTensorGeneral[RuleValidation`RuleRequire[DummyArray2[b]],gravitonParameters]] RuleValidation`RuleRequire[MomentaWrapper[#[[;;2b]]]] & ,
 				Permutations[scalarMomenta]
 			]]
 		]]
+)
         ), True
     ];
 

@@ -23,7 +23,7 @@ faValidModel[model_] := Module[{directory, name, manifestPath, manifest, files, 
   families = Which[orders === {1, 2}, {"TTT", "TTTT", "TUU"},
     orders === {1, 2, 3}, {"TTT", "TTTT", "TTTTT", "TUU"}, True, None];
   If[! AssociationQ[manifest] || Lookup[manifest, "Schema", 0] =!= 1 ||
-      Lookup[manifest, "Profile", None] =!= "PureGR" ||
+      Lookup[manifest, "Profile", None] =!= "GR" ||
       Lookup[manifest, "FixedGauge", None] =!= 2 ||
       Lookup[manifest, "ModelName", None] =!= name ||
       families === None ||

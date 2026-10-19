@@ -1,7 +1,7 @@
 (* Export the complete target without running its potentially large FORM job. *)
 $FeynCalcStartupMessages=False;
 Get[FileNameJoin[{DirectoryName[DirectoryName[DirectoryName[$InputFileName]]],"FeynGrav.wl"}]];
-importQuadraticGravity[1];
+FeynGravImportQuadraticGravity[1];
 Get[FileNameJoin[{DirectoryName[DirectoryName[$InputFileName]],"Examples","ScalarBubble.wl"}]];
 expr=ScalarBubbleExample[p,l,m0,m2];
 {seconds,job}=AbsoluteTiming[CalcFormExport[expr,FileNameJoin[{Environment["CFC_TEST_DIR"],"full-bubble.frm"}],LoopMomenta->{l}]];

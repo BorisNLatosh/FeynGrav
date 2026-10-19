@@ -67,6 +67,9 @@ GravitonVectorGhostVertexUncontracted::usage = GravitonVectorGhostVertexUncontra
 
 Begin["`Private`"];
 
+(* Averaged metric-density coefficients require n! when differentiated into
+   n labelled graviton legs. Do not apply it again to permutation sums. *)
+
 
 (* Supplementary functions. *)
 
@@ -105,7 +108,9 @@ GravitonMassiveVectorVertexUncontracted[indexArray_, \[Lambda]1_, p1_, \[Lambda]
         GravitonMassiveVectorVertexUncontracted[indexArray, \[Lambda]1, p1, \[Lambda]2, p2, m],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 I (Global`\[Kappa])^(Length[indexArray]/2) ( (1/2) RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Alpha],Global`\[Nu],Global`\[Beta]},indexArray]] FVD[p1,Global`\[Sigma]1]FVD[p2,Global`\[Sigma]2]RuleValidation`RuleRequire[FReduced[Global`\[Mu],Global`\[Nu],Global`\[Sigma]1,\[Lambda]1]]RuleValidation`RuleRequire[FReduced[Global`\[Alpha],Global`\[Beta],Global`\[Sigma]2,\[Lambda]2]] + m^2 RuleValidation`RuleRequire[CTensorGeneral[{\[Lambda]1,\[Lambda]2},indexArray]] )
+)
         ), True
     ];
 
@@ -117,7 +122,9 @@ GravitonMassiveVectorVertex[indexArray_, \[Lambda]1_, p1_, \[Lambda]2_, p2_, m_]
         GravitonMassiveVectorVertex[indexArray, \[Lambda]1, p1, \[Lambda]2, p2, m],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 I (Global`\[Kappa])^(Length[indexArray]/2) ( (1/2) RuleValidation`RuleRequire[CTensorGeneral[{\[Mu],\[Alpha],\[Nu],\[Beta]},indexArray]] FVD[p1,\[Sigma]1]FVD[p2,\[Sigma]2]RuleValidation`RuleRequire[FReduced[\[Mu],\[Nu],\[Sigma]1,\[Lambda]1]]RuleValidation`RuleRequire[FReduced[\[Alpha],\[Beta],\[Sigma]2,\[Lambda]2]] + m^2 RuleValidation`RuleRequire[CTensorGeneral[{\[Lambda]1,\[Lambda]2},indexArray]] ) //Contract
+)
         ), True
     ];
 
@@ -132,7 +139,9 @@ GravitonVectorVertex1[indexArray_, \[Lambda]1_, p1_, \[Lambda]2_, p2_] :=
         GravitonVectorVertex1[indexArray, \[Lambda]1, p1, \[Lambda]2, p2],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 RuleValidation`RuleRequire[CTensorGeneral[{\[Mu],\[Alpha],\[Nu],\[Beta]},indexArray]] 1/2 FVD[p1,\[Sigma]1]FVD[p2,\[Sigma]2]RuleValidation`RuleRequire[FReduced[\[Mu],\[Nu],\[Sigma]1,\[Lambda]1]]RuleValidation`RuleRequire[FReduced[\[Alpha],\[Beta],\[Sigma]2,\[Lambda]2]]
+)
         ), True
     ];
 
@@ -144,7 +153,9 @@ GravitonVectorVertex3[indexArray_, \[Lambda]1_, p1_, \[Lambda]2_, p2_] :=
         GravitonVectorVertex3[indexArray, \[Lambda]1, p1, \[Lambda]2, p2],
         {{1, "Array", 3, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}},
         (
+Factorial[Length[indexArray]/3] (
 (-1) RuleValidation`RuleRequire[CTensorGeneral[{\[Sigma]1,\[Lambda]1,\[Sigma]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[indexArray]]]] FVD[p1,\[Sigma]1]FVD[p2,\[Sigma]2]
+)
         ), True
     ];
 
@@ -204,8 +215,8 @@ GravitonVectorVertexUncontracted[indexArray_, \[Lambda]1_, p1_, \[Lambda]2_, p2_
         {{1, "Array", 3, 3, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}},
         (
 Switch[Length[indexArray]/3,
-			1, I (Global`\[Kappa])^(Length[indexArray]/3) ( RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Alpha],Global`\[Nu],Global`\[Beta]},RuleValidation`RuleRequire[TakeLorenzIndices[indexArray]]]] 1/2 FVD[p1,Global`\[Sigma]1]FVD[p2,Global`\[Sigma]2]RuleValidation`RuleRequire[FReduced[Global`\[Mu],Global`\[Nu],Global`\[Sigma]1,\[Lambda]1]]RuleValidation`RuleRequire[FReduced[Global`\[Alpha],Global`\[Beta],Global`\[Sigma]2,\[Lambda]2]] - \[CurlyEpsilon] RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Sigma]1,\[Lambda]1,Global`\[Sigma]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[indexArray]]]] FVD[p1,Global`\[Sigma]1]FVD[p2,Global`\[Sigma]2] + \[CurlyEpsilon] Total[RuleValidation`RuleRequire[ RuleValidation`RuleRequire[Map[ ( RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Nu],Global`\[Mu]1,\[Lambda]1,Global`\[Mu]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[#[[4;;]]]]]] (RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]1,Global`\[Mu],Global`\[Nu],Global`\[Sigma],#[[1]],#[[2]]]]FVD[#[[3]],Global`\[Sigma]]FVD[p2,Global`\[Mu]2] + RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]2,Global`\[Mu],Global`\[Nu],Global`\[Sigma],#[[1]],#[[2]]]]FVD[#[[3]],Global`\[Sigma]]FVD[p1,Global`\[Mu]1]) )& , Flatten/@Permutations[Partition[indexArray,3]] ]] ]] ) ,
-			_, I (Global`\[Kappa])^(Length[indexArray]/3) ( RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Alpha],Global`\[Nu],Global`\[Beta]},RuleValidation`RuleRequire[TakeLorenzIndices[indexArray]]]] 1/2 FVD[p1,Global`\[Sigma]1]FVD[p2,Global`\[Sigma]2]RuleValidation`RuleRequire[FReduced[Global`\[Mu],Global`\[Nu],Global`\[Sigma]1,\[Lambda]1]]RuleValidation`RuleRequire[FReduced[Global`\[Alpha],Global`\[Beta],Global`\[Sigma]2,\[Lambda]2]] - \[CurlyEpsilon] RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Sigma]1,\[Lambda]1,Global`\[Sigma]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[indexArray]]]] FVD[p1,Global`\[Sigma]1]FVD[p2,Global`\[Sigma]2] + \[CurlyEpsilon] Total[RuleValidation`RuleRequire[ RuleValidation`RuleRequire[Map[ ( RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Nu],Global`\[Mu]1,\[Lambda]1,Global`\[Mu]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[#[[4;;]]]]]] (RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]1,Global`\[Mu],Global`\[Nu],Global`\[Sigma],#[[1]],#[[2]]]]FVD[#[[3]],Global`\[Sigma]]FVD[p2,Global`\[Mu]2] + RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]2,Global`\[Mu],Global`\[Nu],Global`\[Sigma],#[[1]],#[[2]]]]FVD[#[[3]],Global`\[Sigma]]FVD[p1,Global`\[Mu]1]) )& , Flatten/@Permutations[Partition[indexArray,3]] ]] ]] + \[CurlyEpsilon] Total[RuleValidation`RuleRequire[ RuleValidation`RuleRequire[Map[ ( (-1/2) RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Nu],Global`\[Alpha],Global`\[Beta],Global`\[Mu]1,\[Lambda]1,Global`\[Mu]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[#[[7;;]]]]]] (FVD[#[[3]],Global`\[Tau]1]FVD[#[[6]],Global`\[Tau]2]RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]1,Global`\[Mu],Global`\[Nu],Global`\[Tau]1,#[[1]],#[[2]]]] RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]2,Global`\[Alpha],Global`\[Beta],Global`\[Tau]2,#[[4]],#[[5]]]] + FVD[#[[3]],Global`\[Tau]2]FVD[#[[6]],Global`\[Tau]1]RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]1,Global`\[Mu],Global`\[Nu],Global`\[Tau]1,#[[4]],#[[5]]]] RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]2,Global`\[Alpha],Global`\[Beta],Global`\[Tau]2,#[[1]],#[[2]]]] ) )& , Flatten/@Permutations[Partition[indexArray,3]] ]] ]] )
+			1, I (Global`\[Kappa])^(Length[indexArray]/3) ( Factorial[Length[indexArray]/3] RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Alpha],Global`\[Nu],Global`\[Beta]},RuleValidation`RuleRequire[TakeLorenzIndices[indexArray]]]] 1/2 FVD[p1,Global`\[Sigma]1]FVD[p2,Global`\[Sigma]2]RuleValidation`RuleRequire[FReduced[Global`\[Mu],Global`\[Nu],Global`\[Sigma]1,\[Lambda]1]]RuleValidation`RuleRequire[FReduced[Global`\[Alpha],Global`\[Beta],Global`\[Sigma]2,\[Lambda]2]] - \[CurlyEpsilon] Factorial[Length[indexArray]/3] RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Sigma]1,\[Lambda]1,Global`\[Sigma]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[indexArray]]]] FVD[p1,Global`\[Sigma]1]FVD[p2,Global`\[Sigma]2] + \[CurlyEpsilon] Total[RuleValidation`RuleRequire[ RuleValidation`RuleRequire[Map[ ( RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Nu],Global`\[Mu]1,\[Lambda]1,Global`\[Mu]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[#[[4;;]]]]]] (RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]1,Global`\[Mu],Global`\[Nu],Global`\[Sigma],#[[1]],#[[2]]]]FVD[#[[3]],Global`\[Sigma]]FVD[p2,Global`\[Mu]2] + RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]2,Global`\[Mu],Global`\[Nu],Global`\[Sigma],#[[1]],#[[2]]]]FVD[#[[3]],Global`\[Sigma]]FVD[p1,Global`\[Mu]1]) )& , Flatten/@Permutations[Partition[indexArray,3]] ]] ]] ) ,
+			_, I (Global`\[Kappa])^(Length[indexArray]/3) ( Factorial[Length[indexArray]/3] RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Alpha],Global`\[Nu],Global`\[Beta]},RuleValidation`RuleRequire[TakeLorenzIndices[indexArray]]]] 1/2 FVD[p1,Global`\[Sigma]1]FVD[p2,Global`\[Sigma]2]RuleValidation`RuleRequire[FReduced[Global`\[Mu],Global`\[Nu],Global`\[Sigma]1,\[Lambda]1]]RuleValidation`RuleRequire[FReduced[Global`\[Alpha],Global`\[Beta],Global`\[Sigma]2,\[Lambda]2]] - \[CurlyEpsilon] Factorial[Length[indexArray]/3] RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Sigma]1,\[Lambda]1,Global`\[Sigma]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[indexArray]]]] FVD[p1,Global`\[Sigma]1]FVD[p2,Global`\[Sigma]2] + \[CurlyEpsilon] Total[RuleValidation`RuleRequire[ RuleValidation`RuleRequire[Map[ ( RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Nu],Global`\[Mu]1,\[Lambda]1,Global`\[Mu]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[#[[4;;]]]]]] (RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]1,Global`\[Mu],Global`\[Nu],Global`\[Sigma],#[[1]],#[[2]]]]FVD[#[[3]],Global`\[Sigma]]FVD[p2,Global`\[Mu]2] + RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]2,Global`\[Mu],Global`\[Nu],Global`\[Sigma],#[[1]],#[[2]]]]FVD[#[[3]],Global`\[Sigma]]FVD[p1,Global`\[Mu]1]) )& , Flatten/@Permutations[Partition[indexArray,3]] ]] ]] + \[CurlyEpsilon] Total[RuleValidation`RuleRequire[ RuleValidation`RuleRequire[Map[ ( (-1/2) RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Nu],Global`\[Alpha],Global`\[Beta],Global`\[Mu]1,\[Lambda]1,Global`\[Mu]2,\[Lambda]2},RuleValidation`RuleRequire[TakeLorenzIndices[#[[7;;]]]]]] (FVD[#[[3]],Global`\[Tau]1]FVD[#[[6]],Global`\[Tau]2]RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]1,Global`\[Mu],Global`\[Nu],Global`\[Tau]1,#[[1]],#[[2]]]] RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]2,Global`\[Alpha],Global`\[Beta],Global`\[Tau]2,#[[4]],#[[5]]]] + FVD[#[[3]],Global`\[Tau]2]FVD[#[[6]],Global`\[Tau]1]RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]1,Global`\[Mu],Global`\[Nu],Global`\[Tau]1,#[[4]],#[[5]]]] RuleValidation`RuleRequire[GammaTensor[Global`\[Mu]2,Global`\[Alpha],Global`\[Beta],Global`\[Tau]2,#[[1]],#[[2]]]] ) )& , Flatten/@Permutations[Partition[indexArray,3]] ]] ]] )
 		]
         ), True
     ];
@@ -221,7 +232,9 @@ GravitonVectorGhostVertex[indexArray_, p1_, p2_] :=
         GravitonVectorGhostVertex[indexArray, p1, p2],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 - I (Global`\[Kappa])^(Length[indexArray]/2) FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]] RuleValidation`RuleRequire[CTensorGeneral[{\[ScriptM],\[ScriptN]},indexArray]] //Contract
+)
         ), True
     ];
 
@@ -233,7 +246,9 @@ GravitonVectorGhostVertexUncontracted[indexArray_, p1_, p2_] :=
         GravitonVectorGhostVertexUncontracted[indexArray, p1, p2],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 - I (Global`\[Kappa])^(Length[indexArray]/2) FVD[p1,Global`\[Mu]]FVD[p2,Global`\[Nu]] RuleValidation`RuleRequire[CTensorGeneral[{Global`\[Mu],Global`\[Nu]},indexArray]]
+)
         ), True
     ];
 

@@ -1,7 +1,7 @@
 {
 	"Schema":1,
-	"Profile":"GREsGB",
-	"ModelName":"GREsGB",
+	"Profile":"Single-Scalar-Tensor-Minimal-Coupling",
+	"ModelName":"Single-Scalar-Tensor-Minimal-Coupling",
 	"FixedGauge":2,
 	"LorentzDimension":"Symbolic D",
 	"FieldClasses":[
@@ -16,7 +16,12 @@
 		"TUU",
 		"TSS",
 		"TTSS",
-		"TTS"
+		"SSS",
+		"TSSS",
+		"TTSSS",
+		"SSSS",
+		"TSSSS",
+		"TTSSSS"
 	],
 	"GravitonOrders":[
 		1,
@@ -24,8 +29,8 @@
 	],
 	"VertexOrderCutoff":2,
 	"Parameters":[
-		"FeynGrav`GaussBonnetG1",
-		"FeynGrav`GaussBonnetG2"
+		"FeynGrav`ScalarLambda3",
+		"FeynGrav`ScalarLambda4"
 	],
 	"ScalarMassSymbol":"FeynGrav`ScalarMass",
 	"LibrarySources":[
@@ -63,7 +68,7 @@
 			],
 			"Order":2,
 			"Path":"\/home\/latosh\/.Wolfram\/Applications\/FeynGrav\/Libs\/GravitonScalarVertex_2",
-			"SHA256":"73de47fde07ff3b1cc6b39762474cf8c3b3b991a0386a0993e2081573c071e97"
+			"SHA256":"dccfed9ac311ccc22c5e55820f4a471f17cc841a0476b97f3e9235ce7360b718"
 		},
 		{
 			"Family":"GravitonScalarPotentialVertex",
@@ -82,15 +87,6 @@
 			"Order":2,
 			"Path":"\/home\/latosh\/.Wolfram\/Applications\/FeynGrav\/Libs\/GravitonScalarPotentialVertex_2",
 			"SHA256":"e06173133694e2fec5b9f4ea1064f8e4a23512612ad6ba27cf2d30376a7905f6"
-		},
-		{
-			"Family":"ScalarGaussBonnet",
-			"Indices":[
-				2
-			],
-			"Order":2,
-			"Path":"\/home\/latosh\/.Wolfram\/Applications\/FeynGrav\/Libs\/ScalarGaussBonnet_2",
-			"SHA256":"1253561c61bcce6394543513dd40ded2ab6761d253cd337f33d3c9c1096bf7d1"
 		}
 	],
 	"RuleSHA256":[
@@ -98,13 +94,18 @@
 		"b4c8f6b4bf3423bd11d15f2574dc52f02f8bd8ca7c03c80077799a229553758a",
 		"b46e9bef232a8ec8f7034265b1f175ca719eda8cf1495759a763bc8e8ad891ae",
 		"db86f185b9ccce0a25352b62185da4be1bd46007b161ccea87b8c06ec148dffc",
-		"7a2ee6331bb7eb7e7ac823f42e8c48e4a3dce6be1e2f43481bf41ec8745962e7",
-		"60d18c65c44e45d1fc598b7d6d8143f6cef611e8b6cd34eefbd29f6e8db1385e"
+		"4058767bba119749bb4d2cef65baf542cb55d3689ec50e7006da159a36296aed",
+		"281d86e3b971b7aad7aa6ce9b6f20aa9e22c0a181be988ea8866a58e5883a7cc",
+		"d33a0109468e84783dbfaf6ad155461f7ade2649c152ec9e6ccf5639cdfa062f",
+		"352c198f52baaaf456a702e44ed3ddd22b9e72e4fd6e55305633933532593632",
+		"74cc781d527a7f5ccff12d16e328d1f58d8718eb97dea9aa06fa0040311b34f1",
+		"f452cea912cff22de6ffe67794bb03a112291d6ad6646296044d08d790688e17",
+		"765c2544a8fd36dbbefe28e30760d3627c025bd61592f37b3ab346053396d8be"
 	],
 	"FeynArtsVersion":"3.12",
-	"FeynGravSHA256":"edc50765ff5b9d58c311c63e85f7d2885b79819ccd62625a2286a6a44172c282",
+	"FeynGravSHA256":"f6b5fc797b5aec99590694d49baf03ca86ca5ede803134a1f455e64e82d719e6",
 	"ModelFileSHA256":{
-		"Generic":"53fda0b884e4cbff6e329581b0d81356d830867bc41cb64d4fb9fa46dd46e542",
-		"Classes":"7d55909acc7fc281f04c4cd5c232ba8bc7cad840989cb46f03e29430e3cef34b"
+		"Generic":"be3581b4be2b098119a3ed7fa3fd9ebf295aecc7bdf4d7b4f2129e12f4552aec",
+		"Classes":"0bd46f30cda5438b2fb42b1053f113518691371a8bf33868beb475851c6ac894"
 	}
 }

@@ -54,7 +54,8 @@ GravitonScalarPotentialVertexUncontracted::usage = GravitonScalarPotentialVertex
 Begin["`Private`"];
 
 
-(* Kinetic term. *)
+(* Kinetic and mass terms. CTensorGeneral averages over n graviton slots;
+   functional differentiation of n identical gravitons restores n!. *)
 
 
 Clear[GravitonScalarVertexUncontracted];
@@ -64,7 +65,7 @@ GravitonScalarVertexUncontracted[indexArray_, p1_, p2_, m_] :=
         GravitonScalarVertexUncontracted[indexArray, p1, p2, m],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}},
         (
-I (Global`\[Kappa])^(Length[indexArray]/2) ( - (1/2) (FVD[p1,Global`\[ScriptM]]FVD[p2,Global`\[ScriptN]]+FVD[p1,Global`\[ScriptN]]FVD[p2,Global`\[ScriptM]])RuleValidation`RuleRequire[CTensorGeneral[{Global`\[ScriptM],Global`\[ScriptN]},indexArray]] - m^2 RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]] )
+I Factorial[Length[indexArray]/2] (Global`\[Kappa])^(Length[indexArray]/2) ( - (1/2) (FVD[p1,Global`\[ScriptM]]FVD[p2,Global`\[ScriptN]]+FVD[p1,Global`\[ScriptN]]FVD[p2,Global`\[ScriptM]])RuleValidation`RuleRequire[CTensorGeneral[{Global`\[ScriptM],Global`\[ScriptN]},indexArray]] - m^2 RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]] )
         ), True
     ];
 
@@ -76,7 +77,7 @@ GravitonScalarVertex[indexArray_, p1_, p2_, m_] :=
         GravitonScalarVertex[indexArray, p1, p2, m],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}},
         (
-I (Global`\[Kappa])^(Length[indexArray]/2) ( - (1/2) RuleValidation`RuleRequire[Contract[(FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]]+FVD[p1,\[ScriptN]]FVD[p2,\[ScriptM]])RuleValidation`RuleRequire[CTensorGeneral[{\[ScriptM],\[ScriptN]},indexArray]]]] - m^2 FeynCalcInternal[RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]]] ) //Expand
+I Factorial[Length[indexArray]/2] (Global`\[Kappa])^(Length[indexArray]/2) ( - (1/2) RuleValidation`RuleRequire[Contract[(FVD[p1,\[ScriptM]]FVD[p2,\[ScriptN]]+FVD[p1,\[ScriptN]]FVD[p2,\[ScriptM]])RuleValidation`RuleRequire[CTensorGeneral[{\[ScriptM],\[ScriptN]},indexArray]]]] - m^2 FeynCalcInternal[RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]]] ) //Expand
         ), True
     ];
 

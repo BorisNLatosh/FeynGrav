@@ -1,0 +1,2165 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 15.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[     85995,       2157]
+NotebookOptionsPosition[     78106,       2031]
+NotebookOutlinePosition[     78571,       2049]
+CellTagsIndexPosition[     78528,       2046]
+WindowTitle->Scalar scattering with FeynArts
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Scalar scattering with gravity and a cubic/quartic potential", "Title",ExpressionUUID->"b1138547-0ffa-4c97-93c6-4d1c644267d9"],
+
+Cell["\<\
+Tree-level p1 + p2 \[RightArrow] p3 + p4 scattering of identical real scalars \
+of mass m. The action contains +\[Lambda]3 phi^3/3! +\[Lambda]4 phi^4/4! and \
+the canonical massive scalar coupled to gravity. Start in a fresh kernel and \
+evaluate from top to bottom. All momenta p1, p2, p3, p4 denote physical \
+incoming or outgoing momenta as indicated. No loop calculation is performed.\
+\>", "Text",ExpressionUUID->"8d480533-ffbd-4ebb-ac83-2d2147b52eb0"],
+
+Cell[CellGroupData[{
+
+Cell["1. Load FeynGrav", "Section",ExpressionUUID->"cd027244-3502-455c-bd31-5c294251b117"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"$LoadAddOns", " ", "=", " ", 
+   RowBox[{"{", "\"\<FeynArts\>\"", "}"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"<<", "\"\<FeynGrav`\>\""}], ";"}]}], "Input",
+ CellChangeTimes->{{4.0013845861773777`*^9, 4.001384592275112*^9}},
+ CellLabel->"In[1]:=",ExpressionUUID->"219500d5-ff5f-4270-a814-5c1aed671a8a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{
+    StyleBox["\<\"FeynCalc \"\>", "Text",
+     StripOnInput->False,
+     FontWeight->Bold], "\[InvisibleSpace]", 
+    StyleBox["\<\"10.2.1 (stable version). For help, use the \"\>", "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox[
+     TagBox[
+      ButtonBox[
+       RowBox[{
+        RowBox[{"online", " ", "documentation"}], ","}],
+       BaseStyle->"Hyperlink",
+       ButtonData:>{
+         URL["https://feyncalc.github.io/referenceDev"], None},
+       ButtonNote->"https://feyncalc.github.io/referenceDev"],
+      DisplayForm], "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox["\<\" visit the \"\>", "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox[
+     TagBox[
+      ButtonBox["forum",
+       BaseStyle->"Hyperlink",
+       ButtonData:>{
+         URL["https://github.com/FeynCalc/feyncalc/discussions"], None},
+       ButtonNote->"https://github.com/FeynCalc/feyncalc/discussions/"],
+      DisplayForm], "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox["\<\" and have a look at the supplied \"\>", "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox[
+     TagBox[
+      ButtonBox[
+       RowBox[{"examples", "."}],
+       BaseStyle->"Hyperlink",
+       ButtonFunction:>SystemOpen[
+         FileNameJoin[{FeynCalc`$FeynCalcDirectory, "Examples"}]],
+       Evaluator->Automatic,
+       Method->"Preemptive"],
+      DisplayForm], "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox["\<\" The PDF-version of the manual can be downloaded \"\>", 
+     "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox[
+     TagBox[
+      ButtonBox[
+       RowBox[{"here", "."}],
+       BaseStyle->"Hyperlink",
+       ButtonData:>{
+         URL[
+         "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-\
+manual/FeynCalcManual.pdf"], None},
+       ButtonNote->
+        "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-\
+manual/FeynCalcManual.pdf"],
+      DisplayForm], "Text",
+     StripOnInput->False]}],
+   SequenceForm[
+    Style["FeynCalc ", "Text", Bold], 
+    Style["10.2.1 (stable version). For help, use the ", "Text"], 
+    Style[
+     DisplayForm[
+      ButtonBox["online documentation,", ButtonData :> {
+         URL["https://feyncalc.github.io/referenceDev"], None}, BaseStyle -> 
+       "Hyperlink", ButtonNote -> "https://feyncalc.github.io/referenceDev"]],
+      "Text"], 
+    Style[" visit the ", "Text"], 
+    Style[
+     DisplayForm[
+      ButtonBox["forum", ButtonData :> {
+         URL["https://github.com/FeynCalc/feyncalc/discussions"], None}, 
+       BaseStyle -> "Hyperlink", ButtonNote -> 
+       "https://github.com/FeynCalc/feyncalc/discussions/"]], "Text"], 
+    Style[" and have a look at the supplied ", "Text"], 
+    Style[
+     DisplayForm[
+      ButtonBox[
+      "examples.", BaseStyle -> "Hyperlink", ButtonFunction :> SystemOpen[
+         FileNameJoin[{FeynCalc`$FeynCalcDirectory, "Examples"}]], Evaluator -> 
+       Automatic, Method -> "Preemptive"]], "Text"], 
+    Style[" The PDF-version of the manual can be downloaded ", "Text"], 
+    Style[
+     DisplayForm[
+      ButtonBox["here.", ButtonData :> {
+         URL[
+         "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-\
+manual/FeynCalcManual.pdf"], None}, BaseStyle -> "Hyperlink", ButtonNote -> 
+       "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-\
+manual/FeynCalcManual.pdf"]], "Text"]],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386048213666*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"d4754007-ca67-450c-bc34-630ce50eb946"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"If you use FeynCalc in your research, please evaluate \
+FeynCalcHowToCite[] to learn how to cite this software.\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386048214788*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"86ec948f-8cda-462f-99e3-6dda6f0a8df4"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"Please keep in mind that the proper academic attribution of \
+our work is crucial to ensure the future development of this package!\"\>", 
+   "Text",
+   StripOnInput->False,
+   FontSlant->Italic], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386048215171*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"66e7a915-8907-45b6-8a8c-641c3042bcc0"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{
+    StyleBox["\<\"FeynArts \"\>", "Text",
+     StripOnInput->False,
+     FontWeight->Bold], "\[InvisibleSpace]", 
+    StyleBox["\<\"3.12 (27 Mar 2025) patched for use with FeynCalc, for \
+documentation see the \"\>", "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox[
+     TagBox[
+      ButtonBox["manual",
+       BaseStyle->"Hyperlink",
+       ButtonFunction:>SystemOpen[
+         First[
+          FileNames[{"*.pdf", "*.PDF"}, 
+           FileNameJoin[{FeynCalc`$FeynArtsDirectory, "manual"}]]]],
+       Evaluator->Automatic,
+       Method->"Preemptive"],
+      DisplayForm], "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox["\<\" or visit \"\>", "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox[
+     TagBox[
+      ButtonBox[
+       RowBox[{"www", ".", "feynarts", ".", "de", "."}],
+       BaseStyle->"Hyperlink",
+       ButtonData:>{
+         URL["http://www.feynarts.de/"], None},
+       ButtonNote->"www.feynarts.de/"],
+      DisplayForm], "Text",
+     StripOnInput->False]}],
+   SequenceForm[
+    Style["FeynArts ", "Text", Bold], 
+    Style[
+    "3.12 (27 Mar 2025) patched for use with FeynCalc, for documentation see \
+the ", "Text"], 
+    Style[
+     DisplayForm[
+      ButtonBox[
+      "manual", BaseStyle -> "Hyperlink", ButtonFunction :> SystemOpen[
+         First[
+          FileNames[{"*.pdf", "*.PDF"}, 
+           FileNameJoin[{FeynCalc`$FeynArtsDirectory, "manual"}]]]], 
+       Evaluator -> Automatic, Method -> "Preemptive"]], "Text"], 
+    Style[" or visit ", "Text"], 
+    Style[
+     DisplayForm[
+      ButtonBox["www.feynarts.de.", ButtonData :> {
+         URL["http://www.feynarts.de/"], None}, BaseStyle -> "Hyperlink", 
+       ButtonNote -> "www.feynarts.de/"]], "Text"]],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.00138604825078*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"f5c713f2-4545-4a60-b192-80620aa390ff"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"If you use FeynArts in your research, please cite\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386048251853*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"e0db4259-ace1-4636-9930-ce3e7bed800d"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\" \[Bullet] T. Hahn, Comput. Phys. Commun., 140, 418-431, \
+2001, arXiv:hep-ph/0012260\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386048252475*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"34f0fe75-b976-45e9-9787-7807e9c3e00e"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"FeynGrav 4.1\"\>", "Text",
+   StripOnInput->False,
+   FontWeight->Bold], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860482530947`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"69144c58-61a1-42e7-ac19-76b166a3b335"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"Feynman rules for gravity and matter, with FeynCalc notation \
+and FORM support through CalcFormConverter.\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860482536583`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"49dc3817-c08e-4772-86e3-6c8bc0239800"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"The default libraries include cubic and quartic graviton \
+vertices and scalar, Dirac fermion and vector interactions with up to two \
+gravitons. Use the FeynGravImport* commands to load additional \
+libraries.\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860482542467`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"b37dfb97-6b26-4d11-9d7f-4a4c3f504ae6"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"FeynArts supported models\"\>", "Text",
+   StripOnInput->False,
+   FontWeight->Bold], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860482548647`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"44249ff5-c5ae-4a92-9fcf-dc5d26288c5b"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"\[Bullet] Pure general relativity\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860482554073`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"d80d870f-29a0-49fc-8db4-3411a4c5fb9b"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"\[Bullet] Scalar field with a potential minimally coupled to \
+gravity\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386048255937*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"79a841a7-b1e5-41e5-bce1-fb90046f3b2d"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"\[Bullet] Scalar field with a non-minimal kinetic \
+coupling\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860482565117`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"fae7ead4-f583-4903-8ff7-518daf86e463"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"\[Bullet] Einstein-scalar-Gauss-Bonnet model\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860482570257`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"8cc53ce7-66f9-4ee1-a95c-5442eab57572"],
+
+Cell[BoxData[
+ FormBox[
+  StyleBox["\<\"The supplied models retain interactions through order \
+\[Kappa]^2 per vertex. Use matching Model and GenericModel names with \
+FeynCalc-patched FeynArts in a fresh kernel. Models are not initialised \
+automatically.\"\>", "Text",
+   StripOnInput->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386048257557*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"4b01360c-4c68-4f7a-976d-020fbbbab50e"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{
+    StyleBox["\<\"Evaluate \"\>", "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox[
+     TagBox[
+      ButtonBox[
+       RowBox[{"FeynGravCommands", "[", "]"}],
+       BaseStyle->"Hyperlink",
+       ButtonFunction:>FeynGrav`FeynGravCommands[],
+       Evaluator->Automatic,
+       Method->"Queued"],
+      DisplayForm], "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox["\<\" to list available commands, \"\>", "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox[
+     TagBox[
+      ButtonBox[
+       RowBox[{"FeynGravConventions", "[", "]"}],
+       BaseStyle->"Hyperlink",
+       ButtonFunction:>FeynGrav`FeynGravConventions[],
+       Evaluator->Automatic,
+       Method->"Queued"],
+      DisplayForm], "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox["\<\" to inspect conventions and current settings, and \"\>", 
+     "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox[
+     TagBox[
+      ButtonBox[
+       RowBox[{"FeynGravHowToCite", "[", "]"}],
+       BaseStyle->"Hyperlink",
+       ButtonFunction:>FeynGrav`FeynGravHowToCite[],
+       Evaluator->Automatic,
+       Method->"Queued"],
+      DisplayForm], "Text",
+     StripOnInput->False], "\[InvisibleSpace]", 
+    StyleBox["\<\" for citation guidance.\"\>", "Text",
+     StripOnInput->False]}],
+   SequenceForm[
+    Style["Evaluate ", "Text"], 
+    Style[
+     DisplayForm[
+      ButtonBox[
+      "FeynGravCommands[]", BaseStyle -> "Hyperlink", ButtonFunction :> 
+       FeynGrav`FeynGravCommands[], Evaluator -> Automatic, Method -> 
+       "Queued"]], "Text"], 
+    Style[" to list available commands, ", "Text"], 
+    Style[
+     DisplayForm[
+      ButtonBox[
+      "FeynGravConventions[]", BaseStyle -> "Hyperlink", ButtonFunction :> 
+       FeynGrav`FeynGravConventions[], Evaluator -> Automatic, Method -> 
+       "Queued"]], "Text"], 
+    Style[" to inspect conventions and current settings, and ", "Text"], 
+    Style[
+     DisplayForm[
+      ButtonBox[
+      "FeynGravHowToCite[]", BaseStyle -> "Hyperlink", ButtonFunction :> 
+       FeynGrav`FeynGravHowToCite[], Evaluator -> Automatic, Method -> 
+       "Queued"]], "Text"], 
+    Style[" for citation guidance.", "Text"]],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860482583933`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"e8722dba-f806-4da9-99a2-e28dc993859e"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["2. Load the FeynArts model", "Section",ExpressionUUID->"0e0b0670-2bc9-4384-ab53-d53bd6d2448e"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "model", " ", "=", " ", "\"\<Single-Scalar-Tensor-Minimal-Coupling\>\""}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{4.001384606057777*^9, 4.001384613237446*^9}},
+ CellLabel->"In[3]:=",ExpressionUUID->"9e099cbc-cde7-41d8-990a-a644efb2bfe0"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3. Generate and display all diagrams", "Section",ExpressionUUID->"f3efb669-2fca-4f7c-b6f3-dd331cd16e8d"],
+
+Cell["\<\
+The complete tree has seven diagrams: one quartic scalar contact, scalar \
+exchange in s, t and u, and graviton exchange in s, t and u. The \
+gravitational ghost does not appear in this tree with only external scalars. \
+Higher-valence contacts in the model cannot contribute to a four-external-leg \
+tree.\
+\>", "Text",ExpressionUUID->"9db53f69-7ead-4a24-8d52-756fb11e5165"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"topologies", " ", "=", " ", 
+   RowBox[{"CreateTopologies", "[", 
+    RowBox[{"0", ",", " ", 
+     RowBox[{"2", " ", "->", " ", "2"}], ",", " ", 
+     RowBox[{"Adjacencies", " ", "->", " ", 
+      RowBox[{"{", 
+       RowBox[{"3", ",", " ", "4", ",", " ", "5", ",", " ", "6"}], "}"}]}]}], 
+    "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"insertions", " ", "=", " ", 
+   RowBox[{"InsertFields", "[", 
+    RowBox[{"topologies", ",", " ", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"S", "[", "1", "]"}], ",", " ", 
+        RowBox[{"S", "[", "1", "]"}]}], "}"}], " ", "->", " ", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"S", "[", "1", "]"}], ",", " ", 
+        RowBox[{"S", "[", "1", "]"}]}], "}"}]}], ",", " ", 
+     RowBox[{"Model", " ", "->", " ", "model"}], ",", " ", 
+     RowBox[{"GenericModel", " ", "->", " ", "model"}], ",", " ", 
+     RowBox[{"InsertionLevel", " ", "->", " ", 
+      RowBox[{"{", "Classes", "}"}]}]}], "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{4.0013846167604513`*^9, 4.001384619350678*^9}},
+ CellLabel->"In[4]:=",ExpressionUUID->"696b0c94-af07-4192-8561-83a00a16d44d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ FormBox["\<\"\"\>", TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386049338428*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"450d0be8-6366-48fa-bd07-c965a10432a0"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"\"\>", "\[InvisibleSpace]", "\<\"loading \"\>", 
+    "\[InvisibleSpace]", "\<\"generic\"\>", 
+    "\[InvisibleSpace]", "\<\" model file \"\>", 
+    "\[InvisibleSpace]", \
+"\<\"/home/latosh/.Wolfram/Applications/FeynGrav/FeynArts/Models/Single-\
+Scalar-Tensor-Minimal-Coupling/Single-Scalar-Tensor-Minimal-Coupling.gen\"\>"}\
+],
+   SequenceForm[
+   "", "loading ", "generic", " model file ", 
+    "/home/latosh/.Wolfram/Applications/FeynGrav/FeynArts/Models/Single-\
+Scalar-Tensor-Minimal-Coupling/Single-Scalar-Tensor-Minimal-Coupling.gen"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386049339719*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"db0def8c-acc0-4f9b-b338-e308666cf4ba"],
+
+Cell[BoxData[
+ FormBox["\<\"> $GenericMixing is OFF\"\>", TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051220592*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"51b894d0-ec52-40a8-ae19-fd036589c61b"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"generic model \"\>", "\[InvisibleSpace]", 
+    RowBox[{"{", "\<\"Single-Scalar-Tensor-Minimal-Coupling\"\>", "}"}], 
+    "\[InvisibleSpace]", "\<\" initialized\"\>"}],
+   SequenceForm[
+   "generic model ", {"Single-Scalar-Tensor-Minimal-Coupling"}, 
+    " initialized"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051232191*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"0d6c844f-f4ca-473a-926e-e3ed6ea14e6b"],
+
+Cell[BoxData[
+ FormBox["\<\"\"\>", TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051232772*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"c3bd40d5-5dcb-46df-abce-3e6ebd1ac347"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"\"\>", "\[InvisibleSpace]", "\<\"loading \"\>", 
+    "\[InvisibleSpace]", "\<\"classes\"\>", 
+    "\[InvisibleSpace]", "\<\" model file \"\>", 
+    "\[InvisibleSpace]", \
+"\<\"/home/latosh/.Wolfram/Applications/FeynGrav/FeynArts/Models/Single-\
+Scalar-Tensor-Minimal-Coupling/Single-Scalar-Tensor-Minimal-Coupling.mod\"\>"}\
+],
+   SequenceForm[
+   "", "loading ", "classes", " model file ", 
+    "/home/latosh/.Wolfram/Applications/FeynGrav/FeynArts/Models/Single-\
+Scalar-Tensor-Minimal-Coupling/Single-Scalar-Tensor-Minimal-Coupling.mod"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051233076*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"ec07da20-6901-489d-b758-cf19257409e2"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> \"\>", "\[InvisibleSpace]", "4", 
+    "\[InvisibleSpace]", "\<\" particles (incl. antiparticles) in \"\>", "\[InvisibleSpace]",
+     "3", "\[InvisibleSpace]", "\<\" classes\"\>"}],
+   SequenceForm[
+   "> ", 4, " particles (incl. antiparticles) in ", 3, " classes"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.00138605124837*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"c32eaf18-bf48-4724-8c3f-e4ac294783d0"],
+
+Cell[BoxData[
+ FormBox["\<\"> $CounterTerms are ON\"\>", TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860512973843`*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"9b28c8bb-c0aa-440e-91b2-cb3985038859"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> \"\>", "\[InvisibleSpace]", "11", 
+    "\[InvisibleSpace]", "\<\" vertices\"\>"}],
+   SequenceForm["> ", 11, " vertices"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051298473*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"87991583-91e1-4865-be22-29deef568670"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"classes model \"\>", "\[InvisibleSpace]", 
+    RowBox[{"{", "\<\"Single-Scalar-Tensor-Minimal-Coupling\"\>", "}"}], 
+    "\[InvisibleSpace]", "\<\" initialized\"\>"}],
+   SequenceForm[
+   "classes model ", {"Single-Scalar-Tensor-Minimal-Coupling"}, 
+    " initialized"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051299169*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"bbbba85d-065e-4819-a548-518aa1ec4f0d"],
+
+Cell[BoxData[
+ FormBox["\<\"\"\>", TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051299803*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"c5e4723e-b6e7-40c4-8558-3998e9e98e3f"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"inserting at level(s) \"\>", "\[InvisibleSpace]", 
+    RowBox[{"{", "Classes", "}"}]}],
+   SequenceForm["inserting at level(s) ", {FeynArts`Classes}],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860513003807`*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"3f01aacd-6266-468e-ad48-7a793e3add29"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "1", 
+    "\[InvisibleSpace]", "\<\": \"\>", 
+    "\[InvisibleSpace]", "\<\"1 Classes insertion\"\>"}],
+   SequenceForm["> Top. ", 1, ": ", "1 Classes insertion"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051300995*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"59cee5b5-d15c-4c4d-89fe-6686b6ef919f"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "2", 
+    "\[InvisibleSpace]", "\<\": \"\>", 
+    "\[InvisibleSpace]", "\<\"2 Classes insertions\"\>"}],
+   SequenceForm["> Top. ", 2, ": ", "2 Classes insertions"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860513140793`*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"e2ea5744-2455-41f6-8621-537ab30af23d"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "3", 
+    "\[InvisibleSpace]", "\<\": \"\>", 
+    "\[InvisibleSpace]", "\<\"2 Classes insertions\"\>"}],
+   SequenceForm["> Top. ", 3, ": ", "2 Classes insertions"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051314611*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"9d0a4117-8b25-464d-b5a0-e17bf94ae5c0"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "4", 
+    "\[InvisibleSpace]", "\<\": \"\>", 
+    "\[InvisibleSpace]", "\<\"2 Classes insertions\"\>"}],
+   SequenceForm["> Top. ", 4, ": ", "2 Classes insertions"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051314942*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"bc8e0138-8b5f-4f98-8f60-6237c225d6aa"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"in total: \"\>", 
+    "\[InvisibleSpace]", "\<\"7 Classes insertions\"\>"}],
+   SequenceForm["in total: ", "7 Classes insertions"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860513153543`*^9},
+ CellLabel->
+  "During evaluation of \
+In[4]:=",ExpressionUUID->"55b72ce8-700d-44c8-ad92-80e2ea776a63"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Paint", "[", 
+   RowBox[{"insertions", ",", " ", 
+    RowBox[{"ColumnsXRows", " ", "->", " ", 
+     RowBox[{"{", 
+      RowBox[{"3", ",", " ", "3"}], "}"}]}], ",", "\n", "  ", 
+    RowBox[{"Numbering", " ", "->", " ", "Simple"}], ",", "\n", "  ", 
+    RowBox[{"SheetHeader", " ", "->", " ", "\"\<Scalar scattering\>\""}], ",",
+     "\n", "  ", 
+    RowBox[{"DisplayFunction", " ", "->", " ", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"Print", " ", "/@", " ", 
+        RowBox[{"Render", "[", 
+         RowBox[{"#", ",", " ", 
+          RowBox[{"ImageSize", " ", "->", " ", 
+           RowBox[{"{", 
+            RowBox[{"768", ",", " ", "768"}], "}"}]}]}], "]"}]}], " ", "&"}], 
+      ")"}]}]}], "]"}], ";"}]], "Input",
+ CellChangeTimes->{{4.001384621705316*^9, 4.001384622760371*^9}, {
+  4.0013846553767653`*^9, 4.00138465790949*^9}, {4.001385226985969*^9, 
+  4.001385231974419*^9}},
+ CellLabel->"In[6]:=",ExpressionUUID->"a70377f9-7281-4e35-9899-1115d06c572d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "1", 
+    "\[InvisibleSpace]", "\<\" \"\>", 
+    "\[InvisibleSpace]", "\<\"aebe/cede/0.m\"\>", 
+    "\[InvisibleSpace]", "\<\", \"\>", 
+    "\[InvisibleSpace]", "\<\"0 diagrams\"\>"}],
+   SequenceForm["> Top. ", 1, " ", "aebe/cede/0.m", ", ", "0 diagrams"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051373557*^9},
+ CellLabel->
+  "During evaluation of \
+In[6]:=",ExpressionUUID->"67b13732-d1c2-42dc-a145-f79b0543a7dd"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "2", 
+    "\[InvisibleSpace]", "\<\" \"\>", 
+    "\[InvisibleSpace]", "\<\"aebe/cfdf/ef.m\"\>", 
+    "\[InvisibleSpace]", "\<\", \"\>", 
+    "\[InvisibleSpace]", "\<\"0 diagrams\"\>"}],
+   SequenceForm["> Top. ", 2, " ", "aebe/cfdf/ef.m", ", ", "0 diagrams"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.00138605137427*^9},
+ CellLabel->
+  "During evaluation of \
+In[6]:=",ExpressionUUID->"bbcfb889-87ab-4fba-a643-baeebdbd6d2a"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "3", 
+    "\[InvisibleSpace]", "\<\" \"\>", 
+    "\[InvisibleSpace]", "\<\"aebf/cedf/ef.m\"\>", 
+    "\[InvisibleSpace]", "\<\", \"\>", 
+    "\[InvisibleSpace]", "\<\"0 diagrams\"\>"}],
+   SequenceForm["> Top. ", 3, " ", "aebf/cedf/ef.m", ", ", "0 diagrams"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860513748693`*^9},
+ CellLabel->
+  "During evaluation of \
+In[6]:=",ExpressionUUID->"8640bc12-7354-4f79-9d74-fa7d4bc61d43"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "4", 
+    "\[InvisibleSpace]", "\<\" \"\>", 
+    "\[InvisibleSpace]", "\<\"aebf/cfde/ef.m\"\>", 
+    "\[InvisibleSpace]", "\<\", \"\>", 
+    "\[InvisibleSpace]", "\<\"0 diagrams\"\>"}],
+   SequenceForm["> Top. ", 4, " ", "aebf/cfde/ef.m", ", ", "0 diagrams"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051375252*^9},
+ CellLabel->
+  "During evaluation of \
+In[6]:=",ExpressionUUID->"d45e7115-c3a7-4611-bd6d-79ca53fb6ce5"],
+
+Cell[BoxData[
+ FormBox[
+  GraphicsBox[{InsetBox[
+     GraphicsBox[
+      TagBox[
+       TooltipBox[
+        {Thickness[0.005], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{3.637978807091713*^-12, 14.999999999996362`}, {
+           10.000000000003638`, 9.999999999996362}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {5.0234223258500545, 11.942044651700108},
+           ImageScaled[{1, 1}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{0., 5.}, {10., 10.}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {4.9765776741499455, 6.942044651700109}, 
+          ImageScaled[{0, 1}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{20.000000000005457`, 15.000000000003638`}, {
+           10.000000000012733`, 10.000000000003638`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {15.023422325850053, 13.057955348299892},
+           ImageScaled[{1, 0}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{20., 5.}, {10., 10.}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {14.976577674149944, 8.057955348299892}, 
+          ImageScaled[{0, 0}]], 
+         {PointSize[0.04], PointBox[{10., 10.}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["1",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->21.326280991735544`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            21.326280991735544`]& ], {10., -0.5}, NCache[
+          ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]]},
+        "\"aebe/cede/0.m\"",
+        TooltipStyle->"TextStyling"],
+       Annotation[#, "aebe/cede/0.m", "Tooltip"]& ],
+      AspectRatio->1,
+      PlotRange->{{-1, 21}, {-1, 21}}], {0, 44}, {0, 0}, {22, 22}], InsetBox[
+     GraphicsBox[
+      TagBox[
+       TooltipBox[
+        {Thickness[0.005], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{0., 15.}, {6.000000000001819, 10.}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {2.7725602804361764, 12.10611233652341}, 
+          ImageScaled[{1, 1}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{0., 5.000000000001819}, {6.000000000001819, 
+           10.000000000001819`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {3.227439719563824, 7.106112336523411}, 
+          ImageScaled[{0, 1}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{20.00000000000182, 15.000000000001819`}, {14., 
+           9.999999999998181}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {16.772560280436178, 12.893887663476587},
+           ImageScaled[{1, 0}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{20.00000000000182, 5.000000000001819}, {14., 10.}}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {17.227439719563822, 7.8938876634765895},
+           ImageScaled[{0, 0}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{5.999999999999551, 10.}, {14.000000000000451`, 10.}}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {10., 9.3048}, NCache[
+          ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {PointSize[0.04], PointBox[{6., 10.}], PointBox[{14., 10.}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["2",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->21.326280991735544`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            21.326280991735544`]& ], {10., -0.5}, NCache[
+          ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]]},
+        "\"aebe/cfdf/ef.m\"",
+        TooltipStyle->"TextStyling"],
+       Annotation[#, "aebe/cfdf/ef.m", "Tooltip"]& ],
+      AspectRatio->1,
+      PlotRange->{{-1, 21}, {-1, 21}}], {22, 44}, {0, 0}, {22, 22}], 
+    InsetBox[
+     GraphicsBox[
+      TagBox[
+       TooltipBox[
+        {Thickness[0.005], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{0., 15.}, {6.000000000001819, 10.}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {2.7725602804361764, 12.10611233652341}, 
+          ImageScaled[{1, 1}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{0., 5.000000000001819}, {6.000000000001819, 
+           10.000000000001819`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {3.227439719563824, 7.106112336523411}, 
+          ImageScaled[{0, 1}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{20.00000000000182, 15.000000000001819`}, {14., 
+           9.999999999998181}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {16.772560280436178, 12.893887663476587},
+           ImageScaled[{1, 0}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{20.00000000000182, 5.000000000001819}, {14., 10.}}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {17.227439719563822, 7.8938876634765895},
+           ImageScaled[{0, 0}]], LineBox[CompressedData["
+1:eJw9lH9MlVUYx89Fu8YYf7QwEC6X93IOXn7Gj1Nmmfi4NhAY44JNLkHjh3IA
+WUFEszBBRzHbItEh8totZxGhuWRADDbbGL+TE+KFFaClMkVNGUTOgtm9Hfrj
+Odu7d5+dve85z/N8v19LQVlGoQchJF09a28XWVuR8P+LMFh+7kLTZRkB5Olj
+K8mRDB6OHf/spK44L5eYdjNouFFjyheK7b75rWUMns9y5UbxNfZyFFQzaCkp
+yFt1hwOBwo3Vhxh4nPL1HpWKi98b8HmLQVrpIjTpit8f741KY7BvcX5kn1C8
+65irysogI7BOcK64oar59iqFILPzloEotv2QvDBO4e8Ng8YJGQZk6cfo9eco
+nC/PaP9CV6zV9k/XUwh5PXNsv1B8uPnU8GEK2sGHmS9xxTfn/UtrKXRaefE6
+ojj048qKkxQmZydNV2QokH82zJ/topA1K8+c1hXbk+zm3yh0CLtZCMW2e3nz
+ngxWa0f7Y7nie4bz5S8yWH8n4uK/bqvqX7w1+w0G6QslKz9JxaMnyjZWMpjw
+TTjXpCvuc0a+U8OgNevdnr1CcRsfNh5kcM3c6BPL1/bNU/lFDPY86fvK5d6s
+zqv/fTGBQUq/6zUpFe/yPNoZyKDDuTyj64rtfS1DSxQcUSEpRUIxubbQOUSh
+u+Lluhe44rbGnVfPUnh8pLvWQBTHXA+r/4RCGolJGJchQI4aD92toTDbc3v6
+tK647eeKZ+oolPCg1CKh2FZwP/FzCgNHnN2cK97a+NGDSxRuPWUMI0TxUtd3
+k/MUrBdaOqRkap4z1Pksg3C/6BxdV9wwYsiMZ+DY1rZZCMVL9otaPoPpiBte
+nCuOebxz7gBD3RHtlRNjqj+hU9ojKSnuFw5mqnopfv/r3YmvhaD4/5nd2amc
+UzxfW135xe0OxvvFV0clSRmM92+WNzua9WCsz5oYYC0UwVh/h/tKbywPxv54
+VSd96HJbsH8p9cMfjEkL9rfQOdvVrFuw/2lR3qpeC86ne7vhEucWnN/b3jve
+NBALzvf+H6UPxqWG8w9q/zTRoWuoj0d/9u4pERrqp9LUZNzCNdRXH5uyeRAN
+9dfkVVbl0INQn1/GpQ1wHoT6taWIvsvSjPrOSbYP5wsz6t/RrkevuAPRH/2e
+VttxPRD905OZXhLOA9Ff35uzzwxKE/rPZ+nAcq4woT8HB7JffeIOQP/mDP0V
+p+sB6O+tlrjyLTwA/b83zFI9Kf0xH1xXJ+6UCX/Mj57IbTu8iD/mS2vqOvhG
+34T5MwdkZDvfhPkUXnx9bkr6YX6Znd869ws/zDejy62WL+rwPw898pg=
+          "]], InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["h",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {10., 9.0548}, NCache[
+          ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {PointSize[0.04], PointBox[{6., 10.}], PointBox[{14., 10.}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["3",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->21.326280991735544`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            21.326280991735544`]& ], {10., -0.5}, NCache[
+          ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]]},
+        "\"aebe/cfdf/ef.m\"",
+        TooltipStyle->"TextStyling"],
+       Annotation[#, "aebe/cfdf/ef.m", "Tooltip"]& ],
+      AspectRatio->1,
+      PlotRange->{{-1, 21}, {-1, 21}}], {44, 44}, {0, 0}, {22, 22}], 
+    InsetBox[
+     GraphicsBox[
+      TagBox[
+       TooltipBox[
+        {Thickness[0.005], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{2.5011104298755527`*^-12, 15.000000000003638`}, {
+           10.000000000002501`, 14.000000000003638`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {4.870645165272702, 13.811251652727016}, 
+          NCache[ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{2.0463630789890885`*^-12, 5.000000000003638}, {
+           10.000000000002046`, 6.000000000003638}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {5.129354834727299, 4.811251652727014}, 
+          NCache[ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{19.99999999999818, 14.999999999996362`}, {
+           10.000000000002274`, 13.999999999996362`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {14.870645165272702, 15.188748347272984},
+           NCache[ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{19.999999999997726`, 4.999999999996362}, {
+           9.999999999997726, 5.999999999996362}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {15.129354834727298, 6.188748347272986}, 
+          NCache[ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{10., 13.999999999996009`}, {10., 5.99999999999511}}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {9.3048, 10.}, NCache[
+          ImageScaled[{1, Rational[1, 2]}], ImageScaled[{1, 0.5}]]], 
+         {PointSize[0.04], PointBox[{10., 14.}], PointBox[{10., 6.}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["4",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->21.326280991735544`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            21.326280991735544`]& ], {10., -0.5}, NCache[
+          ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]]},
+        "\"aebf/cedf/ef.m\"",
+        TooltipStyle->"TextStyling"],
+       Annotation[#, "aebf/cedf/ef.m", "Tooltip"]& ],
+      AspectRatio->1,
+      PlotRange->{{-1, 21}, {-1, 21}}], {0, 22}, {0, 0}, {22, 22}], InsetBox[
+     GraphicsBox[
+      TagBox[
+       TooltipBox[
+        {Thickness[0.005], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{2.5011104298755527`*^-12, 15.000000000003638`}, {
+           10.000000000002501`, 14.000000000003638`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {4.870645165272702, 13.811251652727016}, 
+          NCache[ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{2.0463630789890885`*^-12, 5.000000000003638}, {
+           10.000000000002046`, 6.000000000003638}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {5.129354834727299, 4.811251652727014}, 
+          NCache[ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{19.99999999999818, 14.999999999996362`}, {
+           10.000000000002274`, 13.999999999996362`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {14.870645165272702, 15.188748347272984},
+           NCache[ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{19.999999999997726`, 4.999999999996362}, {
+           9.999999999997726, 5.999999999996362}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {15.129354834727298, 6.188748347272986}, 
+          NCache[ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]], 
+         LineBox[CompressedData["
+1:eJxFlA9MlGUcx58DBN0NW3lG4nEcvs/9lwE+RSFBP9cGYjlOcHITGhzJA6cL
+1GgS6eFGkZaXyfC61yi0JDFbMiEWmzUGCghPCAdrYmpKeFGI3qioc8T1sNrT
+s71799nz/nl+v9/3+40rrsgpCUEIbeHX4v3fhcH5a5CvKEBLjwY2rcWw/NwZ
+7076BKCiQqTOxXBy642JMcbZFmX/rAKDdxXqSyOrOCsbi50YNOtDoVnmDCUr
+nQcwtCxJfU6JogGVvdajegVD5bfDdyso56qhzvhsDLkhcc5Rxnnj0YVqA4bW
+yHW7k8lqQO9XeyYfSvDix7+tk2XO1q82zQxJkNqa/+x8kLP/m4SwsxKEXdk3
+W0jVgLS13ddcEuiV+U2XGOeDng96D0pwJnGLw0xiAN32Re+qlSBlTm89JnM2
+vlW597gERw7LCYEg578ifKfaJRhNtvXaqYbXk2XT3JQAMO0aYJytU0W+ZRge
+j83uISQW0JTi891PYaibLK9ulDmjdEP+dgzz0WPWEKQF1F9fsbISw/RSd3gy
+4dzlXbunBkPiVOc2B+XcQnrD38DgbjyS2Sgv7mvG7KUYdHd2TQ8xzlbXrQcZ
+GHyB9JcUKI73Z9mhthgMHWmKi4RwtnWdvuyX4F0pUk8pZ/TDTNtlCUq819s9
+MueWhg0jpyR4u7b39UHGOfGGyXVYAqUza/9CkPOh8AM/10hw/4+rnUlkDX/+
+u72P1vH+Za42lFDO1uJfMj+UYKz79gWPzPmZhjenL0qQ5ozPYoyzv/3cqE+C
+An/g+2CQc9W45F2BYTw3fzMhEp9fnyIvHcNjt4Y/pZSz33Zea8dwszVvXJY5
+J85tmNiHYceA9nfGOGvX1w/y/lTdW9Tf//uqNT8qCcHi/RXGFl4vFt+nyxMK
+ZBmL/zd5Tl9gDIvzqeeXmBDSifOnlns7CNGJ+ppNsZtLqU7Un9M8ee2ErBP9
+eWcuIWOI6UT/yss7ahVIL/o7W5ZS9yTRi/6ronUvlFK9mM/9/ller17Mr+fL
+hecZ04v51s92fbIQ1Iv55yobVEnEIPQxkf3q1y9Tg9DPxrCMs27ZIPTl+skR
+uMIMQn/7Ryzn/w4ahD6Tq/u7k4hR6HemwKah1Cj0bbvOmk7IRqH/R0ZG1VeZ
+UfijzUDKQpFJ+Kdgz728p4lJ+Eu3NW9wJzUJ//loTutHskn4cy7iUvgwMwn/
+bld57yiQWfg7J6aOEmIW/j9519e3g5pFPvTlPQC3bBb5ke6KiuxnZpEv6m3F
+RQ+DZpE/juyFwnhiEfkUwWrUdmoR+WXsPvbecdki8s0R+oV7gHH+L/9S/lzU
+nwX+Afkz98Y=
+          "]], InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["h",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {9.0548, 10.}, NCache[
+          ImageScaled[{1, Rational[1, 2]}], ImageScaled[{1, 0.5}]]], 
+         {PointSize[0.04], PointBox[{10., 14.}], PointBox[{10., 6.}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["5",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->21.326280991735544`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            21.326280991735544`]& ], {10., -0.5}, NCache[
+          ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]]},
+        "\"aebf/cedf/ef.m\"",
+        TooltipStyle->"TextStyling"],
+       Annotation[#, "aebf/cedf/ef.m", "Tooltip"]& ],
+      AspectRatio->1,
+      PlotRange->{{-1, 21}, {-1, 21}}], {22, 22}, {0, 0}, {22, 22}], 
+    InsetBox[
+     GraphicsBox[
+      TagBox[
+       TooltipBox[
+        {Thickness[0.005], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{2.5011104298755527`*^-12, 15.000000000003638`}, {
+           10.000000000002501`, 14.000000000003638`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {4.870645165272702, 13.811251652727016}, 
+          NCache[ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{2.0463630789890885`*^-12, 5.000000000003638}, {
+           10.000000000002046`, 6.000000000003638}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {5.129354834727299, 4.811251652727014}, 
+          NCache[ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{19.99999999999818, 14.999999999996362`}, {
+           9.999999999996362, 5.999999999994543}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {17.103922156081133, 12.89552477594454}, 
+          ImageScaled[{1, 0}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{20.00000000000182, 4.999999999998181}, {10., 
+           13.999999999998181`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {17.39466828349082, 7.894483248699895}, 
+          ImageScaled[{0, 0}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{10., 13.999999999996009`}, {10., 5.99999999999511}}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {9.404900000000001, 10.}, NCache[
+          ImageScaled[{1, Rational[1, 2]}], ImageScaled[{1, 0.5}]]], 
+         {PointSize[0.04], PointBox[{10., 14.}], PointBox[{10., 6.}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["6",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->21.326280991735544`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            21.326280991735544`]& ], {10., -0.5}, NCache[
+          ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]]},
+        "\"aebf/cfde/ef.m\"",
+        TooltipStyle->"TextStyling"],
+       Annotation[#, "aebf/cfde/ef.m", "Tooltip"]& ],
+      AspectRatio->1,
+      PlotRange->{{-1, 21}, {-1, 21}}], {44, 22}, {0, 0}, {22, 22}], 
+    InsetBox[
+     GraphicsBox[
+      TagBox[
+       TooltipBox[
+        {Thickness[0.005], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{2.5011104298755527`*^-12, 15.000000000003638`}, {
+           10.000000000002501`, 14.000000000003638`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {4.870645165272702, 13.811251652727016}, 
+          NCache[ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{2.0463630789890885`*^-12, 5.000000000003638}, {
+           10.000000000002046`, 6.000000000003638}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {5.129354834727299, 4.811251652727014}, 
+          NCache[ImageScaled[{Rational[1, 2], 1}], ImageScaled[{0.5, 1}]]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{19.99999999999818, 14.999999999996362`}, {
+           9.999999999996362, 5.999999999994543}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {17.103922156081133, 12.89552477594454}, 
+          ImageScaled[{1, 0}]], 
+         {Dashing[{0.030000000000000002`, 0.030000000000000002`}], 
+          LineBox[{{20.00000000000182, 4.999999999998181}, {10., 
+           13.999999999998181`}}]}, InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["s",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {17.39466828349082, 7.894483248699895}, 
+          ImageScaled[{0, 0}]], LineBox[CompressedData["
+1:eJxFlA9MlGUcx58DBN0NW3lG4nEcvs/9lwE+RSFBP9cGYjlOcHITGhzJA6cL
+1GgS6eFGkZaXyfC61yi0JDFbMiEWmzUGCghPCAdrYmpKeFGI3qioc8T1sNrT
+s71799nz/nl+v9/3+40rrsgpCUEIbeHX4v3fhcH5a5CvKEBLjwY2rcWw/NwZ
+7076BKCiQqTOxXBy642JMcbZFmX/rAKDdxXqSyOrOCsbi50YNOtDoVnmDCUr
+nQcwtCxJfU6JogGVvdajegVD5bfDdyso56qhzvhsDLkhcc5Rxnnj0YVqA4bW
+yHW7k8lqQO9XeyYfSvDix7+tk2XO1q82zQxJkNqa/+x8kLP/m4SwsxKEXdk3
+W0jVgLS13ddcEuiV+U2XGOeDng96D0pwJnGLw0xiAN32Re+qlSBlTm89JnM2
+vlW597gERw7LCYEg578ifKfaJRhNtvXaqYbXk2XT3JQAMO0aYJytU0W+ZRge
+j83uISQW0JTi891PYaibLK9ulDmjdEP+dgzz0WPWEKQF1F9fsbISw/RSd3gy
+4dzlXbunBkPiVOc2B+XcQnrD38DgbjyS2Sgv7mvG7KUYdHd2TQ8xzlbXrQcZ
+GHyB9JcUKI73Z9mhthgMHWmKi4RwtnWdvuyX4F0pUk8pZ/TDTNtlCUq819s9
+MueWhg0jpyR4u7b39UHGOfGGyXVYAqUza/9CkPOh8AM/10hw/4+rnUlkDX/+
+u72P1vH+Za42lFDO1uJfMj+UYKz79gWPzPmZhjenL0qQ5ozPYoyzv/3cqE+C
+An/g+2CQc9W45F2BYTw3fzMhEp9fnyIvHcNjt4Y/pZSz33Zea8dwszVvXJY5
+J85tmNiHYceA9nfGOGvX1w/y/lTdW9Tf//uqNT8qCcHi/RXGFl4vFt+nyxMK
+ZBmL/zd5Tl9gDIvzqeeXmBDSifOnlns7CNGJ+ppNsZtLqU7Un9M8ee2ErBP9
+eWcuIWOI6UT/yss7ahVIL/o7W5ZS9yTRi/6ronUvlFK9mM/9/ller17Mr+fL
+hecZ04v51s92fbIQ1Iv55yobVEnEIPQxkf3q1y9Tg9DPxrCMs27ZIPTl+skR
+uMIMQn/7Ryzn/w4ahD6Tq/u7k4hR6HemwKah1Cj0bbvOmk7IRqH/R0ZG1VeZ
+UfijzUDKQpFJ+Kdgz728p4lJ+Eu3NW9wJzUJ//loTutHskn4cy7iUvgwMwn/
+bld57yiQWfg7J6aOEmIW/j9519e3g5pFPvTlPQC3bBb5ke6KiuxnZpEv6m3F
+RQ+DZpE/juyFwnhiEfkUwWrUdmoR+WXsPvbecdki8s0R+oV7gHH+L/9S/lzU
+nwX+Afkz98Y=
+          "]], InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["h",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->26.657851239669426`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            26.657851239669426`]& ], {9.154900000000001, 10.}, NCache[
+          ImageScaled[{1, Rational[1, 2]}], ImageScaled[{1, 0.5}]]], 
+         {PointSize[0.04], PointBox[{10., 14.}], PointBox[{10., 6.}]}, 
+         InsetBox[
+          TagBox[
+           StyleBox[
+            TagBox["7",
+             DisplayForm],
+            FontFamily->"Helvetica",
+            FontSize->21.326280991735544`],
+           
+           StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+            21.326280991735544`]& ], {10., -0.5}, NCache[
+          ImageScaled[{Rational[1, 2], 0}], ImageScaled[{0.5, 0}]]]},
+        "\"aebf/cfde/ef.m\"",
+        TooltipStyle->"TextStyling"],
+       Annotation[#, "aebf/cfde/ef.m", "Tooltip"]& ],
+      AspectRatio->1,
+      PlotRange->{{-1, 21}, {-1, 21}}], {0, 0}, {0, 0}, {22, 22}], InsetBox[
+     TagBox[
+      StyleBox[
+       TagBox[
+        RowBox[{"Scalar", " ", "scattering"}],
+        DisplayForm],
+       FontFamily->"Helvetica",
+       FontSize->31.98942148760331],
+      StyleForm[#, FontFamily -> "Helvetica", FontSize -> 
+       31.98942148760331]& ], {33., 69.96}, NCache[
+     ImageScaled[{Rational[1, 2], Rational[1, 2]}], ImageScaled[{0.5, 0.5}]]]},
+   AspectRatio->1.0999999999999999`,
+   ImageSize->{768, 768},
+   PlotRange->{{0, 66}, {0, 72.6}}], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051463434*^9},
+ CellLabel->
+  "During evaluation of \
+In[6]:=",ExpressionUUID->"74de2632-ce3d-4300-ae92-ad105f5ee0bb"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["4. Fix the on-shell kinematics", "Section",ExpressionUUID->"af9a98b2-4233-4f4a-8a54-c13784a75775"],
+
+Cell["\<\
+p1 and p2 are incoming; p3 and p4 are outgoing. SetMandelstam receives all \
+momenta incoming, hence the minus signs on p3 and p4. The invariants satisfy \
+s + t + u = 4 m^2. Scalar products are fixed in both four and symbolic D \
+dimensions; the final tree amplitude below is evaluated in four dimensions. \
+These assignments persist in the kernel.\
+\>", "Text",ExpressionUUID->"75b7b58c-855e-4c44-8d17-f3bd62dd0560"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"FCClearScalarProducts", "[", "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"SetMandelstam", "[", 
+   RowBox[{
+   "s", ",", " ", "t", ",", " ", "u", ",", " ", "p1", ",", " ", "p2", ",", 
+    " ", 
+    RowBox[{"-", "p3"}], ",", " ", 
+    RowBox[{"-", "p4"}], ",", " ", "m", ",", " ", "m", ",", " ", "m", ",", 
+    " ", "m"}], "]"}], ";"}]}], "Input",
+ CellChangeTimes->{{4.001384626151587*^9, 4.001384627150564*^9}},
+ CellLabel->"In[7]:=",ExpressionUUID->"f774fb12-dfaa-4ef4-a993-af7f947629e5"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["5. Calculate the on-shell amplitude", "Section",ExpressionUUID->"a4b7792d-10bf-464b-b172-253436653ec1"],
+
+Cell["\<\
+PreFactor -> 1 retains the Feynman-rule factors of i. The converted diagrams \
+therefore sum to i M. There is no identical-particle phase-space factor in \
+the amplitude. The potential signs are those stated above; the scalar \
+exchanges carry minus \[Lambda]3^2/(channel - m^2) in M.\
+\>", "Text",ExpressionUUID->"3aa9bddb-8259-443a-b1ae-59a78ef1bf37"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"\[ScriptCapitalM]", " ", "=", " ", 
+   RowBox[{"Collect", "[", 
+    RowBox[{
+     RowBox[{"Simplify", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"ExpandScalarProduct", "[", 
+         RowBox[{"Contract", "[", 
+          RowBox[{"FeynAmpDenominatorExplicit", "[", 
+           RowBox[{
+            RowBox[{"FCFAConvert", "[", 
+             RowBox[{
+              RowBox[{"CreateFeynAmp", "[", 
+               RowBox[{"insertions", ",", " ", 
+                RowBox[{"PreFactor", " ", "->", " ", "1"}], ",", " ", 
+                RowBox[{"GaugeRules", " ", "->", " ", 
+                 RowBox[{"{", "}"}]}], ",", " ", 
+                RowBox[{"MomentumConservation", " ", "->", " ", "True"}], ",",
+                 " ", 
+                RowBox[{"Truncated", " ", "->", " ", "True"}]}], "]"}], ",", 
+              " ", 
+              RowBox[{"IncomingMomenta", " ", "->", " ", 
+               RowBox[{"{", 
+                RowBox[{"p1", ",", " ", "p2"}], "}"}]}], ",", " ", 
+              RowBox[{"OutgoingMomenta", " ", "->", " ", 
+               RowBox[{"{", 
+                RowBox[{"p3", ",", " ", "p4"}], "}"}]}], ",", " ", 
+              RowBox[{"LorentzIndexNames", " ", "->", " ", 
+               RowBox[{"{", 
+                RowBox[{
+                "\[Mu]", ",", " ", "\[Nu]", ",", " ", "\[Rho]", ",", " ", 
+                 "\[Sigma]", ",", " ", "\[Alpha]", ",", " ", "\[Beta]", ",", 
+                 " ", "\[Gamma]", ",", " ", "\[Delta]"}], "}"}]}], ",", " ", 
+              RowBox[{"ChangeDimension", " ", "->", " ", "4"}], ",", " ", 
+              RowBox[{"Contract", " ", "->", " ", "False"}], ",", " ", 
+              RowBox[{"List", " ", "->", " ", "False"}], ",", " ", 
+              RowBox[{"Prefactor", " ", "->", " ", "1"}]}], "]"}], " ", "/.", 
+            " ", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"ScalarMass", " ", "->", " ", "m"}], ",", " ", 
+              RowBox[{"ScalarLambda3", " ", "->", " ", "\[Lambda]3"}], ",", 
+              " ", 
+              RowBox[{"ScalarLambda4", " ", "->", " ", "\[Lambda]4"}]}], 
+             "}"}]}], "]"}], "]"}], "]"}], "/", "I"}], " ", "/.", " ", 
+       RowBox[{"D", " ", "->", " ", "4"}]}], "]"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[Kappa]", "^", "2"}], ",", " ", 
+       RowBox[{"\[Lambda]3", "^", "2"}], ",", " ", "\[Lambda]4"}], "}"}], ",",
+      " ", "Factor"}], "]"}]}], ";"}]], "Input",
+ CellLabel->"In[9]:=",ExpressionUUID->"96abfd65-8a16-4567-9fb1-f7beda5c4276"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ FormBox["\<\"\"\>", TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860515612*^9},
+ CellLabel->
+  "During evaluation of \
+In[9]:=",ExpressionUUID->"56255309-676a-43b9-85cd-1177808a06a8"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"creating amplitudes at level(s) \"\>", "\[InvisibleSpace]", 
+    RowBox[{"{", "Classes", "}"}]}],
+   SequenceForm["creating amplitudes at level(s) ", {FeynArts`Classes}],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051562351*^9},
+ CellLabel->
+  "During evaluation of \
+In[9]:=",ExpressionUUID->"0345be92-97f5-4061-8d28-ee46373c5470"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "1", 
+    "\[InvisibleSpace]", "\<\": \"\>", 
+    "\[InvisibleSpace]", "\<\"1 Classes amplitude\"\>"}],
+   SequenceForm["> Top. ", 1, ": ", "1 Classes amplitude"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051562911*^9},
+ CellLabel->
+  "During evaluation of \
+In[9]:=",ExpressionUUID->"d6fba604-3949-4f78-8577-86069abe2488"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "2", 
+    "\[InvisibleSpace]", "\<\": \"\>", 
+    "\[InvisibleSpace]", "\<\"2 Classes amplitudes\"\>"}],
+   SequenceForm["> Top. ", 2, ": ", "2 Classes amplitudes"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051570034*^9},
+ CellLabel->
+  "During evaluation of \
+In[9]:=",ExpressionUUID->"80bf4865-2f88-49ee-a7c7-8a2971d6f0bb"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "3", 
+    "\[InvisibleSpace]", "\<\": \"\>", 
+    "\[InvisibleSpace]", "\<\"2 Classes amplitudes\"\>"}],
+   SequenceForm["> Top. ", 3, ": ", "2 Classes amplitudes"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.0013860515706577`*^9},
+ CellLabel->
+  "During evaluation of \
+In[9]:=",ExpressionUUID->"c413fb5d-7746-4cee-b313-366a5e0886d2"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"> Top. \"\>", "\[InvisibleSpace]", "4", 
+    "\[InvisibleSpace]", "\<\": \"\>", 
+    "\[InvisibleSpace]", "\<\"2 Classes amplitudes\"\>"}],
+   SequenceForm["> Top. ", 4, ": ", "2 Classes amplitudes"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051571026*^9},
+ CellLabel->
+  "During evaluation of \
+In[9]:=",ExpressionUUID->"fc5b5077-e209-43e9-a648-d6dde7ce450f"],
+
+Cell[BoxData[
+ FormBox[
+  InterpretationBox[
+   RowBox[{"\<\"in total: \"\>", 
+    "\[InvisibleSpace]", "\<\"7 Classes amplitudes\"\>"}],
+   SequenceForm["in total: ", "7 Classes amplitudes"],
+   Editable->False], TraditionalForm]], "Print",
+ CellChangeTimes->{4.001386051571371*^9},
+ CellLabel->
+  "During evaluation of \
+In[9]:=",ExpressionUUID->"03343073-467d-4a0e-89fc-eeafeb1d4637"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"mContact", " ", "=", " ", 
+   RowBox[{
+    RowBox[{"Coefficient", "[", 
+     RowBox[{"\[ScriptCapitalM]", ",", " ", "\[Lambda]4"}], "]"}], " ", 
+    "\[Lambda]4"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"mScalar", " ", "=", " ", 
+   RowBox[{
+    RowBox[{"Coefficient", "[", 
+     RowBox[{"\[ScriptCapitalM]", ",", " ", "\[Lambda]3", ",", " ", "2"}], 
+     "]"}], " ", 
+    RowBox[{"\[Lambda]3", "^", "2"}]}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"mGravity", " ", "=", " ", "\[ScriptCapitalM]"}], " ", 
+  ";"}]}], "Input",
+ CellChangeTimes->{{4.001385941975115*^9, 4.001385949753577*^9}, {
+  4.001385994552799*^9, 4.001385996419334*^9}},
+ CellLabel->"In[10]:=",ExpressionUUID->"2470f50b-af34-4fc8-b5bb-cba36dc47811"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["6. Present the amplitude", "Section",ExpressionUUID->"90aeea2d-a486-4f52-9fe5-111062c6133e"],
+
+Cell["\<\
+The amplitude is calculated directly with the on-shell scalar products and s \
++ t + u = 4 m^2. The table separates the calculated result by coupling: the \
+quartic contact, cubic scalar exchange and gravitational exchange. The \
+overall i has been removed, so the displayed result is M. Pole prescriptions \
+are implicit in the original propagators; the rational display is intended \
+away from the poles. No cross section is calculated.\
+\>", "Text",ExpressionUUID->"1fdf7ca6-94ce-48c5-9804-3f381c08432a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"(", 
+  RowBox[{"Grid", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"\"\<Contribution to M\>\"", ",", 
+        " ", "\"\<On-shell expression\>\""}], "}"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"\"\<Quartic contact\>\"", ",", " ", 
+        RowBox[{"TraditionalForm", "[", "mContact", "]"}]}], "}"}], ",", " ", 
+      
+      RowBox[{"{", 
+       RowBox[{"\"\<Scalar exchange (s, t, u)\>\"", ",", " ", 
+        RowBox[{"TraditionalForm", "[", "mScalar", "]"}]}], "}"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"\"\<Graviton exchange (s, t, u)\>\"", ",", " ", 
+        RowBox[{"TraditionalForm", "[", "mGravity", "]"}]}], "}"}]}], "}"}], ",",
+     " ", 
+    RowBox[{"Frame", " ", "->", " ", "All"}], ",", " ", 
+    RowBox[{"Alignment", " ", "->", " ", "Left"}]}], "]"}], ")"}]], "Input",
+ CellLabel->"In[13]:=",ExpressionUUID->"9349d8b6-2f64-41d8-a933-263f3c4c17c6"],
+
+Cell[BoxData[
+ FormBox[
+  TagBox[GridBox[{
+     {"\<\"Contribution to M\"\>", "\<\"On-shell expression\"\>"},
+     {"\<\"Quartic contact\"\>", "\[Lambda]4"},
+     {"\<\"Scalar exchange (s, t, u)\"\>", 
+      FractionBox[
+       RowBox[{
+        SuperscriptBox["\[Lambda]3", "2"], " ", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"3", " ", 
+           SuperscriptBox["m", "4"]}], "-", 
+          RowBox[{"2", " ", 
+           SuperscriptBox["m", "2"], " ", "s"}], "-", 
+          RowBox[{"2", " ", 
+           SuperscriptBox["m", "2"], " ", "t"}], "-", 
+          RowBox[{"2", " ", 
+           SuperscriptBox["m", "2"], " ", "u"}], "+", 
+          RowBox[{"s", " ", "t"}], "+", 
+          RowBox[{"s", " ", "u"}], "+", 
+          RowBox[{"t", " ", "u"}]}], ")"}]}], 
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{
+          SuperscriptBox["m", "2"], "-", "s"}], ")"}], " ", 
+        RowBox[{"(", 
+         RowBox[{
+          SuperscriptBox["m", "2"], "-", "t"}], ")"}], " ", 
+        RowBox[{"(", 
+         RowBox[{
+          SuperscriptBox["m", "2"], "-", "u"}], ")"}]}]]},
+     {"\<\"Graviton exchange (s, t, u)\"\>", 
+      RowBox[{"\[Lambda]4", "-", 
+       FractionBox[
+        RowBox[{
+         SuperscriptBox["\[Kappa]", "2"], " ", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"4", " ", 
+            SuperscriptBox["m", "4"], " ", "s", " ", "t"}], "+", 
+           RowBox[{"4", " ", 
+            SuperscriptBox["m", "4"], " ", "s", " ", "u"}], "+", 
+           RowBox[{"4", " ", 
+            SuperscriptBox["m", "4"], " ", "t", " ", "u"}], "-", 
+           RowBox[{"4", " ", 
+            SuperscriptBox["m", "2"], " ", 
+            SuperscriptBox["s", "2"], " ", "t"}], "-", 
+           RowBox[{"4", " ", 
+            SuperscriptBox["m", "2"], " ", 
+            SuperscriptBox["s", "2"], " ", "u"}], "-", 
+           RowBox[{"4", " ", 
+            SuperscriptBox["m", "2"], " ", "s", " ", 
+            SuperscriptBox["t", "2"]}], "-", 
+           RowBox[{"4", " ", 
+            SuperscriptBox["m", "2"], " ", "s", " ", 
+            SuperscriptBox["u", "2"]}], "-", 
+           RowBox[{"4", " ", 
+            SuperscriptBox["m", "2"], " ", 
+            SuperscriptBox["t", "2"], " ", "u"}], "-", 
+           RowBox[{"4", " ", 
+            SuperscriptBox["m", "2"], " ", "t", " ", 
+            SuperscriptBox["u", "2"]}], "+", 
+           RowBox[{
+            SuperscriptBox["s", "3"], " ", "t"}], "+", 
+           RowBox[{
+            SuperscriptBox["s", "3"], " ", "u"}], "-", 
+           RowBox[{
+            SuperscriptBox["s", "2"], " ", "t", " ", "u"}], "+", 
+           RowBox[{"s", " ", 
+            SuperscriptBox["t", "3"]}], "-", 
+           RowBox[{"s", " ", 
+            SuperscriptBox["t", "2"], " ", "u"}], "-", 
+           RowBox[{"s", " ", "t", " ", 
+            SuperscriptBox["u", "2"]}], "+", 
+           RowBox[{"s", " ", 
+            SuperscriptBox["u", "3"]}], "+", 
+           RowBox[{
+            SuperscriptBox["t", "3"], " ", "u"}], "+", 
+           RowBox[{"t", " ", 
+            SuperscriptBox["u", "3"]}]}], ")"}]}], 
+        RowBox[{"8", " ", "s", " ", "t", " ", "u"}]], "+", 
+       FractionBox[
+        RowBox[{
+         SuperscriptBox["\[Lambda]3", "2"], " ", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"3", " ", 
+            SuperscriptBox["m", "4"]}], "-", 
+           RowBox[{"2", " ", 
+            SuperscriptBox["m", "2"], " ", "s"}], "-", 
+           RowBox[{"2", " ", 
+            SuperscriptBox["m", "2"], " ", "t"}], "-", 
+           RowBox[{"2", " ", 
+            SuperscriptBox["m", "2"], " ", "u"}], "+", 
+           RowBox[{"s", " ", "t"}], "+", 
+           RowBox[{"s", " ", "u"}], "+", 
+           RowBox[{"t", " ", "u"}]}], ")"}]}], 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{
+           SuperscriptBox["m", "2"], "-", "s"}], ")"}], " ", 
+         RowBox[{"(", 
+          RowBox[{
+           SuperscriptBox["m", "2"], "-", "t"}], ")"}], " ", 
+         RowBox[{"(", 
+          RowBox[{
+           SuperscriptBox["m", "2"], "-", "u"}], ")"}]}]]}]}
+    },
+    AutoDelete->False,
+    GridBoxAlignment->{"Columns" -> {{Left}}},
+    GridBoxFrame->{"Columns" -> {{True}}, "Rows" -> {{True}}},
+    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+   "Grid"], TraditionalForm]], "Output",
+ CellChangeTimes->{4.001386051849663*^9},
+ CellLabel->"Out[13]=",ExpressionUUID->"285df79f-24f0-47f4-b1ee-fa6a939d472c"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"(", 
+  RowBox[{"\[ScriptCapitalM]", " ", "//", " ", "TraditionalForm"}], 
+  ")"}]], "Input",
+ CellLabel->"In[14]:=",ExpressionUUID->"7acbe1b2-fccf-453d-bcad-41587b37a536"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Lambda]4", "-", 
+   FractionBox[
+    RowBox[{
+     SuperscriptBox["\[Kappa]", "2"], " ", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"4", " ", 
+        SuperscriptBox["m", "4"], " ", "s", " ", "t"}], "+", 
+       RowBox[{"4", " ", 
+        SuperscriptBox["m", "4"], " ", "s", " ", "u"}], "+", 
+       RowBox[{"4", " ", 
+        SuperscriptBox["m", "4"], " ", "t", " ", "u"}], "-", 
+       RowBox[{"4", " ", 
+        SuperscriptBox["m", "2"], " ", 
+        SuperscriptBox["s", "2"], " ", "t"}], "-", 
+       RowBox[{"4", " ", 
+        SuperscriptBox["m", "2"], " ", 
+        SuperscriptBox["s", "2"], " ", "u"}], "-", 
+       RowBox[{"4", " ", 
+        SuperscriptBox["m", "2"], " ", "s", " ", 
+        SuperscriptBox["t", "2"]}], "-", 
+       RowBox[{"4", " ", 
+        SuperscriptBox["m", "2"], " ", "s", " ", 
+        SuperscriptBox["u", "2"]}], "-", 
+       RowBox[{"4", " ", 
+        SuperscriptBox["m", "2"], " ", 
+        SuperscriptBox["t", "2"], " ", "u"}], "-", 
+       RowBox[{"4", " ", 
+        SuperscriptBox["m", "2"], " ", "t", " ", 
+        SuperscriptBox["u", "2"]}], "+", 
+       RowBox[{
+        SuperscriptBox["s", "3"], " ", "t"}], "+", 
+       RowBox[{
+        SuperscriptBox["s", "3"], " ", "u"}], "-", 
+       RowBox[{
+        SuperscriptBox["s", "2"], " ", "t", " ", "u"}], "+", 
+       RowBox[{"s", " ", 
+        SuperscriptBox["t", "3"]}], "-", 
+       RowBox[{"s", " ", 
+        SuperscriptBox["t", "2"], " ", "u"}], "-", 
+       RowBox[{"s", " ", "t", " ", 
+        SuperscriptBox["u", "2"]}], "+", 
+       RowBox[{"s", " ", 
+        SuperscriptBox["u", "3"]}], "+", 
+       RowBox[{
+        SuperscriptBox["t", "3"], " ", "u"}], "+", 
+       RowBox[{"t", " ", 
+        SuperscriptBox["u", "3"]}]}], ")"}]}], 
+    RowBox[{"8", " ", "s", " ", "t", " ", "u"}]], "+", 
+   FractionBox[
+    RowBox[{
+     SuperscriptBox["\[Lambda]3", "2"], " ", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"3", " ", 
+        SuperscriptBox["m", "4"]}], "-", 
+       RowBox[{"2", " ", 
+        SuperscriptBox["m", "2"], " ", "s"}], "-", 
+       RowBox[{"2", " ", 
+        SuperscriptBox["m", "2"], " ", "t"}], "-", 
+       RowBox[{"2", " ", 
+        SuperscriptBox["m", "2"], " ", "u"}], "+", 
+       RowBox[{"s", " ", "t"}], "+", 
+       RowBox[{"s", " ", "u"}], "+", 
+       RowBox[{"t", " ", "u"}]}], ")"}]}], 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{
+       SuperscriptBox["m", "2"], "-", "s"}], ")"}], " ", 
+     RowBox[{"(", 
+      RowBox[{
+       SuperscriptBox["m", "2"], "-", "t"}], ")"}], " ", 
+     RowBox[{"(", 
+      RowBox[{
+       SuperscriptBox["m", "2"], "-", "u"}], ")"}]}]]}], 
+  TraditionalForm]], "Output",
+ CellChangeTimes->{4.001386051864451*^9},
+ CellLabel->
+  "Out[14]//TraditionalForm=",ExpressionUUID->"052f9035-9d9e-4477-a135-\
+8ab291b8f32a"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Consistency checks", "Subsection",ExpressionUUID->"8e615c93-96c0-4e5a-9f3d-6d1296f2093f"],
+
+Cell["\<\
+These checks test the scalar signs, crossing symmetry and decoupling limits. \
+These are tree-level consistency checks, not loop validation.\
+\>", "Text",ExpressionUUID->"5fc16c68-6613-493c-a507-5a971eb7547a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"(", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"kinematicZero", "[", "expr_", "]"}], " ", ":=", " ", 
+    RowBox[{
+     RowBox[{"Together", "[", 
+      RowBox[{"expr", " ", "/.", " ", 
+       RowBox[{"u", " ", "->", " ", 
+        RowBox[{
+         RowBox[{"4", " ", 
+          RowBox[{"m", "^", "2"}]}], " ", "-", " ", "s", " ", "-", " ", 
+         "t"}]}]}], "]"}], " ", "===", " ", "0"}]}], ";", "\n", 
+   RowBox[{"checks", " ", "=", " ", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"\"\<Quartic sign\>\"", " ", "->", " ", 
+       RowBox[{"(", 
+        RowBox[{"mContact", " ", "===", " ", "\[Lambda]4"}], ")"}]}], ",", 
+      " ", 
+      RowBox[{"\"\<Scalar exchanges\>\"", " ", "->", " ", 
+       RowBox[{"kinematicZero", "[", 
+        RowBox[{"mScalar", " ", "+", " ", 
+         RowBox[{
+          RowBox[{"\[Lambda]3", "^", "2"}], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"1", "/", 
+             RowBox[{"(", 
+              RowBox[{"s", " ", "-", " ", 
+               RowBox[{"m", "^", "2"}]}], ")"}]}], " ", "+", " ", 
+            RowBox[{"1", "/", 
+             RowBox[{"(", 
+              RowBox[{"t", " ", "-", " ", 
+               RowBox[{"m", "^", "2"}]}], ")"}]}], " ", "+", " ", 
+            RowBox[{"1", "/", 
+             RowBox[{"(", 
+              RowBox[{"u", " ", "-", " ", 
+               RowBox[{"m", "^", "2"}]}], ")"}]}]}], ")"}]}]}], "]"}]}], ",", 
+      " ", 
+      RowBox[{"\"\<s-t crossing\>\"", " ", "->", " ", 
+       RowBox[{"kinematicZero", "[", 
+        RowBox[{"\[ScriptCapitalM]", " ", "-", " ", 
+         RowBox[{"(", 
+          RowBox[{"\[ScriptCapitalM]", " ", "/.", " ", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"s", " ", "->", " ", "t"}], ",", " ", 
+             RowBox[{"t", " ", "->", " ", "s"}]}], "}"}]}], ")"}]}], "]"}]}], 
+      ",", " ", 
+      RowBox[{"\"\<t-u crossing\>\"", " ", "->", " ", 
+       RowBox[{"kinematicZero", "[", 
+        RowBox[{"\[ScriptCapitalM]", " ", "-", " ", 
+         RowBox[{"(", 
+          RowBox[{"\[ScriptCapitalM]", " ", "/.", " ", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"t", " ", "->", " ", "u"}], ",", " ", 
+             RowBox[{"u", " ", "->", " ", "t"}]}], "}"}]}], ")"}]}], "]"}]}], 
+      ",", " ", 
+      RowBox[{"\"\<Gravity switched off\>\"", " ", "->", " ", 
+       RowBox[{"kinematicZero", "[", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"\[ScriptCapitalM]", " ", "/.", " ", 
+           RowBox[{"\[Kappa]", " ", "->", " ", "0"}]}], ")"}], " ", "-", " ", 
+         "mContact", " ", "-", " ", "mScalar"}], "]"}]}], ",", " ", 
+      RowBox[{"\"\<Potential switched off\>\"", " ", "->", " ", 
+       RowBox[{"kinematicZero", "[", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"\[ScriptCapitalM]", " ", "/.", " ", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"\[Lambda]3", " ", "->", " ", "0"}], ",", " ", 
+             RowBox[{"\[Lambda]4", " ", "->", " ", "0"}]}], "}"}]}], ")"}], 
+         " ", "-", " ", "mGravity"}], "]"}]}]}], "}"}]}], ";", "\n", 
+   RowBox[{"Grid", "[", 
+    RowBox[{
+     RowBox[{"Prepend", "[", 
+      RowBox[{
+       RowBox[{"List", " ", "@@@", " ", "checks"}], ",", " ", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Check\>\"", ",", " ", "\"\<Passed\>\""}], "}"}]}], "]"}],
+      ",", " ", 
+     RowBox[{"Frame", " ", "->", " ", "All"}], ",", " ", 
+     RowBox[{"Alignment", " ", "->", " ", "Left"}]}], "]"}]}], ")"}]], "Input",\
+
+ CellLabel->"In[15]:=",ExpressionUUID->"e211d84e-0671-4a26-8f98-b268afb06a46"],
+
+Cell[BoxData[
+ FormBox[
+  TagBox[GridBox[{
+     {"\<\"Check\"\>", "\<\"Passed\"\>"},
+     {"\<\"Quartic sign\"\>", "True"},
+     {"\<\"Scalar exchanges\"\>", "True"},
+     {"\<\"s-t crossing\"\>", "True"},
+     {"\<\"t-u crossing\"\>", "True"},
+     {"\<\"Gravity switched off\"\>", "True"},
+     {"\<\"Potential switched off\"\>", "False"}
+    },
+    AutoDelete->False,
+    GridBoxAlignment->{"Columns" -> {{Left}}},
+    GridBoxFrame->{"Columns" -> {{True}}, "Rows" -> {{True}}},
+    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+   "Grid"], TraditionalForm]], "Output",
+ CellChangeTimes->{4.00138605187392*^9},
+ CellLabel->"Out[15]=",ExpressionUUID->"653ceff3-4d00-45f0-b0bc-e4dc25045fa7"]
+}, Open  ]],
+
+Cell["\<\
+To change the mass or couplings, replace them in \[ScriptCapitalM] after \
+completing the calculation. Restart the kernel before switching examples, or \
+call FCClearScalarProducts[] and explicitly reset any other definitions you \
+introduced.\
+\>", "Text",ExpressionUUID->"802c9fcb-59d7-4529-a097-03149550be66"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+Saveable->True,
+WindowSize->{1435.5, 851.25},
+WindowMargins->{{-2.25, Automatic}, {Automatic, -22.5}},
+WindowTitle->"Scalar scattering with FeynArts",
+FrontEndVersion->"15.0 for Linux x86 (64-bit) (July 2, 2026)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"2bab26e5-406d-41e5-9426-d35efdf54499"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[621, 23, 132, 0, 96, "Title",ExpressionUUID->"b1138547-0ffa-4c97-93c6-4d1c644267d9"],
+Cell[756, 25, 467, 6, 55, "Text",ExpressionUUID->"8d480533-ffbd-4ebb-ac83-2d2147b52eb0"],
+Cell[CellGroupData[{
+Cell[1248, 35, 90, 0, 65, "Section",ExpressionUUID->"cd027244-3502-455c-bd31-5c294251b117"],
+Cell[CellGroupData[{
+Cell[1363, 39, 337, 7, 49, "Input",ExpressionUUID->"219500d5-ff5f-4270-a814-5c1aed671a8a"],
+Cell[CellGroupData[{
+Cell[1725, 50, 3741, 97, 26, "Print",ExpressionUUID->"d4754007-ca67-450c-bc34-630ce50eb946"],
+Cell[5469, 149, 364, 8, 26, "Print",ExpressionUUID->"86ec948f-8cda-462f-99e3-6dda6f0a8df4"],
+Cell[5836, 159, 410, 10, 26, "Print",ExpressionUUID->"66e7a915-8907-45b6-8a8c-641c3042bcc0"],
+Cell[6249, 171, 2013, 57, 26, "Print",ExpressionUUID->"f5c713f2-4545-4a60-b192-80620aa390ff"],
+Cell[8265, 230, 302, 7, 26, "Print",ExpressionUUID->"e0db4259-ace1-4636-9930-ce3e7bed800d"],
+Cell[8570, 239, 338, 8, 26, "Print",ExpressionUUID->"34f0fe75-b976-45e9-9787-7807e9c3e00e"],
+Cell[8911, 249, 288, 8, 26, "Print",ExpressionUUID->"69144c58-61a1-42e7-ac19-76b166a3b335"],
+Cell[9202, 259, 361, 8, 26, "Print",ExpressionUUID->"49dc3817-c08e-4772-86e3-6c8bc0239800"],
+Cell[9566, 269, 465, 10, 26, "Print",ExpressionUUID->"b37dfb97-6b26-4d11-9d7f-4a4c3f504ae6"],
+Cell[10034, 281, 301, 8, 26, "Print",ExpressionUUID->"44249ff5-c5ae-4a92-9fcf-dc5d26288c5b"],
+Cell[10338, 291, 288, 7, 26, "Print",ExpressionUUID->"d80d870f-29a0-49fc-8db4-3411a4c5fb9b"],
+Cell[10629, 300, 323, 8, 26, "Print",ExpressionUUID->"79a841a7-b1e5-41e5-bce1-fb90046f3b2d"],
+Cell[10955, 310, 315, 8, 26, "Print",ExpressionUUID->"fae7ead4-f583-4903-8ff7-518daf86e463"],
+Cell[11273, 320, 299, 7, 26, "Print",ExpressionUUID->"8cc53ce7-66f9-4ee1-a95c-5442eab57572"],
+Cell[11575, 329, 469, 10, 26, "Print",ExpressionUUID->"4b01360c-4c68-4f7a-976d-020fbbbab50e"],
+Cell[12047, 341, 2493, 70, 26, "Print",ExpressionUUID->"e8722dba-f806-4da9-99a2-e28dc993859e"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[14601, 418, 100, 0, 65, "Section",ExpressionUUID->"0e0b0670-2bc9-4384-ab53-d53bd6d2448e"],
+Cell[14704, 420, 275, 6, 29, "Input",ExpressionUUID->"9e099cbc-cde7-41d8-990a-a644efb2bfe0"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[15016, 431, 110, 0, 65, "Section",ExpressionUUID->"f3efb669-2fca-4f7c-b6f3-dd331cd16e8d"],
+Cell[15129, 433, 385, 6, 55, "Text",ExpressionUUID->"9db53f69-7ead-4a24-8d52-756fb11e5165"],
+Cell[CellGroupData[{
+Cell[15539, 443, 1169, 28, 49, "Input",ExpressionUUID->"696b0c94-af07-4192-8561-83a00a16d44d"],
+Cell[CellGroupData[{
+Cell[16733, 475, 208, 5, 22, "Print",ExpressionUUID->"450d0be8-6366-48fa-bd07-c965a10432a0"],
+Cell[16944, 482, 797, 18, 22, "Print",ExpressionUUID->"db0def8c-acc0-4f9b-b338-e308666cf4ba"],
+Cell[17744, 502, 231, 5, 22, "Print",ExpressionUUID->"51b894d0-ec52-40a8-ae19-fd036589c61b"],
+Cell[17978, 509, 526, 13, 22, "Print",ExpressionUUID->"0d6c844f-f4ca-473a-926e-e3ed6ea14e6b"],
+Cell[18507, 524, 208, 5, 22, "Print",ExpressionUUID->"c3bd40d5-5dcb-46df-abce-3e6ebd1ac347"],
+Cell[18718, 531, 797, 18, 22, "Print",ExpressionUUID->"ec07da20-6901-489d-b758-cf19257409e2"],
+Cell[19518, 551, 522, 12, 22, "Print",ExpressionUUID->"c32eaf18-bf48-4724-8c3f-e4ac294783d0"],
+Cell[20043, 565, 232, 5, 22, "Print",ExpressionUUID->"9b28c8bb-c0aa-440e-91b2-cb3985038859"],
+Cell[20278, 572, 380, 10, 22, "Print",ExpressionUUID->"87991583-91e1-4865-be22-29deef568670"],
+Cell[20661, 584, 526, 13, 22, "Print",ExpressionUUID->"bbbba85d-065e-4819-a548-518aa1ec4f0d"],
+Cell[21190, 599, 208, 5, 22, "Print",ExpressionUUID->"c5e4723e-b6e7-40c4-8558-3998e9e98e3f"],
+Cell[21401, 606, 408, 10, 22, "Print",ExpressionUUID->"3f01aacd-6266-468e-ad48-7a793e3add29"],
+Cell[21812, 618, 454, 11, 22, "Print",ExpressionUUID->"59cee5b5-d15c-4c4d-89fe-6686b6ef919f"],
+Cell[22269, 631, 458, 11, 22, "Print",ExpressionUUID->"e2ea5744-2455-41f6-8621-537ab30af23d"],
+Cell[22730, 644, 456, 11, 22, "Print",ExpressionUUID->"9d0a4117-8b25-464d-b5a0-e17bf94ae5c0"],
+Cell[23189, 657, 456, 11, 22, "Print",ExpressionUUID->"bc8e0138-8b5f-4f98-8f60-6237c225d6aa"],
+Cell[23648, 670, 389, 10, 22, "Print",ExpressionUUID->"55b72ce8-700d-44c8-ad92-80e2ea776a63"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[24086, 686, 1003, 23, 89, "Input",ExpressionUUID->"a70377f9-7281-4e35-9899-1115d06c572d"],
+Cell[CellGroupData[{
+Cell[25114, 713, 548, 13, 22, "Print",ExpressionUUID->"67b13732-d1c2-42dc-a145-f79b0543a7dd"],
+Cell[25665, 728, 549, 13, 22, "Print",ExpressionUUID->"bbcfb889-87ab-4fba-a643-baeebdbd6d2a"],
+Cell[26217, 743, 552, 13, 22, "Print",ExpressionUUID->"8640bc12-7354-4f79-9d74-fa7d4bc61d43"],
+Cell[26772, 758, 550, 13, 22, "Print",ExpressionUUID->"d45e7115-c3a7-4611-bd6d-79ca53fb6ce5"],
+Cell[27325, 773, 28725, 669, 776, "Print",ExpressionUUID->"74de2632-ce3d-4300-ae92-ad105f5ee0bb"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[56111, 1449, 104, 0, 65, "Section",ExpressionUUID->"af9a98b2-4233-4f4a-8a54-c13784a75775"],
+Cell[56218, 1451, 428, 6, 55, "Text",ExpressionUUID->"75b7b58c-855e-4c44-8d17-f3bd62dd0560"],
+Cell[56649, 1459, 523, 12, 49, "Input",ExpressionUUID->"f774fb12-dfaa-4ef4-a993-af7f947629e5"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[57209, 1476, 109, 0, 65, "Section",ExpressionUUID->"a4b7792d-10bf-464b-b172-253436653ec1"],
+Cell[57321, 1478, 363, 5, 55, "Text",ExpressionUUID->"3aa9bddb-8259-443a-b1ae-59a78ef1bf37"],
+Cell[CellGroupData[{
+Cell[57709, 1487, 2540, 53, 149, "Input",ExpressionUUID->"96abfd65-8a16-4567-9fb1-f7beda5c4276"],
+Cell[CellGroupData[{
+Cell[60274, 1544, 206, 5, 22, "Print",ExpressionUUID->"56255309-676a-43b9-85cd-1177808a06a8"],
+Cell[60483, 1551, 426, 10, 22, "Print",ExpressionUUID->"0345be92-97f5-4061-8d28-ee46373c5470"],
+Cell[60912, 1563, 454, 11, 22, "Print",ExpressionUUID->"d6fba604-3949-4f78-8577-86069abe2488"],
+Cell[61369, 1576, 456, 11, 22, "Print",ExpressionUUID->"80bf4865-2f88-49ee-a7c7-8a2971d6f0bb"],
+Cell[61828, 1589, 458, 11, 22, "Print",ExpressionUUID->"c413fb5d-7746-4cee-b313-366a5e0886d2"],
+Cell[62289, 1602, 456, 11, 22, "Print",ExpressionUUID->"fc5b5077-e209-43e9-a648-d6dde7ce450f"],
+Cell[62748, 1615, 387, 10, 22, "Print",ExpressionUUID->"03343073-467d-4a0e-89fc-eeafeb1d4637"]
+}, Open  ]]
+}, Open  ]],
+Cell[63162, 1629, 748, 19, 69, "Input",ExpressionUUID->"2470f50b-af34-4fc8-b5bb-cba36dc47811"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[63947, 1653, 98, 0, 65, "Section",ExpressionUUID->"90aeea2d-a486-4f52-9fe5-111062c6133e"],
+Cell[64048, 1655, 517, 7, 77, "Text",ExpressionUUID->"1fdf7ca6-94ce-48c5-9804-3f381c08432a"],
+Cell[CellGroupData[{
+Cell[64590, 1666, 941, 22, 49, "Input",ExpressionUUID->"9349d8b6-2f64-41d8-a933-263f3c4c17c6"],
+Cell[65534, 1690, 4454, 115, 127, "Output",ExpressionUUID->"285df79f-24f0-47f4-b1ee-fa6a939d472c"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[70025, 1810, 195, 4, 29, "Input",ExpressionUUID->"7acbe1b2-fccf-453d-bcad-41587b37a536"],
+Cell[70223, 1816, 2830, 81, 71, "Output",ExpressionUUID->"052f9035-9d9e-4477-a135-8ab291b8f32a"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[73090, 1902, 95, 0, 53, "Subsection",ExpressionUUID->"8e615c93-96c0-4e5a-9f3d-6d1296f2093f"],
+Cell[73188, 1904, 219, 3, 33, "Text",ExpressionUUID->"5fc16c68-6613-493c-a507-5a971eb7547a"],
+Cell[CellGroupData[{
+Cell[73432, 1911, 3576, 88, 109, "Input",ExpressionUUID->"e211d84e-0671-4a26-8f98-b268afb06a46"],
+Cell[77011, 2001, 718, 17, 149, "Output",ExpressionUUID->"653ceff3-4d00-45f0-b0bc-e4dc25045fa7"]
+}, Open  ]],
+Cell[77744, 2021, 322, 5, 55, "Text",ExpressionUUID->"802c9fcb-59d7-4529-a097-03149550be66"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

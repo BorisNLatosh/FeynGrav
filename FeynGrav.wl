@@ -3,44 +3,65 @@
 BeginPackage["FeynGrav`",{"FeynCalc`"}];
 
 
-(* Function to display initialisation messages for FeynGrav package. *)
+(* Citation metadata for the public citation command.
+   These are local strings: displaying citations never performs a network request. *)
+FeynGrav`Private`$feynGravReferences = {
+    {"Boris Latosh, FeynGrav, Classical and Quantum Gravity 39 (2022), 165006.",
+     "https://doi.org/10.1088/1361-6382/ac7e15", "FeynGrav (2022)"},
+    {"Boris Latosh, FeynGrav 2.0, Computer Physics Communications 292 (2023), 108871.",
+     "https://doi.org/10.1016/j.cpc.2023.108871", "FeynGrav 2.0 (2023)"},
+    {"Boris Latosh, FeynGrav 3.0, Computer Physics Communications 310 (2025), 109508.",
+     "https://doi.org/10.1016/j.cpc.2025.109508", "FeynGrav 3.0 (2025)"},
+    {"Boris Latosh, FeynGrav 4.0, arXiv:2510.17320 (2025).",
+     "https://arxiv.org/abs/2510.17320", "FeynGrav 4.0 (2025)"}
+};
 
+FeynGravHowToCite::usage = "FeynGravHowToCite[] prints the FeynGrav publications to cite for the version and features used, with reference links, then returns Null. Notebook output contains clickable links; kernels without a front end print plain text and URLs. The command does not access the network, change settings or run calculations. Cite FeynCalc, FORM and FeynArts separately when used. Invalid arguments return Failure.";
+
+FeynGravHowToCite[] := Module[{},
+    Print["When using FeynGrav in published work, cite the publications relevant to the version and features used:"];
+    Scan[Function[reference,
+        If[$FrontEnd === Null,
+            Print["  ", reference[[1]], "\n    ", reference[[2]]],
+            Print[Style[reference[[1]], "Text"], " ",
+                Hyperlink["Reference", reference[[2]]]]
+        ]
+    ], FeynGrav`Private`$feynGravReferences];
+    Print["Please also follow the citation guidance of FeynCalc, FORM and FeynArts when using them. Evaluate FeynCalcHowToCite[] for FeynCalc references."];
+    Null
+];
+FeynGravHowToCite[args___] /; Length[{args}] != 0 :=
+    Failure["InvalidArgumentCount", <|
+        "MessageTemplate" -> "FeynGravHowToCite[] takes no arguments.",
+        "Function" -> "FeynGrav`FeynGravHowToCite",
+        "ExpectedArgumentCount" -> 0, "ActualArgumentCount" -> Length[{args}]|>];
 
 DisplayInitializationMessages[] := Module[{},
-  Print[Style["FeynGrav 4.1", Bold, 16]];
-  
-  Print[Style["FeynGrav: ", Bold], 
-        "Use ", 
-        Button[Style["FeynGravCommands", Underlined, Blue], 
-               FeynGravCommands[], 
-               Appearance -> None], 
-        " to print the list of all commands."];
-
-  Print[Style["FeynGrav: ", Bold], 
-        "On initialisation, the package only imports libraries for matter with spin s = 0, 1/2, 1, and 2 with minimal couplings up to the second order. To import additional libraries, use the \"import*\" command."];
-
-  Print[Style["FeynGrav: ", Bold],
-        "FeynArts support is available through FeynCalc-patched FeynArts. Supplied models for tree-level diagram construction, with vertices through order \[Kappa]^2:"];
-  Print["  PureGR: general relativity with gravitational ghosts.\n",
-        "  GRScalar: general relativity with one real, minimally coupled scalar of arbitrary mass.\n",
-        "  GRScalarPotential: the massive scalar with independent cubic and quartic potential couplings.\n",
-        "  GRJohn: the massive scalar with the John derivative interaction.\n",
-        "  GREsGB: the massive scalar with independent linear and quadratic scalar-Gauss-Bonnet couplings."];
-
-  Print[Style["FeynGrav: Core publications on FeynGrav are ", Bold], 
-      Row[{Style[Hyperlink["Class.Quant.Grav. 39 (2022) 16, 165006", 
-                          "https://doi.org/10.1088/1361-6382/ac7e15"], Blue, Underlined], 
-           ", ", 
-           Style[Hyperlink["Comput.Phys.Commun. 292 (2023) 108871", 
-                          "https://doi.org/10.1016/j.cpc.2023.108871"], Blue, Underlined], 
-           ", ", 
-           Style[Hyperlink["Comput.Phys.Commun. 310 (2025) 109508", 
-                          "https://doi.org/10.1016/j.cpc.2025.109508"], Blue, Underlined],
-                          ", ", 
-           Style[Hyperlink["arXiv:2510.17320", 
-                          "https://doi.org/10.48550/arXiv.2510.17320"], Blue, Underlined]}]
-	];
-
+    Print[Style["FeynGrav 4.1", "Text", Bold]];
+    Print[Style["Feynman rules for gravity and matter, with FeynCalc notation and FORM support through CalcFormConverter.", "Text"]];
+    Print[Style["The default libraries include cubic and quartic graviton vertices and scalar, Dirac fermion and vector interactions with up to two gravitons. Use the FeynGravImport* commands to load additional libraries.", "Text"]];
+    Print[Style["FeynArts supported models", "Text", Bold]];
+    Scan[Function[name, Print[Style["\[Bullet] " <> name, "Text"]]], {
+        "Pure general relativity",
+        "Scalar field with a potential minimally coupled to gravity",
+        "Scalar field with a non-minimal kinetic coupling",
+        "Einstein-scalar-Gauss-Bonnet model"
+    }];
+    Print[Style["The supplied models retain interactions through order \[Kappa]^2 per vertex. Use matching Model and GenericModel names with FeynCalc-patched FeynArts in a fresh kernel. Models are not initialised automatically.", "Text"]];
+    If[$FrontEnd === Null,
+        Print["Evaluate FeynGravCommands[] to list available commands, FeynGravConventions[] to inspect conventions and current settings, and FeynGravHowToCite[] for citation guidance."],
+        Print[Style["Evaluate ", "Text"],
+            Style[DisplayForm@ButtonBox["FeynGravCommands[]", BaseStyle -> "Hyperlink",
+                ButtonFunction :> FeynGravCommands[], Evaluator -> Automatic, Method -> "Queued"], "Text"],
+            Style[" to list available commands, ", "Text"],
+            Style[DisplayForm@ButtonBox["FeynGravConventions[]", BaseStyle -> "Hyperlink",
+                ButtonFunction :> FeynGravConventions[], Evaluator -> Automatic, Method -> "Queued"], "Text"],
+            Style[" to inspect conventions and current settings, and ", "Text"],
+            Style[DisplayForm@ButtonBox["FeynGravHowToCite[]", BaseStyle -> "Hyperlink",
+                ButtonFunction :> FeynGravHowToCite[], Evaluator -> Automatic, Method -> "Queued"], "Text"],
+            Style[" for citation guidance.", "Text"]]
+    ];
+    Null
 ];
 
 
@@ -274,24 +295,23 @@ QuadraticGravityVertex[{\!\(\*SubscriptBox[\(\[Mu]\), \(1\)]\), \!\(\*SubscriptB
 
 (* Procedures that import libraries. *)
 
-FeynGrav`printOutput::usage = "printOutput is a Boolean option for the FeynGrav library importers. printOutput -> True prints import diagnostics; the default False suppresses them. It does not change the imported expressions. A non-Boolean resolved value returns Failure before loading any libraries. The legacy option Private`printOutput remains accepted; an explicitly supplied public printOutput option takes precedence.";
 
 
-importGravitons::usage = "importGravitons[n] imports the graviton self-interaction libraries through coupling order n, corresponding to vertices with up to n + 2 graviton legs. importGravitons[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importScalars::usage = "importScalars[n] imports the scalar kinetic and potential vertex libraries with up to n attached gravitons. importScalars[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importFermions::usage = "importFermions[n] imports the Dirac fermion vertex libraries with up to n attached gravitons. importFermions[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importVectors::usage = "importVectors[n] imports the massive-vector, massless-vector and vector-ghost vertex libraries with up to n attached gravitons. importVectors[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importSUNYM::usage = "importSUNYM[n] imports the SU(N) Yang-Mills vertex libraries with up to n attached gravitons. importSUNYM[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importAxionVectorVertex::usage = "importAxionVectorVertex[n] imports the axion-like scalar-vector-vector vertex libraries with up to n attached gravitons. importAxionVectorVertex[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importQuadraticGravity::usage = "importQuadraticGravity[n] imports the quadratic-gravity self-interaction libraries through coupling order n, corresponding to vertices with up to n + 2 graviton legs. importQuadraticGravity[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importHorndeskiG2::usage = "importHorndeskiG2[] imports all available Horndeski G2 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importHorndeskiG3::usage = "importHorndeskiG3[] imports all available Horndeski G3 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importHorndeskiG4::usage = "importHorndeskiG4[] imports all available Horndeski G4 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importHorndeskiG5::usage = "importHorndeskiG5[] imports all available Horndeski G5 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
-importScalarGaussBonnet::usage = "importScalarGaussBonnet[n] imports scalar-Gauss-Bonnet vertices with 2 through n graviton legs. importScalarGaussBonnet[] uses n = 2. The flat-background curvature-squared interaction starts at two gravitons; the one-graviton contribution vanishes and needs no library. The requested order must be an integer at least 2 and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The public option printOutput -> True enables diagnostic printing; the default is False. The legacy option Private`printOutput remains accepted. If both options are supplied explicitly, the public option takes precedence. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportGravitons::usage = "FeynGravImportGravitons[n] imports the graviton self-interaction libraries through coupling order n, corresponding to vertices with up to n + 2 graviton legs. FeynGravImportGravitons[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportScalars::usage = "FeynGravImportScalars[n] imports the scalar kinetic and potential vertex libraries with up to n attached gravitons. FeynGravImportScalars[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportFermions::usage = "FeynGravImportFermions[n] imports the Dirac fermion vertex libraries with up to n attached gravitons. FeynGravImportFermions[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportVectors::usage = "FeynGravImportVectors[n] imports the massive-vector, massless-vector and vector-ghost vertex libraries with up to n attached gravitons. FeynGravImportVectors[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportSUNYM::usage = "FeynGravImportSUNYM[n] imports the SU(N) Yang-Mills vertex libraries with up to n attached gravitons. FeynGravImportSUNYM[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportAxionVectorVertex::usage = "FeynGravImportAxionVectorVertex[n] imports the axion-like scalar-vector-vector vertex libraries with up to n attached gravitons. FeynGravImportAxionVectorVertex[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportQuadraticGravity::usage = "FeynGravImportQuadraticGravity[n] imports the quadratic-gravity self-interaction libraries through coupling order n, corresponding to vertices with up to n + 2 graviton legs. FeynGravImportQuadraticGravity[] uses n = 2. The requested order must be a positive integer and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportHorndeskiG2::usage = "FeynGravImportHorndeskiG2[] imports all available Horndeski G2 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportHorndeskiG3::usage = "FeynGravImportHorndeskiG3[] imports all available Horndeski G3 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportHorndeskiG4::usage = "FeynGravImportHorndeskiG4[] imports all available Horndeski G4 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportHorndeskiG5::usage = "FeynGravImportHorndeskiG5[] imports all available Horndeski G5 vertex libraries. No order argument is accepted. Multi-digit filename parameters are supported. Failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
+FeynGravImportScalarGaussBonnet::usage = "FeynGravImportScalarGaussBonnet[n] imports scalar-Gauss-Bonnet vertices with 2 through n graviton legs. FeynGravImportScalarGaussBonnet[] uses n = 2. The flat-background curvature-squared interaction starts at two gravitons; the one-graviton contribution vanishes and needs no library. The requested order must be an integer at least 2 and is capped at the highest order available across the required library families. Multi-digit orders are supported. Missing intermediate orders cause failure before loading. Invalid orders or failed library reads preserve existing vertex definitions. The option Verbose -> False suppresses import diagnostics by default. Use Verbose -> True to print them. Invalid options or non-Boolean values return Failure. Successful imports record their sources, orders and relevant settings; query FeynGravLibraryInformation. Failed imports preserve previous records.";
 
 
-FeynGravLibraryInformation::usage = "FeynGravLibraryInformation[] returns records of the last successful import for each library importer. FeynGravLibraryInformation[importVectors], for example, selects one record. Records contain actual imported families and orders, absolute source paths and SHA-256 hashes, UTC import time and held snapshots of relevant settings. CurrentSettings and ChangedSettings compare the present settings with those snapshots. Settings are held to prevent later assignments from changing historical values. An unrecorded import or historical generation settings are reported as Missing[\"NotRecorded\"]. Failed imports preserve previous definitions and records. This read-only query does not track manual vertex redefinitions or previously computed expressions.";
+FeynGravLibraryInformation::usage = "FeynGravLibraryInformation[] returns records of the last successful import for each library importer. FeynGravLibraryInformation[FeynGravImportVectors], for example, selects one record. Records contain actual imported families and orders, absolute source paths and SHA-256 hashes, UTC import time and held snapshots of relevant settings. CurrentSettings and ChangedSettings compare the present settings with those snapshots. Settings are held to prevent later assignments from changing historical values. An unrecorded import or historical generation settings are reported as Missing[\"NotRecorded\"]. Failed imports preserve previous definitions and records. This read-only query does not track manual vertex redefinitions or previously computed expressions.";
 
 FeynGravConventions::usage = "FeynGravConventions[] prints a fully visible report of fixed mathematical conventions, current session settings and recorded library-import settings, then returns Null. It includes geometry, Fourier transforms, dimensions, gauges, polarisations, epsilon, Dirac and colour conventions, and diagram/integral boundaries. Notebook output uses mathematical formulas and static tables; kernels without a front end receive plain text. The report reads existing state without importing libraries, evaluating algebra or launching FORM. Use FeynGravLibraryInformation for detailed import diagnostics. Invalid arguments return Failure.";
 
@@ -310,11 +330,11 @@ FeynGravCommands[] := Print[
         "ProcaPropagator", "GravitonMassiveVectorVertex", "GravitonVectorVertex", "GravitonVectorGhostVertex",
         "GravitonGluonVertex", "GravitonGluonGhostVertex", "GravitonYMGhostVertex", "GravitonQuarkGluonVertex",
         "GravitonAxionVectorVertex",
-        "HorndeskiG2", "HorndeskiG3", "HorndeskiG4", "HorndeskiG5", "ScalarGaussBonnet", "importScalarGaussBonnet",
+        "HorndeskiG2", "HorndeskiG3", "HorndeskiG4", "HorndeskiG5", "ScalarGaussBonnet", "FeynGravImportScalarGaussBonnet",
         "QuadraticGravityPropagator","QuadraticGravityPropagatorHD","GravitonGhostVertexHD","QuadraticGravityVertex","GhostVectorPropagatorHD",
-        "importGravitons", "importScalars", "importFermions", "importVectors", "importSUNYM",
-        "importHorndeskiG2", "importHorndeskiG3", "importHorndeskiG4", "importHorndeskiG5",
-        "importAxionVectorVertex", "importQuadraticGravity", "FeynGravLibraryInformation", "FeynGravConventions",
+        "FeynGravImportGravitons", "FeynGravImportScalars", "FeynGravImportFermions", "FeynGravImportVectors", "FeynGravImportSUNYM",
+        "FeynGravImportHorndeskiG2", "FeynGravImportHorndeskiG3", "FeynGravImportHorndeskiG4", "FeynGravImportHorndeskiG5",
+        "FeynGravImportAxionVectorVertex", "FeynGravImportQuadraticGravity", "FeynGravLibraryInformation", "FeynGravConventions", "FeynGravHowToCite",
         "CalcFormExport", "CalcFormImport", "CalcFormCheck", "CalcFormInstall", "CalcFormCalculate"
       }, 
       ", "
@@ -336,9 +356,9 @@ FeynGrav`GaugeFixingEpsilonHD0::usage = "GaugeFixingEpsilonHD0 is a coefficient 
 
 FeynGrav`GaugeFixingEpsilonHD1::usage = "GaugeFixingEpsilonHD1 is a coefficient of the higher-derivative gauge-fixing operator in quadratic gravity. It enters QuadraticGravityPropagatorHD, GhostVectorPropagatorHD and GravitonGhostVertexHD. On the flat background, it represents the combination of the two longitudinal coefficients after the second is set to zero in the package convention. It is left symbolic when FeynGrav loads.";
 
-FeynGrav`GaugeFixingEpsilonVector::usage = "GaugeFixingEpsilonVector is the gauge-fixing parameter in the massless-vector vertex libraries used by GravitonVectorVertex. It is initialised to -1 when FeynGrav loads. Set its desired value before importing the libraries with importVectors; changing it afterwards does not restore symbolic dependence already replaced during import.";
+FeynGrav`GaugeFixingEpsilonVector::usage = "GaugeFixingEpsilonVector is the gauge-fixing parameter in the massless-vector vertex libraries used by GravitonVectorVertex. It is initialised to -1 when FeynGrav loads. Set its desired value before importing the libraries with FeynGravImportVectors; changing it afterwards does not restore symbolic dependence already replaced during import.";
 
-FeynGrav`GaugeFixingEpsilonSUNYM::usage = "GaugeFixingEpsilonSUNYM is the gauge-fixing parameter in the SU(N) Yang-Mills vertex libraries. It is initialised to -1 when FeynGrav loads. Set its desired value before importing the libraries with importSUNYM; changing it afterwards does not restore symbolic dependence already replaced during import.";
+FeynGrav`GaugeFixingEpsilonSUNYM::usage = "GaugeFixingEpsilonSUNYM is the gauge-fixing parameter in the SU(N) Yang-Mills vertex libraries. It is initialised to -1 when FeynGrav loads. Set its desired value before importing the libraries with FeynGravImportSUNYM; changing it afterwards does not restore symbolic dependence already replaced during import.";
 
 
 FormatValues[FeynGrav`GaugeFixingEpsilon] = {HoldPattern[MakeBoxes[FeynGrav`GaugeFixingEpsilon,TraditionalForm]]:>SubscriptBox["\[CurlyEpsilon]","Gravity"]} ;
@@ -379,12 +399,12 @@ FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 
 
 ScalarMass::usage = "ScalarMass is the unassigned scalar mass parameter in the native FeynArts scalar models. Specialise it by replacement after conversion.";
-ScalarLambda3::usage = "ScalarLambda3 is the independent coupling of the positive cubic scalar potential term phi^3/3! in GRScalarPotential.";
-ScalarLambda4::usage = "ScalarLambda4 is the independent coupling of the positive quartic scalar potential term phi^4/4! in GRScalarPotential.";
-JohnBeta::usage = "JohnBeta multiplies G^(mu nu) partial_mu phi partial_nu phi in GRJohn, without an additional factor of one half.";
+ScalarLambda3::usage = "ScalarLambda3 is the independent coupling of the positive cubic scalar potential term phi^3/3! in Single-Scalar-Tensor-Minimal-Coupling.";
+ScalarLambda4::usage = "ScalarLambda4 is the independent coupling of the positive quartic scalar potential term phi^4/4! in Single-Scalar-Tensor-Minimal-Coupling.";
+JohnBeta::usage = "JohnBeta multiplies G^(mu nu) partial_mu phi partial_nu phi in John, without an additional factor of one half.";
 
-GaussBonnetG1::usage = "GaussBonnetG1 is the independent coupling of phi times the Gauss-Bonnet invariant in the native GREsGB model.";
-GaussBonnetG2::usage = "GaussBonnetG2 is the independent coupling of phi^2/2! times the Gauss-Bonnet invariant in the native GREsGB model.";
+GaussBonnetG1::usage = "GaussBonnetG1 is the independent coupling of phi times the Gauss-Bonnet invariant in the native Einstein-scalar-Gauss-Bonnet model.";
+GaussBonnetG2::usage = "GaussBonnetG2 is the independent coupling of phi^2/2! times the Gauss-Bonnet invariant in the native Einstein-scalar-Gauss-Bonnet model.";
 
 Begin["`Private`"];
 
@@ -441,21 +461,16 @@ GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2
 (* Graviton sector *)
 
 
-(* Resolve the public printing option, retaining existing calls and SetOptions
-   settings that use Private`printOutput. An explicit public option wins. *)
-importPrintOutput[head_, opts_List] := Module[{rules, public, legacy, resolved},
-    rules = Flatten[opts];
-    (* Select exact symbols: OptionValue can match option names across contexts. *)
-    public = Last[First[Select[Join[rules, Options[head]],
-        First[#] === FeynGrav`printOutput &]]];
-
-    legacy = Last[First[Select[Join[rules, Options[head]],
-        First[#] === Private`printOutput &]]];
-    resolved = If[MemberQ[First /@ rules, FeynGrav`printOutput], public,
-        If[legacy === Automatic, public, legacy]];
+(* Resolve exact option symbols; reject obsolete names and non-Boolean values. *)
+importPrintOutput[head_, opts_List] := Module[{rules = Flatten[opts], unknown, resolved},
+    unknown = Select[First /@ rules, # =!= System`Verbose &];
+    If[unknown =!= {}, Return[Failure["InvalidImportOption", <|
+        "MessageTemplate" -> "Use Verbose -> True or Verbose -> False for library import diagnostics.",
+        "Function" -> (Context[head] <> SymbolName[head]), "UnknownOptions" -> unknown|>]]];
+    resolved = System`Verbose /. Join[rules, Options[head]];
     If[resolved === True || resolved === False, resolved,
-        Failure["InvalidPrintOutput", <|"MessageTemplate" -> "The resolved printOutput option must be True or False.",
-            "Value" -> resolved|>]]
+        Failure["InvalidVerbose", <|"MessageTemplate" -> "Verbose must be True or False.",
+            "Function" -> (Context[head] <> SymbolName[head]), "Value" -> resolved|>]]
 ];
 
 (* ::Subsection:: *)
@@ -467,10 +482,10 @@ importPrintOutput[head_, opts_List] := Module[{rules, public, legacy, resolved},
    leave the previous vertices and their corresponding records intact. *)
 If[!AssociationQ[$libraryImportRecords], $libraryImportRecords = <||>];
 $libraryImporters = {
-    "FeynGrav`importGravitons", "FeynGrav`importScalars", "FeynGrav`importFermions",
-    "FeynGrav`importVectors", "FeynGrav`importSUNYM", "FeynGrav`importAxionVectorVertex",
-    "FeynGrav`importHorndeskiG2", "FeynGrav`importHorndeskiG3", "FeynGrav`importHorndeskiG4",
-    "FeynGrav`importHorndeskiG5", "FeynGrav`importScalarGaussBonnet", "FeynGrav`importQuadraticGravity"
+    "FeynGrav`FeynGravImportGravitons", "FeynGrav`FeynGravImportScalars", "FeynGrav`FeynGravImportFermions",
+    "FeynGrav`FeynGravImportVectors", "FeynGrav`FeynGravImportSUNYM", "FeynGrav`FeynGravImportAxionVectorVertex",
+    "FeynGrav`FeynGravImportHorndeskiG2", "FeynGrav`FeynGravImportHorndeskiG3", "FeynGrav`FeynGravImportHorndeskiG4",
+    "FeynGrav`FeynGravImportHorndeskiG5", "FeynGrav`FeynGravImportScalarGaussBonnet", "FeynGrav`FeynGravImportQuadraticGravity"
 };
 
 (* Evaluate once, then hold the result. An unassigned symbol must not acquire
@@ -481,11 +496,11 @@ importSettings[importer_String] := Join[
     <|"FeynGrav`\[Kappa]" -> importSettingSnapshot[FeynGrav`\[Kappa]],
       "System`D" -> importSettingSnapshot[D]|>,
     Switch[importer,
-        "FeynGrav`importVectors",
+        "FeynGrav`FeynGravImportVectors",
             <|"FeynGrav`GaugeFixingEpsilonVector" -> importSettingSnapshot[FeynGrav`GaugeFixingEpsilonVector]|>,
-        "FeynGrav`importSUNYM",
+        "FeynGrav`FeynGravImportSUNYM",
             <|"FeynGrav`GaugeFixingEpsilonSUNYM" -> importSettingSnapshot[FeynGrav`GaugeFixingEpsilonSUNYM]|>,
-        "FeynGrav`importAxionVectorVertex",
+        "FeynGrav`FeynGravImportAxionVectorVertex",
             <|"FeynCalc`$LeviCivitaSign" -> importSettingSnapshot[FeynCalc`$LeviCivitaSign]|>,
         _, <||>
     ]
@@ -605,12 +620,12 @@ importAvailableOrder[requested_Integer, families_List, first_Integer] := Module[
     last
 ];
 
-Options[importGravitons] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportGravitons] = {System`Verbose -> False};
 
-importGravitons[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+FeynGravImportGravitons[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
 	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
-	importTransaction[importGravitons, {GravitonVertex},
-	With[{printing = importPrintOutput[importGravitons, {opts}]},
+	importTransaction[FeynGravImportGravitons, {GravitonVertex},
+	With[{printing = importPrintOutput[FeynGravImportGravitons, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
 	nImport = importAvailableOrder[nExternal, {"GravitonVertex"}, 1];
@@ -642,12 +657,12 @@ GravitonGhostVertex = {\[Rho],\[Sigma],k,\[Mu],p1,\[Nu],p2} |->  I ( (FeynGrav`\
 (* Scalar sector *)
 
 
-Options[importScalars] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportScalars] = {System`Verbose -> False};
 
-importScalars[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Block[{nImport},
+FeynGravImportScalars[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Block[{nImport},
 	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
-	importTransaction[importScalars, {GravitonScalarVertex,GravitonScalarPotentialVertex},
-	With[{printing = importPrintOutput[importScalars, {opts}]},
+	importTransaction[FeynGravImportScalars, {GravitonScalarVertex,GravitonScalarPotentialVertex},
+	With[{printing = importPrintOutput[FeynGravImportScalars, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
 	nImport = importAvailableOrder[nExternal, {"GravitonScalarVertex", "GravitonScalarPotentialVertex"}, 1];
@@ -680,12 +695,12 @@ importScalars[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Bl
 (* Fermion sector *)
 
 
-Options[importFermions] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportFermions] = {System`Verbose -> False};
 
-importFermions[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+FeynGravImportFermions[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
 	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
-	importTransaction[importFermions, {GravitonFermionVertex},
-	With[{printing = importPrintOutput[importFermions, {opts}]},
+	importTransaction[FeynGravImportFermions, {GravitonFermionVertex},
+	With[{printing = importPrintOutput[FeynGravImportFermions, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
 	nImport = importAvailableOrder[nExternal, {"GravitonFermionVertex"}, 1];
@@ -713,12 +728,12 @@ importFermions[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := M
 (* Vector sector *)
 
 
-Options[importVectors] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportVectors] = {System`Verbose -> False};
 
-importVectors[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+FeynGravImportVectors[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
 	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
-	importTransaction[importVectors, {GravitonMassiveVectorVertex,GravitonVectorVertex,GravitonVectorGhostVertex},
-	With[{printing = importPrintOutput[importVectors, {opts}]},
+	importTransaction[FeynGravImportVectors, {GravitonMassiveVectorVertex,GravitonVectorVertex,GravitonVectorGhostVertex},
+	With[{printing = importPrintOutput[FeynGravImportVectors, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
 	nImport = importAvailableOrder[nExternal, {"GravitonMassiveVectorVertex", "GravitonVectorVertex", "GravitonVectorGhostVertex"}, 1];
@@ -756,12 +771,12 @@ importVectors[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Mo
 (* SU(N) Yang-Mills sector *)
 
 
-Options[importSUNYM] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportSUNYM] = {System`Verbose -> False};
 
-importSUNYM[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+FeynGravImportSUNYM[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
 	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
-	importTransaction[importSUNYM, {GravitonGluonVertex,GravitonQuarkGluonVertex,GravitonYMGhostVertex,GravitonGluonGhostVertex},
-	With[{printing = importPrintOutput[importSUNYM, {opts}]},
+	importTransaction[FeynGravImportSUNYM, {GravitonGluonVertex,GravitonQuarkGluonVertex,GravitonYMGhostVertex,GravitonGluonGhostVertex},
+	With[{printing = importPrintOutput[FeynGravImportSUNYM, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
 	nImport = importAvailableOrder[nExternal, {"GravitonGluonVertex", "GravitonThreeGluonVertex", "GravitonFourGluonVertex", "GravitonQuarkGluonVertex", "GravitonYMGhostVertex", "GravitonGluonGhostVertex"}, 1];
@@ -814,12 +829,12 @@ importSUNYM[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Modu
 (* Graviton-Scalar Axion-Single Vector Sector *)
 
 
-Options[importAxionVectorVertex] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportAxionVectorVertex] = {System`Verbose -> False};
 
-importAxionVectorVertex[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+FeynGravImportAxionVectorVertex[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
 	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
-	importTransaction[importAxionVectorVertex, {GravitonAxionVectorVertex},
-	With[{printing = importPrintOutput[importAxionVectorVertex, {opts}]},
+	importTransaction[FeynGravImportAxionVectorVertex, {GravitonAxionVectorVertex},
+	With[{printing = importPrintOutput[FeynGravImportAxionVectorVertex, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
 	nImport = importAvailableOrder[nExternal, {"GravitonAxionVectorVertex"}, 1];
@@ -847,11 +862,11 @@ importAxionVectorVertex[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern
 (* Horndeski G2 *)
 
 
-Options[importHorndeskiG2] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportHorndeskiG2] = {System`Verbose -> False};
 
-importHorndeskiG2[opts : OptionsPattern[] ] := Block[{indexArray},
-	importTransaction[importHorndeskiG2, {HorndeskiG2},
-	With[{printing = importPrintOutput[importHorndeskiG2, {opts}]},
+FeynGravImportHorndeskiG2[opts : OptionsPattern[] ] := Block[{indexArray},
+	importTransaction[FeynGravImportHorndeskiG2, {HorndeskiG2},
+	With[{printing = importPrintOutput[FeynGravImportHorndeskiG2, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
 	indexArray = importLibraryIndices["HorndeskiG2", 3];
@@ -877,11 +892,11 @@ importHorndeskiG2[opts : OptionsPattern[] ] := Block[{indexArray},
 (* Horndeski G3 *)
 
 
-Options[importHorndeskiG3] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportHorndeskiG3] = {System`Verbose -> False};
 
-importHorndeskiG3[ opts : OptionsPattern[] ] := Block[{indexArray},
-	importTransaction[importHorndeskiG3, {HorndeskiG3},
-	With[{printing = importPrintOutput[importHorndeskiG3, {opts}]},
+FeynGravImportHorndeskiG3[ opts : OptionsPattern[] ] := Block[{indexArray},
+	importTransaction[FeynGravImportHorndeskiG3, {HorndeskiG3},
+	With[{printing = importPrintOutput[FeynGravImportHorndeskiG3, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
 	indexArray = importLibraryIndices["HorndeskiG3", 3];
@@ -907,11 +922,11 @@ importHorndeskiG3[ opts : OptionsPattern[] ] := Block[{indexArray},
 (* Horndeski G4 *)
 
 
-Options[importHorndeskiG4] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportHorndeskiG4] = {System`Verbose -> False};
 
-importHorndeskiG4[ opts : OptionsPattern[] ] := Block[{indexArray},
-	importTransaction[importHorndeskiG4, {HorndeskiG4},
-	With[{printing = importPrintOutput[importHorndeskiG4, {opts}]},
+FeynGravImportHorndeskiG4[ opts : OptionsPattern[] ] := Block[{indexArray},
+	importTransaction[FeynGravImportHorndeskiG4, {HorndeskiG4},
+	With[{printing = importPrintOutput[FeynGravImportHorndeskiG4, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
 	indexArray = importLibraryIndices["HorndeskiG4", 3];
@@ -937,11 +952,11 @@ importHorndeskiG4[ opts : OptionsPattern[] ] := Block[{indexArray},
 (* Horndeski G5 *)
 
 
-Options[importHorndeskiG5] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportHorndeskiG5] = {System`Verbose -> False};
 
-importHorndeskiG5[ opts : OptionsPattern[] ] := Block[{indexArray},
-	importTransaction[importHorndeskiG5, {HorndeskiG5},
-	With[{printing = importPrintOutput[importHorndeskiG5, {opts}]},
+FeynGravImportHorndeskiG5[ opts : OptionsPattern[] ] := Block[{indexArray},
+	importTransaction[FeynGravImportHorndeskiG5, {HorndeskiG5},
+	With[{printing = importPrintOutput[FeynGravImportHorndeskiG5, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
 	indexArray = importLibraryIndices["HorndeskiG5", 3];
@@ -967,12 +982,12 @@ importHorndeskiG5[ opts : OptionsPattern[] ] := Block[{indexArray},
 (* Scalar-Gauss-Bonnet *)
 
 
-Options[importScalarGaussBonnet] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportScalarGaussBonnet] = {System`Verbose -> False};
 
-importScalarGaussBonnet[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+FeynGravImportScalarGaussBonnet[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
 	If[!IntegerQ[nExternal] || nExternal < 2, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 2.", "Order" -> nExternal|>]]];
-	importTransaction[importScalarGaussBonnet, {ScalarGaussBonnet},
-	With[{printing = importPrintOutput[importScalarGaussBonnet, {opts}]},
+	importTransaction[FeynGravImportScalarGaussBonnet, {ScalarGaussBonnet},
+	With[{printing = importPrintOutput[FeynGravImportScalarGaussBonnet, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 	
 	nImport = importAvailableOrder[nExternal, {"ScalarGaussBonnet"}, 2];
@@ -1000,12 +1015,12 @@ importScalarGaussBonnet[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern
 (* Quadratic gravity *)
 
 
-Options[importQuadraticGravity] = {FeynGrav`printOutput -> False, Private`printOutput -> Automatic};
+Options[FeynGravImportQuadraticGravity] = {System`Verbose -> False};
 
-importQuadraticGravity[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
+FeynGravImportQuadraticGravity[nExternal : Except[_?OptionQ] : 2, opts : OptionsPattern[] ] := Module[{nImport},
 	If[!IntegerQ[nExternal] || nExternal < 1, Return[Failure["InvalidImportOrder", <|"MessageTemplate" -> "The import order must be an integer at least 1.", "Order" -> nExternal|>]]];
-	importTransaction[importQuadraticGravity, {QuadraticGravityVertex},
-	With[{printing = importPrintOutput[importQuadraticGravity, {opts}]},
+	importTransaction[FeynGravImportQuadraticGravity, {QuadraticGravityVertex},
+	With[{printing = importPrintOutput[FeynGravImportQuadraticGravity, {opts}]},
 	If[FailureQ[printing], Throw[printing, "FeynGravLibraryImport"]];
 
 	nImport = importAvailableOrder[nExternal, {"QuadraticGravityVertex"}, 1];
@@ -1100,7 +1115,7 @@ Get[FileNameJoin[{packageDirectory, "Conventions.wl"}]];
 (* Retain and report initial import failures instead of discarding them. *)
 initializationResult = Module[{results, failed},
     results = Association @@ Map[Function[head, SymbolName[head] -> head[2]],
-        {importGravitons, importScalars, importFermions, importVectors}];
+        {FeynGravImportGravitons, FeynGravImportScalars, FeynGravImportFermions, FeynGravImportVectors}];
     failed = Select[results, FailureQ];
     If[Length[failed] > 0,
         Message[FeynGravInitialized::init, StringRiffle[Keys[failed], ", "]];

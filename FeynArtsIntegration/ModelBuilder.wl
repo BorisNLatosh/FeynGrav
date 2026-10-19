@@ -91,9 +91,9 @@ faModelCore[name_, gravitonBases_List, gh_, hp_, up_] := Module[
     "M$CouplingMatrices=CloseCouplingVector/@M$CouplingMatrices; M$LastModelRules={};\n";
   {generic, classes}
 ];
-(* Order selection. Order n mirrors importGravitons[n] and means graviton
+(* Order selection. Order n mirrors FeynGravImportGravitons[n] and means graviton
    couplings with up to n + 2 legs: order 2 is the cubic/quartic snapshot that
-   the packaged PureGR model uses, order 3 adds the five-graviton vertex. The
+   the packaged GR model uses, order 3 adds the five-graviton vertex. The
    ghost sector is part of every order. *)
 faGravitonOrderValues = {2, 3};
 faValidGravitonOrderQ[order_] := MemberQ[faGravitonOrderValues, order];
@@ -102,7 +102,7 @@ faOrderSpecification[order_Integer] := <|
   "GravitonOrders" -> Range[order], "LegCounts" -> Range[3, order + 2],
   "Families" -> If[order >= 3, {"TTT", "TTTT", "TTTTT", "TUU"}, {"TTT", "TTTT", "TUU"}],
   "BasisLabels" -> Join[{"ThreeGraviton", "FourGraviton", "FiveGraviton"}[[1 ;; order]], {"GravitonGhost"}]|>;
-(* importGravitons[n] caps silently at the highest installed order, so the
+(* FeynGravImportGravitons[n] caps silently at the highest installed order, so the
    recorded orders are compared with the requested ones and any shortfall fails
    before rule construction instead of publishing a truncated snapshot. *)
 faImportedOrderFailure[info_, spec_] := Module[{recorded},
@@ -112,7 +112,7 @@ faImportedOrderFailure[info_, spec_] := Module[{recorded},
   recorded = Lookup[Lookup[info, "Orders", <||>], "GravitonVertex", {}];
   If[recorded =!= spec["GravitonOrders"],
     Return[faModelFailure["LibraryOrderUnavailable",
-      "The requested graviton order is not installed: importGravitons caps at the highest available order, so continuing would publish a snapshot without the requested vertices.",
+      "The requested graviton order is not installed: FeynGravImportGravitons caps at the highest available order, so continuing would publish a snapshot without the requested vertices.",
       <|"Requested" -> spec["GravitonOrders"], "Imported" -> recorded,
         "RequiredLibrary" -> "Libs/GravitonVertex_" <> ToString[spec["GravitonOrder"]]|>]]];
   If[Lookup[info, "ChangedSettings", {"Unverified"}] =!= {},
@@ -137,8 +137,8 @@ faBuildModel[target_String, order_] := Module[
       StringStartsQ[ExpandFileName[target], ExpandFileName[ToString[FeynArts`$FeynArtsDir]]],
     Return[faModelFailure["ForbiddenDestination", "Do not build inside shipped libraries or the installed FeynArts package."]]];
   spec = faOrderSpecification[order];
-  imp = FeynGrav`importGravitons[spec["ImportOrder"]]; If[FailureQ[imp], Return[imp]];
-  imp = FeynGrav`FeynGravLibraryInformation[FeynGrav`importGravitons];
+  imp = FeynGrav`FeynGravImportGravitons[spec["ImportOrder"]]; If[FailureQ[imp], Return[imp]];
+  imp = FeynGrav`FeynGravLibraryInformation[FeynGrav`FeynGravImportGravitons];
   libFail = faImportedOrderFailure[imp, spec]; If[FailureQ[libFail], Return[libFail]];
   (* Slot tables cover the requested order only; the quintic slots exist only
      for GravitonOrder -> 3, so the default build never evaluates a
@@ -160,12 +160,12 @@ faBuildModel[target_String, order_] := Module[
   hash = Hash[Join[rules, props], "SHA256", "HexString"];
   (* The model name is a fixed, symbol-safe identifier. The snapshot is pinned by
      "SnapshotSHA256" in the manifest and by the per-file hashes, not by the name. *)
-  name = "PureGR";
+  name = "GR";
   gravitonBases = Most[basis];
   contents = faModelCore[name, gravitonBases, Last[basis], Sequence @@ props];
   stage = CreateDirectory[FileNameJoin[{parent, ".fgfa-stage-" <> CreateUUID[]}]];
   gen = FileNameJoin[{stage, name <> ".gen"}]; mod = FileNameJoin[{stage, name <> ".mod"}];
-  manifest = <|"Schema" -> 1, "Profile" -> "PureGR", "ModelName" -> name,
+  manifest = <|"Schema" -> 1, "Profile" -> "GR", "ModelName" -> name,
     "FixedGauge" -> 2, "LorentzDimension" -> "Symbolic D", "FieldClasses" -> {"T[1]", "U[1]", "-U[1]"},
     "InteractionFamilies" -> spec["Families"], "GravitonOrders" -> spec["GravitonOrders"],
     "RuleSHA256" -> (Lookup[#, "RuleSHA256"] & /@ basis), "SnapshotSHA256" -> hash,

@@ -2,17 +2,25 @@
 
 Start with a fresh Mathematica kernel for each notebook and evaluate its input cells from top to bottom with **Shift+Enter**. Opening a notebook does not run calculations. The package and its dependencies must already be installed; see the [main README](../README.md#installation-and-help).
 
-## Suggested reading order
+## Numbered examples and suggested reading order
 
-| Notebook | What you learn | Additional requirements |
-| --- | --- | --- |
-| [Nieuwenhuizen_Operators.nb](Nieuwenhuizen_Operators.nb) | Tensor indices, propagator denominators, spin projectors and algebraic checks | FORM (TFORM optional) |
-| [Scalars_Gravitational_Scattering_Tree_Level.nb](Scalars_Gravitational_Scattering_Tree_Level.nb) | Constructing an exchange amplitude, Mandelstam variables, differential cross sections and the nonrelativistic limit | FORM (TFORM optional) |
-| [Graviton_Scattering_Tree_Level.nb](Graviton_Scattering_Tree_Level.nb) | Joining vertices, permuting external legs, helicity amplitudes, contact terms and longitudinal checks | FORM; TFORM is optional |
-| [Graviton_Self_Energy.nb](Graviton_Self_Energy.nb) | Graviton and ghost loops, FORM contraction, tensor-integral reduction and a projector representation | FORM; TFORM is optional |
-| [Matter_Self_Energy_Graviton_Contribution.nb](Matter_Self_Energy_Graviton_Contribution.nb) | Gravitational loop corrections to matter two-point functions | FORM (TFORM optional) |
-| [Graviton_Self_Energy_Matter_Contribution.nb](Graviton_Self_Energy_Matter_Contribution.nb) | Matter loops in the graviton two-point function, including Dirac and colour algebra | FORM (TFORM optional) |
-| [Graviton_Scalar_Vertex_at_First_Loop.nb](Graviton_Scalar_Vertex_at_First_Loop.nb) | A complete one-loop vertex workflow, scalar integrals, ultraviolet poles and a momentum-transfer limit | FORM, FeynHelpers and Package-X |
+The numbers define the suggested reading order, from operator algebra and tree-level scattering to loop calculations. All notebooks require FeynGrav and FeynCalc. Examples 01–08 also use FORM; TFORM is optional. Examples 09–11 evaluate their tree tensors directly with FeynCalc. Additional tools are listed below.
+
+| No. | Notebook | What you learn | Additional requirements |
+| --- | --- | --- | --- |
+| 01 | [01. Nieuwenhuizen_Operators.nb](01.%20Nieuwenhuizen_Operators.nb) | Tensor indices, propagator denominators, completeness and algebraic checks | None |
+| 02 | [02. Scalars_Gravitational_Scattering_Tree_Level.nb](02.%20Scalars_Gravitational_Scattering_Tree_Level.nb) | Exchange amplitude, Mandelstam variables, differential cross section and nonrelativistic limit | None |
+| 03 | [03. Graviton_Scattering_Tree_Level.nb](03.%20Graviton_Scattering_Tree_Level.nb) | Manual construction, helicity amplitudes, contact terms and longitudinal checks | None |
+| 04 | [04. Graviton_Scattering_Tree_Level_FeynArts.nb](04.%20Graviton_Scattering_Tree_Level_FeynArts.nb) | Native construction of the complete 2 → 2 tree, off-shell tensors and on-shell helicity comparisons | FeynCalc-patched FeynArts |
+| 05 | [05. Graviton_Self_Energy.nb](05.%20Graviton_Self_Energy.nb) | Graviton and ghost loops, tensor-integral reduction and projector representation | None |
+| 06 | [06. Matter_Self_Energy_Graviton_Contribution.nb](06.%20Matter_Self_Energy_Graviton_Contribution.nb) | Matter two-point functions with gravitational loop corrections | None |
+| 07 | [07. Graviton_Self_Energy_Matter_Contribution.nb](07.%20Graviton_Self_Energy_Matter_Contribution.nb) | Scalar, fermion, vector and Yang–Mills loops in the graviton two-point function | None |
+| 08 | [08. Graviton_Scalar_Vertex_One_Loop.nb](08.%20Graviton_Scalar_Vertex_One_Loop.nb) | Vertex construction, consistency checks, ultraviolet poles and infrared behaviour | FeynHelpers and Package-X |
+| 09 | [09. Scalar_Scattering_Tree_Level_FeynArts.nb](09.%20Scalar_Scattering_Tree_Level_FeynArts.nb) | Seven scalar-scattering diagrams, on-shell kinematics and the massive amplitude with independent cubic/quartic couplings | FeynCalc-patched FeynArts |
+| 10 | [10. Scalar_Scattering_John_Tree_Level_FeynArts.nb](10.%20Scalar_Scattering_John_Tree_Level_FeynArts.nb) | John scalar scattering, three graviton exchanges, and minimal/mixed/John amplitude contributions | FeynCalc-patched FeynArts |
+| 11 | [11. Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb](11.%20Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb) | Six scalar–scalar to graviton–graviton diagrams and on-shell polarisation-dependent amplitude; helicity amplitude and two generic graviton Ward checks using the corrected model | FeynCalc-patched FeynArts |
+
+Example 09 can be read immediately after example 04: it gives the scalar counterpart of the native FeynArts workflow, with incoming momenta `p1`, `p2` and outgoing momenta `p3`, `p4`. It displays the contact, scalar-exchange and graviton-exchange contributions to `M` after removing the overall `I` from the diagram result.
 
 The two larger matter notebooks contain separate field sectors. Begin with the scalar sector before moving to fermions or Yang–Mills theory. One-loop reduction and symbolic phase-space integration can take appreciably longer than the small projector checks.
 

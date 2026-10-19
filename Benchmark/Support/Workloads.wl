@@ -31,7 +31,7 @@ synthetic[id_, n_] := Module[{expr},
 ];
 
 (* Library loading is preparation, not part of expression construction timing. *)
-loadPhysicalLibraries[] := (importQuadraticGravity[1]; Null);
+loadPhysicalLibraries[] := (FeynGravImportQuadraticGravity[1]; Null);
 external[a_, b_] := (Nieuwenhuizen`GaugeProjector[a,b,p]+(D-1) Nieuwenhuizen`GaugeProjectorBar[a,b,p])/Sqrt[(D-1)(D-2)];
 partialBubble[] := external[mu,nu] QuadraticGravityVertex[{mu,nu,p,a1,b1,-l,i1,j1,l-p},m0,m2] *
  QuadraticGravityPropagator[a1,b1,a2,b2,l,m0,m2] *

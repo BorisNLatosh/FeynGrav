@@ -47,6 +47,9 @@ GravitonAxionVectorVertexUncontracted::usage = GravitonAxionVectorVertexUncontra
 
 Begin["`Private`"];
 
+(* Averaged metric-density coefficients require n! when differentiated into
+   n labelled graviton legs. Do not apply it again to permutation sums. *)
+
 
 Clear[GravitonAxionVectorVertex];
 
@@ -55,7 +58,9 @@ GravitonAxionVectorVertex[indexArray_, \[Lambda]1_, q1_, \[Lambda]2_, q2_, \[The
         GravitonAxionVectorVertex[indexArray, \[Lambda]1, q1, \[Lambda]2, q2, \[Theta]],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 - I (Global`\[Kappa])^(Length[indexArray]/2) \[Theta] FeynCalcInternal[RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]]] Eps[LorentzIndex[\[Tau]1,D],LorentzIndex[\[Lambda]1,D],LorentzIndex[\[Tau]2,D],LorentzIndex[\[Lambda]2,D]] Pair[Momentum[q1,D],LorentzIndex[\[Tau]1,D]] Pair[Momentum[q2,D],LorentzIndex[\[Tau]2,D]] //Contract
+)
         ), True
     ];
 
@@ -67,7 +72,9 @@ GravitonAxionVectorVertexUncontracted[indexArray_, \[Lambda]1_, q1_, \[Lambda]2_
         GravitonAxionVectorVertexUncontracted[indexArray, \[Lambda]1, q1, \[Lambda]2, q2, \[Theta]],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 - I (Global`\[Kappa])^(Length[indexArray]/2) \[Theta] RuleValidation`RuleRequire[CTensorGeneral[{},indexArray]] Eps[LorentzIndex[\[Tau]1,D],LorentzIndex[\[Lambda]1,D],LorentzIndex[\[Tau]2,D],LorentzIndex[\[Lambda]2,D]] Pair[Momentum[q1,D],LorentzIndex[\[Tau]1,D]] Pair[Momentum[q2,D],LorentzIndex[\[Tau]2,D]]
+)
         ), True
     ];
 

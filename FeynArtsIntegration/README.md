@@ -1,10 +1,10 @@
 # Optional pure-GR FeynArts bridge
 
-The supplied `PureGR` model is ready for native three-/four-graviton trees. Ordinary FeynGrav loading does not load this optional companion or initialise a model. Use the [native model guide](../FeynArts/Models/PureGR/README.md) to construct and convert diagrams without rebuilding anything.
+The supplied `GR` model is ready for native three-/four-graviton trees. Ordinary FeynGrav loading does not load this optional companion or initialise a model. Use the [native model guide](../FeynArts/Models/GR/README.md) to construct and convert diagrams without rebuilding anything.
 
-## Separate GRScalar native model
+## Separate Single-Scalar-Tensor-Minimal-Coupling native model
 
-For GR plus one minimally coupled real scalar of symbolic mass, use the supplied [GRScalar model and native recipe](../FeynArts/Models/GRScalar/README.md). It adds `TSS` and `TTSS` through $\kappa^2$, with mass terms included and no scalar self-potential. Its [24 build and 29 native checks](../Documentation/Verification/GRScalarTreeRelease.md) cover the specified mixed trees. This companion's public process allowlist remains pure GR; use native FeynArts for GRScalar. The dedicated [BuildGRScalar.wl](BuildGRScalar.wl) is an optional developer script, not a new public command or an automatic loading step.
+For GR plus one minimally coupled real scalar of arbitrary mass and independent positive cubic/quartic potential couplings, use [Single-Scalar-Tensor-Minimal-Coupling](../FeynArts/Models/Single-Scalar-Tensor-Minimal-Coupling/README.md). It includes five- and six-leg potential contacts through kappa squared; set both potential couplings to zero for the minimal-only theory. The [scalar extension report](../Documentation/Verification/ScalarModelExtensions.md) records its verification. This companion's process allowlist remains GR-only; use native FeynArts for scalar models. [BuildSingleScalarTensorMinimalCoupling.wl](BuildSingleScalarTensorMinimalCoupling.wl) is the optional developer builder. The former minimal-only builder and bundle were removed when the models were merged.
 
 ## Current tree release — 18 October 2026
 
@@ -32,10 +32,10 @@ Accepted 15 October 2026 following source inspection at `a8c1fb8` and a bounded 
 
 | Object | Source signature and location | Slots and index spaces | Momenta | Coupling | Model representation |
 | --- | --- | --- | --- | --- | --- |
-| Graviton propagator | `GravitonPropagator[mu,nu,alpha,beta,p]`, `FeynGrav.wl` | Two Lorentz indices per leg; massless quadratic part | Line momentum `p` | — (quadratic) | `AnalyticalPropagator[Internal][s1 T[j1,mom,{li1,li2}->{li3,li4}]]` in `PureGR.gen`; full tensor numerator with factor `I`, `FAD[p]` pole and the current gauge value 2 |
-| FP vector-ghost propagator | `GhostVectorPropagator[mu,nu,p]`, `FeynGrav.wl` | One Lorentz index per leg; oriented | Line momentum `p` | — (quadratic) | Internal `U` propagator `(-I)*FAMetricTensor[li1,li2]*FAPropagatorDenominator[mom,0]` in `PureGR.gen` |
-| Three-graviton vertex | `GravitonVertex[mu1,nu1,p1,mu2,nu2,p2,mu3,nu3,p3]`, `Libs/GravitonVertex_1` via `importGravitons[1]` | Three ordered graviton triples (index pair, momentum) | All incoming | $\kappa$ | Generic `AnalyticalCoupling` with three `T` legs (231-term kinematic vector); classes `C[T[1],T[1],T[1]]` scalar coefficients ($\pm I/4\,\kappa$, …) |
-| Four-graviton vertex | `GravitonVertex[...]` with four triples, `Libs/GravitonVertex_2` via `importGravitons[2]` | Four ordered graviton triples | All incoming | $\kappa^2$ | Generic `AnalyticalCoupling` with four `T` legs (4,158-term kinematic vector); classes `C[T[1],T[1],T[1],T[1]]` |
+| Graviton propagator | `GravitonPropagator[mu,nu,alpha,beta,p]`, `FeynGrav.wl` | Two Lorentz indices per leg; massless quadratic part | Line momentum `p` | — (quadratic) | `AnalyticalPropagator[Internal][s1 T[j1,mom,{li1,li2}->{li3,li4}]]` in `GR.gen`; full tensor numerator with factor `I`, `FAD[p]` pole and the current gauge value 2 |
+| FP vector-ghost propagator | `GhostVectorPropagator[mu,nu,p]`, `FeynGrav.wl` | One Lorentz index per leg; oriented | Line momentum `p` | — (quadratic) | Internal `U` propagator `(-I)*FAMetricTensor[li1,li2]*FAPropagatorDenominator[mom,0]` in `GR.gen` |
+| Three-graviton vertex | `GravitonVertex[mu1,nu1,p1,mu2,nu2,p2,mu3,nu3,p3]`, `Libs/GravitonVertex_1` via `FeynGravImportGravitons[1]` | Three ordered graviton triples (index pair, momentum) | All incoming | $\kappa$ | Generic `AnalyticalCoupling` with three `T` legs (231-term kinematic vector); classes `C[T[1],T[1],T[1]]` scalar coefficients ($\pm I/4\,\kappa$, …) |
+| Four-graviton vertex | `GravitonVertex[...]` with four triples, `Libs/GravitonVertex_2` via `FeynGravImportGravitons[2]` | Four ordered graviton triples | All incoming | $\kappa^2$ | Generic `AnalyticalCoupling` with four `T` legs (4,158-term kinematic vector); classes `C[T[1],T[1],T[1],T[1]]` |
 | Graviton–ghost–antighost vertex | `GravitonGhostVertex[rho,sigma,k,mu,pGhost,nu,pAntiGhost]`, `FeynGrav.wl` | Graviton triple first, then ghost $(\mu,p_{\rm ghost})$, then antighost $(\nu,p_{\rm anti})$; the derivative acts on the antighost (`FVD[pAntiGhost,...]`) | All incoming | $\kappa$ (prefactor $I\kappa/2$) | Classes row `C[T[1],-U[1],U[1]]`: antighost `-U[1]` in slot 2, ghost `U[1]` in slot 3; the builder evaluates the source with ghost first and maps it onto the model slot order (`ModelBuilder.wl`) |
 
 **Fields and conjugation.** `T[1]` is the self-conjugate massless graviton (`SelfConjugate->True`, two transported Lorentz indices via `KinematicIndices[T]={Lorentz,Lorentz}`). `U[1]` is the oriented, non-self-conjugate Faddeev–Popov vector ghost (`SelfConjugate->False`, `PropagatorArrow->Forward`, one Lorentz index via `KinematicIndices[U]={Lorentz}`); `-U[1]` is its antighost, and FeynArts treats them as distinct Grassmann lines with the ghost number flowing from the `-U[1]` slot to the `U[1]` slot at the `TUU` coupling. Both external graviton Lorentz indices are transported through the model into the converted amplitude; nothing in the generic file contracts or drops one index of the pair.
@@ -52,7 +52,7 @@ Accepted 15 October 2026 following source inspection at `a8c1fb8` and a bounded 
 
 ## Start with the standard FeynArts model
 
-Use ordinary `InitializeModel`, `CreateTopologies`, `InsertFields`, `CreateFeynAmp` and `FCFAConvert` with the [supplied model and native recipe](../FeynArts/Models/PureGR/README.md). The current tree checks cover contacts, whole-leg permutations, renamed/composite inputs and every s/t/u exchange factor. They establish source-translation fidelity, not general physical-amplitude correctness. The optional convenience interface below adds complete-insertion and result-integrity checks.
+Use ordinary `InitializeModel`, `CreateTopologies`, `InsertFields`, `CreateFeynAmp` and `FCFAConvert` with the [supplied model and native recipe](../FeynArts/Models/GR/README.md). The current tree checks cover contacts, whole-leg permutations, renamed/composite inputs and every s/t/u exchange factor. They establish source-translation fidelity, not general physical-amplitude correctness. The optional convenience interface below adds complete-insertion and result-integrity checks.
 
 ## Small explicit tree workflow
 
@@ -63,10 +63,10 @@ $LoadFeynArts = True;
 root = DirectoryName[FindFile["FeynGrav`"]];
 << FeynGrav`;
 Get[FileNameJoin[{root, "FeynArtsIntegration", "FeynArtsIntegration.wl"}]];
-modelDirectory = FileNameJoin[{root, "FeynArts", "Models", "PureGR"}];
-model = <|"Directory" -> modelDirectory, "ModelName" -> "PureGR",
+modelDirectory = FileNameJoin[{root, "FeynArts", "Models", "GR"}];
+model = <|"Directory" -> modelDirectory, "ModelName" -> "GR",
   "Manifest" -> FileNameJoin[{modelDirectory, "manifest.json"}]|>;
-process = <|"Model" -> "PureGR", "Incoming" -> {FeynArts`T[1], FeynArts`T[1]},
+process = <|"Model" -> "GR", "Incoming" -> {FeynArts`T[1], FeynArts`T[1]},
   "Outgoing" -> {FeynArts`T[1], FeynArts`T[1]}, "LoopOrder" -> 0|>;
 tree = FeynGrav`FeynArtsIntegration`FeynGravCreateAmplitude[
   model, process, {p1, p2}, {q1, q2}];
@@ -99,4 +99,4 @@ External ghosts are for diagnostics, not supported asymptotic processes. Matter,
 
 ## Native scalar extensions — 18 October 2026
 
-`GRScalarPotential`, `GRJohn` and `GREsGB` are supplied alongside PureGR and GRScalar, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](../FeynArts/Models/README.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.
+`Single-Scalar-Tensor-Minimal-Coupling`, `John` and `Einstein-scalar-Gauss-Bonnet` are supplied alongside `GR`, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](../FeynArts/Models/README.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.

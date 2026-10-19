@@ -2,7 +2,7 @@
 
 ## Delivered scope
 
-The separate `FeynArts/Models/GRScalar` bundle implements conventional GR plus one real, minimally coupled scalar with symbolic mass, through $\kappa^2$. It contains `TTT`, `TTTT`, `TUU`, `TSS` and `TTSS`, preserves symbolic `D` and the selected negative ordinary-GR ghost propagator, and introduces no scalar potential or non-minimal interaction. See the [native guide](../../FeynArts/Models/GRScalar/README.md).
+The separate `FeynArts/Models/GRScalar` bundle implements conventional GR plus one real, minimally coupled scalar with symbolic mass, through $\kappa^2$. It contains `TTT`, `TTTT`, `TUU`, `TSS` and `TTSS`, preserves symbolic `D` and the selected negative ordinary-GR ghost propagator, and introduces no scalar potential or non-minimal interaction. See the [native guide](../../FeynArts/Models/Single-Scalar-Tensor-Minimal-Coupling/README.md).
 
 The model files were copied byte-for-byte from the tested staged bundle. The existing PureGR generic/classes files and manifest, interaction libraries, notebooks, Contractor, source formulae and loop verification pins were unchanged by this delivery. Existing uncommitted work was preserved. No commit accompanied this report.
 

@@ -281,3 +281,9 @@ The contracted and uncontracted scalar-potential routines include the n-graviton
 ## Gauss–Bonnet order-two correction
 
 The two-graviton `ScalarGaussBonnet` rule now contracts complete linearised Riemann, Ricci and scalar curvatures. The previous `TensorT` contraction omitted curvature subtraction terms and was not repairable by an overall factor. Only `Libs/ScalarGaussBonnet_2` was regenerated. Higher-order branches and libraries retain their historical implementation and require a separate mathematical audit. See [verification](../Documentation/Verification/ScalarModelExtensions.md). Restart or reimport after replacing an already loaded old library.
+
+## Graviton differentiation multiplicities
+
+C/CE helpers are averaged Taylor coefficients. Direct interaction terms restore
+`n!` for `n` gravitons; terms summing all graviton permutations must not receive
+another factorial. See [the correction and verification record](../Documentation/Verification/RuleMultiplicityCorrection.md) for affected families and regeneration commands.
