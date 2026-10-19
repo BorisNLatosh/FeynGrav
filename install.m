@@ -151,6 +151,18 @@ runtimeDependencies = {
     {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/DiracColour.wl"},
     {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/DiracAlgebra.wl"},
     {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/ColourAlgebra.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/CoefficientParser.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/PropagatorGroups.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/RationalCoefficients.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/DimensionCoefficients.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/PropagatorCancellation.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/StageSymmetry.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/FORMRuntime.wl"},
+    {"CalcFormConverter/PropagatorGroups.wl", "CalcFormConverter/Templates/PropagatorFactors.frm.in"},
+    {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/RationalCoefficients.frm.in"},
+    {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/RationalCoefficientOutput.frm.in"},
+    {"CalcFormConverter/DimensionCoefficients.wl", "CalcFormConverter/Templates/DimensionCoefficients.frm.in"},
+    {"CalcFormConverter/DimensionCoefficients.wl", "CalcFormConverter/Templates/DimensionCoefficientOutput.frm.in"},
     {"CalcFormConverter/DiracAlgebra.wl", "CalcFormConverter/Templates/DiracAlgebra.frm.in"},
     {"CalcFormConverter/ColourAlgebra.wl", "CalcFormConverter/Templates/ColourAlgebra.frm.in"}
 };

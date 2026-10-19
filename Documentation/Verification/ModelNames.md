@@ -1,6 +1,6 @@
 # Model naming and scalar merge — 19 October 2026
 
-This is an uncommitted naming-only update on `FeynArts_Integration` following commit `7713935`. The exact names are `GR`, `Single-Scalar-Tensor-Minimal-Coupling`, `John` and `Einstein-scalar-Gauss-Bonnet`. The latter three include a real scalar of arbitrary symbolic mass. The merged scalar model has independent positive cubic and quartic potential couplings; both may be set to zero after conversion.
+This records the naming-only stage on `FeynArts_Integration` following commit `7713935`, subsequently included in `e910bbe`. Later scalar-contact corrections and bundle rebuilding are recorded separately in [ScalarWardCorrection.md](ScalarWardCorrection.md). The exact names are `GR`, `Single-Scalar-Tensor-Minimal-Coupling`, `John` and `Einstein-scalar-Gauss-Bonnet`. The latter three include a real scalar of arbitrary symbolic mass. The merged scalar model has independent positive cubic and quartic potential couplings; both may be set to zero after conversion.
 
 ## Changes and preserved evidence
 

@@ -1,5 +1,7 @@
 # Scalar-model extensions and source correction
 
+**Subsequent status:** the original checks below are historical. The full John cubic/quartic derivation is summarised in the [John guide](../../FeynArts/Models/John/ModelGuide.md#verification); the later minimal-contact correction, rebuilt scalar models and selected passing Ward identities are recorded in [ScalarWardCorrection.md](ScalarWardCorrection.md). These additions do not validate higher orders or loops.
+
 Checked: 18 October 2026, uncommitted working tree on `FeynArts_Integration`. No commit was made. All evidence below is retained under `/home/latosh/Documents/Codex/FeynGrav-evidence/2026-10-18-scalar-extension-work/`.
 
 ## Delivery and evidence limits

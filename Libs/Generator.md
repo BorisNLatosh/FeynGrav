@@ -252,4 +252,4 @@ See the [generation-progress verification](../Documentation/Verification/Generat
 
 ## Benchmarking generation
 
-Use [Benchmark/06_Library_Generation.nb](../Benchmark/06_Library_Generation.nb) in a fresh kernel to measure public commands and isolated construction, export, FORM execution, import, writing and publication. All output goes to owned temporary directories; shipped libraries are not replaced. See the [benchmark guide](../Benchmark/README.md#library-generation-notebook-06) for profiles, caching and validation boundaries.
+Use [Benchmark/06_Library_Generation.nb](../Benchmark/06_Library_Generation.nb) in a fresh kernel to measure public commands and isolated construction, export, FORM execution, import, writing and publication. All output goes to owned temporary directories; shipped libraries are not replaced. See the [benchmark guide](../Benchmark/UserGuide.md#library-generation-notebook-06) for profiles, caching and validation boundaries.

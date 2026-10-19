@@ -1,6 +1,6 @@
 # Resolution — 18 October 2026
 
-The potential blocker below is resolved. The user authorised the source correction and regeneration; eight checks passed after regeneration without a memory cap. GRScalarPotential is delivered. The historical observations below describe the pre-correction source. See [current scalar-model report](ScalarModelExtensions.md) for delivery, John verification limits and the separate EsGB blocker.
+The potential blocker below is resolved. The user authorised the source correction and regeneration; eight checks passed after regeneration without a memory cap. GRScalarPotential is delivered. The historical observations below describe the pre-correction source. See [current scalar-model report](ScalarModelExtensions.md) for the historical delivery checks and subsequent John/EsGB resolutions.
 
 ---
 

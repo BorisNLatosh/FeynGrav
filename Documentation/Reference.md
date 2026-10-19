@@ -1,6 +1,6 @@
 # FeynGrav function reference
 
-Development reference checked against the working source on 6 October 2026. This describes the current checkout, not a guarantee about older releases. Start with [installation](../README.md#installation-and-help); complete calculations are in the [example notebooks](../Examples/README.md). For generator-side functions, use the [Rules contracts](../Rules/README.md) and [generator guide](../Libs/Generator.md).
+Development reference checked against the working source on 6 October 2026. This describes the current checkout, not a guarantee about older releases. Start with [installation](UserGuide.md#installation-and-help); complete calculations are in the [example notebooks](../Examples/README.md). For generator-side functions, use the [Rules contracts](../Rules/Contracts.md) and [generator guide](../Libs/Generator.md).
 
 ## Contents
 
@@ -67,7 +67,7 @@ These definitions require no additional vertex library. All tensor indices are D
 | `ProcaPropagator[mu, nu, p, m]` | Massive-vector propagator, with numerator `-I (MTD[mu,nu] - FVD[p,mu] FVD[p,nu]/m^2)`. Its massless limit cannot be obtained by substituting `m = 0`. |
 | `GravitonPropagator[mu, nu, alpha, beta, p]` | General-relativity propagator using the current `GaugeFixingEpsilon`, initially 2. |
 | `GravitonPropagatorMassive[mu, nu, alpha, beta, p, m]` | Massive-gravity propagator with the implemented `1/(D-1)` trace subtraction. Requires nonsingular mass and dimension choices; `m = 0` is not a massless-propagator shortcut. |
-| `GhostVectorPropagator[mu, nu, p]` | Conventional gravitational Faddeev–Popov source propagator `-I MTD[mu,nu] FAD[p]` (ordered ghost–antighost contraction). The shipped `GR` model has the same negative line; its [tree-level release](../FeynArtsIntegration/README.md#current-tree-release--18-october-2026) defers loop compatibility checks. |
+| `GhostVectorPropagator[mu, nu, p]` | Conventional gravitational Faddeev–Popov source propagator `-I MTD[mu,nu] FAD[p]` (ordered ghost–antighost contraction). The shipped `GR` model has the same negative line; its [tree-level release](../FeynArtsIntegration/BridgeGuide.md#current-tree-release--18-october-2026) defers loop compatibility checks. |
 | `GhostVectorPropagatorHD[mu, nu, p]` | Ghost propagator for higher-derivative gauge fixing; depends on `GaugeFixingEpsilonHD0` and `GaugeFixingEpsilonHD1`, including their inverse combinations. |
 | `QuadraticGravityPropagator[mu, nu, alpha, beta, p, m0, m2]` | Quadratic-gravity propagator with conventional gauge fixing, using the current `GaugeFixingEpsilon`. |
 | `QuadraticGravityPropagatorHD[mu, nu, alpha, beta, p, m0, m2]` | Quadratic-gravity propagator with higher-derivative gauge fixing, using all three HD gauge parameters. |
@@ -274,7 +274,7 @@ Main-package loading imports default libraries and evaluates definitions but sta
 
 ## FORM commands
 
-These are available after main-package loading; the [converter guide](../CalcFormConverter/README.md#command-and-option-reference) is the authoritative option and failure reference.
+These are available after main-package loading; the [converter guide](../CalcFormConverter/UserGuide.md#command-and-option-reference) is the authoritative option and failure reference.
 
 | Command | Return and dependency |
 | --- | --- |
@@ -288,9 +288,9 @@ The default worker setting is `FORMThreads -> Automatic`. Supported Dirac algebr
 
 ## Native scalar extensions — 18 October 2026
 
-`Single-Scalar-Tensor-Minimal-Coupling`, `John` and `Einstein-scalar-Gauss-Bonnet` are supplied alongside `GR`, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](../FeynArts/Models/README.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.
+`Single-Scalar-Tensor-Minimal-Coupling`, `John` and `Einstein-scalar-Gauss-Bonnet` are supplied alongside `GR`, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](../FeynArts/Models/ModelCatalogue.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.
 
-The native EsGB model uses unassigned `GaussBonnetG1` and `GaussBonnetG2` for the positive terms phi G and phi^2 G / 2!, respectively. `ScalarMass` remains independent. Select `Model -> "Einstein-scalar-Gauss-Bonnet"` and `GenericModel -> "Einstein-scalar-Gauss-Bonnet"`; specialise parameters by replacement after conversion. Two TTS vertices generate g1-squared diagrams of total order kappa^4 even though each vertex is at most order kappa^2. The [model guide](../FeynArts/Models/Einstein-scalar-Gauss-Bonnet/README.md) gives the exact action and native recipe.
+The native EsGB model uses unassigned `GaussBonnetG1` and `GaussBonnetG2` for the positive terms phi G and phi^2 G / 2!, respectively. `ScalarMass` remains independent. Select `Model -> "Einstein-scalar-Gauss-Bonnet"` and `GenericModel -> "Einstein-scalar-Gauss-Bonnet"`; specialise parameters by replacement after conversion. Two TTS vertices generate g1-squared diagrams of total order kappa^4 even though each vertex is at most order kappa^2. The [model guide](../FeynArts/Models/Einstein-scalar-Gauss-Bonnet/ModelGuide.md) gives the exact action and native recipe.
 
 ## Citation guidance
 

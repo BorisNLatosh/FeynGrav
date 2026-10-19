@@ -1,7 +1,6 @@
 # Minimal scalar normalisation and rebuilt scalar models
 
-19 October 2026. This records the uncommitted working-tree correction and the
-subsequent verification; it does not identify the tested snapshot by HEAD alone.
+19 October 2026. This records checks performed on the then-uncommitted correction and subsequent verification. The changes were committed in `e910bbe`; retained source snapshots and hashes, rather than the preceding HEAD alone, identify each tested input.
 
 ## Result
 

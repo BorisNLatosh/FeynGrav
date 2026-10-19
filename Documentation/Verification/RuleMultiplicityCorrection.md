@@ -1,6 +1,6 @@
 # Graviton differentiation multiplicities
 
-19 October 2026; uncommitted working-tree correction.
+19 October 2026; checks were performed on the then-uncommitted working tree. The correction and subsequent regenerated libraries were committed in `e910bbe`. The retained snapshots identify the tested inputs.
 
 The C and CE helpers return averaged Taylor coefficients. Differentiating n
 labelled graviton fields supplies n!. The interaction rule must restore that
@@ -19,8 +19,7 @@ factor unless it already sums the graviton permutations.
   does not resolve or validate the separate epsilon-density/action convention.
 - The preceding minimal-scalar correction follows the same principle.
 
-No global change to C/CE helpers, permutation-based gravity/fermion/Horndeski
-routines, interaction libraries, model bundles or notebooks is made here.
+The source-correction stage made no global change to C/CE helpers or permutation-based gravity/fermion/Horndeski routines. Subsequent library regeneration and scalar-model rebuilding are recorded in [ScalarWardCorrection.md](ScalarWardCorrection.md).
 
 ## Verification and limits
 
@@ -57,5 +56,5 @@ libraries currently extend through order two. Regenerate order two with
 `GenerateGravitonAxionVectorSpecific[2]`.
 For G2, regenerate `GenerateHorndeskiG2Specific[a,b,2]` for
 `{a,b} = {0,2}, {0,3}, {1,1}, {1,2}, {2,1}, {2,2}, {3,1}, {4,1}`.
-Order-one files do not change from these factorial corrections. Any additional
+Order-one coefficients do not change from these factorial corrections. The subsequent axion regeneration also migrated legacy epsilon slots at orders one and two; see the linked regeneration record. The listed affected shipped libraries have now been regenerated. Any additional
 locally generated orders n >= 2 require corresponding regeneration too.

@@ -1,6 +1,6 @@
 # SU(N) colour preflight — 6 October 2026
 
-> Historical implementation record. Forward-looking statements describe that stage. For current capabilities use the [converter guide](../../README.md). The original observations and limitations below are retained.
+> Historical implementation record. Forward-looking statements describe that stage. For current capabilities use the [converter guide](../../UserGuide.md). The original observations and limitations below are retained.
 
 ## Status
 

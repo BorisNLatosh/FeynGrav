@@ -1,6 +1,6 @@
 # Learning FeynGrav through examples
 
-Start with a fresh Mathematica kernel for each notebook and evaluate its input cells from top to bottom with **Shift+Enter**. Opening a notebook does not run calculations. The package and its dependencies must already be installed; see the [main README](../README.md#installation-and-help).
+Start with a fresh Mathematica kernel for each notebook and evaluate its input cells from top to bottom with **Shift+Enter**. Opening a notebook does not run calculations. The package and its dependencies must already be installed; see the [main README](../Documentation/UserGuide.md#installation-and-help).
 
 ## Numbered examples and suggested reading order
 
@@ -41,10 +41,10 @@ The notebooks retain the displayed diagram weights and Feynman-rule factors of `
 
 Run each notebook in a fresh kernel: `SetMandelstam`, explicit scalar-product definitions, and `$Assumptions` persist in a session. After changing kinematics or a diagram, reevaluate its dependent cells. The examples use named intermediate expressions rather than `%` or `%%`, so inserting a display cell does not change later comparisons.
 
-For performance measurements use the separate [Benchmark notebooks](../Benchmark/README.md). These examples emphasise how to construct and interpret calculations.
+For performance measurements use the separate [Benchmark notebooks](../Benchmark/UserGuide.md). These examples emphasise how to construct and interpret calculations.
 
 The updated loop examples extract the pure-gravity and massive-fermion coefficient forms from the current rules rather than asserting the older hard-coded formulas. Their reconstruction checks verify algebraic decomposition, not an independent physical reference. Other reference comparisons are retained where they agree with the computed expressions.
 
 All algebra previously performed through the legacy Calc chain now uses `CalcFormCalculate`. FeynCalc propagator shorthand is expanded with `Explicit`. In these notebooks, fermion and colour expressions first use FeynCalc’s dedicated algebra functions (including `DiracOrder -> True` for open chains); `Collect` passes their bosonic coefficients to FORM. Loop integration and tensor reduction remain in FeynCalc.
 
-This preprocessing describes the notebooks as currently written. It is not a requirement to remove all Dirac or colour structures before using the converter: supported chains, traces and colour tensors can now be processed directly. See the [converter vocabulary](../CalcFormConverter/README.md#supported-vocabulary). The notebooks themselves are unchanged by this documentation update.
+This preprocessing describes the notebooks as currently written. It is not a requirement to remove all Dirac or colour structures before using the converter: supported chains, traces and colour tensors can now be processed directly. See the [converter vocabulary](../CalcFormConverter/UserGuide.md#supported-vocabulary). The notebooks themselves are unchanged by this documentation update.

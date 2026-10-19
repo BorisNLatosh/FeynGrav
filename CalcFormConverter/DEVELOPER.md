@@ -1,6 +1,6 @@
 # Developer guide
 
-This guide describes implementation and maintenance of CalcFormConverter. Start with [README.md](README.md) for commands and workflows; use [FORMAT.md](FORMAT.md) for the compatibility contract. Private helper names and associations may change without changing the public interface or saved format.
+This guide describes implementation and maintenance of CalcFormConverter. Start with [README.md](UserGuide.md) for commands and workflows; use [FORMAT.md](FORMAT.md) for the compatibility contract. Private helper names and associations may change without changing the public interface or saved format.
 
 ## Contents
 
@@ -127,7 +127,7 @@ The complete example bubble was constructed and exported on the development mach
 
 ## Performance measurement
 
-Use the [benchmark notebooks](../Benchmark/README.md) for current user-facing measurements. Compare identical workloads in sequential fresh kernels, record preparation separately, validate outside timing and retain failed/inconclusive observations. More workers are not a guarantee of better performance. Avoid inferring total-call performance from an isolated stage.
+Use the [benchmark notebooks](../Benchmark/UserGuide.md) for current user-facing measurements. Compare identical workloads in sequential fresh kernels, record preparation separately, validate outside timing and retain failed/inconclusive observations. More workers are not a guarantee of better performance. Avoid inferring total-call performance from an isolated stage.
 
 Historical optimisation measurements have moved to the [dated performance report](../Documentation/Verification/ConverterPerformance.md). Its measurements use different revisions and workloads and must not be combined into a single claimed speedup.
 
@@ -378,7 +378,7 @@ See the [original parser measurements](Tests/Reports/CoefficientTreeImport.md) f
 
 ### Focused rational-coefficient experiment
 
-[Tests/RationalCoefficient](Tests/RationalCoefficient/README.md) reproduces the
+[Tests/RationalCoefficient](Tests/RationalCoefficient/VerificationGuide.md) reproduces the
 compact first-term result from `One-Loop-Counterterms.nb` using only FORM
 rational-polynomial arithmetic and factorisation. It includes directly runnable
 FORM files, a test-only preparation adapter, serial/TFORM equality checks and

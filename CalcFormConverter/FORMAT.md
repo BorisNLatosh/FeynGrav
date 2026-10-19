@@ -15,7 +15,7 @@ The marker is derived from the format version in the implementation. The importe
 
 The mapping is read as UTF-8 text. Its primary digest is Wolfram Language `Hash[jsonText, "SHA256", "HexString"]`. For compatibility with early notebook exports, the importer also accepts the digest of `FromCharacterCode[ToCharacterCode[jsonText, "UTF-8"]]`: those exports hashed the UTF-8 byte string before writing Unicode text. Both checks bind the complete mapping. These are Wolfram string hashes, not a specification to hash arbitrary raw file bytes with an external utility. Even JSON reformatting changes the digest. Preserve the mapping file with its result. This check detects mismatched artifacts, not deliberate tampering.
 
-For the user workflow and commands, see [README.md](README.md); implementation invariants and tests are in [DEVELOPER.md](DEVELOPER.md).
+For the user workflow and commands, see [README.md](UserGuide.md); implementation invariants and tests are in [DEVELOPER.md](DEVELOPER.md).
 
 
 ### Version selection

@@ -27,7 +27,7 @@ The user explicitly deferred the corrected model's loop checks. `Loop.wl` and it
 
 The detailed scripts, raw logs, resource records and independent reviews remain in the maintainer's external evidence archive; they are not runtime dependencies or claimed to ship with the package. Records: `2026-10-15-gr-02-b1-helper-correction-34_zbzrg/run-B1`, `2026-10-16-gr-b2-owned-guard-cv844hfn`, and `2026-10-18-gr-trees-order-correction-utyywb1v`. Before publication the supervisor independently matched 112 tree-package hashes, 301 protected inputs and 586 historical files. The release record is `2026-10-18-gr-tree-release`.
 
-The tested checkout was `1685e07619c231d75cb05f4ea867b135abb1aa5e` with recorded uncommitted changes; HEAD alone is not its identity. Source `FeynGrav.wl` SHA-256: `a3b24436ef92f078f6c05cdd0bf8c4ec2cacb3d9274b20ea0245f69fffed6ceb`. Model hashes are listed in the [model guide](../../FeynArts/Models/GR/README.md) and manifest. The [native recipe](../../FeynArts/Models/GR/README.md#construct-and-convert-a-four-graviton-tree) explains the supported workflow.
+The tested checkout was `1685e07619c231d75cb05f4ea867b135abb1aa5e` with recorded uncommitted changes; HEAD alone is not its identity. Source `FeynGrav.wl` SHA-256: `a3b24436ef92f078f6c05cdd0bf8c4ec2cacb3d9274b20ea0245f69fffed6ceb`. Model hashes are listed in the [model guide](../../FeynArts/Models/GR/ModelGuide.md) and manifest. The [native recipe](../../FeynArts/Models/GR/ModelGuide.md#construct-and-convert-a-four-graviton-tree) explains the supported workflow.
 
 ## Subsequent directory layout
 

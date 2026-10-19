@@ -21,7 +21,7 @@ FORM result and mapping remain unchanged.
 
 ## Implementation
 
-The [reproducible example](../RationalCoefficient/README.md) includes the
+The [reproducible example](../RationalCoefficient/VerificationGuide.md) includes the
 original exported term and a runnable candidate FORM program. A small test
 adapter reuses the generated expression/processing prefix, extracts the one
 complete propagator product and keeps it outside the scalar algebra.

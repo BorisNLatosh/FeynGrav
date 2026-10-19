@@ -37,7 +37,7 @@ FeynGravHowToCite[args___] /; Length[{args}] != 0 :=
         "ExpectedArgumentCount" -> 0, "ActualArgumentCount" -> Length[{args}]|>];
 
 DisplayInitializationMessages[] := Module[{},
-    Print[Style["FeynGrav 4.1", "Text", Bold]];
+    Print[Style["FeynGrav 4.1.0", "Text", Bold]];
     Print[Style["Feynman rules for gravity and matter, with FeynCalc notation and FORM support through CalcFormConverter.", "Text"]];
     Print[Style["The default libraries include cubic and quartic graviton vertices and scalar, Dirac fermion and vector interactions with up to two gravitons. Use the FeynGravImport* commands to load additional libraries.", "Text"]];
     Print[Style["FeynArts supported models", "Text", Bold]];

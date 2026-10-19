@@ -1,6 +1,6 @@
 # Colour procedure preflight
 
-> Historical implementation record. Forward-looking statements describe that stage. For current capabilities use the [converter guide](../../README.md). The original observations and limitations below are retained.
+> Historical implementation record. Forward-looking statements describe that stage. For current capabilities use the [converter guide](../../UserGuide.md). The original observations and limitations below are retained.
 
 These are standalone checks of the proposed SU(N) backend. They check the unchanged upstream algorithm separately from converter integration.
 The unchanged source is now bundled in `../../ThirdParty/FORMColour/SUn.prc`;
