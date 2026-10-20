@@ -103,6 +103,9 @@ GravitonGluonGhostVertexUncontracted::usage = GravitonGluonGhostVertexUncontract
 
 Begin["`Private`"];
 
+(* Averaged metric-density coefficients require n! when differentiated into
+   n labelled graviton legs. Do not apply it again to permutation sums. *)
+
 
 (* Contracted vertex *)
 
@@ -114,9 +117,11 @@ GravitonQuarkGluonVertex[indexArray1_, indexArray2_] :=
         GravitonQuarkGluonVertex[indexArray1, indexArray2],
         {{1, "Array", 2, 0, Infinity}, {2, "Array", 1, 2, 2}},
         (
+Factorial[Length[indexArray1]/2] (
 RuleValidation`RuleRequire[DiracSimplify[RuleValidation`RuleRequire[Contract[RuleValidation`RuleRequire[FCI[
 			RuleValidation`RuleRequire[CETensor[{indexArray2[[1]],\[ScriptM]},indexArray1]] RuleValidation`RuleRequire[Explicit[QuarkGluonVertex[\[ScriptM],indexArray2[[2]]]]]
 		]]]]]]
+)
         ), True
     ];
 
@@ -129,9 +134,11 @@ GravitonThreeGluonVertex[indexArray_, p1_, \[Lambda]1_, a1_, p2_, \[Lambda]2_, a
         GravitonThreeGluonVertex[indexArray, p1, \[Lambda]1, a1, p2, \[Lambda]2, a2, p3, \[Lambda]3, a3],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}, {7, "Expression"}, {8, "Expression"}, {9, "Expression"}, {10, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 RuleValidation`RuleRequire[Contract[RuleValidation`RuleRequire[FCI[
 			Expand[RuleValidation`RuleRequire[ExpandScalarProduct[RuleValidation`RuleRequire[FCI[GluonVertex[p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,Explicit->True]]]]]] /.Pair[LorentzIndex[x_,D],LorentzIndex[y_,D]]Pair[LorentzIndex[z_,D],Momentum[p_,D]] -> RuleValidation`RuleRequire[CTensorGeneral[{x,y,z,s},indexArray]]FVD[p,s]
 		]]]]
+)
         ), True
     ];
 
@@ -143,9 +150,11 @@ GravitonFourGluonVertex[indexArray_, p1_, \[Lambda]1_, a1_, p2_, \[Lambda]2_, a2
         GravitonFourGluonVertex[indexArray, p1, \[Lambda]1, a1, p2, \[Lambda]2, a2, p3, \[Lambda]3, a3, p4, \[Lambda]4, a4],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}, {7, "Expression"}, {8, "Expression"}, {9, "Expression"}, {10, "Expression"}, {11, "Expression"}, {12, "Expression"}, {13, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 RuleValidation`RuleRequire[Contract[RuleValidation`RuleRequire[FCI[
 			RuleValidation`RuleRequire[FCI[ GluonVertex[p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4,Explicit->True] ]] /. Pair[LorentzIndex[\[ScriptX]_, D], LorentzIndex[\[ScriptY]_, D]] Pair[LorentzIndex[\[ScriptA]_, D], LorentzIndex[\[ScriptB]_, D]] -> RuleValidation`RuleRequire[CTensorGeneral[{\[ScriptX], \[ScriptY], \[ScriptA], \[ScriptB]}, indexArray]]
 		]]]]
+)
         ), True
     ];
 
@@ -181,9 +190,11 @@ GravitonGluonGhostVertex[indexArray_, array1_, array2_, array3_] :=
         GravitonGluonGhostVertex[indexArray, array1, array2, array3],
         {{1, "Array", 2, 0, Infinity}, {2, "Array", 1, 3, 3}, {3, "Array", 1, 3, 3}, {4, "Array", 1, 3, 3}},
         (
+Factorial[Length[indexArray]/2] (
 RuleValidation`RuleRequire[Contract[RuleValidation`RuleRequire[FCI[
 			Power[Global`\[Kappa],Length[indexArray]/2] RuleValidation`RuleRequire[FCI[GluonGhostVertex[array1,array2,array3,Explicit->True]]]/.Pair[Momentum[p_,D],LorentzIndex[x_,D]] -> RuleValidation`RuleRequire[CTensorGeneral[{x,s},indexArray]]FVD[p,s]
 		]]]]
+)
         ), True
     ];
 
@@ -198,7 +209,9 @@ GravitonQuarkGluonVertexUncontracted[indexArray1_, indexArray2_] :=
         GravitonQuarkGluonVertexUncontracted[indexArray1, indexArray2],
         {{1, "Array", 2, 0, Infinity}, {2, "Array", 1, 2, 2}},
         (
+Factorial[Length[indexArray1]/2] (
 RuleValidation`RuleRequire[CETensor[{indexArray2[[1]],\[ScriptM]},indexArray1]] QuarkGluonVertex[\[ScriptM],indexArray2[[2]],Explicit->True]
+)
         ), True
     ];
 
@@ -222,7 +235,9 @@ GravitonThreeGluonVertexUncontracted[indexArray_, p1_, \[Lambda]1_, a1_, p2_, \[
         GravitonThreeGluonVertexUncontracted[indexArray, p1, \[Lambda]1, a1, p2, \[Lambda]2, a2, p3, \[Lambda]3, a3],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}, {7, "Expression"}, {8, "Expression"}, {9, "Expression"}, {10, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 GluonVertex[p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,Explicit->True]  /.Pair[LorentzIndex[x_,D],LorentzIndex[y_,D]]Pair[LorentzIndex[z_,D],Momentum[p_,D]] -> RuleValidation`RuleRequire[CTensorGeneral[{x,y,z,s},indexArray]]FVD[Momentum[p,D],LorentzIndex[s,D]]
+)
         ), True
     ];
 
@@ -234,7 +249,9 @@ GravitonFourGluonVertexUncontracted[indexArray_, p1_, \[Lambda]1_, a1_, p2_, \[L
         GravitonFourGluonVertexUncontracted[indexArray, p1, \[Lambda]1, a1, p2, \[Lambda]2, a2, p3, \[Lambda]3, a3, p4, \[Lambda]4, a4],
         {{1, "Array", 2, 0, Infinity}, {2, "Expression"}, {3, "Expression"}, {4, "Expression"}, {5, "Expression"}, {6, "Expression"}, {7, "Expression"}, {8, "Expression"}, {9, "Expression"}, {10, "Expression"}, {11, "Expression"}, {12, "Expression"}, {13, "Expression"}},
         (
+Factorial[Length[indexArray]/2] (
 GluonVertex[p1,\[Lambda]1,a1,p2,\[Lambda]2,a2,p3,\[Lambda]3,a3,p4,\[Lambda]4,a4,Explicit->True] /. { Pair[LorentzIndex[\[ScriptX]_, D], LorentzIndex[\[ScriptY]_, D]] Pair[LorentzIndex[\[ScriptA]_, D], LorentzIndex[\[ScriptB]_, D]] -> RuleValidation`RuleRequire[CTensorGeneral[{\[ScriptX], \[ScriptY], \[ScriptA], \[ScriptB]}, indexArray]] , FCGV[_]->s}
+)
         ), True
     ];
 
@@ -258,7 +275,9 @@ GravitonGluonGhostVertexUncontracted[indexArray_, array1_, array2_, array3_] :=
         GravitonGluonGhostVertexUncontracted[indexArray, array1, array2, array3],
         {{1, "Array", 2, 0, Infinity}, {2, "Array", 1, 3, 3}, {3, "Array", 1, 3, 3}, {4, "Array", 1, 3, 3}},
         (
+Factorial[Length[indexArray]/2] (
 Power[Global`\[Kappa],Length[indexArray]/2]  GluonGhostVertex[array1,array2,array3,Explicit->True]/.Pair[Momentum[p_,D],LorentzIndex[x_,D]] -> RuleValidation`RuleRequire[CTensorGeneral[{x,s},indexArray]]FVD[p,s]
+)
         ), True
     ];
 

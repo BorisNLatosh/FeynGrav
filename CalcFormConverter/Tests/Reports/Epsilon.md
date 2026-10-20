@@ -1,6 +1,6 @@
 # Levi-Civita verification — 5 October 2026
 
-> Historical implementation record. Forward-looking statements describe that stage. For current capabilities use the [converter guide](../../README.md). The original observations and limitations below are retained.
+> Historical implementation record. Forward-looking statements describe that stage. For current capabilities use the [converter guide](../../UserGuide.md). The original observations and limitations below are retained.
 
 Real serial FORM and TFORM (two workers) passed the convention checks for
 `$LeviCivitaSign` = -1, 1, -I, I. The final Epsilon suite passed 48 assertions.
