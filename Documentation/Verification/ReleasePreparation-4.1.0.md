@@ -1,6 +1,6 @@
 # Release preparation for FeynGrav 4.1.0
 
-19 October 2026. **Unreleased preparation**, originally tested as uncommitted changes on top of `e910bbe`.
+19 October 2026. **Historical pre-release verification**, originally tested as uncommitted changes on top of `e910bbe`. The release documentation was dated 20 October 2026 subsequently; the checks below retain their original scope and date.
 This record does not announce a release, tag or publication.
 
 ## Changes

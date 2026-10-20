@@ -1,6 +1,6 @@
 # FeynGrav documentation
 
-- [4.1.0 release notes](ReleaseNotes-4.1.0.md): migration, scientific corrections and remaining limitations (unreleased).
+- [4.1.0 release notes](ReleaseNotes-4.1.0.md): migration, scientific corrections and remaining limitations (20 October 2026).
 - [4.1.0 release preparation](Verification/ReleasePreparation-4.1.0.md): packaging checks and publication boundaries.
 
 This documentation describes the development source checked on 6 October 2026, with the conventions report added on 9 October and converter optimisation documentation reviewed on 10 October 2026. The four native model guides use the names selected on 19 October 2026; earlier verification reports retain their historical names. Installed releases may differ; consult `?FunctionName` and `Options[FunctionName]` in your kernel. Begin a new kernel after changing package files.

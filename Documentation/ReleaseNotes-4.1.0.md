@@ -1,7 +1,6 @@
 # FeynGrav 4.1.0 — release notes
 
-**Status: unreleased; prepared for review.** Intended tag: `v4.1.0`.
-No release date is assigned until publication.
+**Release date: 20 October 2026.** Release tag: `v4.1.0`.
 
 ## Versioning policy
 

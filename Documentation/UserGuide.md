@@ -30,7 +30,7 @@ Supported models include general relativity, minimally coupled scalar, fermion a
 
 ### Automatic installation
 
-The installer is available on public `main`. The commands below install the current contents of that branch, which may include development changes beyond the latest tagged release; they do not automatically select the latest GitHub Release. Version 4.1.0 is still being prepared for publication. To test a local checkout, load its `install.m` with `Get["/absolute/path/to/FeynGrav/install.m"]` and select a local archive with `FeynGravArchive` and a temporary destination with `InstallFeynGravTo`; loading a local installer alone does not select the local package. The installer refuses to replace Git working checkouts.
+The installer is available on public `main`. The commands below install the current contents of that branch, which may include development changes beyond the latest tagged release; they do not automatically select the latest GitHub Release. To test a local checkout, load its `install.m` with `Get["/absolute/path/to/FeynGrav/install.m"]` and select a local archive with `FeynGravArchive` and a temporary destination with `InstallFeynGravTo`; loading a local installer alone does not select the local package. The installer refuses to replace Git working checkouts.
 
 ```mathematica
 Import["https://raw.githubusercontent.com/BorisNLatosh/FeynGrav/main/install.m"];
@@ -202,9 +202,11 @@ Report problems through [GitHub issues](https://github.com/BorisNLatosh/FeynGrav
 
 ## Version history
 
-### Version 4.1.0 — unreleased
+<a id="version-410--unreleased"></a>
 
-Planned release tag: `v4.1.0`. This is release preparation, not an announcement of publication. See the [4.1.0 release notes](ReleaseNotes-4.1.0.md) for migration instructions, scientific corrections and known limitations.
+### Version 4.1.0 — 20 October 2026
+
+Release tag: `v4.1.0`. See the [4.1.0 release notes](ReleaseNotes-4.1.0.md) for migration instructions, scientific corrections and known limitations.
 
 From this release onward, versions follow MAJOR.MINOR.PATCH: incompatible public-interface changes increment MAJOR, compatible additions MINOR, and compatible corrections PATCH. Version 4.1.0 is the explicitly chosen transition release and includes the incompatible changes listed below.
 

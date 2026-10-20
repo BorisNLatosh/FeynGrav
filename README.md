@@ -3,7 +3,7 @@
 Wolfram Language Feynman rules for gravity and matter, using FeynCalc notation,
 with FORM calculation support and four native FeynArts models.
 
-**4.1.0 is unreleased.** See the [release notes](Documentation/ReleaseNotes-4.1.0.md)
+**Version 4.1.0 — 20 October 2026.** See the [release notes](Documentation/ReleaseNotes-4.1.0.md)
 for migration instructions, scientific corrections and known limitations.
 
 ## Start here
