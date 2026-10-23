@@ -152,6 +152,19 @@ The converter performs algebra and Lorentz contractions. It automatically groups
 
 See the [user guide](../CalcFormConverter/UserGuide.md) for workflows, supported expressions, options, installation details, and performance guidance; the [format specification](../CalcFormConverter/FORMAT.md) for saved-file compatibility; and the [developer guide](../CalcFormConverter/DEVELOPER.md) for architecture, tests, and measurements.
 
+### Simplified front end (development, unreleased)
+
+An additional five-command facade, described with the converter guide and the
+[unreleased development note](ReleaseNotes-API01-Development.md), is supplied on
+the development branch: ``CalcFormConverter`FeynGravSimplify[expr, opts]``
+selects the full pipeline (`Method -> Automatic` or `"FORM"`) or the restricted
+external adapter (`"Contractor"`, `"FORMBenchmark"`) without fallback, and
+`FeynGravFORMExport`, `FeynGravFORMImport`, `FeynGravFORMCheck` and
+`FeynGravFORMInstall` wrap the corresponding `CalcForm*` commands. Restricted
+methods accept only the fixed capability baseline. These commands are additions;
+`CalcFormCalculate` and all `CalcForm*` commands above remain the published
+interface and are unchanged.
+
 ## Examples
 
 The [examples guide](../Examples/README.md) lists the numbered notebooks in their suggested reading order, with requirements and scope. Run each notebook in a fresh kernel and evaluate its setup cells before its calculation cells.

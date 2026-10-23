@@ -46,14 +46,14 @@ The six sections cover:
 2. Lorentz dimensions, incoming vertex momenta and the current assignment to `D`.
 3. Initial and current gauge parameters, actual loaded orders, and differences between recorded import settings and the current session.
 4. Momentum-first polarisation syntax, conjugation labels, current transversality defaults and limitations of the tensor product shortcuts.
-5. Rank-four epsilon conventions, trace normalisation, the current FeynCalc Dirac scheme, supported Dirac operations and fundamental SU(N) normalisation. Export and calculation defaults are shown separately.
+5. Rank-four epsilon conventions, trace normalisation, the current FeynCalc Dirac scheme, supported Dirac operations and fundamental SU(N) normalisation. The independent defaults of `CalcFormExport`, `CalcFormCalculate`, `FeynGravFORMExport` and `FeynGravSimplify` are shown separately, together with the configured `Method` and the distinction between the full pipeline and restricted methods.
 6. Factors already supplied by interaction rules and factors the converter does not add, together with the limits of ordinary `FAD` prescription information.
 
 Fixed formulas are inert display data: assignments to symbols do not change them. Historical import settings remain held when displayed. The report reads the existing [library import records](#library-import-records); it does not import libraries, calculate tensors, launch FORM, write files or change settings. It is not printed automatically on loading.
 
 “Not recorded” means that provenance is unavailable. Records describe the last successful import, not historical generation settings, manually redefined vertices or previously calculated user expressions. Reimport a library when a gauge value was substituted into its vertices. Other setting differences need not affect every expression. Use `FeynGravLibraryInformation[]` for detailed diagnostic data, including paths and hashes.
 
-FeynCalc's Cartesian metric setting is reported separately from the package's spacetime convention; changing it does not transform stored interactions. Likewise, displaying a FeynCalc Dirac scheme does not imply converter support for all operations in that scheme. Unavailable dependency settings are labelled explicitly. The effective omitted transversality setting for all four polarisation shortcuts is read from `Options[Polarization]`; wrapper option declarations do not override it. Delayed option defaults (`:>`) are displayed as held expressions labelled “Delayed default”, without evaluating them.
+FeynCalc's Cartesian metric setting is reported separately from the package's spacetime convention; changing it does not transform stored interactions. Likewise, displaying a FeynCalc Dirac scheme does not imply converter support for all operations in that scheme. Unavailable dependency settings are labelled explicitly. The effective omitted transversality setting for all four polarisation shortcuts is read from `Options[Polarization]`; wrapper option declarations do not override it. Delayed option defaults (`:>`), including `Method`, are displayed as held expressions labelled “Delayed default”, without evaluating them or choosing explanatory text from their values.
 
 Representative curvature and momentum-space checks and the display checks are recorded in [Conventions verification](Verification/Conventions.md). They do not constitute a proof for every interaction or perturbative order.
 
@@ -285,6 +285,33 @@ These are available after main-package loading; the [converter guide](../CalcFor
 | `CalcFormCalculate[expr, opts]` | Algebraic result, equality result or `Failure`; requires usable FORM/TFORM. |
 
 The default worker setting is `FORMThreads -> Automatic`. Supported Dirac algebra is enabled by `DiracAlgebra -> Automatic`; fundamental SU(N) reduction by `ColourAlgebra -> True`. Disabling either selects preservation for that space, subject to the converter's vocabulary restrictions. With one explicitly declared loop momentum, `TensorDecomposition -> True` (the default) returns integral coefficient functions with FeynCalc's `I Pi^2` normalisation. `DropScaleless -> False` preserves formal scaleless terms. Empty loop metadata or disabled decomposition retains integrand algebra. Default `ReduceToScalarMasters -> True` reduces supported tensor coefficients through boxes to rank-zero PaVe masters and includes necessary power reduction. False retains coefficient functions. Saved coefficients can be reduced without a new integration variable. Exceptional cases remain explicit and are reported as partial reduction. Masters are not analytically evaluated; see the [converter guide](../CalcFormConverter/UserGuide.md#one-loop-tensor-decomposition).
+
+
+### Simplified calculation front end (development, unreleased)
+
+Five short facade commands are supplied as a convenient public front end to the
+converter pipeline and, without any fallback, to a restricted benchmarking
+adapter. They are implemented in `FeynGravSimplify/` and described in
+[the unreleased development note](ReleaseNotes-API01-Development.md); they are
+not part of the published 4.1.0 interface.
+
+- `FeynGravSimplify[expr, opts]` — one-call simplified calculation. `Method` is
+  a new option symbol: `Automatic` (default) and `"FORM"` dispatch to the full
+  converter pipeline (`CalcFormCalculate` semantics, no `Method` forwarding);
+  `"Contractor"` and `"FORMBenchmark"` dispatch to the restricted external
+  adapter. There is no automatic backend fallback.
+- `FeynGravFORMExport[expr, file, opts]`, `FeynGravFORMImport[resultFile, mappingFile]`,
+  `FeynGravFORMCheck[opts]` and `FeynGravFORMInstall[opts]` are wrappers over
+  the corresponding `CalcForm*` commands, each with its own option store and
+  otherwise identical semantics; see `CalcFormConverter/UserGuide.md`.
+
+All five commands own their option stores in the ``CalcFormConverter` `` context and accept
+explicit call options over configured defaults. Restricted methods accept only
+the fixed capability baseline and refuse other full-pipeline settings with
+`MethodCapability`. `CalcFormCalculate` and all `CalcForm*` commands are
+unchanged and remain the published interface. See
+[the facade reference block in the converter guide](../CalcFormConverter/UserGuide.md#simplified-front-end-development)
+for the full option and failure contract.
 
 
 ### Reducing repeated-power loop coefficients

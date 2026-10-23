@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Converter and runtime tests. Installation is always mocked."""
+"""Converter, facade and runtime tests. Installation is always mocked."""
 import hashlib
 import argparse
+import datetime
+import json
 import os
 from pathlib import Path
 import shutil
@@ -9,15 +11,116 @@ import subprocess
 import tempfile
 import sys
 
+FACADE_PHASES = ('Adapter', 'Loading', 'Standalone', 'Reliability', 'Facade')
+COMPLETION_KEYS = {'Suite', 'Passed', 'Failed', 'Status'}
+
+
+def require_completion(path, phase):
+    """Require one fresh, well-formed, successful suite completion record."""
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f'{phase} did not produce a readable completion record: {exc}')
+    if not isinstance(data, dict) or set(data) != COMPLETION_KEYS:
+        raise SystemExit(f'{phase} completion record has the wrong fields: {data!r}')
+    if data['Suite'] != phase:
+        raise SystemExit(f'{phase} completion record names {data["Suite"]!r}.')
+    for key in ('Passed', 'Failed'):
+        value = data[key]
+        if type(value) is not int or value < 0:
+            raise SystemExit(f'{phase} completion record has invalid {key}: {value!r}')
+    if data['Passed'] <= 0:
+        raise SystemExit(f'{phase} completion record has no completed assertions.')
+    if data['Failed'] != 0 or data['Status'] != 'Completed':
+        raise SystemExit(f'{phase} did not complete successfully: {data!r}')
+
+
+def append_phase_record(evidence, entry):
+    with (evidence / 'phase-log.jsonl').open('a', encoding='utf-8') as stream:
+        stream.write(json.dumps(entry, sort_keys=True) + '\n')
+
+
+def run_facade_phase(kernel, script, work, env, phase, evidence):
+    """Run one facade phase, retaining raw logs and the completion record."""
+    completion = work / f'suite-completed-{phase}.json'
+    record = evidence / f'completion-{phase}.json'
+    missing = evidence / f'completion-{phase}.missing'
+    stdout_path = evidence / f'phase-{phase}.stdout.log'
+    stderr_path = evidence / f'phase-{phase}.stderr.log'
+    completion.unlink(missing_ok=True)
+    for old in evidence.glob(f'completion-{phase}.*'):
+        old.unlink()
+    for old in evidence.glob(f'phase-{phase}.*'):
+        old.unlink()
+    entry = {'Phase': phase, 'Started': datetime.datetime.now(datetime.timezone.utc).isoformat()}
+    try:
+        process = subprocess.Popen([kernel, '-noinit', '-script', str(script)],
+                                   cwd=work, env=env, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True)
+    except OSError as exc:
+        entry.update({'Status': 'LaunchFailed', 'Error': str(exc)})
+        append_phase_record(evidence, entry)
+        raise SystemExit(f'{phase} could not launch: {exc}')
+    stdout, stderr = process.communicate()
+    stdout_path.write_text(stdout or '', encoding='utf-8')
+    stderr_path.write_text(stderr or '', encoding='utf-8')
+    rc = process.returncode
+    entry.update({'PID': process.pid, 'Exit': rc, 'Stdout': stdout_path.name,
+                  'Stderr': stderr_path.name})
+    if completion.exists():
+        shutil.copyfile(completion, record)
+        entry['Completion'] = record.name
+    else:
+        missing.write_text('completion record missing\n', encoding='utf-8')
+        entry['Completion'] = missing.name
+    if stdout:
+        print(f'--- {phase} stdout ---')
+        print(stdout, end='')
+    if stderr:
+        print(f'--- {phase} stderr ---')
+        print(stderr, end='')
+    try:
+        if rc != 0:
+            raise SystemExit(f'{phase} exited with status {rc}.')
+        require_completion(completion, phase)
+    except SystemExit as exc:
+        entry.update({'Status': 'Failed', 'Failure': str(exc)})
+        append_phase_record(evidence, entry)
+        raise
+    entry['Status'] = 'Completed'
+    append_phase_record(evidence, entry)
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--suite', choices=('all', 'core', 'form', 'runtime', 'integration'), default='all')
+    parser.add_argument('--suite', choices=('all', 'core', 'form', 'runtime', 'integration', 'facade'), default='all')
+    parser.add_argument('--facade-phase', action='append', choices=FACADE_PHASES, default=None,
+                        help='Run only this facade phase; repeat for several (requires --suite facade).')
+    parser.add_argument('--evidence-dir', type=Path, default=None,
+                        help='Optional destination for facade phase logs and raw completion records.')
     args = parser.parse_args()
+    if args.facade_phase is not None:
+        if args.suite != 'facade':
+            parser.error('--facade-phase requires --suite facade.')
+        if len(set(args.facade_phase)) != len(args.facade_phase):
+            parser.error('--facade-phase must not repeat a phase.')
+        facade_phases = tuple(args.facade_phase)
+    else:
+        facade_phases = FACADE_PHASES
+    evidence = None
+    if args.evidence_dir is not None:
+        evidence = args.evidence_dir.expanduser().resolve()
+        if evidence.exists() and not evidence.is_dir():
+            parser.error('--evidence-dir must be a directory.')
+        evidence.mkdir(parents=True, exist_ok=True)
     here = Path(__file__).resolve().parent
     kernel = shutil.which('WolframKernel')
     if not kernel:
         parser.error('WolframKernel must be on PATH.')
+    if args.suite == 'facade':
+        fixture = os.environ.get('FG_CONTRACTOR_TEST_FIXTURE')
+        if not fixture or not Path(fixture).is_file():
+            parser.error('--suite facade requires FG_CONTRACTOR_TEST_FIXTURE to name an existing test double.')
     form = shutil.which('form') if args.suite != 'core' else None
     if args.suite != 'core' and not form:
         parser.error('The selected suite requires form on PATH; core does not.')
@@ -36,6 +139,21 @@ def main():
                 if not completed_marker.exists():
                     raise SystemExit(f'{phase} exited before completing its assertions.')
 
+            if suite == 'facade':
+                facade = here.parent.parent / 'FeynGravSimplify' / 'Tests'
+                for phase in facade_phases:
+                    script = facade / (phase + '.wls')
+                    if not script.is_file():
+                        raise SystemExit(f'Facade suite script missing: {script}')
+                    completion = work / f'suite-completed-{phase}.json'
+                    completion.unlink(missing_ok=True)
+                    if evidence is not None:
+                        run_facade_phase(kernel, script, work, env, phase, evidence)
+                    else:
+                        subprocess.run([kernel, '-noinit', '-script', str(script)],
+                                       cwd=work, env=env, check=True)
+                        require_completion(completion, phase)
+                continue
             if suite == 'core':
                 run_kernel('Core')
                 run_kernel('Parser')
@@ -79,7 +197,7 @@ def main():
                 run_kernel('ColourRules')
                 # The full bubble is exported only after smaller jobs have run.
                 run_kernel('BubbleExport')
-    print('All selected converter tests passed.')
+    print('All selected converter and facade tests passed.')
 
 
 def check_colour_reference(here, work, form):

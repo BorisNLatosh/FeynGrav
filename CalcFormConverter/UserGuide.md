@@ -12,6 +12,7 @@ A standalone Wolfram Language package for translating supported exact FeynCalc e
   - [Numerator–propagator cancellation](#numeratorpropagator-cancellation)
   - [Bounded coefficient simplification](#bounded-coefficient-simplification)
 - [Automated workflow](#automated-workflow)
+- [Simplified front end (development)](#simplified-front-end-development)
 - [One-loop tensor decomposition](#one-loop-tensor-decomposition)
   - [Scalar master reduction](#scalar-master-reduction)
 - [Timing, progress and parallel execution](#timing-progress-and-parallel-execution)
@@ -193,6 +194,88 @@ An algebraic input returns a FeynCalc expression; a binary equality returns `Tru
 Successful jobs are deleted unless `KeepFiles -> True`. Retained successful jobs report their path with `CalcFormCalculate::files`. Failed calculation jobs are retained once a job directory has been created. A failure during the initial availability check can occur before there are any job files. `job.frm`, `job.map.json` and `job.out` can then be used with the manual workflow. Never infer a successful calculation solely from a result file: check the returned value.
 
 The examples above explicitly retain integrand algebra. Declaring one loop momentum without disabling tensor decomposition instead returns an integral expressed through coefficient functions, as described below.
+
+## Simplified front end (development)
+
+**Status: development, unreleased.** The commands in this section are supplied
+by `FeynGravSimplify/` on the development branch and are documented in the
+[unreleased development note](../Documentation/ReleaseNotes-API01-Development.md).
+They are additions to the converter; `CalcFormCalculate`, `CalcFormExport`,
+`CalcFormImport`, `CalcFormCheck` and `CalcFormInstall` remain the published
+interface, unchanged, and take precedence where the two disagree.
+
+| Command | Purpose |
+| --- | --- |
+| `FeynGravSimplify[expr, opts]` | One-call simplified calculation: full pipeline or restricted external adapter, selected once by `Method`, with no fallback. |
+| `FeynGravFORMExport[expr, file, opts]` | Facade wrapper of [`CalcFormExport`](#command-and-option-reference), callable without FORM installed. |
+| `FeynGravFORMImport[resultFile, mappingFile]` | Facade wrapper of `CalcFormImport`; exactly two arguments. |
+| `FeynGravFORMCheck[opts]` | Facade wrapper of `CalcFormCheck`. |
+| `FeynGravFORMInstall[opts]` | Facade wrapper of `CalcFormInstall`. |
+
+The commands are defined in the ``CalcFormConverter` `` context and visible after main-package
+loading or a standalone converter load. `FeynGravSimplify/` modules are loaded
+once per kernel; a later ``Needs["CalcFormConverter`"]`` does not re-run them or
+reset configured options.
+
+### Method selection
+
+`FeynGravSimplify` has a new option symbol `Method` owned by the
+``CalcFormConverter` `` context, default `Automatic`:
+
+- `Automatic` and `"FORM"` dispatch to the full converter pipeline with
+  `CalcFormCalculate` semantics. Resolved converter options are forwarded as
+  ordinary rules and no `Method` rule reaches `CalcFormCalculate`; Contractor
+  executables are not read or probed on this path.
+- `"Contractor"` and `"FORMBenchmark"` dispatch to the restricted external
+  adapter. `Method -> "Contractor"` selects the Contractor executable
+  (`ContractorExecutable`, `ContractorThreads`, both in ``FeynGrav` ``);
+  `Method -> "FORMBenchmark"` selects the restricted, benchmarking-oriented
+  FORM mode (`FORMExecutable`, `FORMThreads`). There is **no automatic backend
+  fallback** in either direction.
+
+Restricted methods accept only the fixed capability baseline for the
+full-pipeline settings `LoopMomenta`, `TensorDecomposition`,
+`ReduceLoopCoefficients`, `ReduceToScalarMasters`, `DropScaleless`,
+`DiracAlgebra`, `ColourAlgebra`, `Dimension` and `WorkingDirectory`. Any other
+requested value terminates with a `MethodCapability` failure that lists each
+deviation (`Setting`, `RequestedValue`, `RestrictedBaseline`) without starting a
+backend. Restricted calls do not delegate to the converter's Mathematica-side
+algebra or its public commands. Only the selected backend's executable/worker
+pair is resolved and forwarded; the facade does not resolve or forward the
+unselected pair. Its delayed values (`:>`) remain inactive. Immediate rules
+(`->`) retain ordinary Wolfram evaluation before the call. Unknown option names
+still fail with `InvalidOption`.
+
+```mathematica
+FeynGravSimplify[MTD[mu,nu] FVD[p,mu] FVD[q,nu]]
+FeynGravSimplify[MTD[mu,mu], Method -> "FORMBenchmark", FORMThreads -> 1]
+FeynGravSimplify[loopExpr, Method -> "FORM", LoopMomenta -> {q}]
+```
+
+### Options, stores and failures
+
+Each facade command owns its own option store in the ``CalcFormConverter` `` context;
+`FeynGravSimplify` uses one union store containing all restricted and
+full-pipeline option names (including `Method` and, for store completeness,
+``FeynGrav`ContractorExecutable`` and ``FeynGrav`ContractorThreads``), while the four
+`FeynGravFORM*` wrappers mirror the stored options of their `CalcForm*`
+commands. `SetOptions` on a facade command affects only that command.
+Explicit options in a call take precedence over stored defaults, but a
+repeated option name in one call is resolved first-wins by the Wolfram
+evaluator: an option forced by a wrapper cannot be overridden by an argument
+of the same name. Every supplied key is validated against the union of
+call options and stored options before any process work; a non-documented
+key present in a directly modified store also produces `InvalidOption`.
+`FeynGravFORMImport` accepts exactly two arguments (`InvalidArguments`).
+
+Full-pipeline option semantics, failures and file behaviour are those of
+[CalcFormCalculate](#automated-workflow). Restricted-method semantics follow
+the adapter description in `FeynGravSimplify/README.md`, which also states the
+restricted input domain and the shared-native-IO cancellation limitation. Run
+the focused checks in `FeynGravSimplify/Tests/` from fresh kernels; see
+[the development note](../Documentation/ReleaseNotes-API01-Development.md) for
+the loader guard and the status of these commands relative to the published
+interface.
 
 ## One-loop tensor decomposition
 
@@ -830,6 +913,6 @@ Future FORM procedures can be inserted at the marked processing boundary without
 
 ## Development and tests
 
-Run `python3 Tests/run.py --suite core` for conversion, parser, transaction and mocked installer tests without FORM. The default `python3 Tests/run.py` additionally runs FORM, runtime and FeynGrav integration suites with their dependencies. Tests do not install system packages.
+Run `python3 Tests/run.py --suite core` for conversion, parser, transaction and mocked installer tests without FORM. The default `python3 Tests/run.py` additionally runs FORM, runtime and FeynGrav integration suites with their dependencies. The explicit focused facade suite is `python3 Tests/run.py --suite facade` after setting `FG_CONTRACTOR_TEST_FIXTURE` to an existing test double; it also requires FORM and does not require a real Contractor binary. A narrow phase selection is available with repeated `--facade-phase` arguments; for example, `--facade-phase Loading --facade-phase Facade` selects the two-phase bounded check. Add `--evidence-dir <directory>` to retain per-phase logs and raw completion records. The selector and completion protocol passed the focused Loading/Facade check (151/151), repeated after the directory rename. Other completion writers were not rerun in these batches; see the Stage E verification report for limits and historical failures. Tests do not install system packages, and the driver selects suites without supplying the task-owned resource bounds.
 
 See [DEVELOPER.md](DEVELOPER.md) for architecture, invariants, suite dependencies and measurement methodology. [FORMAT.md](FORMAT.md) is the persisted format contract; private helper associations are not public APIs.

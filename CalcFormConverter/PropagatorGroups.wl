@@ -16,11 +16,17 @@
    retain ordinary grouping until their factorised reconstruction is validated. *)
 pgFactorisationQ[data_Association] := data["Mapping"]["Version"] === 1 &&
     AnyTrue[data["Mapping"]["Entries"], #["Kind"] === "Denominator" &];
-pgOutput[data_Association, path_String, rationalPlan_: <||>, dimensionPlan_: <||>] := Module[{template, names, indices, vectors, fallback},
+pgOutput[data_Association, path_String, rationalPlan_: <||>, dimensionPlan_: <||>] := Module[{template, templateNames, names, indices, vectors, fallback},
     If[KeyExistsQ[data,"LoopReductionProcessing"], Return[lrOutput[data,path]]];
     If[!pgFactorisationQ[data], Return["#write <" <> path <> "> \"%E\",cfcResult"]];
     template = Quiet[Check[Import[FileNameJoin[{$moduleDirectory, "Templates", "PropagatorFactors.frm.in"}], "Text"], $Failed]];
-    If[!StringQ[template] || !ContainsAll[StringCases[template, RegularExpression["@[A-Z]+@"]], {"@RESULT@", "@DENOMINATORS@", "@INDEXCHECK@", "@COEFFICIENTBRACKET@", "@RINITIAL@", "@RCHECK@", "@RMAXIMUM@", "@REDUCTION@", "@RSKIP@", "@COEFFICIENTOUTPUT@", "@RCLEANUP@", "@DREDUCTION@"}],
+    If[!StringQ[template],
+        throwFailure["MissingTemplate", "Cannot read the propagator factorisation template."]];
+    templateNames = templatePlaceholderNames[template];
+    If[templateMissingPlaceholders[templateNames,
+        {"@RESULT@", "@DENOMINATORS@", "@INDEXCHECK@", "@COEFFICIENTBRACKET@",
+         "@RINITIAL@", "@RCHECK@", "@RMAXIMUM@", "@REDUCTION@", "@RSKIP@",
+         "@COEFFICIENTOUTPUT@", "@RCLEANUP@", "@DREDUCTION@"}] =!= {},
         throwFailure["MissingTemplate", "Cannot read the propagator factorisation template."]];
     names = Lookup[Select[data["Mapping"]["Entries"], #["Kind"] === "Denominator" &], "Name"];
     (* occurs detects component indices but not indices in native metrics.

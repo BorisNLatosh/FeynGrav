@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[     63843,       1595]
-NotebookOptionsPosition[     50853,       1365]
-NotebookOutlinePosition[     51341,       1383]
-CellTagsIndexPosition[     51298,       1380]
+NotebookDataLength[     96031,       2551]
+NotebookOptionsPosition[     77650,       2226]
+NotebookOutlinePosition[     78138,       2244]
+CellTagsIndexPosition[     78095,       2241]
 WindowTitle->Gravitational corrections to matter propagators
 WindowFrame->Normal*)
 
@@ -21,17 +21,20 @@ WindowFrame->Normal*)
 Notebook[{
 
 Cell[CellGroupData[{
-Cell["Gravitational corrections to matter propagators", "Title",ExpressionUUID->"b1870694-48db-4d3b-a510-3651c3d5bcda"],
+Cell["Gravitational corrections to matter propagators", "Title",
+ Editable->False,ExpressionUUID->"b1870694-48db-4d3b-a510-3651c3d5bcda"],
 
 Cell["\<\
 Explore the graviton contributions to scalar, fermion, massive-vector, \
 massless-vector, gluon and quark two-point functions. Follow one sector at a \
 time to learn vertex assembly, loop reduction and result inspection.\
-\>", "Text",ExpressionUUID->"1a8a7cfe-8200-4a31-b209-fb4fb5d419c3"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"1a8a7cfe-8200-4a31-b209-fb4fb5d419c3"],
 
 Cell[CellGroupData[{
 
-Cell["1. Setup and notation", "Section",ExpressionUUID->"faffbe22-3228-4446-8054-da7dcb431001"],
+Cell["1. Setup and notation", "Section",
+ Editable->False,ExpressionUUID->"faffbe22-3228-4446-8054-da7dcb431001"],
 
 Cell["\<\
 Start with a fresh Mathematica kernel and evaluate the input cells from top \
@@ -40,110 +43,458 @@ see the package README. Opening this notebook executes nothing. A semicolon \
 stores an intermediate result without printing its full expression. Use \
 ?FunctionName for help and FeynGravCommands[] to discover the package \
 interface.\
-\>", "Text",ExpressionUUID->"1273878a-8bc7-432d-9193-63868c6c4479"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"1273878a-8bc7-432d-9193-63868c6c4479"],
+
+Cell["\<\
+Saved outputs are retained from the previous evaluation. Bubble calculations \
+and their displayed comparisons have not been rerun as part of this notebook \
+revision. Reevaluate dependent cells to obtain results for the current inputs.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"9b796ff5-92fd-462c-a4df-ddcadaed6275"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<FeynGrav`\>\""}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{4.000099972767213*^9},
  CellLabel->"In[1]:=",ExpressionUUID->"8168dc49-3c37-47ba-90a2-b4cd58a1a16a"],
 
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   StyleBox["\<\"FeynCalc \"\>", "Text",
+    StripOnInput->False,
+    FontWeight->Bold], "\[InvisibleSpace]", 
+   StyleBox["\<\"10.2.1 (stable version). For help, use the \"\>", "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox[
+    TagBox[
+     ButtonBox[
+      RowBox[{
+       RowBox[{"online", " ", "documentation"}], ","}],
+      BaseStyle->"Hyperlink",
+      ButtonData:>{
+        URL["https://feyncalc.github.io/referenceDev"], None},
+      ButtonNote->"https://feyncalc.github.io/referenceDev"],
+     DisplayForm], "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox["\<\" visit the \"\>", "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox[
+    TagBox[
+     ButtonBox["forum",
+      BaseStyle->"Hyperlink",
+      ButtonData:>{
+        URL["https://github.com/FeynCalc/feyncalc/discussions"], None},
+      ButtonNote->"https://github.com/FeynCalc/feyncalc/discussions/"],
+     DisplayForm], "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox["\<\" and have a look at the supplied \"\>", "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox[
+    TagBox[
+     ButtonBox[
+      RowBox[{"examples", "."}],
+      BaseStyle->"Hyperlink",
+      ButtonFunction:>SystemOpen[
+        FileNameJoin[{FeynCalc`$FeynCalcDirectory, "Examples"}]],
+      Evaluator->Automatic,
+      Method->"Preemptive"],
+     DisplayForm], "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox["\<\" The PDF-version of the manual can be downloaded \"\>", 
+    "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox[
+    TagBox[
+     ButtonBox[
+      RowBox[{"here", "."}],
+      BaseStyle->"Hyperlink",
+      ButtonData:>{
+        URL[
+        "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-\
+manual/FeynCalcManual.pdf"], None},
+      ButtonNote->
+       "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-\
+manual/FeynCalcManual.pdf"],
+     DisplayForm], "Text",
+    StripOnInput->False]}],
+  SequenceForm[
+   Style["FeynCalc ", "Text", Bold], 
+   Style["10.2.1 (stable version). For help, use the ", "Text"], 
+   Style[
+    DisplayForm[
+     ButtonBox["online documentation,", ButtonData :> {
+        URL["https://feyncalc.github.io/referenceDev"], None}, BaseStyle -> 
+      "Hyperlink", ButtonNote -> "https://feyncalc.github.io/referenceDev"]], 
+    "Text"], 
+   Style[" visit the ", "Text"], 
+   Style[
+    DisplayForm[
+     ButtonBox["forum", ButtonData :> {
+        URL["https://github.com/FeynCalc/feyncalc/discussions"], None}, 
+      BaseStyle -> "Hyperlink", ButtonNote -> 
+      "https://github.com/FeynCalc/feyncalc/discussions/"]], "Text"], 
+   Style[" and have a look at the supplied ", "Text"], 
+   Style[
+    DisplayForm[
+     ButtonBox[
+     "examples.", BaseStyle -> "Hyperlink", ButtonFunction :> SystemOpen[
+        FileNameJoin[{FeynCalc`$FeynCalcDirectory, "Examples"}]], Evaluator -> 
+      Automatic, Method -> "Preemptive"]], "Text"], 
+   Style[" The PDF-version of the manual can be downloaded ", "Text"], 
+   Style[
+    DisplayForm[
+     ButtonBox["here.", ButtonData :> {
+        URL[
+        "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-\
+manual/FeynCalcManual.pdf"], None}, BaseStyle -> "Hyperlink", ButtonNote -> 
+      "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-\
+manual/FeynCalcManual.pdf"]], "Text"]],
+  Editable->False]], "Print",
+ CellChangeTimes->{4.001653198186907*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"6bfd0221-bd4d-4d38-8b64-d466fb575925"],
+
+Cell[BoxData[
+ StyleBox["\<\"If you use FeynCalc in your research, please evaluate \
+FeynCalcHowToCite[] to learn how to cite this software.\"\>", "Text",
+  StripOnInput->False]], "Print",
+ CellChangeTimes->{4.001653198189803*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"6ec1fec4-8c5c-40d5-bdca-1604d5650d3e"],
+
+Cell[BoxData[
+ StyleBox["\<\"Please keep in mind that the proper academic attribution of \
+our work is crucial to ensure the future development of this package!\"\>", 
+  "Text",
+  StripOnInput->False,
+  FontSlant->Italic]], "Print",
+ CellChangeTimes->{4.001653198190701*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"7d640c85-c666-4950-85c2-32df46c6889e"],
+
+Cell[BoxData[
+ StyleBox["\<\"FeynGrav 4.1.0\"\>", "Text",
+  StripOnInput->False,
+  FontWeight->Bold]], "Print",
+ CellChangeTimes->{4.0016531981915894`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"771979e9-fe94-4135-9f5d-29484dd0969c"],
+
+Cell[BoxData[
+ StyleBox["\<\"Feynman rules for gravity and matter, with FeynCalc notation \
+and FORM support through CalcFormConverter.\"\>", "Text",
+  StripOnInput->False]], "Print",
+ CellChangeTimes->{4.0016531981921053`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"43e01de1-cef8-44ba-ab25-dfda4659c438"],
+
+Cell[BoxData[
+ StyleBox["\<\"The default libraries include cubic and quartic graviton \
+vertices and scalar, Dirac fermion and vector interactions with up to two \
+gravitons. Use the FeynGravImport* commands to load additional \
+libraries.\"\>", "Text",
+  StripOnInput->False]], "Print",
+ CellChangeTimes->{4.0016531981925087`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"91bcf071-ae1d-4315-be8d-7ff6eced4247"],
+
+Cell[BoxData[
+ StyleBox["\<\"FeynArts supported models\"\>", "Text",
+  StripOnInput->False,
+  FontWeight->Bold]], "Print",
+ CellChangeTimes->{4.0016531981929073`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"f0329214-68bd-41d1-97c5-53cce6476f7c"],
+
+Cell[BoxData[
+ StyleBox["\<\"\[Bullet] Pure general relativity\"\>", "Text",
+  StripOnInput->False]], "Print",
+ CellChangeTimes->{4.001653198193233*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"305cf50a-9c54-4f80-b0f9-5e3fbc496593"],
+
+Cell[BoxData[
+ StyleBox["\<\"\[Bullet] Scalar field with a potential minimally coupled to \
+gravity\"\>", "Text",
+  StripOnInput->False]], "Print",
+ CellChangeTimes->{4.001653198193829*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"cd45ee9a-544e-4d24-819f-c450532e333e"],
+
+Cell[BoxData[
+ StyleBox["\<\"\[Bullet] Scalar field with a non-minimal kinetic \
+coupling\"\>", "Text",
+  StripOnInput->False]], "Print",
+ CellChangeTimes->{4.0016531981941833`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"476eaded-0005-417d-9b08-52f272ad3199"],
+
+Cell[BoxData[
+ StyleBox["\<\"\[Bullet] Einstein-scalar-Gauss-Bonnet model\"\>", "Text",
+  StripOnInput->False]], "Print",
+ CellChangeTimes->{4.001653198194542*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"5fe3ac9b-6ff0-4dbf-bcd0-8ae4915944e3"],
+
+Cell[BoxData[
+ StyleBox["\<\"The supplied models retain interactions through order \
+\\!\\(\\*SuperscriptBox[\\(\[Kappa]\\), \\(2\\)]\\) per vertex. Use matching \
+Model and GenericModel names with FeynCalc-patched FeynArts in a fresh \
+kernel. Models are not initialised automatically.\"\>", "Text",
+  StripOnInput->False]], "Print",
+ CellChangeTimes->{4.001653198194888*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"a47e8a83-4293-4c5b-85e1-f60fa2f642cc"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   StyleBox["\<\"Evaluate \"\>", "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox[
+    TagBox[
+     ButtonBox[
+      RowBox[{"FeynGravCommands", "[", "]"}],
+      BaseStyle->"Hyperlink",
+      ButtonFunction:>FeynGrav`FeynGravCommands[],
+      Evaluator->Automatic,
+      Method->"Queued"],
+     DisplayForm], "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox["\<\" to list available commands, \"\>", "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox[
+    TagBox[
+     ButtonBox[
+      RowBox[{"FeynGravConventions", "[", "]"}],
+      BaseStyle->"Hyperlink",
+      ButtonFunction:>FeynGrav`FeynGravConventions[],
+      Evaluator->Automatic,
+      Method->"Queued"],
+     DisplayForm], "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox["\<\" to inspect conventions and current settings, and \"\>", 
+    "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox[
+    TagBox[
+     ButtonBox[
+      RowBox[{"FeynGravHowToCite", "[", "]"}],
+      BaseStyle->"Hyperlink",
+      ButtonFunction:>FeynGrav`FeynGravHowToCite[],
+      Evaluator->Automatic,
+      Method->"Queued"],
+     DisplayForm], "Text",
+    StripOnInput->False], "\[InvisibleSpace]", 
+   StyleBox["\<\" for citation guidance.\"\>", "Text",
+    StripOnInput->False]}],
+  SequenceForm[
+   Style["Evaluate ", "Text"], 
+   Style[
+    DisplayForm[
+     ButtonBox[
+     "FeynGravCommands[]", BaseStyle -> "Hyperlink", ButtonFunction :> 
+      FeynGrav`FeynGravCommands[], Evaluator -> Automatic, Method -> 
+      "Queued"]], "Text"], 
+   Style[" to list available commands, ", "Text"], 
+   Style[
+    DisplayForm[
+     ButtonBox[
+     "FeynGravConventions[]", BaseStyle -> "Hyperlink", ButtonFunction :> 
+      FeynGrav`FeynGravConventions[], Evaluator -> Automatic, Method -> 
+      "Queued"]], "Text"], 
+   Style[" to inspect conventions and current settings, and ", "Text"], 
+   Style[
+    DisplayForm[
+     ButtonBox[
+     "FeynGravHowToCite[]", BaseStyle -> "Hyperlink", ButtonFunction :> 
+      FeynGrav`FeynGravHowToCite[], Evaluator -> Automatic, Method -> 
+      "Queued"]], "Text"], 
+   Style[" for citation guidance.", "Text"]],
+  Editable->False]], "Print",
+ CellChangeTimes->{4.001653198195602*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"9721bb1a-3d48-457c-8626-d07deb92fed6"]
+}, Open  ]]
+}, Open  ]],
+
 Cell["\<\
-This notebook requires FORM on the kernel\[CloseCurlyQuote]s PATH. \
-CalcFormCalculate performs bosonic algebra and Lorentz contractions; TFORM is \
-used automatically when available. FeynCalc handles loop reduction and any \
-Dirac or colour algebra before the bosonic coefficients are sent to FORM.\
+Use a fresh kernel. FeynGrav supplies the vertices and propagators. The \
+tadpole checks use FeynGravSimplify with an explicitly declared loop momentum \
+and DropScaleless -> True. Bubble integrands are reduced by FeynCalc with \
+TID; subsequent coefficient algebra and comparisons use FeynGravSimplify \
+where shown. FORM must be available for those calls.\
 \>", "Text",
+ Editable->False,
  CellChangeTimes->{
   4.00009997597785*^9},ExpressionUUID->"9ce37baa-d571-4f6d-9856-074d3da8aa14"],
 
 Cell["\<\
-Explicit expands FeynCalc propagator shorthand before export. SUNSimplify \
-contracts colour indices, and DiracSimplify with DiracOrder -> True reduces \
-and orders open Dirac chains. Collect sends only the bosonic coefficients of \
-the remaining DiracGamma or SUNDelta structures to CalcFormCalculate. Loop \
-reduction stays in FeynCalc. SUNNToCACF -> False keeps colour factors in terms \
-of SUNN, matching the displayed reference formulas.\
-\>", "Text",ExpressionUUID->"7b453c41-dc11-4817-91ff-503866d6a4f9"],
+Explicit expands propagator shorthand. Fermion chains use Dot to preserve \
+matrix order. DiracSimplify and SUNSimplify process the indicated Dirac and \
+colour structures; Collect groups the resulting coefficients. SUNNToCACF -> \
+False retains colour factors in terms of SUNN.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"7b453c41-dc11-4817-91ff-503866d6a4f9"],
 
 Cell["\<\
-The external momentum is p, the loop momentum is k, and m denotes the matter \
-mass where present. Repeated Lorentz or colour indices are summed. TID[..., k, \
-ToPaVe -> True] reduces tensor integrals to scalar A0 and B0 functions. In \
-FeynCalc\[CloseCurlyQuote]s convention these expressions retain the i \[Pi]\
-\.b2 normalisation; no (2\[Pi])^(-D) loop-measure prefactor is inserted here. \
-Keep D symbolic during reduction. Setting D -> 4 in a displayed coefficient \
-is not a Laurent expansion, UV subtraction, or a renormalised answer.\
-\>", "Text",ExpressionUUID->"0507f9a5-9183-4ead-baed-4ec8c2e29dfa"],
+The external momentum is p and the loop momentum is k. Keep D symbolic during \
+reduction and in the combined operators. TID[..., k, ToPaVe -> True] uses \
+FeynCalc\[CloseCurlyQuote]s integral normalisation, including i \[Pi]\.b2; no \
+(2\[Pi])^(-D) measure factor is inserted. The optional D -> 4 coefficient \
+comparisons below are not Laurent expansions or renormalised finite answers: \
+terms proportional to D - 4 can multiply divergent integrals.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"0507f9a5-9183-4ead-baed-4ec8c2e29dfa"],
 
 Cell["\<\
 FeynGrav supplies the vertex and propagator normalisations, including i and \
 \[Kappa]. The default gravitational gauge parameter is GaugeFixingEpsilon = \
 2. The displayed diagram weights are retained from the original example; the \
 notebook does not derive their combinatorics.\
-\>", "Text",ExpressionUUID->"fe8fc526-322d-44ff-9051-b91f1746cf40"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"fe8fc526-322d-44ff-9051-b91f1746cf40"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"FeynGravImportSUNYM", "[", "2", "]"}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellLabel->"In[2]:=",ExpressionUUID->"1d09ce57-263f-4350-acc3-ff437df9d50d"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["2. Scalar", "Section",ExpressionUUID->"8e77db67-e2e7-4c7b-961c-bb57ad3b0946"],
+Cell["2. Scalar", "Section",
+ Editable->False,ExpressionUUID->"8e77db67-e2e7-4c7b-961c-bb57ad3b0946"],
 
 Cell["\<\
 The external matter legs are amputated. The internal graviton and matter \
 propagators are shown explicitly in each bubble integrand.\
-\>", "Text",ExpressionUUID->"d89b8a2f-3809-4789-b62d-ab15220c483c"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"d89b8a2f-3809-4789-b62d-ab15220c483c"],
 
 Cell[CellGroupData[{
 
-Cell["Tadpole", "Subsection",ExpressionUUID->"201aaf28-ffa8-4f8c-bd19-79fd346a3c50"],
+Cell["Tadpole", "Subsection",
+ Editable->False,ExpressionUUID->"201aaf28-ffa8-4f8c-bd19-79fd346a3c50"],
 
 Cell["\<\
-Close the two graviton legs of the contact vertex with one graviton \
-propagator. The massless gravitational tadpole is scaleless in dimensional \
-regularisation.\
-\>", "Text",ExpressionUUID->"bb3bfda8-2055-4226-a429-0237949bf1e9"],
+Close the two graviton legs of the contact vertex with a massless graviton \
+propagator. The resulting integral is scaleless in dimensional \
+regularisation. Declare LoopMomenta -> {k} explicitly so polynomial terms \
+left by propagator cancellation are still treated as integrands. The \
+following check should return True.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"bb3bfda8-2055-4226-a429-0237949bf1e9"],
+
+Cell[BoxData[
+ RowBox[{"scalarTadpoleIntegrand", "=", 
+  RowBox[{
+   RowBox[{"GravitonScalarVertex", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]"}], "}"}],
+      ",", "p", ",", 
+     RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
+   RowBox[{"GravitonPropagator", "[", 
+    RowBox[{
+    "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
+    "]"}]}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[3]:=",ExpressionUUID->"45cc4789-e2df-40bc-a5d1-822e450ae9cf"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{
    RowBox[{"ScalarPolarizationOperator1", "[", 
     RowBox[{"p_", ",", "m_"}], "]"}], "=", 
-   RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"GravitonScalarVertex", "[", 
-       RowBox[{
-        RowBox[{"{", 
-         RowBox[{"\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]"}], 
-         "}"}], ",", "p", ",", 
-        RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
-      RowBox[{"GravitonPropagator", "[", 
-       RowBox[{
-       "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
-       "]"}]}], ",", "k", ",", 
-     RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+   RowBox[{"FeynGravSimplify", "[", 
+    RowBox[{"scalarTadpoleIntegrand", ",", 
+     RowBox[{"LoopMomenta", "->", 
+      RowBox[{"{", "k", "}"}]}], ",", 
+     RowBox[{"DropScaleless", "->", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[3]:=",ExpressionUUID->"d862d513-aebc-4cdb-894b-9701d7ea6ddb"]
+ CellLabel->"In[4]:=",ExpressionUUID->"d862d513-aebc-4cdb-894b-9701d7ea6ddb"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"ScalarPolarizationOperator1", "[", 
+   RowBox[{"p", ",", "m"}], "]"}], " ", "==", " ", "0"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellChangeTimes->{{4.001575583119804*^9, 4.0015755834263372`*^9}},
+ CellLabel->"In[5]:=",ExpressionUUID->"9e6402a2-415c-4a30-98f9-7392e0a9fbef"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653199055949*^9},
+ CellLabel->"Out[5]=",ExpressionUUID->"6910900a-8570-4954-bd8e-8b82dd0d9659"]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Bubble", "Subsection",ExpressionUUID->"675477cf-f6c3-45b9-b65e-0d3d2d4177d5"],
+Cell["Bubble", "Subsection",
+ Editable->False,ExpressionUUID->"675477cf-f6c3-45b9-b65e-0d3d2d4177d5"],
 
 Cell["\<\
-Join two three-point vertices with a graviton and a matter propagator. Dirac \
-products use Dot; do not replace them by ordinary multiplication. \
-GravitonFermionVertex takes graviton triples {index, index, incoming \
-momentum}; include these momenta even when older examples list only the \
-indices.\
-\>", "Text",ExpressionUUID->"5039a59a-f6e0-41b7-bf44-876a6ab287e3"],
+Join the two scalar\[Dash]graviton vertices with a graviton of momentum k and \
+a scalar of momentum p - k. The scalar mass m is retained.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"5039a59a-f6e0-41b7-bf44-876a6ab287e3"],
+
+Cell[BoxData[
+ RowBox[{"scalarBubbleIntegrand", "=", 
+  RowBox[{
+   RowBox[{"GravitonScalarVertex", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Mu]", ",", "\[Nu]"}], "}"}], ",", "p", ",", 
+     RowBox[{"-", 
+      RowBox[{"(", 
+       RowBox[{"p", "-", "k"}], ")"}]}], ",", "m"}], "]"}], " ", 
+   RowBox[{"GravitonScalarVertex", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Alpha]", ",", "\[Beta]"}], "}"}], ",", 
+     RowBox[{"p", "-", "k"}], ",", 
+     RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
+   RowBox[{"GravitonPropagator", "[", 
+    RowBox[{
+    "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], "]"}],
+    " ", 
+   RowBox[{"ScalarPropagator", "[", 
+    RowBox[{
+     RowBox[{"p", "-", "k"}], ",", "m"}], "]"}]}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[6]:=",ExpressionUUID->"99063939-2b5d-4913-bbce-34f20c146783"],
 
 Cell[BoxData[
  RowBox[{
@@ -151,41 +502,24 @@ Cell[BoxData[
    RowBox[{"ScalarPolarizationOperator2", "[", 
     RowBox[{"p_", ",", "m_"}], "]"}], "=", 
    RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"GravitonScalarVertex", "[", 
-       RowBox[{
-        RowBox[{"{", 
-         RowBox[{"\[Mu]", ",", "\[Nu]"}], "}"}], ",", "p", ",", 
-        RowBox[{"-", 
-         RowBox[{"(", 
-          RowBox[{"p", "-", "k"}], ")"}]}], ",", "m"}], "]"}], " ", 
-      RowBox[{"GravitonScalarVertex", "[", 
-       RowBox[{
-        RowBox[{"{", 
-         RowBox[{"\[Alpha]", ",", "\[Beta]"}], "}"}], ",", 
-        RowBox[{"p", "-", "k"}], ",", 
-        RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
-      RowBox[{"GravitonPropagator", "[", 
-       RowBox[{
-       "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
-       "]"}], " ", 
-      RowBox[{"ScalarPropagator", "[", 
-       RowBox[{
-        RowBox[{"p", "-", "k"}], ",", "m"}], "]"}]}], ",", "k", ",", 
+    RowBox[{"scalarBubbleIntegrand", ",", "k", ",", 
      RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[4]:=",ExpressionUUID->"d65f7751-1f90-4c53-a16d-50ab0bcf538a"]
+ CellLabel->"In[7]:=",ExpressionUUID->"d65f7751-1f90-4c53-a16d-50ab0bcf538a"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Combined operator", "Subsection",ExpressionUUID->"cdcecd5c-d342-4c6c-942a-93389dffc137"],
+Cell["Combined operator in symbolic D", "Subsection",
+ Editable->False,ExpressionUUID->"cdcecd5c-d342-4c6c-942a-93389dffc137"],
 
 Cell["\<\
-Add the stored tadpole and bubble terms and collect their scalar master \
-integrals.\
-\>", "Text",ExpressionUUID->"4397736f-9e51-46be-999b-14703c19782b"],
+Add the tadpole and bubble contributions and collect the scalar loop \
+integrals. This named combined operator retains symbolic D; the optional \
+four-dimensional comparison below does not overwrite it.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"4397736f-9e51-46be-999b-14703c19782b"],
 
 Cell[BoxData[
  RowBox[{
@@ -208,22 +542,27 @@ Cell[BoxData[
       RowBox[{"Collect", "[", 
        RowBox[{"#1", ",", "m", ",", "Factor"}], "]"}], "&"}]}], "]"}]}], 
   ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[5]:=",ExpressionUUID->"b098053b-6424-446e-8eb5-670eaf771c36"]
+ CellLabel->"In[8]:=",ExpressionUUID->"b098053b-6424-446e-8eb5-670eaf771c36"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Display or compare the result", "Subsection",ExpressionUUID->"98e1c7b1-c55b-4e71-94bc-3e7dc67ad5a7"],
+Cell["Four-dimensional coefficient comparison", "Subsection",
+ Editable->False,ExpressionUUID->"98e1c7b1-c55b-4e71-94bc-3e7dc67ad5a7"],
 
 Cell["\<\
-The four-dimensional coefficient expression retains unevaluated scalar loop \
-integrals. A True comparison confirms the written reference in this gauge; it \
-does not perform UV renormalisation.\
-\>", "Text",ExpressionUUID->"72d01624-d273-46b2-9671-bcdcc6e03021"],
+This optional comparison substitutes D -> 4 only in the displayed coefficient \
+expression, retaining unevaluated scalar loop integrals. It checks the \
+written reference in the selected gauge, not ultraviolet renormalisation.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"72d01624-d273-46b2-9671-bcdcc6e03021"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"CalcFormCalculate", "[", 
+ RowBox[{"FeynGravSimplify", "[", 
   RowBox[{
    RowBox[{"(", 
     RowBox[{
@@ -256,67 +595,135 @@ Cell[BoxData[
      SuperscriptBox["\[Kappa]", "2"], " ", 
      RowBox[{"A0", "[", 
       SuperscriptBox["m", "2"], "]"}]}]}]}], "]"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000099995085911*^9, 4.0001000041775007`*^9}},
- CellLabel->"In[6]:=",ExpressionUUID->"b265f251-917d-4cf8-949e-4aa2c82eb597"]
+ CellLabel->"In[9]:=",ExpressionUUID->"b265f251-917d-4cf8-949e-4aa2c82eb597"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653199539257*^9},
+ CellLabel->"Out[9]=",ExpressionUUID->"3f35e268-4f4e-4dff-87ca-3476e9915041"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["3. Dirac fermion", "Section",ExpressionUUID->"3876be3c-37e7-41c5-94e7-05091a0a2674"],
+Cell["3. Dirac fermion", "Section",
+ Editable->False,ExpressionUUID->"3876be3c-37e7-41c5-94e7-05091a0a2674"],
 
 Cell["\<\
 The external matter legs are amputated. The internal graviton and matter \
 propagators are shown explicitly in each bubble integrand.\
-\>", "Text",ExpressionUUID->"12980e0b-66d1-430b-8e25-b7fe85c8742f"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"12980e0b-66d1-430b-8e25-b7fe85c8742f"],
 
 Cell[CellGroupData[{
 
-Cell["Tadpole", "Subsection",ExpressionUUID->"eba0e395-0f0b-484c-8101-6316609f0b0b"],
+Cell["Tadpole", "Subsection",
+ Editable->False,ExpressionUUID->"eba0e395-0f0b-484c-8101-6316609f0b0b"],
 
 Cell["\<\
-Close the two graviton legs of the contact vertex with one graviton \
-propagator. The massless gravitational tadpole is scaleless in dimensional \
-regularisation.\
-\>", "Text",ExpressionUUID->"7d8bc0a6-57d5-4de9-92a4-7f333a390c0d"],
+Close the two graviton legs of the contact vertex with a massless graviton \
+propagator. The resulting integral is scaleless in dimensional \
+regularisation. Declare LoopMomenta -> {k} explicitly so polynomial terms \
+left by propagator cancellation are still treated as integrands. The \
+following check should return True.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"7d8bc0a6-57d5-4de9-92a4-7f333a390c0d"],
+
+Cell[BoxData[
+ RowBox[{"fermionTadpoleIntegrand", "=", 
+  RowBox[{
+   RowBox[{"GravitonFermionVertex", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "\[Mu]", ",", "\[Nu]", ",", "k", ",", "\[Alpha]", ",", "\[Beta]", ",", 
+       RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", 
+     RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
+   RowBox[{"GravitonPropagator", "[", 
+    RowBox[{
+    "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
+    "]"}]}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[10]:=",ExpressionUUID->"89227890-490a-4333-b89d-886c1c23a7ec"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{
    RowBox[{"FermionPolarizationOperator1", "[", 
     RowBox[{"p_", ",", "m_"}], "]"}], "=", 
-   RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"GravitonFermionVertex", "[", 
-       RowBox[{
-        RowBox[{"{", 
-         RowBox[{
-         "\[Mu]", ",", "\[Nu]", ",", "k", ",", "\[Alpha]", ",", "\[Beta]", ",", 
-          RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", 
-        RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
-      RowBox[{"GravitonPropagator", "[", 
-       RowBox[{
-       "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
-       "]"}]}], ",", "k", ",", 
-     RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+   RowBox[{"FeynGravSimplify", "[", 
+    RowBox[{"fermionTadpoleIntegrand", ",", 
+     RowBox[{"LoopMomenta", "->", 
+      RowBox[{"{", "k", "}"}]}], ",", 
+     RowBox[{"DropScaleless", "->", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100219991323*^9, 4.000100226292326*^9}},
- CellLabel->"In[7]:=",ExpressionUUID->"72dc86ab-5bc1-45dc-9bb2-5fcb848d135f"]
+ CellLabel->"In[11]:=",ExpressionUUID->"72dc86ab-5bc1-45dc-9bb2-5fcb848d135f"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FermionPolarizationOperator1", "[", "p", ",", "m", "]", " ", "==", 
+  " ", "0"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[12]:=",ExpressionUUID->"498ec560-5c8e-4a0b-bfbf-e73bab6f9039"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653199731575*^9},
+ CellLabel->"Out[12]=",ExpressionUUID->"50554e69-c364-41d8-b94e-d17660e0ca2f"]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Bubble", "Subsection",ExpressionUUID->"4100daf2-e76e-4b48-9948-87f84ad93719"],
+Cell["Bubble", "Subsection",
+ Editable->False,ExpressionUUID->"4100daf2-e76e-4b48-9948-87f84ad93719"],
 
 Cell["\<\
-Join two three-point vertices with a graviton and a matter propagator. Dirac \
-products use Dot; do not replace them by ordinary multiplication. \
-GravitonFermionVertex takes graviton triples {index, index, incoming \
-momentum}; include these momenta even when older examples list only the \
-indices.\
-\>", "Text",ExpressionUUID->"0c30d6f1-09a4-4648-9006-97853b969d7b"],
+Join the two fermion\[Dash]graviton vertices with an internal graviton and \
+fermion. Dot preserves the open Dirac-chain order. Each graviton slot \
+contains its two Lorentz indices and incoming momentum.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"0c30d6f1-09a4-4648-9006-97853b969d7b"],
+
+Cell[BoxData[
+ RowBox[{"fermionBubbleIntegrand", "=", 
+  RowBox[{"Explicit", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"GravitonFermionVertex", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\[Mu]", ",", "\[Nu]", ",", 
+         RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", 
+       RowBox[{"-", 
+        RowBox[{"(", 
+         RowBox[{"p", "-", "k"}], ")"}]}], ",", "m"}], "]"}], ".", 
+     RowBox[{"QuarkPropagator", "[", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"p", "-", "k"}], ",", "m"}], "}"}], "]"}], ".", 
+     RowBox[{"GravitonFermionVertex", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\[Alpha]", ",", "\[Beta]", ",", "k"}], "}"}], ",", 
+       RowBox[{"p", "-", "k"}], ",", 
+       RowBox[{"-", "p"}], ",", "m"}], "]"}]}], " ", 
+    RowBox[{"GravitonPropagator", "[", 
+     RowBox[{
+     "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
+     "]"}]}], "]"}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[13]:=",ExpressionUUID->"8729acc4-8b09-4172-a487-c0948956e074"],
 
 Cell[BoxData[
  RowBox[{
@@ -324,47 +731,26 @@ Cell[BoxData[
    RowBox[{"FermionPolarizationOperator2", "[", 
     RowBox[{"p_", ",", "m_"}], "]"}], "=", 
    RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{"Explicit", "[", 
-      RowBox[{
-       RowBox[{
-        RowBox[{"GravitonFermionVertex", "[", 
-         RowBox[{
-          RowBox[{"{", 
-           RowBox[{"\[Mu]", ",", "\[Nu]", ",", 
-            RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", 
-          RowBox[{"-", 
-           RowBox[{"(", 
-            RowBox[{"p", "-", "k"}], ")"}]}], ",", "m"}], "]"}], ".", 
-        RowBox[{"QuarkPropagator", "[", 
-         RowBox[{"{", 
-          RowBox[{
-           RowBox[{"p", "-", "k"}], ",", "m"}], "}"}], "]"}], ".", 
-        RowBox[{"GravitonFermionVertex", "[", 
-         RowBox[{
-          RowBox[{"{", 
-           RowBox[{"\[Alpha]", ",", "\[Beta]", ",", "k"}], "}"}], ",", 
-          RowBox[{"p", "-", "k"}], ",", 
-          RowBox[{"-", "p"}], ",", "m"}], "]"}]}], " ", 
-       RowBox[{"GravitonPropagator", "[", 
-        RowBox[{
-        "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
-        "]"}]}], "]"}], ",", "k", ",", 
+    RowBox[{"fermionBubbleIntegrand", ",", "k", ",", 
      RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100017951889*^9, 4.000100045710164*^9}, {
   4.0001002233223257`*^9, 4.000100274973031*^9}},
- CellLabel->"In[8]:=",ExpressionUUID->"1df3d17e-21ea-4d67-8223-4ef140f2d76b"]
+ CellLabel->"In[14]:=",ExpressionUUID->"1df3d17e-21ea-4d67-8223-4ef140f2d76b"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Combined operator", "Subsection",ExpressionUUID->"48e9a845-0c47-445d-afb0-a3fa703b557d"],
+Cell["Combined operator in symbolic D", "Subsection",
+ Editable->False,ExpressionUUID->"48e9a845-0c47-445d-afb0-a3fa703b557d"],
 
 Cell["\<\
-Add the stored tadpole and bubble terms and collect their scalar master \
-integrals.\
-\>", "Text",ExpressionUUID->"95394321-ab58-4e63-b2d5-8fbb6ea2a694"],
+Add the tadpole and bubble contributions and collect the scalar loop \
+integrals. This named combined operator retains symbolic D; the optional \
+four-dimensional comparison below does not overwrite it.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"95394321-ab58-4e63-b2d5-8fbb6ea2a694"],
 
 Cell[BoxData[
  RowBox[{
@@ -383,23 +769,37 @@ Cell[BoxData[
        RowBox[{"A0", "[", "__", "]"}], ",", 
        RowBox[{"B0", "[", "__", "]"}], ",", 
        RowBox[{"C0", "[", "__", "]"}]}], "}"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100063016651*^9, 4.0001000799837837`*^9}, 
    4.000100132825869*^9, 4.000100210467094*^9, {4.000100286552602*^9, 
    4.000100290717547*^9}, 4.000100327372871*^9},
- CellLabel->"In[9]:=",ExpressionUUID->"1e4a7441-f817-48bd-86a8-8ebefbef1834"]
+ CellLabel->"In[15]:=",ExpressionUUID->"1e4a7441-f817-48bd-86a8-8ebefbef1834"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Display and compare the result", "Subsection",
+Cell["Four-dimensional coefficient comparison", "Subsection",
+ Editable->False,
  CellChangeTimes->{{4.000100355124539*^9, 
   4.000100355390025*^9}},ExpressionUUID->"8033b331-8a9a-4381-ae3c-\
 a887d251b9dc"],
 
-Cell["Apply Explicit before Dirac simplification. The displayed four-dimensional coefficients still contain unevaluated scalar loop integrals; setting D to four does not perform ultraviolet subtraction.", "Text",ExpressionUUID->"8ae17b34-fecd-45d3-b5c1-b170bcf5bb74"],
+Cell["\<\
+Apply Explicit before Dirac simplification. The displayed four-dimensional \
+coefficients still contain unevaluated scalar loop integrals; setting D to \
+four does not perform ultraviolet subtraction.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"8ae17b34-fecd-45d3-b5c1-b170bcf5bb74"],
 
-Cell["Display the coefficients of the identity and slash p, then check that they reconstruct the computed expression. This tests the decomposition, not an independent reference formula.", "Text",ExpressionUUID->"57d75d85-8b5b-4005-8595-b3f6d59f5bad"],
+Cell["\<\
+Display the coefficients of the identity and slash p, then check that they \
+reconstruct the computed expression. This tests the decomposition, not an \
+independent reference formula.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"57d75d85-8b5b-4005-8595-b3f6d59f5bad"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
@@ -417,8 +817,8 @@ Cell[BoxData[
       RowBox[{"D", "\[Rule]", "4"}]}], ",", "_DiracGamma", ",", 
      RowBox[{
       RowBox[{"Simplify", "[", 
-       RowBox[{"CalcFormCalculate", "[", "#1", "]"}], "]"}], "&"}]}], "]"}]}],
-   ";", 
+       RowBox[{"FeynGravSimplify", "[", "#1", "]"}], "]"}], "&"}]}], "]"}]}], 
+  ";", 
   RowBox[{"fermionSlash", "=", 
    RowBox[{"FCI", "[", 
     RowBox[{"GS", "[", "p", "]"}], "]"}]}], ";", 
@@ -441,9 +841,191 @@ Cell[BoxData[
     GridBoxFrame->{"Columns" -> {{True}}, "Rows" -> {{True}}},
     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
    "Grid"]}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100142994049*^9, 4.000100175815559*^9}},
- CellLabel->"In[10]:=",ExpressionUUID->"f01d58b9-9b9e-4f66-ba51-aaddff3643f5"],
+ CellLabel->"In[16]:=",ExpressionUUID->"f01d58b9-9b9e-4f66-ba51-aaddff3643f5"],
+
+Cell[BoxData[
+ FormBox[
+  TagBox[GridBox[{
+     {"\<\"Identity\"\>", 
+      RowBox[{
+       RowBox[{"-", 
+        FractionBox["1", "8"]}], " ", "\[ImaginaryI]", " ", 
+       SuperscriptBox["\[Pi]", "2"], " ", 
+       SuperscriptBox["\[Kappa]", "2"], " ", "m", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"17", " ", 
+          SuperscriptBox["m", "2"], " ", 
+          FormBox[
+           TagBox[
+            FormBox[
+             RowBox[{
+              SubscriptBox["\<\"B\"\>", "\<\"0\"\>"], "(", 
+              RowBox[{
+               SuperscriptBox[
+                FormBox[
+                 OverscriptBox[
+                  FormBox["p",
+                   TraditionalForm], "_"],
+                 TraditionalForm], "2"], ",", "0", ",", 
+               SuperscriptBox["m", "2"]}], ")"}],
+             TraditionalForm],
+            HoldForm],
+           TraditionalForm]}], "+", 
+         RowBox[{"3", " ", 
+          SuperscriptBox[
+           FormBox[
+            OverscriptBox[
+             FormBox["p",
+              TraditionalForm], "_"],
+            TraditionalForm], "2"], " ", 
+          FormBox[
+           TagBox[
+            FormBox[
+             RowBox[{
+              SubscriptBox["\<\"B\"\>", "\<\"0\"\>"], "(", 
+              RowBox[{
+               SuperscriptBox[
+                FormBox[
+                 OverscriptBox[
+                  FormBox["p",
+                   TraditionalForm], "_"],
+                 TraditionalForm], "2"], ",", "0", ",", 
+               SuperscriptBox["m", "2"]}], ")"}],
+             TraditionalForm],
+            HoldForm],
+           TraditionalForm]}], "-", 
+         RowBox[{"3", " ", 
+          FormBox[
+           TagBox[
+            FormBox[
+             RowBox[{
+              SubscriptBox["\<\"A\"\>", "\<\"0\"\>"], "(", 
+              SuperscriptBox["m", "2"], ")"}],
+             TraditionalForm],
+            HoldForm],
+           TraditionalForm]}]}], ")"}]}]},
+     {"\<\"Slash p\"\>", 
+      RowBox[{"-", 
+       FractionBox[
+        RowBox[{"\[ImaginaryI]", " ", 
+         SuperscriptBox["\[Pi]", "2"], " ", 
+         SuperscriptBox["\[Kappa]", "2"], " ", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"17", " ", 
+            SuperscriptBox["m", "2"], " ", 
+            SuperscriptBox[
+             FormBox[
+              OverscriptBox[
+               FormBox["p",
+                TraditionalForm], "_"],
+              TraditionalForm], "2"], " ", 
+            FormBox[
+             TagBox[
+              FormBox[
+               RowBox[{
+                SubscriptBox["\<\"B\"\>", "\<\"0\"\>"], "(", 
+                RowBox[{
+                 SuperscriptBox[
+                  FormBox[
+                   OverscriptBox[
+                    FormBox["p",
+                    TraditionalForm], "_"],
+                   TraditionalForm], "2"], ",", "0", ",", 
+                 SuperscriptBox["m", "2"]}], ")"}],
+               TraditionalForm],
+              HoldForm],
+             TraditionalForm]}], "+", 
+           RowBox[{
+            SuperscriptBox[
+             FormBox[
+              OverscriptBox[
+               FormBox["p",
+                TraditionalForm], "_"],
+              TraditionalForm], "4"], " ", 
+            FormBox[
+             TagBox[
+              FormBox[
+               RowBox[{
+                SubscriptBox["\<\"B\"\>", "\<\"0\"\>"], "(", 
+                RowBox[{
+                 SuperscriptBox[
+                  FormBox[
+                   OverscriptBox[
+                    FormBox["p",
+                    TraditionalForm], "_"],
+                   TraditionalForm], "2"], ",", "0", ",", 
+                 SuperscriptBox["m", "2"]}], ")"}],
+               TraditionalForm],
+              HoldForm],
+             TraditionalForm]}], "+", 
+           RowBox[{"8", " ", 
+            SuperscriptBox["m", "4"], " ", 
+            FormBox[
+             TagBox[
+              FormBox[
+               RowBox[{
+                SubscriptBox["\<\"B\"\>", "\<\"0\"\>"], "(", 
+                RowBox[{
+                 SuperscriptBox[
+                  FormBox[
+                   OverscriptBox[
+                    FormBox["p",
+                    TraditionalForm], "_"],
+                   TraditionalForm], "2"], ",", "0", ",", 
+                 SuperscriptBox["m", "2"]}], ")"}],
+               TraditionalForm],
+              HoldForm],
+             TraditionalForm]}], "-", 
+           RowBox[{
+            SuperscriptBox[
+             FormBox[
+              OverscriptBox[
+               FormBox["p",
+                TraditionalForm], "_"],
+              TraditionalForm], "2"], " ", 
+            FormBox[
+             TagBox[
+              FormBox[
+               RowBox[{
+                SubscriptBox["\<\"A\"\>", "\<\"0\"\>"], "(", 
+                SuperscriptBox["m", "2"], ")"}],
+               TraditionalForm],
+              HoldForm],
+             TraditionalForm]}], "-", 
+           RowBox[{"8", " ", 
+            SuperscriptBox["m", "2"], " ", 
+            FormBox[
+             TagBox[
+              FormBox[
+               RowBox[{
+                SubscriptBox["\<\"A\"\>", "\<\"0\"\>"], "(", 
+                SuperscriptBox["m", "2"], ")"}],
+               TraditionalForm],
+              HoldForm],
+             TraditionalForm]}]}], ")"}]}], 
+        RowBox[{"8", " ", 
+         SuperscriptBox[
+          FormBox[
+           OverscriptBox[
+            FormBox["p",
+             TraditionalForm], "_"],
+           TraditionalForm], "2"]}]]}]}
+    },
+    AutoDelete->False,
+    GridBoxAlignment->{"Columns" -> {{Left}}},
+    GridBoxFrame->{"Columns" -> {{True}}, "Rows" -> {{True}}},
+    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+   "Grid"], TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653202502489*^9},
+ CellLabel->"Out[16]=",ExpressionUUID->"10ab8a88-3b94-4092-bf6d-96057acff14c"]
+}, Open  ]],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{"fermionReconstructionCheck", "=", 
@@ -457,65 +1039,130 @@ Cell[BoxData[
       "]"}], ",", "_DiracGamma", ",", 
      RowBox[{
       RowBox[{"Simplify", "[", 
-       RowBox[{"CalcFormCalculate", "[", "#1", "]"}], "]"}], "&"}]}], "]"}], "\[Equal]",
+       RowBox[{"FeynGravSimplify", "[", "#1", "]"}], "]"}], "&"}]}], "]"}], "\[Equal]",
     "0"}]}]], "Input",
- CellLabel->"In[11]:=",ExpressionUUID->"6d59492d-bbbf-4659-b0fa-0cef2258ca3c"]
+ Editable->False,
+ CellLabel->"In[17]:=",ExpressionUUID->"6d59492d-bbbf-4659-b0fa-0cef2258ca3c"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653202626721*^9},
+ CellLabel->"Out[17]=",ExpressionUUID->"a523a1d7-e569-419f-b931-3a49bd60a051"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["4. Massive vector", "Section",ExpressionUUID->"0b4e23d8-57a6-4fc4-be9e-0b465693581d"],
+Cell["4. Massive vector", "Section",
+ Editable->False,ExpressionUUID->"0b4e23d8-57a6-4fc4-be9e-0b465693581d"],
 
 Cell["\<\
 The external matter legs are amputated. The internal graviton and matter \
 propagators are shown explicitly in each bubble integrand.\
-\>", "Text",ExpressionUUID->"5732ee4f-2771-49cc-b19d-a659a677618f"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"5732ee4f-2771-49cc-b19d-a659a677618f"],
 
 Cell[CellGroupData[{
 
-Cell["Tadpole", "Subsection",ExpressionUUID->"3c73fa5a-ba2d-4644-a9e6-0314903368e3"],
+Cell["Tadpole", "Subsection",
+ Editable->False,ExpressionUUID->"3c73fa5a-ba2d-4644-a9e6-0314903368e3"],
 
 Cell["\<\
-Close the two graviton legs of the contact vertex with one graviton \
-propagator. The massless gravitational tadpole is scaleless in dimensional \
-regularisation.\
-\>", "Text",ExpressionUUID->"b3ba30ca-ad86-4252-b75e-c5e682842d74"],
+Close the two graviton legs of the contact vertex with a massless graviton \
+propagator. The resulting integral is scaleless in dimensional \
+regularisation. Declare LoopMomenta -> {k} explicitly so polynomial terms \
+left by propagator cancellation are still treated as integrands. The \
+following check should return True.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"b3ba30ca-ad86-4252-b75e-c5e682842d74"],
+
+Cell[BoxData[
+ RowBox[{"massiveVectorTadpoleIntegrand", "=", 
+  RowBox[{
+   RowBox[{"GravitonMassiveVectorVertex", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]"}], 
+      "}"}], ",", "\[Mu]", ",", "p", ",", "\[Nu]", ",", 
+     RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
+   RowBox[{"GravitonPropagator", "[", 
+    RowBox[{
+    "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}], 
+    "]"}]}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[18]:=",ExpressionUUID->"ded36c63-ab5f-4325-953b-381212353823"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{
    RowBox[{"ProcaPolarizationOperator1", "[", 
     RowBox[{"\[Mu]_", ",", "\[Nu]_", ",", "p_", ",", "m_"}], "]"}], "=", 
-   RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"GravitonMassiveVectorVertex", "[", 
-       RowBox[{
-        RowBox[{"{", 
-         RowBox[{"\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]"}],
-          "}"}], ",", "\[Mu]", ",", "p", ",", "\[Nu]", ",", 
-        RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
-      RowBox[{"GravitonPropagator", "[", 
-       RowBox[{
-       "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}],
-        "]"}]}], ",", "k", ",", 
-     RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+   RowBox[{"FeynGravSimplify", "[", 
+    RowBox[{"massiveVectorTadpoleIntegrand", ",", 
+     RowBox[{"LoopMomenta", "->", 
+      RowBox[{"{", "k", "}"}]}], ",", 
+     RowBox[{"DropScaleless", "->", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[12]:=",ExpressionUUID->"2755e4f7-11b5-41dd-b446-d545f21e3ee8"]
+ CellLabel->"In[19]:=",ExpressionUUID->"2755e4f7-11b5-41dd-b446-d545f21e3ee8"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"ProcaPolarizationOperator1", "[", "\[Mu]", ",", "\[Nu]", ",", "p", ",",
+   "m", "]", " ", "==", " ", "0"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[20]:=",ExpressionUUID->"780e7ced-c820-4009-93ee-77b4251abacf"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653202775872*^9},
+ CellLabel->"Out[20]=",ExpressionUUID->"574ce284-2ae6-4453-af92-9f94f20ab609"]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Bubble", "Subsection",ExpressionUUID->"f5448d39-5234-416c-8046-d76e7c2a8f67"],
+Cell["Bubble", "Subsection",
+ Editable->False,ExpressionUUID->"f5448d39-5234-416c-8046-d76e7c2a8f67"],
 
 Cell["\<\
-Join two three-point vertices with a graviton and a matter propagator. Dirac \
-products use Dot; do not replace them by ordinary multiplication. \
-GravitonFermionVertex takes graviton triples {index, index, incoming \
-momentum}; include these momenta even when older examples list only the \
-indices.\
-\>", "Text",ExpressionUUID->"ab7c2b7f-31cd-4f39-8b9d-35bbccc576be"],
+Join two massive-vector\[Dash]graviton vertices with a graviton of momentum k \
+and a massive vector of momentum p - k. Retain both external vector indices \
+and the mass m.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"ab7c2b7f-31cd-4f39-8b9d-35bbccc576be"],
+
+Cell[BoxData[
+ RowBox[{"massiveVectorBubbleIntegrand", "=", 
+  RowBox[{
+   RowBox[{"GravitonMassiveVectorVertex", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Alpha]", ",", "\[Beta]"}], "}"}], ",", "\[Mu]", ",", "p", ",",
+      "\[Lambda]", ",", 
+     RowBox[{"-", 
+      RowBox[{"(", 
+       RowBox[{"p", "-", "k"}], ")"}]}], ",", "m"}], "]"}], " ", 
+   RowBox[{"GravitonMassiveVectorVertex", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Rho]", ",", "\[Sigma]"}], "}"}], ",", "\[Tau]", ",", 
+     RowBox[{"p", "-", "k"}], ",", "\[Nu]", ",", 
+     RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
+   RowBox[{"GravitonPropagator", "[", 
+    RowBox[{
+    "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}], 
+    "]"}], " ", 
+   RowBox[{"ProcaPropagator", "[", 
+    RowBox[{"\[Lambda]", ",", "\[Tau]", ",", 
+     RowBox[{"p", "-", "k"}], ",", "m"}], "]"}]}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[21]:=",ExpressionUUID->"88cf0685-4027-4498-81b8-a15a62465dd5"],
 
 Cell[BoxData[
  RowBox[{
@@ -523,42 +1170,24 @@ Cell[BoxData[
    RowBox[{"ProcaPolarizationOperator2", "[", 
     RowBox[{"\[Mu]_", ",", "\[Nu]_", ",", "p_", ",", "m_"}], "]"}], "=", 
    RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"GravitonMassiveVectorVertex", "[", 
-       RowBox[{
-        RowBox[{"{", 
-         RowBox[{"\[Alpha]", ",", "\[Beta]"}], "}"}], ",", "\[Mu]", ",", "p", 
-        ",", "\[Lambda]", ",", 
-        RowBox[{"-", 
-         RowBox[{"(", 
-          RowBox[{"p", "-", "k"}], ")"}]}], ",", "m"}], "]"}], " ", 
-      RowBox[{"GravitonMassiveVectorVertex", "[", 
-       RowBox[{
-        RowBox[{"{", 
-         RowBox[{"\[Rho]", ",", "\[Sigma]"}], "}"}], ",", "\[Tau]", ",", 
-        RowBox[{"p", "-", "k"}], ",", "\[Nu]", ",", 
-        RowBox[{"-", "p"}], ",", "m"}], "]"}], " ", 
-      RowBox[{"GravitonPropagator", "[", 
-       RowBox[{
-       "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}],
-        "]"}], " ", 
-      RowBox[{"ProcaPropagator", "[", 
-       RowBox[{"\[Lambda]", ",", "\[Tau]", ",", 
-        RowBox[{"p", "-", "k"}], ",", "m"}], "]"}]}], ",", "k", ",", 
+    RowBox[{"massiveVectorBubbleIntegrand", ",", "k", ",", 
      RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[13]:=",ExpressionUUID->"5c6b4432-acf4-41cf-b2f5-46f69f770012"]
+ CellLabel->"In[22]:=",ExpressionUUID->"5c6b4432-acf4-41cf-b2f5-46f69f770012"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Combined operator", "Subsection",ExpressionUUID->"616b9f45-571f-4cec-98d1-9a7bc4344e3b"],
+Cell["Combined operator in symbolic D", "Subsection",
+ Editable->False,ExpressionUUID->"616b9f45-571f-4cec-98d1-9a7bc4344e3b"],
 
 Cell["\<\
-Add the stored tadpole and bubble terms and collect their scalar master \
-integrals.\
-\>", "Text",ExpressionUUID->"52cbc03b-8873-45fa-8bd2-0f26f4382b8e"],
+Add the tadpole and bubble contributions and collect the scalar loop \
+integrals. This named combined operator retains symbolic D; the optional \
+four-dimensional comparison below does not overwrite it.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"52cbc03b-8873-45fa-8bd2-0f26f4382b8e"],
 
 Cell[BoxData[
  RowBox[{
@@ -581,20 +1210,25 @@ Cell[BoxData[
       RowBox[{"Collect", "[", 
        RowBox[{"#1", ",", "m", ",", "Factor"}], "]"}], "&"}]}], "]"}]}], 
   ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100417639195*^9, 4.000100423020043*^9}},
- CellLabel->"In[14]:=",ExpressionUUID->"5500f282-9c6d-4f02-8193-5edd18958cfb"]
+ CellLabel->"In[23]:=",ExpressionUUID->"5500f282-9c6d-4f02-8193-5edd18958cfb"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Display or compare the result", "Subsection",ExpressionUUID->"5c7f53e6-3b45-4043-8cbb-187c8c4534ae"],
+Cell["Four-dimensional coefficient comparison", "Subsection",
+ Editable->False,ExpressionUUID->"5c7f53e6-3b45-4043-8cbb-187c8c4534ae"],
 
 Cell["\<\
-The four-dimensional coefficient expression retains unevaluated scalar loop \
-integrals. A True comparison confirms the written reference in this gauge; it \
-does not perform UV renormalisation.\
-\>", "Text",ExpressionUUID->"dffb1432-67c4-4505-8a98-12f4f5fa9210"],
+This optional comparison substitutes D -> 4 only in the displayed coefficient \
+expression, retaining unevaluated scalar loop integrals. It checks the \
+written reference in the selected gauge, not ultraviolet renormalisation.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"dffb1432-67c4-4505-8a98-12f4f5fa9210"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
@@ -668,68 +1302,139 @@ Cell[BoxData[
         RowBox[{"SP", "[", 
          RowBox[{"p", ",", "p"}], "]"}]}]]}], "]"}]}], "/.", 
    "\[VeryThinSpace]", 
-   RowBox[{"D", "\[Rule]", "4"}]}], "//", "CalcFormCalculate"}]], "Input",
+   RowBox[{"D", "\[Rule]", "4"}]}], "//", "FeynGravSimplify"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.0001004283568153`*^9, 4.00010045369446*^9}},
- CellLabel->"In[15]:=",ExpressionUUID->"e6d8dd43-b48b-487b-bf6f-00d6ffac3e83"]
+ CellLabel->"In[24]:=",ExpressionUUID->"e6d8dd43-b48b-487b-bf6f-00d6ffac3e83"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653205313758*^9},
+ CellLabel->"Out[24]=",ExpressionUUID->"428e948a-ba38-4ae1-9fff-26e07177b0c5"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["5. Massless vector", "Section",ExpressionUUID->"10a64f7e-3819-4d68-97c0-1da14ce2e40f"],
+Cell["5. Massless vector", "Section",
+ Editable->False,ExpressionUUID->"10a64f7e-3819-4d68-97c0-1da14ce2e40f"],
 
 Cell["\<\
 The external matter legs are amputated. The internal graviton and matter \
 propagators are shown explicitly in each bubble integrand.\
-\>", "Text",ExpressionUUID->"ca0234f8-ee33-4f9b-9e69-53163dff0fbe"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"ca0234f8-ee33-4f9b-9e69-53163dff0fbe"],
 
 Cell[CellGroupData[{
 
-Cell["Tadpole", "Subsection",ExpressionUUID->"a3d0e403-690c-482b-81a3-3fef821cad2c"],
+Cell["Tadpole", "Subsection",
+ Editable->False,ExpressionUUID->"a3d0e403-690c-482b-81a3-3fef821cad2c"],
 
 Cell["\<\
-Close the two graviton legs of the contact vertex with one graviton \
-propagator. The massless gravitational tadpole is scaleless in dimensional \
-regularisation.\
-\>", "Text",ExpressionUUID->"91787ca9-f724-4ca2-9020-1c3d1ec94030"],
+Close the two graviton legs of the contact vertex with a massless graviton \
+propagator. The resulting integral is scaleless in dimensional \
+regularisation. Declare LoopMomenta -> {k} explicitly so polynomial terms \
+left by propagator cancellation are still treated as integrands. The \
+following check should return True.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"91787ca9-f724-4ca2-9020-1c3d1ec94030"],
+
+Cell[BoxData[
+ RowBox[{"vectorTadpoleIntegrand", "=", 
+  RowBox[{
+   RowBox[{"GravitonVectorVertex", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Rho]", ",", "\[Sigma]", ",", 
+       RowBox[{"-", "k"}], ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], "}"}],
+      ",", "\[Mu]", ",", "p", ",", "\[Nu]", ",", 
+     RowBox[{"-", "p"}]}], "]"}], " ", 
+   RowBox[{"GravitonPropagator", "[", 
+    RowBox[{
+    "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
+    "]"}]}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[25]:=",ExpressionUUID->"c72e144a-8b89-41d8-9fbe-e3f8112f7f92"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{
    RowBox[{"VectorPolarizationOperator1", "[", 
     RowBox[{"\[Mu]_", ",", "\[Nu]_", ",", "p_"}], "]"}], "=", 
-   RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"GravitonVectorVertex", "[", 
-       RowBox[{
-        RowBox[{"{", 
-         RowBox[{"\[Rho]", ",", "\[Sigma]", ",", 
-          RowBox[{"-", "k"}], ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
-         "}"}], ",", "\[Mu]", ",", "p", ",", "\[Nu]", ",", 
-        RowBox[{"-", "p"}]}], "]"}], " ", 
-      RowBox[{"GravitonPropagator", "[", 
-       RowBox[{
-       "\[Rho]", ",", "\[Sigma]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}],
-        "]"}]}], ",", "k", ",", 
-     RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+   RowBox[{"FeynGravSimplify", "[", 
+    RowBox[{"vectorTadpoleIntegrand", ",", 
+     RowBox[{"LoopMomenta", "->", 
+      RowBox[{"{", "k", "}"}]}], ",", 
+     RowBox[{"DropScaleless", "->", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100465081532*^9, 4.0001005050623302`*^9}},
- CellLabel->"In[16]:=",ExpressionUUID->"e71e5702-e25a-4f59-8360-4ec9140ad2f1"]
+ CellLabel->"In[26]:=",ExpressionUUID->"e71e5702-e25a-4f59-8360-4ec9140ad2f1"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"VectorPolarizationOperator1", "[", "\[Mu]", ",", "\[Nu]", ",", "p", 
+  "]", " ", "==", " ", "0"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[27]:=",ExpressionUUID->"ce6b862e-f1dc-472b-b50f-8596a6511a04"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653205497015*^9},
+ CellLabel->"Out[27]=",ExpressionUUID->"3e939fe8-50a8-48de-9ef0-009156734daa"]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Bubble", "Subsection",ExpressionUUID->"9970f609-6278-4ea9-b25b-35f09fc92fbf"],
+Cell["Bubble", "Subsection",
+ Editable->False,ExpressionUUID->"9970f609-6278-4ea9-b25b-35f09fc92fbf"],
 
 Cell["\<\
-Join two three-point vertices with a graviton and a matter propagator. Dirac \
-products use Dot; do not replace them by ordinary multiplication. \
-GravitonFermionVertex takes graviton triples {index, index, incoming \
-momentum}; include these momenta even when older examples list only the \
-indices.\
-\>", "Text",ExpressionUUID->"95d93d12-eeec-4bad-9537-7df1c08b9b43"],
+Join two massless-vector\[Dash]graviton vertices with a graviton of momentum \
+k and a vector of momentum p - k. Explicit expands the internal vector \
+propagator.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"95d93d12-eeec-4bad-9537-7df1c08b9b43"],
+
+Cell[BoxData[
+ RowBox[{"vectorBubbleIntegrand", "=", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"GravitonVectorVertex", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"\[Alpha]", ",", "\[Beta]", ",", 
+        RowBox[{"-", "k"}]}], "}"}], ",", "\[Mu]", ",", "p", ",", "\[Sigma]1",
+       ",", 
+      RowBox[{"-", 
+       RowBox[{"(", 
+        RowBox[{"p", "-", "k"}], ")"}]}]}], "]"}], " ", 
+    RowBox[{"GravitonVectorVertex", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"\[Rho]", ",", "\[Sigma]", ",", "k"}], "}"}], ",", "\[Sigma]2",
+       ",", 
+      RowBox[{"p", "-", "k"}], ",", "\[Nu]", ",", 
+      RowBox[{"-", "p"}]}], "]"}], " ", 
+    RowBox[{"GravitonPropagator", "[", 
+     RowBox[{
+     "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}], 
+     "]"}], " ", 
+    RowBox[{"GluonPropagator", "[", 
+     RowBox[{
+      RowBox[{"p", "-", "k"}], ",", 
+      RowBox[{"{", "\[Sigma]1", "}"}], ",", 
+      RowBox[{"{", "\[Sigma]2", "}"}]}], "]"}]}], "//", "Explicit"}], 
+  ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[28]:=",ExpressionUUID->"382f1558-3922-4d2f-b3e4-a0caa60820fb"],
 
 Cell[BoxData[
  RowBox[{
@@ -737,50 +1442,26 @@ Cell[BoxData[
    RowBox[{"VectorPolarizationOperator2", "[", 
     RowBox[{"\[Mu]_", ",", "\[Nu]_", ",", "p_"}], "]"}], "=", 
    RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{
-       RowBox[{"GravitonVectorVertex", "[", 
-        RowBox[{
-         RowBox[{"{", 
-          RowBox[{"\[Alpha]", ",", "\[Beta]", ",", 
-           RowBox[{"-", "k"}]}], "}"}], ",", "\[Mu]", ",", "p", ",", 
-         "\[Sigma]1", ",", 
-         RowBox[{"-", 
-          RowBox[{"(", 
-           RowBox[{"p", "-", "k"}], ")"}]}]}], "]"}], " ", 
-       RowBox[{"GravitonVectorVertex", "[", 
-        RowBox[{
-         RowBox[{"{", 
-          RowBox[{"\[Rho]", ",", "\[Sigma]", ",", "k"}], "}"}], ",", 
-         "\[Sigma]2", ",", 
-         RowBox[{"p", "-", "k"}], ",", "\[Nu]", ",", 
-         RowBox[{"-", "p"}]}], "]"}], " ", 
-       RowBox[{"GravitonPropagator", "[", 
-        RowBox[{
-        "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", 
-         "k"}], "]"}], " ", 
-       RowBox[{"GluonPropagator", "[", 
-        RowBox[{
-         RowBox[{"p", "-", "k"}], ",", 
-         RowBox[{"{", "\[Sigma]1", "}"}], ",", 
-         RowBox[{"{", "\[Sigma]2", "}"}]}], "]"}]}], "//", "Explicit"}], ",", 
-     "k", ",", 
+    RowBox[{"vectorBubbleIntegrand", ",", "k", ",", 
      RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100471991089*^9, 4.000100476151182*^9}, {
   4.000100509468227*^9, 4.000100532998728*^9}},
- CellLabel->"In[17]:=",ExpressionUUID->"76e47c62-8945-4491-b93b-aa60178daa3f"]
+ CellLabel->"In[29]:=",ExpressionUUID->"76e47c62-8945-4491-b93b-aa60178daa3f"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Combined operator", "Subsection",ExpressionUUID->"1c873bd2-3cf6-4e55-84ae-6b187c8594cf"],
+Cell["Combined operator in symbolic D", "Subsection",
+ Editable->False,ExpressionUUID->"1c873bd2-3cf6-4e55-84ae-6b187c8594cf"],
 
 Cell["\<\
-Add the stored tadpole and bubble terms and collect their scalar master \
-integrals.\
-\>", "Text",ExpressionUUID->"0480a826-f7f7-43d7-a044-20ee2d8603de"],
+Add the tadpole and bubble contributions and collect the scalar loop \
+integrals. This named combined operator retains symbolic D; the optional \
+four-dimensional comparison below does not overwrite it.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"0480a826-f7f7-43d7-a044-20ee2d8603de"],
 
 Cell[BoxData[
  RowBox[{
@@ -809,20 +1490,24 @@ Cell[BoxData[
           RowBox[{"LorentzIndex", "[", 
            RowBox[{"\[Nu]", ",", "D"}], "]"}]}], "]"}], ",", "Factor"}], 
        "]"}], "&"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[18]:=",ExpressionUUID->"d714a39b-7392-4725-856a-9ebb1ce9952e"]
+ CellLabel->"In[30]:=",ExpressionUUID->"d714a39b-7392-4725-856a-9ebb1ce9952e"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Longitudinal contraction with a transverse state", "Subsection",ExpressionUUID->"1410d07d-473c-4852-a03c-988a68dd9d7d"],
+Cell["Longitudinal contraction with a transverse state", "Subsection",
+ Editable->False,ExpressionUUID->"1410d07d-473c-4852-a03c-988a68dd9d7d"],
 
 Cell["\<\
-This tests the combined operator after replacing one external index by p and \
-contracting the other with a transverse polarisation vector. The following \
-cell imposes p\[CenterDot]\[CurlyEpsilon](p)=0 explicitly, then clears the \
-scalar-product definitions.\
-\>", "Text",ExpressionUUID->"8140834a-c95c-46b7-bac5-0ce2fc1535d8"],
+Contract one external index with p and the other with a transverse \
+polarisation vector. This is weaker than testing p\[Mu] \
+\[CapitalPi]\[Mu]\[Nu] = 0: a longitudinal term proportional to p\[Mu] p\[Nu] \
+also passes. The cells impose p\[CenterDot]\[CurlyEpsilon](p) = 0 explicitly \
+and then clear scalar-product definitions.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"8140834a-c95c-46b7-bac5-0ce2fc1535d8"],
 
 Cell[BoxData[
  RowBox[{
@@ -836,12 +1521,15 @@ Cell[BoxData[
        RowBox[{"Polarization", "[", 
         RowBox[{"p", ",", "\[ImaginaryI]"}], "]"}], ",", "D"}], "]"}]}], 
     "]"}], "=", "0"}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[19]:=",ExpressionUUID->"717a7967-6cdc-42f2-aa2c-cf13f3198472"],
+ CellLabel->"In[31]:=",ExpressionUUID->"717a7967-6cdc-42f2-aa2c-cf13f3198472"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"CalcFormCalculate", "[", 
+  RowBox[{"FeynGravSimplify", "[", 
    RowBox[{"Explicit", "[", 
     RowBox[{
      RowBox[{"VectorPolarizationOperator", "[", 
@@ -858,22 +1546,39 @@ Cell[BoxData[
        RowBox[{"LorentzIndex", "[", 
         RowBox[{"\[Nu]", ",", "D"}], "]"}]}], "]"}]}], "]"}], "]"}], "==", 
   "0"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.0001005474437113`*^9, 4.000100547813984*^9}},
- CellLabel->"In[20]:=",ExpressionUUID->"1235171b-2a4e-473c-8255-440cc091f7e2"],
+ CellLabel->"In[32]:=",ExpressionUUID->"1235171b-2a4e-473c-8255-440cc091f7e2"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653207892819*^9},
+ CellLabel->"Out[32]=",ExpressionUUID->"b49ce061-8384-4f1c-abfc-1f5d3e59db42"]
+}, Open  ]],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"FCClearScalarProducts", "[", "]"}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[21]:=",ExpressionUUID->"e1dae363-bcb6-4f90-832d-3f9eca85e7cf"]
+ CellLabel->"In[33]:=",ExpressionUUID->"e1dae363-bcb6-4f90-832d-3f9eca85e7cf"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Display or compare the result", "Subsection",ExpressionUUID->"e4db4035-0f35-482b-ab06-f2bfc52e0a85"],
+Cell["Four-dimensional coefficient comparison", "Subsection",
+ Editable->False,ExpressionUUID->"e4db4035-0f35-482b-ab06-f2bfc52e0a85"],
 
-Cell["Expand the computed operator first and apply the same D -> 4 and GaugeFixingEpsilon -> 2 substitutions to both sides. FORM contracts the tensor difference; Simplify combines its scalar coefficients. True confirms this reference in the stated gauge. The master integrals remain unevaluated.", "Text",ExpressionUUID->"bc805626-2bf1-4ecd-8633-1d1abec3fd3f"],
+Cell["\<\
+Expand the computed operator first and apply the same D -> 4 and \
+GaugeFixingEpsilon -> 2 substitutions to both sides. FORM contracts the \
+tensor difference; Simplify combines its scalar coefficients. True confirms \
+this reference in the stated gauge. The master integrals remain unevaluated.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"bc805626-2bf1-4ecd-8633-1d1abec3fd3f"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
@@ -925,41 +1630,62 @@ Cell[BoxData[
       RowBox[{"GaugeFixingEpsilon", "\[Rule]", "2"}]}], "}"}]}]}], ";", 
   RowBox[{
    RowBox[{"Simplify", "[", 
-    RowBox[{"CalcFormCalculate", "[", 
+    RowBox[{"FeynGravSimplify", "[", 
      RowBox[{"vectorComputed", "-", "vectorReference"}], "]"}], "]"}], "\[Equal]",
     "0"}]}]], "Input",
- CellLabel->"In[22]:=",ExpressionUUID->"fa10814b-2cb6-4edf-a629-535bad1e3f3b"]
+ Editable->False,
+ CellLabel->"In[34]:=",ExpressionUUID->"fa10814b-2cb6-4edf-a629-535bad1e3f3b"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653208025548*^9},
+ CellLabel->"Out[34]=",ExpressionUUID->"950476a3-a207-411b-9111-bb9a181f47f9"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["6. SU(N) Yang\[Dash]Mills", "Section",ExpressionUUID->"27af1125-de1e-4505-bd9b-99f8a2bb66b6"],
+Cell["6. Gluon", "Section",
+ Editable->False,ExpressionUUID->"27af1125-de1e-4505-bd9b-99f8a2bb66b6"],
 
 Cell["\<\
-The external matter legs are amputated. The internal graviton and matter \
-propagators are shown explicitly in each bubble integrand.\
-\>", "Text",ExpressionUUID->"a64c5b9e-57c0-4ece-9e47-d43298948f92"],
+The SU(N) library was loaded in setup. The gluon result retains its external \
+colour tensor.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"9c4e36fc-7ba5-41f0-b2af-4037ef5b9ce6"],
 
 Cell[CellGroupData[{
 
-Cell["Gluon self-energy", "Subsection",ExpressionUUID->"b348fccf-4aa0-4e94-bfc9-e43063f7d44c"],
+Cell["Tadpole", "Subsection",
+ Editable->False,ExpressionUUID->"9051d361-6f65-411b-ba6b-36d64b246dfb"],
 
 Cell["\<\
-The SU(N) library was loaded in setup. SUNDelta retains the external colour \
-structure; the quark example takes the massless limit.\
-\>", "Text",ExpressionUUID->"9c4e36fc-7ba5-41f0-b2af-4037ef5b9ce6"]
-}, Open  ]],
+Close the two graviton legs of the contact vertex with a massless graviton \
+propagator. The resulting integral is scaleless in dimensional \
+regularisation. Declare LoopMomenta -> {k} explicitly so polynomial terms \
+left by propagator cancellation are still treated as integrands. The \
+following check should return True.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"dce78bd8-345f-4f0c-bd78-585828af4b3f"],
 
-Cell[CellGroupData[{
-
-Cell["Tadpole", "Subsection",ExpressionUUID->"9051d361-6f65-411b-ba6b-36d64b246dfb"],
-
-Cell["\<\
-Close the two graviton legs of the contact vertex with one graviton \
-propagator. The massless gravitational tadpole is scaleless in dimensional \
-regularisation.\
-\>", "Text",ExpressionUUID->"dce78bd8-345f-4f0c-bd78-585828af4b3f"],
+Cell[BoxData[
+ RowBox[{"gluonTadpoleIntegrand", "=", 
+  RowBox[{
+   RowBox[{"GravitonGluonVertex", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Alpha]", ",", "\[Beta]", ",", 
+       RowBox[{"-", "k"}], ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}], "}"}], 
+     ",", "p", ",", "\[Mu]", ",", "a", ",", 
+     RowBox[{"-", "p"}], ",", "\[Nu]", ",", "b"}], "]"}], " ", 
+   RowBox[{"GravitonPropagator", "[", 
+    RowBox[{
+    "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}], 
+    "]"}]}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[35]:=",ExpressionUUID->"398b6886-26f0-4a93-bb54-cdfd54a1896f"],
 
 Cell[BoxData[
  RowBox[{
@@ -967,36 +1693,77 @@ Cell[BoxData[
    RowBox[{"GluonPolarizationOperator1", "[", 
     RowBox[{"\[Mu]_", ",", "\[Nu]_", ",", "a_", ",", "b_", ",", "p_"}], "]"}],
     "=", 
-   RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"GravitonGluonVertex", "[", 
-       RowBox[{
-        RowBox[{"{", 
-         RowBox[{"\[Alpha]", ",", "\[Beta]", ",", 
-          RowBox[{"-", "k"}], ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}], 
-         "}"}], ",", "p", ",", "\[Mu]", ",", "a", ",", 
-        RowBox[{"-", "p"}], ",", "\[Nu]", ",", "b"}], "]"}], " ", 
-      RowBox[{"GravitonPropagator", "[", 
-       RowBox[{
-       "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}],
-        "]"}]}], ",", "k", ",", 
-     RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+   RowBox[{"FeynGravSimplify", "[", 
+    RowBox[{"gluonTadpoleIntegrand", ",", 
+     RowBox[{"LoopMomenta", "->", 
+      RowBox[{"{", "k", "}"}]}], ",", 
+     RowBox[{"DropScaleless", "->", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[23]:=",ExpressionUUID->"13a20b3f-ac65-4f04-b948-83804a1b9d30"]
+ CellLabel->"In[36]:=",ExpressionUUID->"13a20b3f-ac65-4f04-b948-83804a1b9d30"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"GluonPolarizationOperator1", "[", "\[Mu]", ",", "\[Nu]", ",", "a", ",",
+   "b", ",", "p", "]", " ", "==", " ", "0"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[37]:=",ExpressionUUID->"fbcb09d0-1ab5-40fe-b293-e6e08ba4ac5f"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.0016532081948757`*^9},
+ CellLabel->"Out[37]=",ExpressionUUID->"e9bc2d69-32f3-4c35-9ae3-881d78130850"]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Bubble", "Subsection",ExpressionUUID->"cd02c6d8-cdc5-4641-8474-0840b424b1e2"],
+Cell["Bubble", "Subsection",
+ Editable->False,ExpressionUUID->"cd02c6d8-cdc5-4641-8474-0840b424b1e2"],
 
 Cell["\<\
-Join two three-point vertices with a graviton and a matter propagator. Dirac \
-products use Dot; do not replace them by ordinary multiplication. \
-GravitonFermionVertex takes graviton triples {index, index, incoming \
-momentum}; include these momenta even when older examples list only the \
+Join two gluon\[Dash]graviton vertices with an internal graviton and gluon. \
+Contract the internal colour index while retaining the external colour \
 indices.\
-\>", "Text",ExpressionUUID->"08def40a-834d-40c3-b85c-16714b8749d0"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"08def40a-834d-40c3-b85c-16714b8749d0"],
+
+Cell[BoxData[
+ RowBox[{"gluonBubbleIntegrand", "=", 
+  RowBox[{"Contract", "[", 
+   RowBox[{"Explicit", "[", 
+    RowBox[{
+     RowBox[{"GravitonGluonVertex", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\[Alpha]", ",", "\[Beta]", ",", 
+         RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", "\[Mu]", ",", "a", ",", 
+       RowBox[{"-", 
+        RowBox[{"(", 
+         RowBox[{"p", "-", "k"}], ")"}]}], ",", "\[Sigma]1", ",", "i"}], 
+      "]"}], " ", 
+     RowBox[{"GluonPropagator", "[", 
+      RowBox[{
+       RowBox[{"p", "-", "k"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Sigma]1", ",", "i"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Sigma]2", ",", "j"}], "}"}]}], "]"}], " ", 
+     RowBox[{"GravitonGluonVertex", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\[Rho]", ",", "\[Sigma]", ",", "k"}], "}"}], ",", 
+       RowBox[{"p", "-", "k"}], ",", "\[Sigma]2", ",", "j", ",", 
+       RowBox[{"-", "p"}], ",", "\[Nu]", ",", "b"}], "]"}], " ", 
+     RowBox[{"GravitonPropagator", "[", 
+      RowBox[{
+      "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", "k"}], 
+      "]"}]}], "]"}], "]"}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[38]:=",ExpressionUUID->"7c9623f4-1bfb-4cbf-9173-762d08d1530b"],
 
 Cell[BoxData[
  RowBox[{
@@ -1005,50 +1772,25 @@ Cell[BoxData[
     RowBox[{"\[Mu]_", ",", "\[Nu]_", ",", "a_", ",", "b_", ",", "p_"}], "]"}],
     "=", 
    RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{"Contract", "[", 
-      RowBox[{"Explicit", "[", 
-       RowBox[{
-        RowBox[{"GravitonGluonVertex", "[", 
-         RowBox[{
-          RowBox[{"{", 
-           RowBox[{"\[Alpha]", ",", "\[Beta]", ",", 
-            RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", "\[Mu]", ",", "a", ",", 
-          RowBox[{"-", 
-           RowBox[{"(", 
-            RowBox[{"p", "-", "k"}], ")"}]}], ",", "\[Sigma]1", ",", "i"}], 
-         "]"}], " ", 
-        RowBox[{"GluonPropagator", "[", 
-         RowBox[{
-          RowBox[{"p", "-", "k"}], ",", 
-          RowBox[{"{", 
-           RowBox[{"\[Sigma]1", ",", "i"}], "}"}], ",", 
-          RowBox[{"{", 
-           RowBox[{"\[Sigma]2", ",", "j"}], "}"}]}], "]"}], " ", 
-        RowBox[{"GravitonGluonVertex", "[", 
-         RowBox[{
-          RowBox[{"{", 
-           RowBox[{"\[Rho]", ",", "\[Sigma]", ",", "k"}], "}"}], ",", 
-          RowBox[{"p", "-", "k"}], ",", "\[Sigma]2", ",", "j", ",", 
-          RowBox[{"-", "p"}], ",", "\[Nu]", ",", "b"}], "]"}], " ", 
-        RowBox[{"GravitonPropagator", "[", 
-         RowBox[{
-         "\[Alpha]", ",", "\[Beta]", ",", "\[Rho]", ",", "\[Sigma]", ",", 
-          "k"}], "]"}]}], "]"}], "]"}], ",", "k", ",", 
+    RowBox[{"gluonBubbleIntegrand", ",", "k", ",", 
      RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100714077194*^9, 4.00010076113995*^9}},
- CellLabel->"In[24]:=",ExpressionUUID->"577f0817-7be8-4f34-9508-8b118bd32590"]
+ CellLabel->"In[39]:=",ExpressionUUID->"577f0817-7be8-4f34-9508-8b118bd32590"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Combined operator", "Subsection",ExpressionUUID->"8641f1ba-afc2-4022-9421-08477bda92eb"],
+Cell["Combined operator in symbolic D", "Subsection",
+ Editable->False,ExpressionUUID->"8641f1ba-afc2-4022-9421-08477bda92eb"],
 
 Cell["\<\
-Add the stored tadpole and bubble terms and collect their scalar master \
-integrals.\
-\>", "Text",ExpressionUUID->"64ec73b8-6439-485f-ab27-380c34a78b05"],
+Add the tadpole and bubble contributions and collect the scalar loop \
+integrals. This named combined operator retains symbolic D; the optional \
+four-dimensional comparison below does not overwrite it.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"64ec73b8-6439-485f-ab27-380c34a78b05"],
 
 Cell[BoxData[
  RowBox[{
@@ -1081,21 +1823,25 @@ Cell[BoxData[
           RowBox[{"LorentzIndex", "[", 
            RowBox[{"\[Nu]", ",", "D"}], "]"}]}], "]"}], ",", "Factor"}], 
        "]"}], "&"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100769141408*^9, 4.000100772799293*^9}},
- CellLabel->"In[25]:=",ExpressionUUID->"76ad14fc-9d17-401d-bfab-864c4da1a649"]
+ CellLabel->"In[40]:=",ExpressionUUID->"76ad14fc-9d17-401d-bfab-864c4da1a649"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Longitudinal contraction with a transverse state", "Subsection",ExpressionUUID->"c9452bda-a2f4-45cc-b4e5-c4fde9cad5b9"],
+Cell["Longitudinal contraction with a transverse state", "Subsection",
+ Editable->False,ExpressionUUID->"c9452bda-a2f4-45cc-b4e5-c4fde9cad5b9"],
 
 Cell["\<\
-This tests the combined operator after replacing one external index by p and \
-contracting the other with a transverse polarisation vector. The following \
-cell imposes p\[CenterDot]\[CurlyEpsilon](p)=0 explicitly, then clears the \
-scalar-product definitions.\
-\>", "Text",ExpressionUUID->"36bca8ed-ce75-45fe-a643-4d84f5aa033a"],
+Contract one external index with p and the other with a transverse \
+polarisation vector. This is weaker than testing p\[Mu] \
+\[CapitalPi]\[Mu]\[Nu] = 0: a longitudinal term proportional to p\[Mu] p\[Nu] \
+also passes. The cells impose p\[CenterDot]\[CurlyEpsilon](p) = 0 explicitly \
+and then clear scalar-product definitions.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"36bca8ed-ce75-45fe-a643-4d84f5aa033a"],
 
 Cell[BoxData[
  RowBox[{
@@ -1109,8 +1855,11 @@ Cell[BoxData[
        RowBox[{"Polarization", "[", 
         RowBox[{"p", ",", "\[ImaginaryI]"}], "]"}], ",", "D"}], "]"}]}], 
     "]"}], "=", "0"}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[26]:=",ExpressionUUID->"4614b99b-2cf3-458e-be9f-37095b990b2e"],
+ CellLabel->"In[41]:=",ExpressionUUID->"4614b99b-2cf3-458e-be9f-37095b990b2e"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
@@ -1129,26 +1878,36 @@ Cell[BoxData[
       RowBox[{"LorentzIndex", "[", 
        RowBox[{"\[Nu]", ",", "D"}], "]"}]}], "]"}]}], "]"}], "==", 
   "0"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100787889319*^9, 4.000100851804347*^9}},
- CellLabel->"In[27]:=",ExpressionUUID->"7d4e3052-9e3b-4217-a7f7-bb7451e2336d"],
+ CellLabel->"In[42]:=",ExpressionUUID->"7d4e3052-9e3b-4217-a7f7-bb7451e2336d"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653210811146*^9},
+ CellLabel->"Out[42]=",ExpressionUUID->"1edd4eff-da70-4eb5-9b73-01956905ec56"]
+}, Open  ]],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"FCClearScalarProducts", "[", "]"}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[28]:=",ExpressionUUID->"9b33a60d-40eb-4c9a-98d9-f074e4b6caaf"]
+ CellLabel->"In[43]:=",ExpressionUUID->"9b33a60d-40eb-4c9a-98d9-f074e4b6caaf"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Display or compare the result", "Subsection",ExpressionUUID->"f1164294-0a51-49c3-a45c-2a800fc2b553"],
+Cell["Four-dimensional coefficient comparison", "Subsection",
+ Editable->False,ExpressionUUID->"f1164294-0a51-49c3-a45c-2a800fc2b553"],
 
 Cell["\<\
-The four-dimensional coefficient expression retains unevaluated scalar loop \
-integrals. A True comparison confirms the written reference in this gauge; it \
-does not perform UV renormalisation.\
-\>", "Text",ExpressionUUID->"4a556eff-7f98-42f6-a1f9-387790a0d8fb"],
+This optional comparison substitutes D -> 4 only in the displayed coefficient \
+expression, retaining unevaluated scalar loop integrals. It checks the \
+written reference in the selected gauge, not ultraviolet renormalisation.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"4a556eff-7f98-42f6-a1f9-387790a0d8fb"],
 
 Cell[BoxData[
  RowBox[{
@@ -1160,9 +1919,12 @@ Cell[BoxData[
       "\[VeryThinSpace]", 
      RowBox[{"D", "\[Rule]", "4"}]}], "//", "FeynAmpDenominatorExplicit"}]}], 
   ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100895192646*^9, 4.0001009067272587`*^9}},
- CellLabel->"In[29]:=",ExpressionUUID->"7b62460d-c15d-457f-a913-7a127db18d7f"],
+ CellLabel->"In[44]:=",ExpressionUUID->"7b62460d-c15d-457f-a913-7a127db18d7f"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
@@ -1200,111 +1962,160 @@ Cell[BoxData[
            RowBox[{"p", ",", "p"}], "]"}]]}], ")"}]}], "]"}], "/.", 
      "\[VeryThinSpace]", 
      RowBox[{"D", "\[Rule]", "4"}]}], ")"}]}], "//", "Simplify"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100868313142*^9, 4.000100912909103*^9}},
- CellLabel->"In[30]:=",ExpressionUUID->"e859e6a3-ff14-430a-b705-ee6de35704b4"]
+ CellLabel->"In[45]:=",ExpressionUUID->"e859e6a3-ff14-430a-b705-ee6de35704b4"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653210841857*^9},
+ CellLabel->"Out[45]=",ExpressionUUID->"56913218-5deb-4733-b3d5-4bbc2f77fe68"]
+}, Open  ]]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Quark self-energy", "Subsection",ExpressionUUID->"74e49210-86bb-46ba-aa0b-5a9bc7ce76af"],
+Cell["7. Quark", "Section",
+ Editable->False,ExpressionUUID->"74e49210-86bb-46ba-aa0b-5a9bc7ce76af"],
 
 Cell["\<\
-The SU(N) library was loaded in setup. SUNDelta retains the external colour \
-structure; the quark example takes the massless limit.\
-\>", "Text",ExpressionUUID->"54666aa6-4798-440a-9204-e4b0e1991085"]
-}, Open  ]],
+This is the massless quark result. Gravity is diagonal in colour; the \
+external fundamental colour identity is suppressed. The momentum and Dirac \
+dependence follows the fermion sector with m = 0.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"54666aa6-4798-440a-9204-e4b0e1991085"],
 
 Cell[CellGroupData[{
 
-Cell["Tadpole", "Subsection",ExpressionUUID->"d7e1cd7d-ac14-4717-9d46-6617cf8d8a76"],
+Cell["Tadpole", "Subsection",
+ Editable->False,ExpressionUUID->"d7e1cd7d-ac14-4717-9d46-6617cf8d8a76"],
 
 Cell["\<\
-Close the two graviton legs of the contact vertex with one graviton \
-propagator. The massless gravitational tadpole is scaleless in dimensional \
-regularisation.\
-\>", "Text",ExpressionUUID->"17ad1ad6-a276-4dfd-b490-9df5722df4dd"],
+Close the two graviton legs of the contact vertex with a massless graviton \
+propagator. The resulting integral is scaleless in dimensional \
+regularisation. Declare LoopMomenta -> {k} explicitly so polynomial terms \
+left by propagator cancellation are still treated as integrands. The \
+following check should return True.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"17ad1ad6-a276-4dfd-b490-9df5722df4dd"],
+
+Cell[BoxData[
+ RowBox[{"quarkTadpoleIntegrand", "=", 
+  RowBox[{"Explicit", "[", 
+   RowBox[{
+    RowBox[{"GravitonFermionVertex", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+       "\[Mu]", ",", "\[Nu]", ",", "k", ",", "\[Alpha]", ",", "\[Beta]", ",", 
+        
+        RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", 
+      RowBox[{"-", "p"}], ",", "0"}], "]"}], " ", 
+    RowBox[{"GravitonPropagator", "[", 
+     RowBox[{
+     "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
+     "]"}]}], "]"}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[46]:=",ExpressionUUID->"82ecd14b-e10b-4281-9691-3897bd3f89dd"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{
    RowBox[{"QuarkPolarizationOperator1", "[", "p_", "]"}], "=", 
-   RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{"Explicit", "[", 
-      RowBox[{
-       RowBox[{"GravitonFermionVertex", "[", 
-        RowBox[{
-         RowBox[{"{", 
-          RowBox[{
-          "\[Mu]", ",", "\[Nu]", ",", "k", ",", "\[Alpha]", ",", "\[Beta]", ",", 
-           RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", 
-         RowBox[{"-", "p"}], ",", "0"}], "]"}], " ", 
-       RowBox[{"GravitonPropagator", "[", 
-        RowBox[{
-        "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
-        "]"}]}], "]"}], ",", "k", ",", 
-     RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+   RowBox[{"FeynGravSimplify", "[", 
+    RowBox[{"quarkTadpoleIntegrand", ",", 
+     RowBox[{"LoopMomenta", "->", 
+      RowBox[{"{", "k", "}"}]}], ",", 
+     RowBox[{"DropScaleless", "->", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.000100933935049*^9, 4.000100942542705*^9}},
- CellLabel->"In[31]:=",ExpressionUUID->"733b4448-366d-49dc-8911-a1ff2a9cb2c9"]
+ CellLabel->"In[47]:=",ExpressionUUID->"733b4448-366d-49dc-8911-a1ff2a9cb2c9"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"QuarkPolarizationOperator1", "[", "p", "]", " ", "==", " ", 
+  "0"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[48]:=",ExpressionUUID->"10340cdb-7fe4-4000-a2fd-4ea1a56b7d7d"],
+
+Cell[BoxData[
+ FormBox["True", TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653211014042*^9},
+ CellLabel->"Out[48]=",ExpressionUUID->"f26cdae5-623e-498d-8feb-1ac0a8ff3c41"]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Bubble", "Subsection",ExpressionUUID->"997759e6-7d1c-4613-beab-762ea24544b1"],
+Cell["Bubble", "Subsection",
+ Editable->False,ExpressionUUID->"997759e6-7d1c-4613-beab-762ea24544b1"],
 
 Cell["\<\
-Join two three-point vertices with a graviton and a matter propagator. Dirac \
-products use Dot; do not replace them by ordinary multiplication. \
-GravitonFermionVertex takes graviton triples {index, index, incoming \
-momentum}; include these momenta even when older examples list only the \
-indices.\
-\>", "Text",ExpressionUUID->"99ed15ab-3d83-498a-b8f2-f43809b06f06"],
+Use the massless fermion\[Dash]graviton vertices and propagator. Dot \
+preserves the open Dirac-chain order; the external colour identity is \
+suppressed in this expression.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"99ed15ab-3d83-498a-b8f2-f43809b06f06"],
+
+Cell[BoxData[
+ RowBox[{"quarkBubbleIntegrand", "=", 
+  RowBox[{"Explicit", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"GravitonFermionVertex", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\[Mu]", ",", "\[Nu]", ",", 
+         RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", 
+       RowBox[{"-", 
+        RowBox[{"(", 
+         RowBox[{"p", "-", "k"}], ")"}]}], ",", "0"}], "]"}], ".", 
+     RowBox[{"QuarkPropagator", "[", 
+      RowBox[{"p", "-", "k"}], "]"}], ".", 
+     RowBox[{"GravitonFermionVertex", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\[Alpha]", ",", "\[Beta]", ",", "k"}], "}"}], ",", 
+       RowBox[{"p", "-", "k"}], ",", 
+       RowBox[{"-", "p"}], ",", "0"}], "]"}]}], " ", 
+    RowBox[{"GravitonPropagator", "[", 
+     RowBox[{
+     "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
+     "]"}]}], "]"}], ";"}]], "Input",
+ Editable->False,
+ InitializationCell->False,
+ CellLabel->"In[49]:=",ExpressionUUID->"b151aee9-6b1b-48f1-8325-ab225d1f3bca"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{
    RowBox[{"QuarkPolarizationOperator2", "[", "p_", "]"}], "=", 
    RowBox[{"TID", "[", 
-    RowBox[{
-     RowBox[{"Explicit", "[", 
-      RowBox[{
-       RowBox[{
-        RowBox[{"GravitonFermionVertex", "[", 
-         RowBox[{
-          RowBox[{"{", 
-           RowBox[{"\[Mu]", ",", "\[Nu]", ",", 
-            RowBox[{"-", "k"}]}], "}"}], ",", "p", ",", 
-          RowBox[{"-", 
-           RowBox[{"(", 
-            RowBox[{"p", "-", "k"}], ")"}]}], ",", "0"}], "]"}], ".", 
-        RowBox[{"QuarkPropagator", "[", 
-         RowBox[{"p", "-", "k"}], "]"}], ".", 
-        RowBox[{"GravitonFermionVertex", "[", 
-         RowBox[{
-          RowBox[{"{", 
-           RowBox[{"\[Alpha]", ",", "\[Beta]", ",", "k"}], "}"}], ",", 
-          RowBox[{"p", "-", "k"}], ",", 
-          RowBox[{"-", "p"}], ",", "0"}], "]"}]}], " ", 
-       RowBox[{"GravitonPropagator", "[", 
-        RowBox[{
-        "\[Mu]", ",", "\[Nu]", ",", "\[Alpha]", ",", "\[Beta]", ",", "k"}], 
-        "]"}]}], "]"}], ",", "k", ",", 
+    RowBox[{"quarkBubbleIntegrand", ",", "k", ",", 
      RowBox[{"ToPaVe", "\[Rule]", "True"}]}], "]"}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{{4.0001009527367363`*^9, 4.000100966308982*^9}},
- CellLabel->"In[32]:=",ExpressionUUID->"b1d67470-8abf-4f99-b0c6-645cac5cb94e"]
+ CellLabel->"In[50]:=",ExpressionUUID->"b1d67470-8abf-4f99-b0c6-645cac5cb94e"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Combined operator", "Subsection",ExpressionUUID->"8f81bb88-aea7-45ce-9444-eec1866b8c1d"],
+Cell["Combined operator in symbolic D", "Subsection",
+ Editable->False,ExpressionUUID->"8f81bb88-aea7-45ce-9444-eec1866b8c1d"],
 
 Cell["\<\
-Add the stored tadpole and bubble terms and collect their scalar master \
-integrals.\
-\>", "Text",ExpressionUUID->"f8072cd6-aedd-4faf-aa04-3596ba491940"],
+Add the tadpole and bubble contributions and collect the scalar loop \
+integrals. This named combined operator retains symbolic D; the optional \
+four-dimensional comparison below does not overwrite it.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"f8072cd6-aedd-4faf-aa04-3596ba491940"],
 
 Cell[BoxData[
  RowBox[{
@@ -1321,36 +2132,85 @@ Cell[BoxData[
        RowBox[{"B0", "[", "__", "]"}], ",", 
        RowBox[{"C0", "[", "__", "]"}]}], "}"}], ",", "Factor"}], "]"}]}], 
   ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[33]:=",ExpressionUUID->"14d7642a-bacb-4b1c-b800-cb8dbc0cc2cd"]
+ CellLabel->"In[51]:=",ExpressionUUID->"14d7642a-bacb-4b1c-b800-cb8dbc0cc2cd"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Display or compare the result", "Subsection",ExpressionUUID->"3d5bd24a-764c-47f7-aa3e-6f7528fd9234"],
+Cell["Four-dimensional coefficient display", "Subsection",
+ Editable->False,ExpressionUUID->"3d5bd24a-764c-47f7-aa3e-6f7528fd9234"],
 
 Cell["\<\
-The four-dimensional coefficient expression retains unevaluated scalar loop \
-integrals. A True comparison confirms the written reference in this gauge; it \
-does not perform UV renormalisation.\
-\>", "Text",ExpressionUUID->"de22132e-2f3b-4181-9a7f-6f83ac69dab8"],
+Display the massless quark expression after substituting D -> 4. This is a \
+coefficient presentation, not a comparison with an independent reference or a \
+renormalised finite result.\
+\>", "Text",
+ Editable->False,ExpressionUUID->"de22132e-2f3b-4181-9a7f-6f83ac69dab8"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"QuarkPolarizationOperator", "[", "p", "]"}], "/.", 
-  "\[VeryThinSpace]", 
-  RowBox[{"{", 
-   RowBox[{
-    RowBox[{"D", "\[Rule]", "4"}], ",", 
-    RowBox[{"GaugeFixingEpsilon", "\[Rule]", "2"}]}], "}"}]}]], "Input",
+  RowBox[{
+   RowBox[{"QuarkPolarizationOperator", "[", "p", "]"}], "/.", 
+   "\[VeryThinSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"D", "\[Rule]", "4"}], ",", 
+     RowBox[{"GaugeFixingEpsilon", "\[Rule]", "2"}]}], "}"}]}], "//", 
+  "DiracSimplify"}]], "Input",
+ Editable->False,
  InitializationCell->False,
- CellLabel->"In[34]:=",ExpressionUUID->"54a562aa-1d43-4870-af2f-ef2e674c9ddf"]
+ CellChangeTimes->{{4.00157571504327*^9, 4.00157571977017*^9}},
+ CellLabel->"In[52]:=",ExpressionUUID->"54a562aa-1d43-4870-af2f-ef2e674c9ddf"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"-", 
+    FractionBox["1", "8"]}], " ", "\[ImaginaryI]", " ", 
+   SuperscriptBox["\[Pi]", "2"], " ", 
+   SuperscriptBox["\[Kappa]", "2"], " ", 
+   SuperscriptBox[
+    FormBox[
+     OverscriptBox[
+      FormBox["p",
+       TraditionalForm], "_"],
+     TraditionalForm], "2"], " ", 
+   RowBox[{
+    OverscriptBox["\[Gamma]", "_"], "\[CenterDot]", 
+    FormBox[
+     OverscriptBox[
+      FormBox["p",
+       TraditionalForm], "_"],
+     TraditionalForm]}], " ", 
+   FormBox[
+    TagBox[
+     FormBox[
+      RowBox[{
+       SubscriptBox["\<\"B\"\>", "\<\"0\"\>"], "(", 
+       RowBox[{
+        SuperscriptBox[
+         FormBox[
+          OverscriptBox[
+           FormBox["p",
+            TraditionalForm], "_"],
+          TraditionalForm], "2"], ",", "0", ",", "0"}], ")"}],
+      TraditionalForm],
+     HoldForm],
+    TraditionalForm]}], TraditionalForm]], "Output",
+ CellChangeTimes->{4.001653212808168*^9},
+ CellLabel->"Out[52]=",ExpressionUUID->"e49e0c98-022e-478f-9730-574d994a222c"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["How to adapt this example", "Section",ExpressionUUID->"75d49a56-6acc-46d2-a783-3e92d9a00b99"],
+Cell["How to adapt this example", "Section",
+ Editable->False,ExpressionUUID->"75d49a56-6acc-46d2-a783-3e92d9a00b99"],
 
 Cell["\<\
 Change one ingredient at a time: a mass, a momentum assignment, or a vertex \
@@ -1359,7 +2219,8 @@ scalar-product definitions and assumptions persist in the session. \
 Re-evaluate all dependent cells after a change. Inspect the stored \
 intermediate expressions if a comparison is False or remains unevaluated; do \
 not treat an unresolved expression as a passed check.\
-\>", "Text",ExpressionUUID->"12c98604-4b63-4324-b090-d6c04ca4ca6e"]
+\>", "Text",
+ Editable->False,ExpressionUUID->"12c98604-4b63-4324-b090-d6c04ca4ca6e"]
 }, Open  ]]
 }, Open  ]]
 },
@@ -1383,223 +2244,316 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[637, 23, 119, 0, 96, "Title",ExpressionUUID->"b1870694-48db-4d3b-a510-3651c3d5bcda"],
-Cell[759, 25, 299, 4, 55, "Text",ExpressionUUID->"1a8a7cfe-8200-4a31-b209-fb4fb5d419c3"],
+Cell[637, 23, 137, 1, 96, "Title",ExpressionUUID->"b1870694-48db-4d3b-a510-3651c3d5bcda"],
+Cell[777, 26, 317, 5, 55, "Text",ExpressionUUID->"1a8a7cfe-8200-4a31-b209-fb4fb5d419c3"],
 Cell[CellGroupData[{
-Cell[1083, 33, 95, 0, 65, "Section",ExpressionUUID->"faffbe22-3228-4446-8054-da7dcb431001"],
-Cell[1181, 35, 470, 7, 55, "Text",ExpressionUUID->"1273878a-8bc7-432d-9193-63868c6c4479"],
-Cell[1654, 44, 227, 5, 29, "Input",ExpressionUUID->"8168dc49-3c37-47ba-90a2-b4cd58a1a16a",
+Cell[1119, 35, 113, 1, 65, "Section",ExpressionUUID->"faffbe22-3228-4446-8054-da7dcb431001"],
+Cell[1235, 38, 488, 8, 55, "Text",ExpressionUUID->"1273878a-8bc7-432d-9193-63868c6c4479"],
+Cell[1726, 48, 333, 5, 55, "Text",ExpressionUUID->"9b796ff5-92fd-462c-a4df-ddcadaed6275"],
+Cell[CellGroupData[{
+Cell[2084, 57, 245, 6, 29, "Input",ExpressionUUID->"8168dc49-3c37-47ba-90a2-b4cd58a1a16a",
  InitializationCell->False],
-Cell[1884, 51, 422, 7, 55, "Text",ExpressionUUID->"9ce37baa-d571-4f6d-9856-074d3da8aa14"],
-Cell[2309, 60, 521, 7, 77, "Text",ExpressionUUID->"7b453c41-dc11-4817-91ff-503866d6a4f9"],
-Cell[2833, 69, 620, 8, 77, "Text",ExpressionUUID->"0507f9a5-9183-4ead-baed-4ec8c2e29dfa"],
-Cell[3456, 79, 359, 5, 55, "Text",ExpressionUUID->"fe8fc526-322d-44ff-9051-b91f1746cf40"],
-Cell[3818, 86, 188, 4, 29, "Input",ExpressionUUID->"1d09ce57-263f-4350-acc3-ff437df9d50d",
+Cell[CellGroupData[{
+Cell[2354, 67, 3625, 96, 26, "Print",ExpressionUUID->"6bfd0221-bd4d-4d38-8b64-d466fb575925"],
+Cell[5982, 165, 334, 7, 26, "Print",ExpressionUUID->"6ec1fec4-8c5c-40d5-bdca-1604d5650d3e"],
+Cell[6319, 174, 378, 9, 26, "Print",ExpressionUUID->"7d640c85-c666-4950-85c2-32df46c6889e"],
+Cell[6700, 185, 259, 7, 26, "Print",ExpressionUUID->"771979e9-fe94-4135-9f5d-29484dd0969c"],
+Cell[6962, 194, 331, 7, 26, "Print",ExpressionUUID->"43e01de1-cef8-44ba-ab25-dfda4659c438"],
+Cell[7296, 203, 435, 9, 26, "Print",ExpressionUUID->"91bcf071-ae1d-4315-be8d-7ff6eced4247"],
+Cell[7734, 214, 270, 7, 26, "Print",ExpressionUUID->"f0329214-68bd-41d1-97c5-53cce6476f7c"],
+Cell[8007, 223, 256, 6, 26, "Print",ExpressionUUID->"305cf50a-9c54-4f80-b0f9-5e3fbc496593"],
+Cell[8266, 231, 293, 7, 26, "Print",ExpressionUUID->"cd45ee9a-544e-4d24-819f-c450532e333e"],
+Cell[8562, 240, 285, 7, 26, "Print",ExpressionUUID->"476eaded-0005-417d-9b08-52f272ad3199"],
+Cell[8850, 249, 267, 6, 26, "Print",ExpressionUUID->"5fe3ac9b-6ff0-4dbf-bcd0-8ae4915944e3"],
+Cell[9120, 257, 480, 9, 26, "Print",ExpressionUUID->"a47e8a83-4293-4c5b-85e1-f60fa2f642cc"],
+Cell[9603, 268, 2398, 69, 26, "Print",ExpressionUUID->"9721bb1a-3d48-457c-8626-d07deb92fed6"]
+}, Open  ]]
+}, Open  ]],
+Cell[12028, 341, 498, 9, 55, "Text",ExpressionUUID->"9ce37baa-d571-4f6d-9856-074d3da8aa14"],
+Cell[12529, 352, 375, 6, 55, "Text",ExpressionUUID->"7b453c41-dc11-4817-91ff-503866d6a4f9"],
+Cell[12907, 360, 549, 8, 55, "Text",ExpressionUUID->"0507f9a5-9183-4ead-baed-4ec8c2e29dfa"],
+Cell[13459, 370, 377, 6, 55, "Text",ExpressionUUID->"fe8fc526-322d-44ff-9051-b91f1746cf40"],
+Cell[13839, 378, 214, 5, 29, "Input",ExpressionUUID->"1d09ce57-263f-4350-acc3-ff437df9d50d",
  InitializationCell->False]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4043, 95, 83, 0, 65, "Section",ExpressionUUID->"8e77db67-e2e7-4c7b-961c-bb57ad3b0946"],
-Cell[4129, 97, 212, 3, 33, "Text",ExpressionUUID->"d89b8a2f-3809-4789-b62d-ab15220c483c"],
+Cell[14090, 388, 101, 1, 65, "Section",ExpressionUUID->"8e77db67-e2e7-4c7b-961c-bb57ad3b0946"],
+Cell[14194, 391, 230, 4, 33, "Text",ExpressionUUID->"d89b8a2f-3809-4789-b62d-ab15220c483c"],
 Cell[CellGroupData[{
-Cell[4366, 104, 84, 0, 53, "Subsection",ExpressionUUID->"201aaf28-ffa8-4f8c-bd19-79fd346a3c50"],
-Cell[4453, 106, 241, 4, 33, "Text",ExpressionUUID->"bb3bfda8-2055-4226-a429-0237949bf1e9"],
-Cell[4697, 112, 764, 20, 29, "Input",ExpressionUUID->"d862d513-aebc-4cdb-894b-9701d7ea6ddb",
- InitializationCell->False]
-}, Open  ]],
+Cell[14449, 399, 102, 1, 53, "Subsection",ExpressionUUID->"201aaf28-ffa8-4f8c-bd19-79fd346a3c50"],
+Cell[14554, 402, 421, 7, 55, "Text",ExpressionUUID->"bb3bfda8-2055-4226-a429-0237949bf1e9"],
+Cell[14978, 411, 568, 15, 29, "Input",ExpressionUUID->"45cc4789-e2df-40bc-a5d1-822e450ae9cf",
+ InitializationCell->False],
+Cell[15549, 428, 479, 12, 29, "Input",ExpressionUUID->"d862d513-aebc-4cdb-894b-9701d7ea6ddb",
+ InitializationCell->False],
 Cell[CellGroupData[{
-Cell[5498, 137, 83, 0, 53, "Subsection",ExpressionUUID->"675477cf-f6c3-45b9-b65e-0d3d2d4177d5"],
-Cell[5584, 139, 379, 6, 55, "Text",ExpressionUUID->"5039a59a-f6e0-41b7-bf44-876a6ab287e3"],
-Cell[5966, 147, 1130, 30, 49, "Input",ExpressionUUID->"d65f7751-1f90-4c53-a16d-50ab0bcf538a",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[7133, 182, 94, 0, 53, "Subsection",ExpressionUUID->"cdcecd5c-d342-4c6c-942a-93389dffc137"],
-Cell[7230, 184, 163, 3, 33, "Text",ExpressionUUID->"4397736f-9e51-46be-999b-14703c19782b"],
-Cell[7396, 189, 796, 22, 29, "Input",ExpressionUUID->"b098053b-6424-446e-8eb5-670eaf771c36",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[8229, 216, 106, 0, 53, "Subsection",ExpressionUUID->"98e1c7b1-c55b-4e71-94bc-3e7dc67ad5a7"],
-Cell[8338, 218, 273, 4, 33, "Text",ExpressionUUID->"72d01624-d273-46b2-9671-bcdcc6e03021"],
-Cell[8614, 224, 1344, 36, 47, "Input",ExpressionUUID->"b265f251-917d-4cf8-949e-4aa2c82eb597",
- InitializationCell->False]
+Cell[16053, 444, 330, 7, 29, "Input",ExpressionUUID->"9e6402a2-415c-4a30-98f9-7392e0a9fbef",
+ InitializationCell->False],
+Cell[16386, 453, 179, 3, 32, "Output",ExpressionUUID->"6910900a-8570-4954-bd8e-8b82dd0d9659"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[10007, 266, 90, 0, 65, "Section",ExpressionUUID->"3876be3c-37e7-41c5-94e7-05091a0a2674"],
-Cell[10100, 268, 212, 3, 33, "Text",ExpressionUUID->"12980e0b-66d1-430b-8e25-b7fe85c8742f"],
-Cell[CellGroupData[{
-Cell[10337, 275, 84, 0, 53, "Subsection",ExpressionUUID->"eba0e395-0f0b-484c-8101-6316609f0b0b"],
-Cell[10424, 277, 241, 4, 33, "Text",ExpressionUUID->"7d8bc0a6-57d5-4de9-92a4-7f333a390c0d"],
-Cell[10668, 283, 878, 22, 29, "Input",ExpressionUUID->"72dc86ab-5bc1-45dc-9bb2-5fcb848d135f",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[11583, 310, 83, 0, 53, "Subsection",ExpressionUUID->"4100daf2-e76e-4b48-9948-87f84ad93719"],
-Cell[11669, 312, 379, 6, 55, "Text",ExpressionUUID->"0c30d6f1-09a4-4648-9006-97853b969d7b"],
-Cell[12051, 320, 1422, 36, 69, "Input",ExpressionUUID->"1df3d17e-21ea-4d67-8223-4ef140f2d76b",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[13510, 361, 94, 0, 53, "Subsection",ExpressionUUID->"48e9a845-0c47-445d-afb0-a3fa703b557d"],
-Cell[13607, 363, 163, 3, 33, "Text",ExpressionUUID->"95394321-ab58-4e63-b2d5-8fbb6ea2a694"],
-Cell[13773, 368, 871, 21, 29, "Input",ExpressionUUID->"1e4a7441-f817-48bd-86a8-8ebefbef1834",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[14681, 394, 178, 3, 53, "Subsection",ExpressionUUID->"8033b331-8a9a-4381-ae3c-a887d251b9dc"],
-Cell[14862, 399, 267, 0, 33, "Text",ExpressionUUID->"8ae17b34-fecd-45d3-b5c1-b170bcf5bb74"],
-Cell[15132, 401, 250, 0, 33, "Text",ExpressionUUID->"57d75d85-8b5b-4005-8595-b3f6d59f5bad"],
-Cell[15385, 403, 1664, 42, 131, "Input",ExpressionUUID->"f01d58b9-9b9e-4f66-ba51-aaddff3643f5",
+Cell[16614, 462, 101, 1, 53, "Subsection",ExpressionUUID->"675477cf-f6c3-45b9-b65e-0d3d2d4177d5"],
+Cell[16718, 465, 235, 4, 33, "Text",ExpressionUUID->"5039a59a-f6e0-41b7-bf44-876a6ab287e3"],
+Cell[16956, 471, 903, 25, 29, "Input",ExpressionUUID->"99063939-2b5d-4913-bbce-34f20c146783",
  InitializationCell->False],
-Cell[17052, 447, 612, 14, 69, "Input",ExpressionUUID->"6d59492d-bbbf-4659-b0fa-0cef2258ca3c"]
+Cell[17862, 498, 399, 10, 29, "Input",ExpressionUUID->"d65f7751-1f90-4c53-a16d-50ab0bcf538a",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[18298, 513, 126, 1, 53, "Subsection",ExpressionUUID->"cdcecd5c-d342-4c6c-942a-93389dffc137"],
+Cell[18427, 516, 299, 5, 33, "Text",ExpressionUUID->"4397736f-9e51-46be-999b-14703c19782b"],
+Cell[18729, 523, 814, 23, 29, "Input",ExpressionUUID->"b098053b-6424-446e-8eb5-670eaf771c36",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[19580, 551, 134, 1, 53, "Subsection",ExpressionUUID->"98e1c7b1-c55b-4e71-94bc-3e7dc67ad5a7"],
+Cell[19717, 554, 323, 5, 55, "Text",ExpressionUUID->"72d01624-d273-46b2-9671-bcdcc6e03021"],
+Cell[CellGroupData[{
+Cell[20065, 563, 1361, 37, 47, "Input",ExpressionUUID->"b265f251-917d-4cf8-949e-4aa2c82eb597",
+ InitializationCell->False],
+Cell[21429, 602, 179, 3, 32, "Output",ExpressionUUID->"3f35e268-4f4e-4dff-87ca-3476e9915041"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[17713, 467, 91, 0, 65, "Section",ExpressionUUID->"0b4e23d8-57a6-4fc4-be9e-0b465693581d"],
-Cell[17807, 469, 212, 3, 33, "Text",ExpressionUUID->"5732ee4f-2771-49cc-b19d-a659a677618f"],
+Cell[21669, 612, 108, 1, 65, "Section",ExpressionUUID->"3876be3c-37e7-41c5-94e7-05091a0a2674"],
+Cell[21780, 615, 230, 4, 33, "Text",ExpressionUUID->"12980e0b-66d1-430b-8e25-b7fe85c8742f"],
 Cell[CellGroupData[{
-Cell[18044, 476, 84, 0, 53, "Subsection",ExpressionUUID->"3c73fa5a-ba2d-4644-a9e6-0314903368e3"],
-Cell[18131, 478, 241, 4, 33, "Text",ExpressionUUID->"b3ba30ca-ad86-4252-b75e-c5e682842d74"],
-Cell[18375, 484, 837, 20, 29, "Input",ExpressionUUID->"2755e4f7-11b5-41dd-b446-d545f21e3ee8",
- InitializationCell->False]
-}, Open  ]],
+Cell[22035, 623, 102, 1, 53, "Subsection",ExpressionUUID->"eba0e395-0f0b-484c-8101-6316609f0b0b"],
+Cell[22140, 626, 421, 7, 55, "Text",ExpressionUUID->"7d8bc0a6-57d5-4de9-92a4-7f333a390c0d"],
+Cell[22564, 635, 615, 16, 29, "Input",ExpressionUUID->"89227890-490a-4333-b89d-886c1c23a7ec",
+ InitializationCell->False],
+Cell[23182, 653, 548, 13, 29, "Input",ExpressionUUID->"72dc86ab-5bc1-45dc-9bb2-5fcb848d135f",
+ InitializationCell->False],
 Cell[CellGroupData[{
-Cell[19249, 509, 83, 0, 53, "Subsection",ExpressionUUID->"f5448d39-5234-416c-8046-d76e7c2a8f67"],
-Cell[19335, 511, 379, 6, 55, "Text",ExpressionUUID->"ab7c2b7f-31cd-4f39-8b9d-35bbccc576be"],
-Cell[19717, 519, 1284, 31, 69, "Input",ExpressionUUID->"5c6b4432-acf4-41cf-b2f5-46f69f770012",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[21038, 555, 94, 0, 53, "Subsection",ExpressionUUID->"616b9f45-571f-4cec-98d1-9a7bc4344e3b"],
-Cell[21135, 557, 163, 3, 33, "Text",ExpressionUUID->"52cbc03b-8873-45fa-8bd2-0f26f4382b8e"],
-Cell[21301, 562, 946, 23, 49, "Input",ExpressionUUID->"5500f282-9c6d-4f02-8193-5edd18958cfb",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[22284, 590, 106, 0, 53, "Subsection",ExpressionUUID->"5c7f53e6-3b45-4043-8cbb-187c8c4534ae"],
-Cell[22393, 592, 273, 4, 33, "Text",ExpressionUUID->"dffb1432-67c4-4505-8a98-12f4f5fa9210"],
-Cell[22669, 598, 2863, 75, 109, "Input",ExpressionUUID->"e6d8dd43-b48b-487b-bf6f-00d6ffac3e83",
- InitializationCell->False]
+Cell[23755, 670, 240, 5, 29, "Input",ExpressionUUID->"498ec560-5c8e-4a0b-bfbf-e73bab6f9039",
+ InitializationCell->False],
+Cell[23998, 677, 180, 3, 32, "Output",ExpressionUUID->"50554e69-c364-41d8-b94e-d17660e0ca2f"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[25581, 679, 92, 0, 65, "Section",ExpressionUUID->"10a64f7e-3819-4d68-97c0-1da14ce2e40f"],
-Cell[25676, 681, 212, 3, 33, "Text",ExpressionUUID->"ca0234f8-ee33-4f9b-9e69-53163dff0fbe"],
-Cell[CellGroupData[{
-Cell[25913, 688, 84, 0, 53, "Subsection",ExpressionUUID->"a3d0e403-690c-482b-81a3-3fef821cad2c"],
-Cell[26000, 690, 241, 4, 33, "Text",ExpressionUUID->"91787ca9-f724-4ca2-9020-1c3d1ec94030"],
-Cell[26244, 696, 924, 22, 29, "Input",ExpressionUUID->"e71e5702-e25a-4f59-8360-4ec9140ad2f1",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[27205, 723, 83, 0, 53, "Subsection",ExpressionUUID->"9970f609-6278-4ea9-b25b-35f09fc92fbf"],
-Cell[27291, 725, 379, 6, 55, "Text",ExpressionUUID->"95d93d12-eeec-4bad-9537-7df1c08b9b43"],
-Cell[27673, 733, 1531, 39, 69, "Input",ExpressionUUID->"76e47c62-8945-4491-b93b-aa60178daa3f",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[29241, 777, 94, 0, 53, "Subsection",ExpressionUUID->"1c873bd2-3cf6-4e55-84ae-6b187c8594cf"],
-Cell[29338, 779, 163, 3, 33, "Text",ExpressionUUID->"0480a826-f7f7-43d7-a044-20ee2d8603de"],
-Cell[29504, 784, 1090, 28, 49, "Input",ExpressionUUID->"d714a39b-7392-4725-856a-9ebb1ce9952e",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[30631, 817, 125, 0, 53, "Subsection",ExpressionUUID->"1410d07d-473c-4852-a03c-988a68dd9d7d"],
-Cell[30759, 819, 339, 5, 55, "Text",ExpressionUUID->"8140834a-c95c-46b7-bac5-0ce2fc1535d8"],
-Cell[31101, 826, 451, 13, 29, "Input",ExpressionUUID->"717a7967-6cdc-42f2-aa2c-cf13f3198472",
+Cell[24227, 686, 101, 1, 53, "Subsection",ExpressionUUID->"4100daf2-e76e-4b48-9948-87f84ad93719"],
+Cell[24331, 689, 301, 5, 33, "Text",ExpressionUUID->"0c30d6f1-09a4-4648-9006-97853b969d7b"],
+Cell[24635, 696, 1068, 29, 49, "Input",ExpressionUUID->"8729acc4-8b09-4172-a487-c0948956e074",
  InitializationCell->False],
-Cell[31555, 841, 812, 21, 29, "Input",ExpressionUUID->"1235171b-2a4e-473c-8255-440cc091f7e2",
- InitializationCell->False],
-Cell[32370, 864, 194, 4, 29, "Input",ExpressionUUID->"e1dae363-bcb6-4f90-832d-3f9eca85e7cf",
+Cell[25706, 727, 519, 12, 29, "Input",ExpressionUUID->"1df3d17e-21ea-4d67-8223-4ef140f2d76b",
  InitializationCell->False]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[32601, 873, 106, 0, 53, "Subsection",ExpressionUUID->"e4db4035-0f35-482b-ab06-f2bfc52e0a85"],
-Cell[32710, 875, 360, 0, 55, "Text",ExpressionUUID->"bc805626-2bf1-4ecd-8633-1d1abec3fd3f"],
-Cell[33073, 877, 1978, 53, 89, "Input",ExpressionUUID->"fa10814b-2cb6-4edf-a629-535bad1e3f3b"]
+Cell[26262, 744, 126, 1, 53, "Subsection",ExpressionUUID->"48e9a845-0c47-445d-afb0-a3fa703b557d"],
+Cell[26391, 747, 299, 5, 33, "Text",ExpressionUUID->"95394321-ab58-4e63-b2d5-8fbb6ea2a694"],
+Cell[26693, 754, 890, 22, 29, "Input",ExpressionUUID->"1e4a7441-f817-48bd-86a8-8ebefbef1834",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[27620, 781, 205, 4, 53, "Subsection",ExpressionUUID->"8033b331-8a9a-4381-ae3c-a887d251b9dc"],
+Cell[27828, 787, 297, 5, 33, "Text",ExpressionUUID->"8ae17b34-fecd-45d3-b5c1-b170bcf5bb74"],
+Cell[28128, 794, 280, 5, 33, "Text",ExpressionUUID->"57d75d85-8b5b-4005-8595-b3f6d59f5bad"],
+Cell[CellGroupData[{
+Cell[28433, 803, 1681, 43, 131, "Input",ExpressionUUID->"f01d58b9-9b9e-4f66-ba51-aaddff3643f5",
+ InitializationCell->False],
+Cell[30117, 848, 5861, 176, 78, "Output",ExpressionUUID->"10ab8a88-3b94-4092-bf6d-96057acff14c"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[36015, 1029, 629, 15, 69, "Input",ExpressionUUID->"6d59492d-bbbf-4659-b0fa-0cef2258ca3c"],
+Cell[36647, 1046, 180, 3, 32, "Output",ExpressionUUID->"a523a1d7-e569-419f-b931-3a49bd60a051"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[35100, 936, 99, 0, 65, "Section",ExpressionUUID->"27af1125-de1e-4505-bd9b-99f8a2bb66b6"],
-Cell[35202, 938, 212, 3, 33, "Text",ExpressionUUID->"a64c5b9e-57c0-4ece-9e47-d43298948f92"],
+Cell[36888, 1056, 109, 1, 65, "Section",ExpressionUUID->"0b4e23d8-57a6-4fc4-be9e-0b465693581d"],
+Cell[37000, 1059, 230, 4, 33, "Text",ExpressionUUID->"5732ee4f-2771-49cc-b19d-a659a677618f"],
 Cell[CellGroupData[{
-Cell[35439, 945, 94, 0, 53, "Subsection",ExpressionUUID->"b348fccf-4aa0-4e94-bfc9-e43063f7d44c"],
-Cell[35536, 947, 211, 3, 33, "Text",ExpressionUUID->"9c4e36fc-7ba5-41f0-b2af-4037ef5b9ce6"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[35784, 955, 84, 0, 53, "Subsection",ExpressionUUID->"9051d361-6f65-411b-ba6b-36d64b246dfb"],
-Cell[35871, 957, 241, 4, 33, "Text",ExpressionUUID->"dce78bd8-345f-4f0c-bd78-585828af4b3f"],
-Cell[36115, 963, 900, 22, 29, "Input",ExpressionUUID->"13a20b3f-ac65-4f04-b948-83804a1b9d30",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[37052, 990, 83, 0, 53, "Subsection",ExpressionUUID->"cd02c6d8-cdc5-4641-8474-0840b424b1e2"],
-Cell[37138, 992, 379, 6, 55, "Text",ExpressionUUID->"08def40a-834d-40c3-b85c-16714b8749d0"],
-Cell[37520, 1000, 1659, 40, 89, "Input",ExpressionUUID->"577f0817-7be8-4f34-9508-8b118bd32590",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[39216, 1045, 94, 0, 53, "Subsection",ExpressionUUID->"8641f1ba-afc2-4022-9421-08477bda92eb"],
-Cell[39313, 1047, 163, 3, 33, "Text",ExpressionUUID->"64ec73b8-6439-485f-ab27-380c34a78b05"],
-Cell[39479, 1052, 1278, 33, 49, "Input",ExpressionUUID->"76ad14fc-9d17-401d-bfab-864c4da1a649",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[40794, 1090, 125, 0, 53, "Subsection",ExpressionUUID->"c9452bda-a2f4-45cc-b4e5-c4fde9cad5b9"],
-Cell[40922, 1092, 339, 5, 55, "Text",ExpressionUUID->"36bca8ed-ce75-45fe-a643-4d84f5aa033a"],
-Cell[41264, 1099, 451, 13, 29, "Input",ExpressionUUID->"4614b99b-2cf3-458e-be9f-37095b990b2e",
+Cell[37255, 1067, 102, 1, 53, "Subsection",ExpressionUUID->"3c73fa5a-ba2d-4644-a9e6-0314903368e3"],
+Cell[37360, 1070, 421, 7, 55, "Text",ExpressionUUID->"b3ba30ca-ad86-4252-b75e-c5e682842d74"],
+Cell[37784, 1079, 620, 15, 29, "Input",ExpressionUUID->"ded36c63-ab5f-4325-953b-381212353823",
  InitializationCell->False],
-Cell[41718, 1114, 763, 19, 29, "Input",ExpressionUUID->"7d4e3052-9e3b-4217-a7f7-bb7451e2336d",
+Cell[38407, 1096, 516, 12, 29, "Input",ExpressionUUID->"2755e4f7-11b5-41dd-b446-d545f21e3ee8",
  InitializationCell->False],
-Cell[42484, 1135, 194, 4, 29, "Input",ExpressionUUID->"9b33a60d-40eb-4c9a-98d9-f074e4b6caaf",
- InitializationCell->False]
-}, Open  ]],
 Cell[CellGroupData[{
-Cell[42715, 1144, 106, 0, 53, "Subsection",ExpressionUUID->"f1164294-0a51-49c3-a45c-2a800fc2b553"],
-Cell[42824, 1146, 273, 4, 33, "Text",ExpressionUUID->"4a556eff-7f98-42f6-a1f9-387790a0d8fb"],
-Cell[43100, 1152, 511, 12, 29, "Input",ExpressionUUID->"7b62460d-c15d-457f-a913-7a127db18d7f",
+Cell[38948, 1112, 266, 5, 29, "Input",ExpressionUUID->"780e7ced-c820-4009-93ee-77b4251abacf",
  InitializationCell->False],
-Cell[43614, 1166, 1457, 38, 45, "Input",ExpressionUUID->"e859e6a3-ff14-430a-b705-ee6de35704b4",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[45108, 1209, 94, 0, 53, "Subsection",ExpressionUUID->"74e49210-86bb-46ba-aa0b-5a9bc7ce76af"],
-Cell[45205, 1211, 211, 3, 33, "Text",ExpressionUUID->"54666aa6-4798-440a-9204-e4b0e1991085"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[45453, 1219, 84, 0, 53, "Subsection",ExpressionUUID->"d7e1cd7d-ac14-4717-9d46-6617cf8d8a76"],
-Cell[45540, 1221, 241, 4, 33, "Text",ExpressionUUID->"17ad1ad6-a276-4dfd-b490-9df5722df4dd"],
-Cell[45784, 1227, 901, 22, 29, "Input",ExpressionUUID->"733b4448-366d-49dc-8911-a1ff2a9cb2c9",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[46722, 1254, 83, 0, 53, "Subsection",ExpressionUUID->"997759e6-7d1c-4613-beab-762ea24544b1"],
-Cell[46808, 1256, 379, 6, 55, "Text",ExpressionUUID->"99ed15ab-3d83-498a-b8f2-f43809b06f06"],
-Cell[47190, 1264, 1283, 32, 69, "Input",ExpressionUUID->"b1d67470-8abf-4f99-b0c6-645cac5cb94e",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[48510, 1301, 94, 0, 53, "Subsection",ExpressionUUID->"8f81bb88-aea7-45ce-9444-eec1866b8c1d"],
-Cell[48607, 1303, 163, 3, 33, "Text",ExpressionUUID->"f8072cd6-aedd-4faf-aa04-3596ba491940"],
-Cell[48773, 1308, 614, 16, 29, "Input",ExpressionUUID->"14d7642a-bacb-4b1c-b800-cb8dbc0cc2cd",
- InitializationCell->False]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[49424, 1329, 106, 0, 53, "Subsection",ExpressionUUID->"3d5bd24a-764c-47f7-aa3e-6f7528fd9234"],
-Cell[49533, 1331, 273, 4, 33, "Text",ExpressionUUID->"de22132e-2f3b-4181-9a7f-6f83ac69dab8"],
-Cell[49809, 1337, 358, 9, 29, "Input",ExpressionUUID->"54a562aa-1d43-4870-af2f-ef2e674c9ddf",
- InitializationCell->False]
+Cell[39217, 1119, 180, 3, 32, "Output",ExpressionUUID->"574ce284-2ae6-4453-af92-9f94f20ab609"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[50216, 1352, 99, 0, 65, "Section",ExpressionUUID->"75d49a56-6acc-46d2-a783-3e92d9a00b99"],
-Cell[50318, 1354, 507, 7, 55, "Text",ExpressionUUID->"12c98604-4b63-4324-b090-d6c04ca4ca6e"]
+Cell[39446, 1128, 101, 1, 53, "Subsection",ExpressionUUID->"f5448d39-5234-416c-8046-d76e7c2a8f67"],
+Cell[39550, 1131, 270, 5, 33, "Text",ExpressionUUID->"ab7c2b7f-31cd-4f39-8b9d-35bbccc576be"],
+Cell[39823, 1138, 1033, 26, 49, "Input",ExpressionUUID->"88cf0685-4027-4498-81b8-a15a62465dd5",
+ InitializationCell->False],
+Cell[40859, 1166, 436, 10, 29, "Input",ExpressionUUID->"5c6b4432-acf4-41cf-b2f5-46f69f770012",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[41332, 1181, 126, 1, 53, "Subsection",ExpressionUUID->"616b9f45-571f-4cec-98d1-9a7bc4344e3b"],
+Cell[41461, 1184, 299, 5, 33, "Text",ExpressionUUID->"52cbc03b-8873-45fa-8bd2-0f26f4382b8e"],
+Cell[41763, 1191, 964, 24, 49, "Input",ExpressionUUID->"5500f282-9c6d-4f02-8193-5edd18958cfb",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[42764, 1220, 134, 1, 53, "Subsection",ExpressionUUID->"5c7f53e6-3b45-4043-8cbb-187c8c4534ae"],
+Cell[42901, 1223, 323, 5, 55, "Text",ExpressionUUID->"dffb1432-67c4-4505-8a98-12f4f5fa9210"],
+Cell[CellGroupData[{
+Cell[43249, 1232, 2880, 76, 109, "Input",ExpressionUUID->"e6d8dd43-b48b-487b-bf6f-00d6ffac3e83",
+ InitializationCell->False],
+Cell[46132, 1310, 180, 3, 32, "Output",ExpressionUUID->"428e948a-ba38-4ae1-9fff-26e07177b0c5"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[46373, 1320, 110, 1, 65, "Section",ExpressionUUID->"10a64f7e-3819-4d68-97c0-1da14ce2e40f"],
+Cell[46486, 1323, 230, 4, 33, "Text",ExpressionUUID->"ca0234f8-ee33-4f9b-9e69-53163dff0fbe"],
+Cell[CellGroupData[{
+Cell[46741, 1331, 102, 1, 53, "Subsection",ExpressionUUID->"a3d0e403-690c-482b-81a3-3fef821cad2c"],
+Cell[46846, 1334, 421, 7, 55, "Text",ExpressionUUID->"91787ca9-f724-4ca2-9020-1c3d1ec94030"],
+Cell[47270, 1343, 638, 16, 29, "Input",ExpressionUUID->"c72e144a-8b89-41d8-9fbe-e3f8112f7f92",
+ InitializationCell->False],
+Cell[47911, 1361, 567, 13, 29, "Input",ExpressionUUID->"e71e5702-e25a-4f59-8360-4ec9140ad2f1",
+ InitializationCell->False],
+Cell[CellGroupData[{
+Cell[48503, 1378, 257, 5, 29, "Input",ExpressionUUID->"ce6b862e-f1dc-472b-b50f-8596a6511a04",
+ InitializationCell->False],
+Cell[48763, 1385, 180, 3, 32, "Output",ExpressionUUID->"3e939fe8-50a8-48de-9ef0-009156734daa"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[48992, 1394, 101, 1, 53, "Subsection",ExpressionUUID->"9970f609-6278-4ea9-b25b-35f09fc92fbf"],
+Cell[49096, 1397, 260, 5, 33, "Text",ExpressionUUID->"95d93d12-eeec-4bad-9537-7df1c08b9b43"],
+Cell[49359, 1404, 1149, 32, 69, "Input",ExpressionUUID->"382f1558-3922-4d2f-b3e4-a0caa60820fb",
+ InitializationCell->False],
+Cell[50511, 1438, 534, 12, 29, "Input",ExpressionUUID->"76e47c62-8945-4491-b93b-aa60178daa3f",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[51082, 1455, 126, 1, 53, "Subsection",ExpressionUUID->"1c873bd2-3cf6-4e55-84ae-6b187c8594cf"],
+Cell[51211, 1458, 299, 5, 33, "Text",ExpressionUUID->"0480a826-f7f7-43d7-a044-20ee2d8603de"],
+Cell[51513, 1465, 1108, 29, 49, "Input",ExpressionUUID->"d714a39b-7392-4725-856a-9ebb1ce9952e",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[52658, 1499, 143, 1, 53, "Subsection",ExpressionUUID->"1410d07d-473c-4852-a03c-988a68dd9d7d"],
+Cell[52804, 1502, 425, 7, 55, "Text",ExpressionUUID->"8140834a-c95c-46b7-bac5-0ce2fc1535d8"],
+Cell[53232, 1511, 469, 14, 29, "Input",ExpressionUUID->"717a7967-6cdc-42f2-aa2c-cf13f3198472",
+ InitializationCell->False],
+Cell[CellGroupData[{
+Cell[53726, 1529, 829, 22, 29, "Input",ExpressionUUID->"1235171b-2a4e-473c-8255-440cc091f7e2",
+ InitializationCell->False],
+Cell[54558, 1553, 180, 3, 32, "Output",ExpressionUUID->"b49ce061-8384-4f1c-abfc-1f5d3e59db42"]
+}, Open  ]],
+Cell[54753, 1559, 212, 5, 29, "Input",ExpressionUUID->"e1dae363-bcb6-4f90-832d-3f9eca85e7cf",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[55002, 1569, 134, 1, 53, "Subsection",ExpressionUUID->"e4db4035-0f35-482b-ab06-f2bfc52e0a85"],
+Cell[55139, 1572, 392, 6, 55, "Text",ExpressionUUID->"bc805626-2bf1-4ecd-8633-1d1abec3fd3f"],
+Cell[CellGroupData[{
+Cell[55556, 1582, 1995, 54, 89, "Input",ExpressionUUID->"fa10814b-2cb6-4edf-a629-535bad1e3f3b"],
+Cell[57554, 1638, 180, 3, 32, "Output",ExpressionUUID->"950476a3-a207-411b-9111-bb9a181f47f9"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[57795, 1648, 100, 1, 65, "Section",ExpressionUUID->"27af1125-de1e-4505-bd9b-99f8a2bb66b6"],
+Cell[57898, 1651, 190, 4, 33, "Text",ExpressionUUID->"9c4e36fc-7ba5-41f0-b2af-4037ef5b9ce6"],
+Cell[CellGroupData[{
+Cell[58113, 1659, 102, 1, 53, "Subsection",ExpressionUUID->"9051d361-6f65-411b-ba6b-36d64b246dfb"],
+Cell[58218, 1662, 421, 7, 55, "Text",ExpressionUUID->"dce78bd8-345f-4f0c-bd78-585828af4b3f"],
+Cell[58642, 1671, 656, 16, 29, "Input",ExpressionUUID->"398b6886-26f0-4a93-bb54-cdfd54a1896f",
+ InitializationCell->False],
+Cell[59301, 1689, 523, 13, 29, "Input",ExpressionUUID->"13a20b3f-ac65-4f04-b948-83804a1b9d30",
+ InitializationCell->False],
+Cell[CellGroupData[{
+Cell[59849, 1706, 276, 5, 29, "Input",ExpressionUUID->"fbcb09d0-1ab5-40fe-b293-e6e08ba4ac5f",
+ InitializationCell->False],
+Cell[60128, 1713, 182, 3, 32, "Output",ExpressionUUID->"e9bc2d69-32f3-4c35-9ae3-881d78130850"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[60359, 1722, 101, 1, 53, "Subsection",ExpressionUUID->"cd02c6d8-cdc5-4641-8474-0840b424b1e2"],
+Cell[60463, 1725, 256, 5, 33, "Text",ExpressionUUID->"08def40a-834d-40c3-b85c-16714b8749d0"],
+Cell[60722, 1732, 1298, 33, 69, "Input",ExpressionUUID->"7c9623f4-1bfb-4cbf-9173-762d08d1530b",
+ InitializationCell->False],
+Cell[62023, 1767, 508, 12, 29, "Input",ExpressionUUID->"577f0817-7be8-4f34-9508-8b118bd32590",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[62568, 1784, 126, 1, 53, "Subsection",ExpressionUUID->"8641f1ba-afc2-4022-9421-08477bda92eb"],
+Cell[62697, 1787, 299, 5, 33, "Text",ExpressionUUID->"64ec73b8-6439-485f-ab27-380c34a78b05"],
+Cell[62999, 1794, 1296, 34, 49, "Input",ExpressionUUID->"76ad14fc-9d17-401d-bfab-864c4da1a649",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[64332, 1833, 143, 1, 53, "Subsection",ExpressionUUID->"c9452bda-a2f4-45cc-b4e5-c4fde9cad5b9"],
+Cell[64478, 1836, 425, 7, 55, "Text",ExpressionUUID->"36bca8ed-ce75-45fe-a643-4d84f5aa033a"],
+Cell[64906, 1845, 469, 14, 29, "Input",ExpressionUUID->"4614b99b-2cf3-458e-be9f-37095b990b2e",
+ InitializationCell->False],
+Cell[CellGroupData[{
+Cell[65400, 1863, 781, 20, 29, "Input",ExpressionUUID->"7d4e3052-9e3b-4217-a7f7-bb7451e2336d",
+ InitializationCell->False],
+Cell[66184, 1885, 180, 3, 32, "Output",ExpressionUUID->"1edd4eff-da70-4eb5-9b73-01956905ec56"]
+}, Open  ]],
+Cell[66379, 1891, 212, 5, 29, "Input",ExpressionUUID->"9b33a60d-40eb-4c9a-98d9-f074e4b6caaf",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[66628, 1901, 134, 1, 53, "Subsection",ExpressionUUID->"f1164294-0a51-49c3-a45c-2a800fc2b553"],
+Cell[66765, 1904, 323, 5, 55, "Text",ExpressionUUID->"4a556eff-7f98-42f6-a1f9-387790a0d8fb"],
+Cell[67091, 1911, 529, 13, 29, "Input",ExpressionUUID->"7b62460d-c15d-457f-a913-7a127db18d7f",
+ InitializationCell->False],
+Cell[CellGroupData[{
+Cell[67645, 1928, 1475, 39, 45, "Input",ExpressionUUID->"e859e6a3-ff14-430a-b705-ee6de35704b4",
+ InitializationCell->False],
+Cell[69123, 1969, 180, 3, 32, "Output",ExpressionUUID->"56913218-5deb-4733-b3d5-4bbc2f77fe68"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[69364, 1979, 100, 1, 65, "Section",ExpressionUUID->"74e49210-86bb-46ba-aa0b-5a9bc7ce76af"],
+Cell[69467, 1982, 295, 5, 33, "Text",ExpressionUUID->"54666aa6-4798-440a-9204-e4b0e1991085"],
+Cell[CellGroupData[{
+Cell[69787, 1991, 102, 1, 53, "Subsection",ExpressionUUID->"d7e1cd7d-ac14-4717-9d46-6617cf8d8a76"],
+Cell[69892, 1994, 421, 7, 55, "Text",ExpressionUUID->"17ad1ad6-a276-4dfd-b490-9df5722df4dd"],
+Cell[70316, 2003, 669, 18, 29, "Input",ExpressionUUID->"82ecd14b-e10b-4281-9691-3897bd3f89dd",
+ InitializationCell->False],
+Cell[70988, 2023, 518, 12, 29, "Input",ExpressionUUID->"733b4448-366d-49dc-8911-a1ff2a9cb2c9",
+ InitializationCell->False],
+Cell[CellGroupData[{
+Cell[71531, 2039, 228, 5, 29, "Input",ExpressionUUID->"10340cdb-7fe4-4000-a2fd-4ea1a56b7d7d",
+ InitializationCell->False],
+Cell[71762, 2046, 180, 3, 32, "Output",ExpressionUUID->"f26cdae5-623e-498d-8feb-1ac0a8ff3c41"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[71991, 2055, 101, 1, 53, "Subsection",ExpressionUUID->"997759e6-7d1c-4613-beab-762ea24544b1"],
+Cell[72095, 2058, 270, 5, 33, "Text",ExpressionUUID->"99ed15ab-3d83-498a-b8f2-f43809b06f06"],
+Cell[72368, 2065, 1009, 27, 49, "Input",ExpressionUUID->"b151aee9-6b1b-48f1-8325-ab225d1f3bca",
+ InitializationCell->False],
+Cell[73380, 2094, 440, 10, 29, "Input",ExpressionUUID->"b1d67470-8abf-4f99-b0c6-645cac5cb94e",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[73857, 2109, 126, 1, 53, "Subsection",ExpressionUUID->"8f81bb88-aea7-45ce-9444-eec1866b8c1d"],
+Cell[73986, 2112, 299, 5, 33, "Text",ExpressionUUID->"f8072cd6-aedd-4faf-aa04-3596ba491940"],
+Cell[74288, 2119, 632, 17, 29, "Input",ExpressionUUID->"14d7642a-bacb-4b1c-b800-cb8dbc0cc2cd",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[74957, 2141, 131, 1, 53, "Subsection",ExpressionUUID->"3d5bd24a-764c-47f7-aa3e-6f7528fd9234"],
+Cell[75091, 2144, 281, 5, 33, "Text",ExpressionUUID->"de22132e-2f3b-4181-9a7f-6f83ac69dab8"],
+Cell[CellGroupData[{
+Cell[75397, 2153, 485, 13, 29, "Input",ExpressionUUID->"54a562aa-1d43-4870-af2f-ef2e674c9ddf",
+ InitializationCell->False],
+Cell[75885, 2168, 1031, 36, 46, "Output",ExpressionUUID->"e49e0c98-022e-478f-9730-574d994a222c"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[76977, 2211, 117, 1, 65, "Section",ExpressionUUID->"75d49a56-6acc-46d2-a783-3e92d9a00b99"],
+Cell[77097, 2214, 525, 8, 55, "Text",ExpressionUUID->"12c98604-4b63-4324-b090-d6c04ca4ca6e"]
 }, Open  ]]
 }, Open  ]]
 }
 ]
 *)
-
-(* End of internal cache information *)
 

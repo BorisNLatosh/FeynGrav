@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[     41489,       1124]
-NotebookOptionsPosition[     35702,       1017]
-NotebookOutlinePosition[     36193,       1035]
-CellTagsIndexPosition[     36150,       1032]
+NotebookDataLength[     42374,       1165]
+NotebookOptionsPosition[     36583,       1058]
+NotebookOutlinePosition[     37074,       1076]
+CellTagsIndexPosition[     37031,       1073]
 WindowTitle->Tree-level gravitational scattering of two scalars
 WindowFrame->Normal*)
 
@@ -21,17 +21,20 @@ WindowFrame->Normal*)
 Notebook[{
 
 Cell[CellGroupData[{
-Cell["Tree-level gravitational scattering of two scalars", "Title",ExpressionUUID->"dc9fa314-8461-47a9-99a4-40565efd709a"],
+Cell["Tree-level gravitational scattering of two scalars", "Title",
+ Editable->False,ExpressionUUID->"dc9fa314-8461-47a9-99a4-40565efd709a"],
 
 Cell["\<\
 Build the exchange amplitude for two distinguishable massive scalars, convert \
 it to a center-of-mass differential cross section, and check the \
 nonrelativistic limit.\
-\>", "Text",ExpressionUUID->"5ffac651-9e08-4986-8274-61357ac7f5ad"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"5ffac651-9e08-4986-8274-61357ac7f5ad"],
 
 Cell[CellGroupData[{
 
-Cell["1. Setup and notation", "Section",ExpressionUUID->"d3192615-35de-4b5f-94e2-39c60d4277f4"],
+Cell["1. Setup and notation", "Section",
+ Editable->False,ExpressionUUID->"d3192615-35de-4b5f-94e2-39c60d4277f4"],
 
 Cell["\<\
 Start with a fresh Mathematica kernel and evaluate the input cells from top \
@@ -40,13 +43,15 @@ see the package README. Opening this notebook executes nothing. A semicolon \
 stores an intermediate result without printing its full expression. Use \
 ?FunctionName for help and FeynGravCommands[] to discover the package \
 interface.\
-\>", "Text",ExpressionUUID->"e1b93f4a-0cc5-453b-a7bf-0c782d10ec56"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"e1b93f4a-0cc5-453b-a7bf-0c782d10ec56"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<FeynGrav`\>\""}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellChangeTimes->{4.000101062944523*^9},
  CellLabel->"In[1]:=",ExpressionUUID->"4515f81e-b61a-4241-a539-2cbe98bbcb95"],
@@ -146,19 +151,19 @@ manual/FeynCalcManual.pdf"], None}, BaseStyle -> "Hyperlink", ButtonNote ->
       "https://github.com/FeynCalc/feyncalc-manual/releases/download/dev-\
 manual/FeynCalcManual.pdf"]], "Text"]],
   Editable->False]], "Print",
- CellChangeTimes->{4.0013834285504227`*^9},
+ CellChangeTimes->{4.001573204469751*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"94ea9b51-3fba-49c6-aa25-fc5cc283c92d"],
+In[1]:=",ExpressionUUID->"44514dbc-67da-443c-b3b7-2e7ca97871b7"],
 
 Cell[BoxData[
  StyleBox["\<\"If you use FeynCalc in your research, please evaluate \
 FeynCalcHowToCite[] to learn how to cite this software.\"\>", "Text",
   StripOnInput->False]], "Print",
- CellChangeTimes->{4.001383428563694*^9},
+ CellChangeTimes->{4.001573204472191*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"279dbf21-6473-46db-8ba4-5e77da277e94"],
+In[1]:=",ExpressionUUID->"32fab231-43eb-49c6-a871-2b33af71475f"],
 
 Cell[BoxData[
  StyleBox["\<\"Please keep in mind that the proper academic attribution of \
@@ -166,28 +171,28 @@ our work is crucial to ensure the future development of this package!\"\>",
   "Text",
   StripOnInput->False,
   FontSlant->Italic]], "Print",
- CellChangeTimes->{4.001383428564973*^9},
+ CellChangeTimes->{4.001573204473126*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"c66a6a24-4761-48f9-89a3-bda251134fb0"],
+In[1]:=",ExpressionUUID->"666a17cf-5a3e-43bc-a8a2-f5cba620f3fb"],
 
 Cell[BoxData[
- StyleBox["\<\"FeynGrav 4.1\"\>", "Text",
+ StyleBox["\<\"FeynGrav 4.1.0\"\>", "Text",
   StripOnInput->False,
   FontWeight->Bold]], "Print",
- CellChangeTimes->{4.0013834285757313`*^9},
+ CellChangeTimes->{4.001573204473823*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"7fe60ca1-e6e6-473e-a2ce-1280bf67aef1"],
+In[1]:=",ExpressionUUID->"1ac38c45-3b5d-4bea-abd0-16ebeed53577"],
 
 Cell[BoxData[
  StyleBox["\<\"Feynman rules for gravity and matter, with FeynCalc notation \
 and FORM support through CalcFormConverter.\"\>", "Text",
   StripOnInput->False]], "Print",
- CellChangeTimes->{4.001383428576652*^9},
+ CellChangeTimes->{4.001573204474526*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"db08a455-a779-4945-99a0-830a5e1aa5d8"],
+In[1]:=",ExpressionUUID->"01f2bf2c-6b16-4377-a2a5-a0725099e65f"],
 
 Cell[BoxData[
  StyleBox["\<\"The default libraries include cubic and quartic graviton \
@@ -195,64 +200,64 @@ vertices and scalar, Dirac fermion and vector interactions with up to two \
 gravitons. Use the FeynGravImport* commands to load additional \
 libraries.\"\>", "Text",
   StripOnInput->False]], "Print",
- CellChangeTimes->{4.001383428577409*^9},
+ CellChangeTimes->{4.00157320447511*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"649a77ef-b1c7-4293-aa4f-55f83cc25625"],
+In[1]:=",ExpressionUUID->"94d0bcd4-a875-48c5-9627-3513c9b3b165"],
 
 Cell[BoxData[
  StyleBox["\<\"FeynArts supported models\"\>", "Text",
   StripOnInput->False,
   FontWeight->Bold]], "Print",
- CellChangeTimes->{4.001383428578265*^9},
+ CellChangeTimes->{4.001573204475718*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"b4a4ce2e-3d22-4b75-b62b-478bed4f3899"],
+In[1]:=",ExpressionUUID->"72f571e3-d27b-43de-91a2-eaf004a4b41e"],
 
 Cell[BoxData[
  StyleBox["\<\"\[Bullet] Pure general relativity\"\>", "Text",
   StripOnInput->False]], "Print",
- CellChangeTimes->{4.0013834285791693`*^9},
+ CellChangeTimes->{4.0015732044764957`*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"ff24605c-edd4-422b-bda0-8373de144443"],
+In[1]:=",ExpressionUUID->"d3faab04-ac96-444b-b443-8c71f8092c59"],
 
 Cell[BoxData[
  StyleBox["\<\"\[Bullet] Scalar field with a potential minimally coupled to \
 gravity\"\>", "Text",
   StripOnInput->False]], "Print",
- CellChangeTimes->{4.001383428579856*^9},
+ CellChangeTimes->{4.0015732044768867`*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"0e6451ad-b433-45e6-b849-66e7e165cdec"],
+In[1]:=",ExpressionUUID->"5cacd8e0-0854-4615-b8a9-d1e1756f34cf"],
 
 Cell[BoxData[
  StyleBox["\<\"\[Bullet] Scalar field with a non-minimal kinetic \
 coupling\"\>", "Text",
   StripOnInput->False]], "Print",
- CellChangeTimes->{4.00138342858057*^9},
+ CellChangeTimes->{4.001573204477195*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"351a8d4f-e76f-45cb-9b23-ded928ffce55"],
+In[1]:=",ExpressionUUID->"e828bcac-0865-41da-bfd8-58e66c480a60"],
 
 Cell[BoxData[
  StyleBox["\<\"\[Bullet] Einstein-scalar-Gauss-Bonnet model\"\>", "Text",
   StripOnInput->False]], "Print",
- CellChangeTimes->{4.0013834285811653`*^9},
+ CellChangeTimes->{4.0015732044775*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"5f629a2a-d4fd-4498-82b9-75b7d3227b72"],
+In[1]:=",ExpressionUUID->"45c2ca1e-1b58-4b6f-be17-78aa66d16834"],
 
 Cell[BoxData[
  StyleBox["\<\"The supplied models retain interactions through order \
-\[Kappa]^2 per vertex. Use matching Model and GenericModel names with \
-FeynCalc-patched FeynArts in a fresh kernel. Models are not initialised \
-automatically.\"\>", "Text",
+\\!\\(\\*SuperscriptBox[\\(\[Kappa]\\), \\(2\\)]\\) per vertex. Use matching \
+Model and GenericModel names with FeynCalc-patched FeynArts in a fresh \
+kernel. Models are not initialised automatically.\"\>", "Text",
   StripOnInput->False]], "Print",
- CellChangeTimes->{4.001383428581855*^9},
+ CellChangeTimes->{4.0015732044777803`*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"0f2b0cbc-d791-4246-8ca9-fbbed0fcd898"],
+In[1]:=",ExpressionUUID->"2a74cc93-8f39-4a27-89b8-c4be8f37cac2"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -320,19 +325,20 @@ Cell[BoxData[
       "Queued"]], "Text"], 
    Style[" for citation guidance.", "Text"]],
   Editable->False]], "Print",
- CellChangeTimes->{4.00138342858285*^9},
+ CellChangeTimes->{4.0015732044825172`*^9},
  CellLabel->
   "During evaluation of \
-In[1]:=",ExpressionUUID->"619512f0-bdb9-493a-bf48-3ff366c5d1a7"]
+In[1]:=",ExpressionUUID->"2075a3c9-377c-4d6e-867d-1316b640ca73"]
 }, Open  ]]
 }, Open  ]],
 
 Cell["\<\
 This notebook requires FORM on the kernel\[CloseCurlyQuote]s PATH. \
-CalcFormCalculate performs bosonic algebra and Lorentz contractions; TFORM is \
+FeynGravSimplify performs bosonic algebra and Lorentz contractions; TFORM is \
 used automatically when available. FeynCalc handles loop reduction and any \
 Dirac or colour algebra before the bosonic coefficients are sent to FORM.\
 \>", "Text",
+ Editable->False,
  CellChangeTimes->{
   4.000101086781893*^9},ExpressionUUID->"4a8d65e3-6ce6-4c02-87ff-\
 e16879c1c9ec"],
@@ -342,18 +348,21 @@ FeynGrav supplies the vertex and propagator normalisations, including i and \
 \[Kappa]. The default gravitational gauge parameter is GaugeFixingEpsilon = \
 2. The displayed diagram weights are retained from the original example; the \
 notebook does not derive their combinatorics.\
-\>", "Text",ExpressionUUID->"1633e35a-7106-4b20-bb85-7f917f324481"]
+\>", "Text",
+ Editable->False,ExpressionUUID->"1633e35a-7106-4b20-bb85-7f917f324481"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["2. Fix the external kinematics", "Section",ExpressionUUID->"9bc80cca-f19c-4ecd-b9f6-2a8b989c053a"],
+Cell["2. Fix the external kinematics", "Section",
+ Editable->False,ExpressionUUID->"9bc80cca-f19c-4ecd-b9f6-2a8b989c053a"],
 
 Cell["\<\
 SetMandelstam uses all-incoming momenta: p1 + p2 + p3 + p4 = 0. Physical \
 outgoing momenta are -p3 and -p4. The masses are {m1, m2, m1, m2}; s + t + u \
 = 2 m1\.b2 + 2 m2\.b2.\
-\>", "Text",ExpressionUUID->"01620e23-85a0-4523-8004-63427842b0cd"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"01620e23-85a0-4523-8004-63427842b0cd"],
 
 Cell[BoxData[
  RowBox[{
@@ -361,20 +370,23 @@ Cell[BoxData[
    RowBox[{
    "s", ",", "t", ",", "u", ",", "p1", ",", "p2", ",", "p3", ",", "p4", ",", 
     "m1", ",", "m2", ",", "m1", ",", "m2"}], "]"}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellLabel->"In[2]:=",ExpressionUUID->"f7febe59-e156-4048-a991-f1fb6e574b20"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["3. Construct the exchange amplitude", "Section",ExpressionUUID->"599f55d5-4f28-4795-8e57-81577b5f7fe4"],
+Cell["3. Construct the exchange amplitude", "Section",
+ Editable->False,ExpressionUUID->"599f55d5-4f28-4795-8e57-81577b5f7fe4"],
 
 Cell["\<\
 Each GravitonScalarVertex has an index pair, two incoming scalar momenta and \
 a mass. Join the vertices with a graviton propagator carrying p1 + p3, the \
 t-channel momentum. The amplitude retains the factors of i in the Feynman \
 rules.\
-\>", "Text",ExpressionUUID->"7c78b6f2-b5a5-4d26-af16-207e131b8cc2"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"7c78b6f2-b5a5-4d26-af16-207e131b8cc2"],
 
 Cell[CellGroupData[{
 
@@ -382,7 +394,7 @@ Cell[BoxData[
  RowBox[{"\[ScriptCapitalM]", "=", 
   RowBox[{"Simplify", "[", 
    RowBox[{
-    RowBox[{"CalcFormCalculate", "[", 
+    RowBox[{"FeynGravSimplify", "[", 
      RowBox[{
       RowBox[{"GravitonScalarVertex", "[", 
        RowBox[{
@@ -406,6 +418,7 @@ Cell[BoxData[
          SuperscriptBox["m1", "2"], "+", 
          SuperscriptBox["m2", "2"]}], ")"}]}], "-", "s", "-", "t"}]}]}], 
    "]"}]}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellLabel->"In[3]:=",ExpressionUUID->"94425197-bc9f-4ad2-99e3-3f0e012cea09"],
 
@@ -448,20 +461,22 @@ Cell[BoxData[
      RowBox[{"(", 
       RowBox[{"D", "-", "2"}], ")"}], " ", "t"}]]}], 
   TraditionalForm]], "Output",
- CellChangeTimes->{4.001383429400008*^9},
- CellLabel->"Out[3]=",ExpressionUUID->"97fc8801-9343-4c7d-bd99-5e753bd1664c"]
+ CellChangeTimes->{4.00157320533152*^9},
+ CellLabel->"Out[3]=",ExpressionUUID->"fc3b0f20-0e0d-42d1-96b0-302a40510aa2"]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["4. Convert to center-of-mass variables", "Section",ExpressionUUID->"a6cb08aa-8fa6-4f4f-8a70-574997efe030"],
+Cell["4. Convert to center-of-mass variables", "Section",
+ Editable->False,ExpressionUUID->"a6cb08aa-8fa6-4f4f-8a70-574997efe030"],
 
 Cell["\<\
 p is now the positive magnitude of the three-momentum, rather than a \
 four-vector. \[Theta] is the scattering angle; m1 and m2 are positive. These \
 assumptions are local to this fresh-kernel example.\
-\>", "Text",ExpressionUUID->"1e7c1bf8-9ba7-4e0f-a79f-3b2dff7548f9"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"1e7c1bf8-9ba7-4e0f-a79f-3b2dff7548f9"],
 
 Cell[BoxData[
  RowBox[{
@@ -471,12 +486,14 @@ Cell[BoxData[
     RowBox[{"m2", ">", "0"}], "&&", 
     RowBox[{"p", ">", "0"}], "&&", 
     RowBox[{"0", "<", "\[Theta]", "<", "\[Pi]"}]}]}], ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellLabel->"In[4]:=",ExpressionUUID->"7a60ef80-165f-4903-9cb3-daf9f3b360ed"],
 
 Cell[CellGroupData[{
 
-Cell["Phase space and incoming flux", "Subsection",ExpressionUUID->"645a3519-c24d-4091-9ea9-2cd4ccca2c9a"],
+Cell["Phase space and incoming flux", "Subsection",
+ Editable->False,ExpressionUUID->"645a3519-c24d-4091-9ea9-2cd4ccca2c9a"],
 
 Cell["\<\
 Integrate the final radial momentum k using the energy-conserving delta \
@@ -485,7 +502,8 @@ d\[Sigma]/d\[CapitalOmega], not an angle-integrated total cross section. The \
 forward gravitational singularity at \[Theta] = 0 is excluded by the \
 assumptions. This symbolic integration may take longer than the amplitude \
 contraction.\
-\>", "Text",ExpressionUUID->"6ce5b74d-09a8-48a9-b5dc-219ad4234f19"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"6ce5b74d-09a8-48a9-b5dc-219ad4234f19"],
 
 Cell[CellGroupData[{
 
@@ -607,31 +625,45 @@ Cell[BoxData[
         SqrtBox[
          RowBox[{"32", " ", "\[Pi]", " ", "G"}]]}]}], "}"}]}]}], ";"}], 
   "]"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellLabel->"In[5]:=",ExpressionUUID->"6a336cdb-d961-40ec-b731-1701740422b1"],
 
 Cell[BoxData[
  FormBox[
   RowBox[{"{", 
-   RowBox[{"31.733572`", ",", "Null"}], "}"}], TraditionalForm]], "Output",
- CellChangeTimes->{4.001383461163497*^9},
- CellLabel->"Out[5]=",ExpressionUUID->"e9e06548-3263-4a59-9229-405815f0c629"]
+   RowBox[{"33.130114`", ",", "Null"}], "}"}], TraditionalForm]], "Output",
+ CellChangeTimes->{4.0015732384947977`*^9},
+ CellLabel->"Out[5]=",ExpressionUUID->"dc7dd86a-5257-4ef0-80fe-ec5376a2959e"]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Display the differential cross section", "Subsection",ExpressionUUID->"3593c57d-60e9-425b-a599-b009d54b119e"],
+Cell["Display the differential cross section", "Subsection",
+ Editable->False,ExpressionUUID->"3593c57d-60e9-425b-a599-b009d54b119e"],
 
-Cell["\<\
-This is the leading tree-level contribution, of order G\.b2. The replacement \
-\[Kappa] = \[Sqrt](32 \[Pi] G) is applied when converting the squared \
-amplitude to the cross section.\
-\>", "Text",ExpressionUUID->"6205defe-6000-4341-903b-c1462fb47f5b"],
+Cell[TextData[{
+ "This is the leading tree-level contribution, of order G\.b2. The \
+replacement ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Kappa]", "=", 
+    SqrtBox[
+     RowBox[{"32", " ", "\[Pi]", " ", "G"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "0a9aa13f-d4f9-424e-9dcb-e13671b67b3c"],
+ " is applied when converting the squared amplitude to the cross section."
+}], "Text",
+ Editable->False,
+ CellChangeTimes->{{4.001573248079545*^9, 
+  4.0015732621039057`*^9}},ExpressionUUID->"6205defe-6000-4341-903b-\
+c1462fb47f5b"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData["differentialCrossSection"], "Input",
+ Editable->False,
  InitializationCell->False,
  CellLabel->"In[6]:=",ExpressionUUID->"efa7e665-ecb1-4be1-91fc-45c37de0167e"],
 
@@ -753,20 +785,22 @@ Cell[BoxData[
       RowBox[{
        SuperscriptBox["m1", "2"], " ", 
        SuperscriptBox["m2", "2"]}]}]]}]], TraditionalForm]], "Output",
- CellChangeTimes->{4.00138346126875*^9},
- CellLabel->"Out[6]=",ExpressionUUID->"19784fe3-8705-41b5-9f80-b1ebac0ee2fb"]
+ CellChangeTimes->{4.001573238633073*^9},
+ CellLabel->"Out[6]=",ExpressionUUID->"0c61a5ac-0ccf-461e-be37-a1ba4cfbfcee"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["5. Check the nonrelativistic limit", "Section",ExpressionUUID->"f7d327e3-4060-40bc-a9c0-bd176427e62a"],
+Cell["5. Check the nonrelativistic limit", "Section",
+ Editable->False,ExpressionUUID->"f7d327e3-4060-40bc-a9c0-bd176427e62a"],
 
 Cell["\<\
 The leading p \[RightArrow] 0 term is compared with the gravitational \
 Rutherford expression. The equality should evaluate to True.\
-\>", "Text",ExpressionUUID->"b41235d7-1263-4cf7-becb-adbd6c6dc7b5"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"b41235d7-1263-4cf7-becb-adbd6c6dc7b5"],
 
 Cell[BoxData[
  RowBox[{
@@ -795,29 +829,33 @@ Cell[BoxData[
           RowBox[{"Sin", "[", 
            FractionBox["\[Theta]", "2"], "]"}], "4"]}], ")"}]}]]}], "]"}]}], 
   ";"}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellLabel->"In[7]:=",ExpressionUUID->"03e82b1a-6908-46d7-9344-84e87d6caac4"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData["rutherfordLimitCheck1"], "Input",
+ Editable->False,
  InitializationCell->False,
  CellLabel->"In[8]:=",ExpressionUUID->"5c213f87-1948-48f6-89c3-af25a19f94fe"],
 
 Cell[BoxData[
  FormBox["True", TraditionalForm]], "Output",
- CellChangeTimes->{4.001383461333976*^9},
- CellLabel->"Out[8]=",ExpressionUUID->"86c7886a-aa92-4a2b-a711-4206b0068856"]
+ CellChangeTimes->{4.0015732387201567`*^9},
+ CellLabel->"Out[8]=",ExpressionUUID->"b473bdff-1791-4983-94a3-aa51e3b4ef5c"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Expand beyond the leading term", "Subsection",ExpressionUUID->"cecbb9c1-7cc3-4a60-ada3-74df7ab95ecd"],
+Cell["Expand beyond the leading term", "Subsection",
+ Editable->False,ExpressionUUID->"cecbb9c1-7cc3-4a60-ada3-74df7ab95ecd"],
 
 Cell["\<\
 Series keeps the order term explicitly. Negative powers of p occur because \
 the leading long-range scattering cross section grows as p\:207b\:2074.\
-\>", "Text",ExpressionUUID->"f34a9239-0a58-44de-b623-bd5ce66fd552"],
+\>", "Text",
+ Editable->False,ExpressionUUID->"f34a9239-0a58-44de-b623-bd5ce66fd552"],
 
 Cell[CellGroupData[{
 
@@ -827,6 +865,7 @@ Cell[BoxData[
    RowBox[{"differentialCrossSection", ",", 
     RowBox[{"{", 
      RowBox[{"p", ",", "0", ",", "3"}], "}"}]}], "]"}]}]], "Input",
+ Editable->False,
  InitializationCell->False,
  CellLabel->"In[9]:=",ExpressionUUID->"ebadf493-9dca-4d59-9d0e-339a073488be"],
 
@@ -994,15 +1033,16 @@ Cell[BoxData[
 $CellContext`m2 + $CellContext`m2^2) Cos[2 $CellContext`\[Theta]]) 
      Csc[Rational[1, 2] $CellContext`\[Theta]]^4}, -4, 4, 1],
    Editable->False], TraditionalForm]], "Output",
- CellChangeTimes->{4.00138346177547*^9},
- CellLabel->"Out[9]=",ExpressionUUID->"fd836544-7824-46ac-901d-446eec8b9888"]
+ CellChangeTimes->{4.001573239216083*^9},
+ CellLabel->"Out[9]=",ExpressionUUID->"459394e6-b47e-4dcc-96ee-382c3560083c"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["How to adapt this example", "Section",ExpressionUUID->"ea7360aa-5b67-41ee-b7ec-61ce35c090ac"],
+Cell["How to adapt this example", "Section",
+ Editable->False,ExpressionUUID->"ea7360aa-5b67-41ee-b7ec-61ce35c090ac"],
 
 Cell["\<\
 Change one ingredient at a time: a mass, a momentum assignment, or a vertex \
@@ -1011,7 +1051,8 @@ scalar-product definitions and assumptions persist in the session. \
 Re-evaluate all dependent cells after a change. Inspect the stored \
 intermediate expressions if a comparison is False or remains unevaluated; do \
 not treat an unresolved expression as a passed check.\
-\>", "Text",ExpressionUUID->"e06d1cca-e319-44c5-a3dd-3325d4d9a539"]
+\>", "Text",
+ Editable->False,ExpressionUUID->"e06d1cca-e319-44c5-a3dd-3325d4d9a539"]
 }, Open  ]]
 }, Open  ]]
 },
@@ -1035,100 +1076,98 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[640, 23, 122, 0, 96, "Title",ExpressionUUID->"dc9fa314-8461-47a9-99a4-40565efd709a"],
-Cell[765, 25, 248, 4, 33, "Text",ExpressionUUID->"5ffac651-9e08-4986-8274-61357ac7f5ad"],
+Cell[640, 23, 140, 1, 96, "Title",ExpressionUUID->"dc9fa314-8461-47a9-99a4-40565efd709a"],
+Cell[783, 26, 266, 5, 33, "Text",ExpressionUUID->"5ffac651-9e08-4986-8274-61357ac7f5ad"],
 Cell[CellGroupData[{
-Cell[1038, 33, 95, 0, 65, "Section",ExpressionUUID->"d3192615-35de-4b5f-94e2-39c60d4277f4"],
-Cell[1136, 35, 470, 7, 55, "Text",ExpressionUUID->"e1b93f4a-0cc5-453b-a7bf-0c782d10ec56"],
+Cell[1074, 35, 113, 1, 65, "Section",ExpressionUUID->"d3192615-35de-4b5f-94e2-39c60d4277f4"],
+Cell[1190, 38, 488, 8, 55, "Text",ExpressionUUID->"e1b93f4a-0cc5-453b-a7bf-0c782d10ec56"],
 Cell[CellGroupData[{
-Cell[1631, 46, 227, 5, 29, "Input",ExpressionUUID->"4515f81e-b61a-4241-a539-2cbe98bbcb95",
+Cell[1703, 50, 245, 6, 29, "Input",ExpressionUUID->"4515f81e-b61a-4241-a539-2cbe98bbcb95",
  InitializationCell->False],
 Cell[CellGroupData[{
-Cell[1883, 55, 3627, 96, 26, "Print",ExpressionUUID->"94ea9b51-3fba-49c6-aa25-fc5cc283c92d"],
-Cell[5513, 153, 334, 7, 26, "Print",ExpressionUUID->"279dbf21-6473-46db-8ba4-5e77da277e94"],
-Cell[5850, 162, 378, 9, 26, "Print",ExpressionUUID->"c66a6a24-4761-48f9-89a3-bda251134fb0"],
-Cell[6231, 173, 257, 7, 26, "Print",ExpressionUUID->"7fe60ca1-e6e6-473e-a2ce-1280bf67aef1"],
-Cell[6491, 182, 329, 7, 26, "Print",ExpressionUUID->"db08a455-a779-4945-99a0-830a5e1aa5d8"],
-Cell[6823, 191, 433, 9, 26, "Print",ExpressionUUID->"649a77ef-b1c7-4293-aa4f-55f83cc25625"],
-Cell[7259, 202, 268, 7, 26, "Print",ExpressionUUID->"b4a4ce2e-3d22-4b75-b62b-478bed4f3899"],
-Cell[7530, 211, 258, 6, 26, "Print",ExpressionUUID->"ff24605c-edd4-422b-bda0-8373de144443"],
-Cell[7791, 219, 293, 7, 26, "Print",ExpressionUUID->"0e6451ad-b433-45e6-b849-66e7e165cdec"],
-Cell[8087, 228, 282, 7, 26, "Print",ExpressionUUID->"351a8d4f-e76f-45cb-9b23-ded928ffce55"],
-Cell[8372, 237, 269, 6, 26, "Print",ExpressionUUID->"5f629a2a-d4fd-4498-82b9-75b7d3227b72"],
-Cell[8644, 245, 439, 9, 26, "Print",ExpressionUUID->"0f2b0cbc-d791-4246-8ca9-fbbed0fcd898"],
-Cell[9086, 256, 2397, 69, 26, "Print",ExpressionUUID->"619512f0-bdb9-493a-bf48-3ff366c5d1a7"]
+Cell[1973, 60, 3625, 96, 26, "Print",ExpressionUUID->"44514dbc-67da-443c-b3b7-2e7ca97871b7"],
+Cell[5601, 158, 334, 7, 26, "Print",ExpressionUUID->"32fab231-43eb-49c6-a871-2b33af71475f"],
+Cell[5938, 167, 378, 9, 26, "Print",ExpressionUUID->"666a17cf-5a3e-43bc-a8a2-f5cba620f3fb"],
+Cell[6319, 178, 257, 7, 26, "Print",ExpressionUUID->"1ac38c45-3b5d-4bea-abd0-16ebeed53577"],
+Cell[6579, 187, 329, 7, 26, "Print",ExpressionUUID->"01f2bf2c-6b16-4377-a2a5-a0725099e65f"],
+Cell[6911, 196, 432, 9, 26, "Print",ExpressionUUID->"94d0bcd4-a875-48c5-9627-3513c9b3b165"],
+Cell[7346, 207, 268, 7, 26, "Print",ExpressionUUID->"72f571e3-d27b-43de-91a2-eaf004a4b41e"],
+Cell[7617, 216, 258, 6, 26, "Print",ExpressionUUID->"d3faab04-ac96-444b-b443-8c71f8092c59"],
+Cell[7878, 224, 295, 7, 26, "Print",ExpressionUUID->"5cacd8e0-0854-4615-b8a9-d1e1756f34cf"],
+Cell[8176, 233, 283, 7, 26, "Print",ExpressionUUID->"e828bcac-0865-41da-bfd8-58e66c480a60"],
+Cell[8462, 242, 265, 6, 26, "Print",ExpressionUUID->"45c2ca1e-1b58-4b6f-be17-78aa66d16834"],
+Cell[8730, 250, 482, 9, 26, "Print",ExpressionUUID->"2a74cc93-8f39-4a27-89b8-c4be8f37cac2"],
+Cell[9215, 261, 2400, 69, 26, "Print",ExpressionUUID->"2075a3c9-377c-4d6e-867d-1316b640ca73"]
 }, Open  ]]
 }, Open  ]],
-Cell[11510, 329, 425, 8, 55, "Text",ExpressionUUID->"4a8d65e3-6ce6-4c02-87ff-e16879c1c9ec"],
-Cell[11938, 339, 359, 5, 55, "Text",ExpressionUUID->"1633e35a-7106-4b20-bb85-7f917f324481"]
+Cell[11642, 334, 442, 9, 55, "Text",ExpressionUUID->"4a8d65e3-6ce6-4c02-87ff-e16879c1c9ec"],
+Cell[12087, 345, 377, 6, 55, "Text",ExpressionUUID->"1633e35a-7106-4b20-bb85-7f917f324481"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[12334, 349, 104, 0, 65, "Section",ExpressionUUID->"9bc80cca-f19c-4ecd-b9f6-2a8b989c053a"],
-Cell[12441, 351, 255, 4, 33, "Text",ExpressionUUID->"01620e23-85a0-4523-8004-63427842b0cd"],
-Cell[12699, 357, 321, 7, 29, "Input",ExpressionUUID->"f7febe59-e156-4048-a991-f1fb6e574b20",
+Cell[12501, 356, 122, 1, 65, "Section",ExpressionUUID->"9bc80cca-f19c-4ecd-b9f6-2a8b989c053a"],
+Cell[12626, 359, 273, 5, 33, "Text",ExpressionUUID->"01620e23-85a0-4523-8004-63427842b0cd"],
+Cell[12902, 366, 339, 8, 29, "Input",ExpressionUUID->"f7febe59-e156-4048-a991-f1fb6e574b20",
  InitializationCell->False]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[13057, 369, 109, 0, 65, "Section",ExpressionUUID->"599f55d5-4f28-4795-8e57-81577b5f7fe4"],
-Cell[13169, 371, 317, 5, 55, "Text",ExpressionUUID->"7c78b6f2-b5a5-4d26-af16-207e131b8cc2"],
+Cell[13278, 379, 127, 1, 65, "Section",ExpressionUUID->"599f55d5-4f28-4795-8e57-81577b5f7fe4"],
+Cell[13408, 382, 335, 6, 55, "Text",ExpressionUUID->"7c78b6f2-b5a5-4d26-af16-207e131b8cc2"],
 Cell[CellGroupData[{
-Cell[13511, 380, 1132, 29, 93, "Input",ExpressionUUID->"94425197-bc9f-4ad2-99e3-3f0e012cea09",
+Cell[13768, 392, 1149, 30, 93, "Input",ExpressionUUID->"94425197-bc9f-4ad2-99e3-3f0e012cea09",
  InitializationCell->False],
-Cell[14646, 411, 1313, 40, 52, "Output",ExpressionUUID->"97fc8801-9343-4c7d-bd99-5e753bd1664c"]
+Cell[14920, 424, 1312, 40, 52, "Output",ExpressionUUID->"fc3b0f20-0e0d-42d1-96b0-302a40510aa2"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[16008, 457, 112, 0, 65, "Section",ExpressionUUID->"a6cb08aa-8fa6-4f4f-8a70-574997efe030"],
-Cell[16123, 459, 280, 4, 33, "Text",ExpressionUUID->"1e7c1bf8-9ba7-4e0f-a79f-3b2dff7548f9"],
-Cell[16406, 465, 354, 9, 29, "Input",ExpressionUUID->"7a60ef80-165f-4903-9cb3-daf9f3b360ed",
+Cell[16281, 470, 130, 1, 65, "Section",ExpressionUUID->"a6cb08aa-8fa6-4f4f-8a70-574997efe030"],
+Cell[16414, 473, 298, 5, 33, "Text",ExpressionUUID->"1e7c1bf8-9ba7-4e0f-a79f-3b2dff7548f9"],
+Cell[16715, 480, 372, 10, 29, "Input",ExpressionUUID->"7a60ef80-165f-4903-9cb3-daf9f3b360ed",
  InitializationCell->False],
 Cell[CellGroupData[{
-Cell[16785, 478, 106, 0, 53, "Subsection",ExpressionUUID->"645a3519-c24d-4091-9ea9-2cd4ccca2c9a"],
-Cell[16894, 480, 444, 7, 55, "Text",ExpressionUUID->"6ce5b74d-09a8-48a9-b5dc-219ad4234f19"],
+Cell[17112, 494, 124, 1, 53, "Subsection",ExpressionUUID->"645a3519-c24d-4091-9ea9-2cd4ccca2c9a"],
+Cell[17239, 497, 462, 8, 55, "Text",ExpressionUUID->"6ce5b74d-09a8-48a9-b5dc-219ad4234f19"],
 Cell[CellGroupData[{
-Cell[17363, 491, 4037, 119, 177, "Input",ExpressionUUID->"6a336cdb-d961-40ec-b731-1701740422b1",
+Cell[17726, 509, 4055, 120, 177, "Input",ExpressionUUID->"6a336cdb-d961-40ec-b731-1701740422b1",
  InitializationCell->False],
-Cell[21403, 612, 235, 5, 32, "Output",ExpressionUUID->"e9e06548-3263-4a59-9229-405815f0c629"]
+Cell[21784, 631, 237, 5, 32, "Output",ExpressionUUID->"dc7dd86a-5257-4ef0-80fe-ec5376a2959e"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[21687, 623, 115, 0, 53, "Subsection",ExpressionUUID->"3593c57d-60e9-425b-a599-b009d54b119e"],
-Cell[21805, 625, 261, 4, 38, "Text",ExpressionUUID->"6205defe-6000-4341-903b-c1462fb47f5b"],
+Cell[22070, 642, 133, 1, 53, "Subsection",ExpressionUUID->"3593c57d-60e9-425b-a599-b009d54b119e"],
+Cell[22206, 645, 557, 15, 34, "Text",ExpressionUUID->"6205defe-6000-4341-903b-c1462fb47f5b"],
 Cell[CellGroupData[{
-Cell[22091, 633, 156, 2, 29, "Input",ExpressionUUID->"efa7e665-ecb1-4be1-91fc-45c37de0167e",
+Cell[22788, 664, 174, 3, 29, "Input",ExpressionUUID->"efa7e665-ecb1-4be1-91fc-45c37de0167e",
  InitializationCell->False],
-Cell[22250, 637, 3805, 119, 72, "Output",ExpressionUUID->"19784fe3-8705-41b5-9f80-b1ebac0ee2fb"]
-}, Open  ]]
-}, Open  ]]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[26116, 763, 108, 0, 65, "Section",ExpressionUUID->"f7d327e3-4060-40bc-a9c0-bd176427e62a"],
-Cell[26227, 765, 211, 3, 33, "Text",ExpressionUUID->"b41235d7-1263-4cf7-becb-adbd6c6dc7b5"],
-Cell[26441, 770, 958, 28, 56, "Input",ExpressionUUID->"03e82b1a-6908-46d7-9344-84e87d6caac4",
- InitializationCell->False],
-Cell[CellGroupData[{
-Cell[27424, 802, 153, 2, 29, "Input",ExpressionUUID->"5c213f87-1948-48f6-89c3-af25a19f94fe",
- InitializationCell->False],
-Cell[27580, 806, 179, 3, 32, "Output",ExpressionUUID->"86c7886a-aa92-4a2b-a711-4206b0068856"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[27796, 814, 107, 0, 53, "Subsection",ExpressionUUID->"cecbb9c1-7cc3-4a60-ada3-74df7ab95ecd"],
-Cell[27906, 816, 227, 3, 33, "Text",ExpressionUUID->"f34a9239-0a58-44de-b623-bd5ce66fd552"],
-Cell[CellGroupData[{
-Cell[28158, 823, 304, 7, 29, "Input",ExpressionUUID->"ebadf493-9dca-4d59-9d0e-339a073488be",
- InitializationCell->False],
-Cell[28465, 832, 6539, 165, 112, "Output",ExpressionUUID->"fd836544-7824-46ac-901d-446eec8b9888"]
+Cell[22965, 669, 3806, 119, 72, "Output",ExpressionUUID->"0c61a5ac-0ccf-461e-be37-a1ba4cfbfcee"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[35065, 1004, 99, 0, 65, "Section",ExpressionUUID->"ea7360aa-5b67-41ee-b7ec-61ce35c090ac"],
-Cell[35167, 1006, 507, 7, 55, "Text",ExpressionUUID->"e06d1cca-e319-44c5-a3dd-3325d4d9a539"]
+Cell[26832, 795, 126, 1, 65, "Section",ExpressionUUID->"f7d327e3-4060-40bc-a9c0-bd176427e62a"],
+Cell[26961, 798, 229, 4, 33, "Text",ExpressionUUID->"b41235d7-1263-4cf7-becb-adbd6c6dc7b5"],
+Cell[27193, 804, 976, 29, 56, "Input",ExpressionUUID->"03e82b1a-6908-46d7-9344-84e87d6caac4",
+ InitializationCell->False],
+Cell[CellGroupData[{
+Cell[28194, 837, 171, 3, 29, "Input",ExpressionUUID->"5c213f87-1948-48f6-89c3-af25a19f94fe",
+ InitializationCell->False],
+Cell[28368, 842, 181, 3, 32, "Output",ExpressionUUID->"b473bdff-1791-4983-94a3-aa51e3b4ef5c"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[28586, 850, 125, 1, 53, "Subsection",ExpressionUUID->"cecbb9c1-7cc3-4a60-ada3-74df7ab95ecd"],
+Cell[28714, 853, 245, 4, 33, "Text",ExpressionUUID->"f34a9239-0a58-44de-b623-bd5ce66fd552"],
+Cell[CellGroupData[{
+Cell[28984, 861, 322, 8, 29, "Input",ExpressionUUID->"ebadf493-9dca-4d59-9d0e-339a073488be",
+ InitializationCell->False],
+Cell[29309, 871, 6540, 165, 112, "Output",ExpressionUUID->"459394e6-b47e-4dcc-96ee-382c3560083c"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[35910, 1043, 117, 1, 65, "Section",ExpressionUUID->"ea7360aa-5b67-41ee-b7ec-61ce35c090ac"],
+Cell[36030, 1046, 525, 8, 55, "Text",ExpressionUUID->"e06d1cca-e319-44c5-a3dd-3325d4d9a539"]
 }, Open  ]]
 }, Open  ]]
 }
 ]
 *)
-
-(* End of internal cache information *)
 

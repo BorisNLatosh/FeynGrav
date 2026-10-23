@@ -43,64 +43,108 @@ safeNameQ[name_] := StringQ[name] && StringLength[name] > 0 &&
         # =!= "" && # =!= "." && # =!= ".." && !StringEndsQ[#, " " | "."] &&
         !StringMatchQ[ToUpperCase[First[StringSplit[#, "."]]],
             RegularExpression["CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9]"]] &];
-validateArchive[file_] := Module[{s, size, tail, positions, e, count, offset, cdSize, h, n, x, c, raw, name,
-        mode, local, names = {}, u, extra, fieldsOK, require},
-    u[b_] := FromDigits[Reverse[b], 256];
-    require[q_] := If[!TrueQ[q], stop["InvalidArchive", "Unsupported or unsafe ZIP archive."]];
-    fieldsOK[bytes_] := Module[{i = 1, len, id},
-        While[i <= Length[bytes],
-            require[i + 3 <= Length[bytes]];
-            id = u[bytes[[i ;; i + 1]]]; len = u[bytes[[i + 2 ;; i + 3]]];
-            (* Only timestamp/UID metadata. Reject alternate Unicode paths and ZIP64. *)
-            require[MemberQ[{10, 21589, 30837}, id] && i + 3 + len <= Length[bytes]];
-            i += 4 + len]; True];
-    s = checked[OpenRead[file, BinaryFormat -> True], "ArchiveReadFailed", "Cannot read ZIP archive."];
+validateArchive[file_] := Module[
+    {stream, archiveSize, archiveTail, endRecordPositions, endRecordStart,
+     entryCount, centralOffset, centralSize, header, nameLength, extraLength,
+     commentLength, rawName, entryName, fileTypeBits, nextCentralEntry,
+     entryNames = {}, littleEndianInteger, extraFields, validateExtraFields, requireArchive},
+    (* ZIP integers are unsigned and stored least-significant byte first. *)
+    littleEndianInteger[b_] := FromDigits[Reverse[b], 256];
+    requireArchive[q_] := If[!TrueQ[q], stop["InvalidArchive", "Unsupported or unsafe ZIP archive."]];
+    validateExtraFields[bytes_] := Module[{extraOffset = 1, payloadLength, fieldID},
+        While[extraOffset <= Length[bytes],
+            requireArchive[extraOffset + 3 <= Length[bytes]];
+            fieldID = littleEndianInteger[bytes[[extraOffset ;; extraOffset + 1]]];
+            payloadLength = littleEndianInteger[bytes[[extraOffset + 2 ;; extraOffset + 3]]];
+            (* Extra-field IDs: 10 = NTFS timestamps, 21589 (0x5455) = extended
+               timestamps, 30837 (0x7875) = Unix UID/GID. Preserve this allowlist;
+               alternate Unicode paths and ZIP64 metadata are rejected. *)
+            requireArchive[MemberQ[{10, 21589, 30837}, fieldID] &&
+                extraOffset + 3 + payloadLength <= Length[bytes]];
+            extraOffset += 4 + payloadLength];
+        True];
+    stream = checked[OpenRead[file, BinaryFormat -> True], "ArchiveReadFailed", "Cannot read ZIP archive."];
     WithCleanup[Null,
-        size = FileByteCount[file]; require[size >= 22];
-        SetStreamPosition[s, Max[0, size - 65557]];
-        tail = BinaryReadList[s, "Byte"];
-        positions = SequencePosition[tail, {80, 75, 5, 6}]; require[positions =!= {}];
-        e = First[Last[positions]]; require[e + 21 <= Length[tail]];
-        h = Take[tail, {e, e + 21}];
-        require[e + 21 + u[h[[21 ;; 22]]] === Length[tail]];
-        require[u[h[[5 ;; 8]]] === 0]; count = u[h[[11 ;; 12]]];
-        require[0 < count < 65535 && count === u[h[[9 ;; 10]]]];
-        cdSize = u[h[[13 ;; 16]]]; offset = u[h[[17 ;; 20]]];
-        require[offset + cdSize === size - Length[tail] + e - 1];
-        SetStreamPosition[s, offset];
+        archiveSize = FileByteCount[file];
+        requireArchive[archiveSize >= 22];
+        (* End-of-central-directory record: 22 fixed bytes plus at most
+           65535 comment bytes. Its signature is PK followed by bytes 5, 6. *)
+        SetStreamPosition[stream, Max[0, archiveSize - 65557]];
+        archiveTail = BinaryReadList[stream, "Byte"];
+        endRecordPositions = SequencePosition[archiveTail, {80, 75, 5, 6}];
+        requireArchive[endRecordPositions =!= {}];
+        endRecordStart = First[Last[endRecordPositions]];
+        requireArchive[endRecordStart + 21 <= Length[archiveTail]];
+        header = Take[archiveTail, {endRecordStart, endRecordStart + 21}];
+        requireArchive[endRecordStart + 21 + littleEndianInteger[header[[21 ;; 22]]] === Length[archiveTail]];
+        (* Both disk numbers must be zero, and both entry counts must agree.
+           A count of 0xFFFF is reserved for ZIP64, which is unsupported. *)
+        requireArchive[littleEndianInteger[header[[5 ;; 8]]] === 0];
+        entryCount = littleEndianInteger[header[[11 ;; 12]]];
+        requireArchive[0 < entryCount < 65535 && entryCount === littleEndianInteger[header[[9 ;; 10]]]];
+        centralSize = littleEndianInteger[header[[13 ;; 16]]];
+        centralOffset = littleEndianInteger[header[[17 ;; 20]]];
+        requireArchive[centralOffset + centralSize === archiveSize - Length[archiveTail] + endRecordStart - 1];
+        (* Central-directory entries have 46 fixed bytes. Filename, extra-field
+           and comment lengths occupy bytes 29-34 (one-based positions here). *)
+        SetStreamPosition[stream, centralOffset];
         Do[
-            h = BinaryReadList[s, "Byte", 46]; require[Length[h] === 46 && h[[1 ;; 4]] === {80, 75, 1, 2}];
-            n = u[h[[29 ;; 30]]]; x = u[h[[31 ;; 32]]]; c = u[h[[33 ;; 34]]];
-            require[n > 0 && EvenQ[u[h[[9 ;; 10]]]] && u[h[[35 ;; 36]]] === 0];
-            require[FreeQ[{u[h[[21 ;; 24]]], u[h[[25 ;; 28]]], u[h[[43 ;; 46]]]}, 4294967295]];
-            mode = BitAnd[BitShiftRight[u[h[[39 ;; 42]]], 16], 61440];
-            require[MemberQ[{0, 16384, 32768}, mode]];
-            raw = BinaryReadList[s, "Byte", n]; require[Length[raw] === n];
-            name = Quiet[Check[FromCharacterCode[raw, "UTF-8"], $Failed]]; require[safeNameQ[name]];
-            AppendTo[names, name]; extra = BinaryReadList[s, "Byte", x]; require[Length[extra] === x]; fieldsOK[extra];
-            local = StreamPosition[s] + c;
-            SetStreamPosition[s, u[h[[43 ;; 46]]]];
-            h = BinaryReadList[s, "Byte", 30]; require[Length[h] === 30 && h[[1 ;; 4]] === {80, 75, 3, 4}];
-            require[u[h[[27 ;; 28]]] === n && BinaryReadList[s, "Byte", n] === raw];
-            x = u[h[[29 ;; 30]]]; extra = BinaryReadList[s, "Byte", x]; require[Length[extra] === x]; fieldsOK[extra];
-            SetStreamPosition[s, local], {count}];
-        require[StreamPosition[s] === offset + cdSize];
-        require[DuplicateFreeQ[ToLowerCase[StringTrim[#, "/"]] & /@ names]];
-        names,
-        Close[s]]
+            header = BinaryReadList[stream, "Byte", 46];
+            requireArchive[Length[header] === 46 && header[[1 ;; 4]] === {80, 75, 1, 2}];
+            nameLength = littleEndianInteger[header[[29 ;; 30]]];
+            extraLength = littleEndianInteger[header[[31 ;; 32]]];
+            commentLength = littleEndianInteger[header[[33 ;; 34]]];
+            (* Flag bit 0 denotes encryption; the starting disk must be zero. *)
+            requireArchive[nameLength > 0 && EvenQ[littleEndianInteger[header[[9 ;; 10]]]] &&
+                littleEndianInteger[header[[35 ;; 36]]] === 0];
+            (* 0xFFFFFFFF in compressed/uncompressed size or local-header offset
+               is the ZIP64 sentinel. These fields occupy bytes 21-28 and 43-46. *)
+            requireArchive[FreeQ[{littleEndianInteger[header[[21 ;; 24]]],
+                littleEndianInteger[header[[25 ;; 28]]], littleEndianInteger[header[[43 ;; 46]]]}, 4294967295]];
+            (* Unix file type occupies the upper external-attribute bits:
+               mask 0xF000; allow unspecified, directory (0x4000), regular (0x8000). *)
+            fileTypeBits = BitAnd[BitShiftRight[littleEndianInteger[header[[39 ;; 42]]], 16], 61440];
+            requireArchive[MemberQ[{0, 16384, 32768}, fileTypeBits]];
+            rawName = BinaryReadList[stream, "Byte", nameLength];
+            requireArchive[Length[rawName] === nameLength];
+            entryName = Quiet[Check[FromCharacterCode[rawName, "UTF-8"], $Failed]];
+            requireArchive[safeNameQ[entryName]];
+            AppendTo[entryNames, entryName];
+            extraFields = BinaryReadList[stream, "Byte", extraLength];
+            requireArchive[Length[extraFields] === extraLength];
+            validateExtraFields[extraFields];
+            (* Save the next central entry before visiting the 30-byte local
+               header. Its raw filename must agree with the central entry. *)
+            nextCentralEntry = StreamPosition[stream] + commentLength;
+            SetStreamPosition[stream, littleEndianInteger[header[[43 ;; 46]]]];
+            header = BinaryReadList[stream, "Byte", 30];
+            requireArchive[Length[header] === 30 && header[[1 ;; 4]] === {80, 75, 3, 4}];
+            requireArchive[littleEndianInteger[header[[27 ;; 28]]] === nameLength &&
+                BinaryReadList[stream, "Byte", nameLength] === rawName];
+            extraLength = littleEndianInteger[header[[29 ;; 30]]];
+            extraFields = BinaryReadList[stream, "Byte", extraLength];
+            requireArchive[Length[extraFields] === extraLength];
+            validateExtraFields[extraFields];
+            SetStreamPosition[stream, nextCentralEntry], {entryCount}];
+        requireArchive[StreamPosition[stream] === centralOffset + centralSize];
+        requireArchive[DuplicateFreeQ[ToLowerCase[StringTrim[#, "/"]] & /@ entryNames]];
+        entryNames,
+        Close[stream]]
 ];
 
-(* A fresh subprocess writes a small JSON report. Never parse its console as
-   Wolfram input; no caller definitions or loaded package state are inherited. *)
-probe[stage_, work_] := Module[{script, report, code, process = None, output, errors, diagnostics, data, started, timedOut},
-    script = FileNameJoin[{work, "probe-" <> CreateUUID[] <> ".wls"}]; report = script <> ".json";
-    code = "$FeynCalcStartupMessages=False;$LoadAddOns={};\n" <>
+(* Keep the child program separate from process ownership and diagnostics.
+   InputForm serialises injected paths without changing their Wolfram meaning. *)
+probeSource[stage_, report_] :=
+    (* Dependency discovery and minimum-version check. *)
+    "$FeynCalcStartupMessages=False;$LoadAddOns={};\n" <>
         "$Path=" <> ToString[Select[$Path, StringQ], InputForm] <> ";\n" <>
         "fc=Quiet[Check[FindFile[\"FeynCalc`\"],$Failed]];\n" <>
         "ok=StringQ[fc]&&Quiet[Check[Get[fc];StringQ[FeynCalc`$FeynCalcVersion],False]];\n" <>
         "ver=If[TrueQ[ok],FeynCalc`$FeynCalcVersion,\"unavailable\"];\n" <>
         "parts=StringCases[ver,DigitCharacter..]; nums=If[Length[parts]>=3,FromDigits/@Take[parts,3],{0,0,0}];\n" <>
         "ok=TrueQ[ok]&&OrderedQ[{{10,2,1},nums}];\n" <>
+        (* A staged package also has to load and resolve representative vertices
+           without launching external processes. *)
         If[stage === None, "",
             "root=" <> ToString[stage, InputForm] <> ";\n" <>
             "If[ok,calls=0;Block[{StartProcess=Function[Null,calls++;$Failed,HoldAll],RunProcess=Function[Null,calls++;$Failed,HoldAll]},\n" <>
@@ -108,8 +152,15 @@ probe[stage_, work_] := Module[{script, report, code, process = None, output, er
             "ok=loaded=!=$Failed&&!FailureQ[loaded]&&TrueQ[FeynGrav`FeynGravInitialized]&&FileNameSplit[ExpandFileName[FeynGrav`Private`packageDirectory]]===FileNameSplit[ExpandFileName[root]];\n" <>
             "ok=ok&&TrueQ[Check[vertices={FeynGrav`GravitonVertex[a,b,p,c,d,q,e,f,r],FeynGrav`GravitonScalarVertex[{a,b},p,q,m],FeynGrav`GravitonFermionVertex[{a,b,k},p,q,m],FeynGrav`GravitonVectorVertex[{a,b,k},c,p,d,q]};\n" <>
             "FreeQ[vertices,_Failure|_FeynGrav`GravitonVertex|_FeynGrav`GravitonScalarVertex|_FeynGrav`GravitonFermionVertex|_FeynGrav`GravitonVectorVertex],False]];];ok=ok&&calls===0];\n"] <>
+        (* Report through JSON, independently of package console output. *)
         "Export[" <> ToString[report, InputForm] <>
         ",<|\"OK\"->TrueQ[ok],\"WolframVersion\"->$Version,\"FeynCalcVersion\"->ver,\"FeynCalcPath\"->If[StringQ[fc],fc,\"\"]|>,\"RawJSON\"];Quit[];";
+
+(* A fresh subprocess writes a small JSON report. Never parse its console as
+   Wolfram input; no caller definitions or loaded package state are inherited. *)
+probe[stage_, work_] := Module[{script, report, code, process = None, output, errors, diagnostics, data, started, timedOut},
+    script = FileNameJoin[{work, "probe-" <> CreateUUID[] <> ".wls"}]; report = script <> ".json";
+    code = probeSource[stage, report];
     checked[Export[script, code, "Text"], "ProbeFailed", "Cannot write verification script."];
     WithCleanup[Null,
         AbortProtect[process = checked[StartProcess[{First[$CommandLine], "-noinit", "-script", script}], "ProbeFailed", "Cannot start a fresh Wolfram kernel."]];
@@ -138,16 +189,25 @@ installDependency[] := Module[{loaded},
         stop["DependencyInstallerFailed", "Could not load the official FeynCalc installer."]];
     FeynCalcInstaller`InstallFeynCalc[];
 ];
-requiredFiles = Join[{"FeynGrav.wl", "Rules/Nieuwenhuizen.wl", "CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/FORMRuntime.wl", "CalcFormConverter/Templates/Program.frm.in"},
+requiredFiles = Join[{"FeynGrav.wl", "Rules/Nieuwenhuizen.wl", "CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/FORMRuntime.wl",
+    "CalcFormConverter/Templates/Program.frm.in"},
     Flatten[Table["Libs/" <> family <> "_" <> ToString[n],
         {family, {"GravitonVertex", "GravitonScalarVertex", "GravitonScalarPotentialVertex", "GravitonFermionVertex", "GravitonMassiveVectorVertex", "GravitonVectorVertex", "GravitonVectorGhostVertex"}}, {n, 2}]]];
 (* Revision-aware runtime requirements: older compatible revisions did not load
    Conventions or Dirac/colour modules. Require each resource when its owning
    source names it. Read source as text only; never evaluate it for discovery.
-   Extend this table when introducing a new runtime module or lazy template. *)
+   Extend this table when introducing a new runtime module or lazy template.
+   Detection below matches the quoted target basename anywhere in source text,
+   including comments; dynamically constructed names are not discovered. Keep
+   dependency filenames literal and maintain these edges when moving modules.
+   Package-installer layout fixtures: FeynGravSimplify/Tests/Loading.wls.
+   CalcFormConverter/Tests/Installer.wls tests the separate FORM installer. *)
 runtimeDependencies = {
     {"FeynGrav.wl", "Conventions.wl"},
     {"Rules/Nieuwenhuizen.wl", "Rules/RuleValidation.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/MappingEncoding.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/ExportAssembly.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/ImportReconstruction.wl"},
     {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/DiracColour.wl"},
     {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/DiracAlgebra.wl"},
     {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/ColourAlgebra.wl"},
@@ -163,6 +223,11 @@ runtimeDependencies = {
     {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/LoopDenominatorGroups.wl"},
     {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/SharedCoefficientReader.wl"},
     {"CalcFormConverter/CalcFormConverter.wl", "CalcFormConverter/FORMRuntime.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "FeynGravSimplify/RestrictedCodec.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "FeynGravSimplify/Contractor.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "FeynGravSimplify/FORM.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "FeynGravSimplify/RestrictedCoordination.wl"},
+    {"CalcFormConverter/CalcFormConverter.wl", "FeynGravSimplify/Facade.wl"},
     {"CalcFormConverter/LoopDenominatorGroups.wl", "CalcFormConverter/Templates/LoopDenominatorGroups.frm.in"},
     {"CalcFormConverter/PropagatorGroups.wl", "CalcFormConverter/Templates/PropagatorFactors.frm.in"},
     {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/RationalCoefficients.frm.in"},
@@ -188,7 +253,7 @@ validateLayout[dir_] := Module[{required = requiredFiles, missing, path, source,
 InstallFeynGrav[opts : OptionsPattern[]] := Module[
     {dest = OptionValue[InstallFeynGravTo], ref = OptionValue[FeynGravReference], archive = OptionValue[FeynGravArchive],
      overwrite = OptionValue[OverwriteFeynGrav], dependency = OptionValue[InstallFeynCalcDependency], work = None,
-     backup = None, source, files, root, staged, dep, verified, result, cleanup = {}, retain = False, parent},
+     backup = None, source, files, root, staged, dep, verified, result, cleanup = {}, retainWorkForRecovery = False, parent},
     result = Catch[CheckAbort[
         If[$VersionNumber < 12.2, stop["UnsupportedWolfram", "Wolfram Language 12.2 or newer is required."]];
         If[!AllTrue[First /@ {opts}, MemberQ[First /@ Options[InstallFeynGrav], #] &], stop["InvalidOption", "Unknown installer option."]];
@@ -204,6 +269,8 @@ InstallFeynGrav[opts : OptionsPattern[]] := Module[
         If[archive =!= Automatic && (!StringQ[archive] || FileType[archive] =!= File), stop["InvalidArchive", "Local archive must be an existing ZIP file."]];
         source = If[archive === Automatic, archiveURL[ref], ExpandFileName[archive]];
         If[!DirectoryQ[parent], checked[CreateDirectory[parent, CreateIntermediateDirectories -> True], "CreateDirectoryFailed", "Cannot create destination parent."]];
+        (* A sibling staging directory keeps publication on the destination
+           filesystem; the replacement below uses directory renames. *)
         work = checked[CreateDirectory[FileNameJoin[{parent, ".feyngrav-install-" <> CreateUUID[]}]], "CreateDirectoryFailed", "Cannot create staging directory."];
         dep = probe[None, work];
         If[!TrueQ[dep["OK"]],
@@ -226,18 +293,22 @@ InstallFeynGrav[opts : OptionsPattern[]] := Module[
         If[gitCheckoutQ[dest], stop["GitCheckout", "Destination is now inside a Git checkout; installation cancelled."]];
         If[DirectoryQ[dest] && !consent[overwrite, "Replace FeynGrav at " <> dest <> "? A complete sibling backup will be retained; extra libraries and edits will not be merged."],
             stop["ReplacementDeclined", "Existing installation was left unchanged."]];
+        (* Defer interruption across backup, publication and any restoration.
+           The sibling backup is outside work and is never temporary cleanup. *)
         AbortProtect[
             If[DirectoryQ[dest], backup = dest <> ".backup-" <> CreateUUID[];
                 checked[Quiet[Check[moveDirectory[dest, backup], $Failed]], "BackupFailed", "Cannot back up the existing installation."]];
             If[Quiet[Check[moveDirectory[staged, dest], $Failed]] === $Failed,
                 If[backup =!= None && Quiet[Check[moveDirectory[backup, dest], $Failed]] === $Failed,
-                    retain = True; stop["RollbackFailed", "Installation failed and automatic restoration failed. Recover the complete old installation from BackupPath.", <|"BackupPath" -> backup, "StagingPath" -> work|>]];
+                    retainWorkForRecovery = True; stop["RollbackFailed", "Installation failed and automatic restoration failed. Recover the complete old installation from BackupPath.", <|"BackupPath" -> backup, "StagingPath" -> work|>]];
                 stop["InstallFailed", "Could not install the staged directory; any previous installation was restored."]]
         ];
         <|"InstalledPath" -> dest, "Reference" -> If[OptionValue[FeynGravArchive] === Automatic, ref, Null],
           "Source" -> source, "Verification" -> verified, "BackupPath" -> If[backup === None, Null, backup]|>,
         failure["Aborted", "Installation interrupted. Inspect the destination and any reported backup before retrying.", <|"InstalledPath" -> dest, "BackupPath" -> backup|>]], $failureTag];
-    If[StringQ[work] && DirectoryQ[work] && !retain,
+    (* Failed restoration retains work for manual recovery. Successful backups
+       remain untouched whether staging cleanup succeeds or fails. *)
+    If[StringQ[work] && DirectoryQ[work] && !retainWorkForRecovery,
         If[Quiet[Check[DeleteDirectory[work, DeleteContents -> True], $Failed]] === $Failed, AppendTo[cleanup, work]]];
     If[cleanup =!= {}, Print["Temporary files could not be removed: ", cleanup];
         result = If[FailureQ[result], Failure[result[[1]], Join[result[[2]], <|"RetainedPaths" -> cleanup|>]], Append[result, "RetainedPaths" -> cleanup]]];

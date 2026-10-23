@@ -21,7 +21,10 @@ This guide describes implementation and maintenance of CalcFormConverter. Start 
 
 | Module | Responsibility |
 | --- | --- |
-| `CalcFormConverter.wl` | Common vocabulary, export orchestration, mappings, restricted parsing and reconstruction |
+| `CalcFormConverter.wl` | Package shell, public vocabulary and option declarations, shared failure/serialization primitives, companion loading and facade guard |
+| `MappingEncoding.wl` | Supported-head tables, reversible symbol/mapping encoding and decoding, dimension selection and structural validation |
+| `ExportAssembly.wl` | Stage planning, in-memory conversion, FORM rendering, template validation, transactional publication and `CalcFormExport` |
+| `ImportReconstruction.wl` | Restricted and grouped result grammars, mapping validation, incremental reconstruction and `CalcFormImport` |
 | `TensorDecomposition.wl` | Integral-family validation, embedded FORM recurrence and typed coefficient reconstruction |
 | `LoopCoefficientReduction.wl` | Optional partial fractions/IBP in FORM, scalar recurrence planning and saved-coefficient mode |
 | `FORMRuntime.wl` | Executable selection, probes, process lifecycle and calculation orchestration |
@@ -35,6 +38,24 @@ This guide describes implementation and maintenance of CalcFormConverter. Start 
 | `CoefficientParser.wl` | Restricted syntax validation and held reconstruction of commuting coefficients |
 | `StageSymmetry.wl` | Verified pair symmetries and canonical intermediate tensors in prepared version-one jobs |
 | `Templates/` | Main program, grouped coefficient output, rational/dimension processing and embedded Dirac/colour procedures |
+
+The converter shell loads `MappingEncoding.wl`, `ExportAssembly.wl` and `ImportReconstruction.wl` first, in that order, then the specialised Dirac/colour, algebra, decomposition and runtime companions. Every companion is read inside the same converter-private context, so definition names, option symbols and the public context are unchanged. Loading performs no process execution and no directory changes. The installer's revision-aware dependency rows follow the same edges: a source that names a companion requires it, while pre-Stage-B archives that do not name these files remain installable.
+
+A development-only `FeynGravSimplify/` directory (repository root, not under `CalcFormConverter/`) supplies the unreleased facade commands `FeynGravSimplify` and `FeynGravFORM*`; `CalcFormConverter.wl` loads its five restricted modules through a guarded one-time `Get` block so re-loading the converter cannot reset configured options. That directory also holds the restricted external adapter and its own verification suites. The facade is documented as unreleased in `Documentation/ReleaseNotes-API01-Development.md`; the published converter interface and formats are unaffected.
+
+Companion state is explicit rather than ambient. Each companion's
+`$moduleDirectory` is set while loading and retained for later template,
+procedure and executable resolution; it is not a load-only local. The facade
+`$FacadeLoadedMark` is the persistent readiness marker, while
+`facadeGuardLoaded` and `facadeLoadResults` are short-lived loader scratch
+symbols. `$showProgress` and `$backendLabel` are dynamically scoped for one
+restricted call, and `$progressIntervalSeconds` is a constant reporting
+interval. The initial `Facade.wl` evaluation assigns defaults to the four
+independent public option stores; the converter's guarded load skips `Facade`
+on a successful later `Needs`/re-`Get`, so user `SetOptions` survives. Directly
+re-evaluating `Facade.wl` would re-run those initial assignments rather than
+preserve them. Export registries, import dictionaries, parser caches and decoder
+state are job-local. Loading launches no process or download.
 
 Export validates and normalises the input, selects typed dictionaries and format metadata, serialises, then renders and publishes files. Enabled colour processing precedes Dirac processing and final Lorentz contraction in FORM. Import validates the mapping and result, reconstructs typed expressions and applies scalar coefficient presentation for processed colour jobs; it does not run tensor colour reduction in Mathematica. Companion loading launches no processes.
 
@@ -106,7 +127,7 @@ Run from this directory or use the full path:
 python3 Tests/run.py
 ```
 
-The default runs all four suites. Installer tests always use mocks and never modify system packages. To run them separately:
+The default runs all four converter suites. Installer tests always use mocks and never modify system packages. To run them separately:
 
 ```sh
 python3 Tests/run.py --suite core
@@ -115,12 +136,49 @@ python3 Tests/run.py --suite runtime
 python3 Tests/run.py --suite integration
 ```
 
+The explicit facade entry point runs the focused `FeynGravSimplify/Tests` contract
+and lifecycle scripts in fresh kernels:
+
+```sh
+FG_CONTRACTOR_TEST_FIXTURE=/absolute/path/to/fixture-process \
+  python3 Tests/run.py --suite facade
+```
+
+`facade` runs `Adapter`, `Loading`, `Standalone`, `Reliability` and `Facade` in
+that order by default. It requires `WolframKernel`, FeynCalc, FORM and an
+existing Go-built test double; it does not require a real Contractor binary and
+is not part of the default `all` selection. `FORM.wls` and `Integration.wls`
+remain explicit standalone suites because they require the restricted FORM
+backend and a real Contractor executable respectively. The driver selects
+suites only: use the task-owned bounded runner for resource enforcement. It
+never installs packages.
+
+For the planned two-kernel bounded correction, select the two phases explicitly:
+
+```sh
+FG_CONTRACTOR_TEST_FIXTURE=/absolute/path/to/fixture-process \
+  python3 Tests/run.py --suite facade \
+    --facade-phase Loading --facade-phase Facade
+```
+
+Every selected facade phase must write `suite-completed-<Phase>.json` with
+`Suite`, integer `Passed`/`Failed` counts and `Status == "Completed"`. The driver
+clears the record before the launch and requires exit 0 plus a fresh matching
+record with positive passing and zero failed assertions. Add `--evidence-dir
+<directory>` to retain per-phase stdout/stderr, the raw completion record and
+the phase PID/exit log outside the temporary work directory. The default suite
+selection is unchanged. The selector and completion protocol passed the final Stage E Loading/Facade
+check (151/151), repeated after the directory rename. Other completion writers
+were not rerun in those batches. Historical failed runs remain documented in
+the Stage E verification report.
+
 | Suite | Dependencies | Coverage |
 | --- | --- | --- |
 | `core` | WolframKernel and FeynCalc | Mapping/parser checks, nested zero-divisor diagnostics, observed native dispatch and hostile-source rejection, persisted version-one fixture, in-memory rendering, export rollback/recovery and mocked installation decisions |
 | `form` | Core dependencies plus FORM | Bosonic export–FORM–import comparisons, staged and independent monolithic programs, free/contracted indices, mapping order and fallback cases |
 | `runtime` | FORM dependencies; Linux/POSIX test environment | Runtime probes, timeout/cancellation and cleanup; epsilon, Dirac and colour processing; grouped input, coefficient simplification, observed cancellation sectors, dimension-stage hooks and verified stage symmetry; unchanged upstream colour preflight |
 | `integration` | FORM dependencies plus FeynGrav's cubic quadratic-gravity library | Vertex/propagator comparisons, loading and namespace isolation, Dirac/colour rule comparisons and complete bubble export |
+| `facade` | FORM, FeynCalc, Go test double; no real Contractor | Codec, installer/load guard, standalone loading and option stores, recovery and process reporting, facade contract and failure payloads |
 
 Executables must be on `PATH`; `core` does not locate or launch FORM. The `runtime` suite requires Mathematica to be allowed to start external processes; a restricted execution sandbox may block it. The driver uses separate temporary directories and fresh kernels. Tests identify cases by descriptive keys, so adding a case does not change other tests' meaning. The fixed compatibility artifacts in `Tests/Fixtures` are read without regeneration.
 

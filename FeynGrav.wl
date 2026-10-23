@@ -47,7 +47,7 @@ DisplayInitializationMessages[] := Module[{},
         "Scalar field with a non-minimal kinetic coupling",
         "Einstein-scalar-Gauss-Bonnet model"
     }];
-    Print[Style["The supplied models retain interactions through order \[Kappa]^2 per vertex. Use matching Model and GenericModel names with FeynCalc-patched FeynArts in a fresh kernel. Models are not initialised automatically.", "Text"]];
+    Print[Style["The supplied models retain interactions through order \!\(\*SuperscriptBox[\(\[Kappa]\), \(2\)]\) per vertex. Use matching Model and GenericModel names with FeynCalc-patched FeynArts in a fresh kernel. Models are not initialised automatically.", "Text"]];
     If[$FrontEnd === Null,
         Print["Evaluate FeynGravCommands[] to list available commands, FeynGravConventions[] to inspect conventions and current settings, and FeynGravHowToCite[] for citation guidance."],
         Print[Style["Evaluate ", "Text"],
@@ -65,7 +65,8 @@ DisplayInitializationMessages[] := Module[{},
 ];
 
 
-(* Ensure the package is initialised only once. *)
+(* Show the banner only before a successful initialisation. Explicit reloading
+   still resets gauge defaults and reimports the four required library sectors. *)
 
 
 If[!TrueQ[FeynGravInitialized], DisplayInitializationMessages[]];
@@ -77,13 +78,56 @@ FeynGravInitialized::init = "Initialisation failed for `1`. Inspect the returned
 (* Standalone bosonic FeynCalc/FORM conversion; loading never runs FORM. *)
 
 
-Needs["CalcFormConverter`", FileNameJoin[{DirectoryName[$InputFileName], "CalcFormConverter", "CalcFormConverter.wl"}]];
+Begin["`Private`"];
+
+
+(* Keep failed attempts across reloads: Needs may cache a context even when a
+   companion did not finish loading. Use Get for first loads and retries so its
+   return value is retained instead of normalised by Needs. A successful
+   cached package retains its configured options. Current load failures always
+   take precedence over definitions left by an earlier load. *)
+If[!AssociationQ[FeynGrav`Private`$requiredCompanionLoads],
+    FeynGrav`Private`$requiredCompanionLoads = <||>];
+Module[{file = FileNameJoin[{DirectoryName[$InputFileName], "CalcFormConverter", "CalcFormConverter.wl"}],
+    retry, result, ready},
+    retry = FailureQ[Lookup[FeynGrav`Private`$requiredCompanionLoads, "CalcFormConverter", Null]];
+    AssociateTo[FeynGrav`Private`$requiredCompanionLoads,
+        "CalcFormConverter" -> Failure["CompanionLoadIncomplete", <|"File" -> file|>]];
+    result = Check[If[retry || !MemberQ[$Packages, "CalcFormConverter`"],
+        Get[file], Needs["CalcFormConverter`", file]], $Failed];
+    ready = Check[
+        TrueQ[FeynGrav`Simplification`Private`$FacadeLoadedMark] &&
+        Length[DownValues[FeynGrav`Simplification`Private`facadeReadyQ]] > 0 &&
+        TrueQ[FeynGrav`Simplification`Private`facadeReadyQ[]], False];
+    AssociateTo[FeynGrav`Private`$requiredCompanionLoads, "CalcFormConverter" ->
+        If[result =!= $Failed && result =!= $Aborted && !FailureQ[result] && TrueQ[ready], Null,
+            Failure["RequiredCompanionFailed", <|"File" -> file,
+                "LoadResult" -> result, "Ready" -> ready|>]]]
+];
 
 
 (* The package imports the Nieuwenhuizen operators and gauge projectors. *)
 
 
-Needs["Nieuwenhuizen`",DirectoryName[$InputFileName]<>"Rules/Nieuwenhuizen.wl"];
+Module[{file = FileNameJoin[{DirectoryName[$InputFileName], "Rules", "Nieuwenhuizen.wl"}],
+    retry, result, ready},
+    retry = FailureQ[Lookup[FeynGrav`Private`$requiredCompanionLoads, "Nieuwenhuizen", Null]];
+    AssociateTo[FeynGrav`Private`$requiredCompanionLoads,
+        "Nieuwenhuizen" -> Failure["CompanionLoadIncomplete", <|"File" -> file|>]];
+    result = Check[If[retry || !MemberQ[$Packages, "Nieuwenhuizen`"],
+        Get[file], Needs["Nieuwenhuizen`", file]], $Failed];
+    (* Main-package propagators use these operators and their validation layer. *)
+    ready = AllTrue[{Nieuwenhuizen`NieuwenhuizenOperator, Nieuwenhuizen`NieuwenhuizenOperatorInverse,
+        RuleValidation`RuleCall, RuleValidation`RuleRequire, RuleValidation`RuleArityFailure},
+        Length[DownValues[#]] > 0 &];
+    AssociateTo[FeynGrav`Private`$requiredCompanionLoads, "Nieuwenhuizen" ->
+        If[result =!= $Failed && result =!= $Aborted && !FailureQ[result] && TrueQ[ready], Null,
+            Failure["RequiredCompanionFailed", <|"File" -> file,
+                "LoadResult" -> result, "Ready" -> ready|>]]]
+];
+
+
+End[];
 
 
 (* Description of the functions. *)
@@ -335,7 +379,8 @@ FeynGravCommands[] := Print[
         "FeynGravImportGravitons", "FeynGravImportScalars", "FeynGravImportFermions", "FeynGravImportVectors", "FeynGravImportSUNYM",
         "FeynGravImportHorndeskiG2", "FeynGravImportHorndeskiG3", "FeynGravImportHorndeskiG4", "FeynGravImportHorndeskiG5",
         "FeynGravImportAxionVectorVertex", "FeynGravImportQuadraticGravity", "FeynGravLibraryInformation", "FeynGravConventions", "FeynGravHowToCite",
-        "CalcFormExport", "CalcFormImport", "CalcFormCheck", "CalcFormInstall", "CalcFormCalculate"
+        "CalcFormExport", "CalcFormImport", "CalcFormCheck", "CalcFormInstall", "CalcFormCalculate",
+        "FeynGravSimplify", "FeynGravFORMExport", "FeynGravFORMImport", "FeynGravFORMCheck", "FeynGravFORMInstall"
       }, 
       ", "
     ],
@@ -437,6 +482,10 @@ GravitonPropagatorCR[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,p_] := I FAD[p] Nieuwenhui
 GravitonPropagatorAuxiliaryCR[\[Lambda]1_,\[Mu]1_,\[Nu]1_,\[Lambda]2_,\[Mu]2_,\[Nu]2_] := I \[Kappa]^(2-D) ( MTD[\[Lambda]1,\[Nu]2] MTD[\[Lambda]2,\[Nu]1] MTD[\[Mu]1,\[Mu]2]+MTD[\[Lambda]1,\[Mu]2] MTD[\[Lambda]2,\[Nu]1] MTD[\[Mu]1,\[Nu]2]+MTD[\[Lambda]1,\[Nu]2] MTD[\[Lambda]2,\[Mu]1] MTD[\[Mu]2,\[Nu]1]+MTD[\[Lambda]1,\[Mu]2] MTD[\[Lambda]2,\[Mu]1] MTD[\[Nu]1,\[Nu]2]+(MTD[\[Lambda]1,\[Mu]1] MTD[\[Lambda]2,\[Mu]2] MTD[\[Nu]1,\[Nu]2])/(1-D)+(MTD[\[Lambda]1,\[Mu]1] MTD[\[Lambda]2,\[Nu]2] MTD[\[Mu]2,\[Nu]1])/(1-D)+(MTD[\[Lambda]1,\[Nu]1] MTD[\[Lambda]2,\[Nu]2] MTD[\[Mu]1,\[Mu]2])/(1-D)+(MTD[\[Lambda]1,\[Nu]1] MTD[\[Lambda]2,\[Mu]2] MTD[\[Mu]1,\[Nu]2])/(1-D) );
 
 
+(* These ordered immediate assignments build each vertex from a seed. Each
+   right-hand side uses the preceding definition; changing Set to SetDelayed or
+   reordering the stages changes the construction. For hhh, average the three
+   index-pair exchanges, then sum leg permutations and apply the coupling. *)
 GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_] =FVD[p1,\[Mu]2]FVD[p2,\[Mu]1]MTD[\[Mu]3,\[Nu]1]MTD[\[Nu]3,\[Nu]2]+1/2 FVD[p1,\[Mu]2]FVD[p3,\[Nu]2](MTD[\[Mu]1,\[Mu]3]MTD[\[Nu]1,\[Nu]3]-1/(D-2) MTD[\[Mu]1,\[Nu]1]MTD[\[Mu]3,\[Nu]3])-SPD[p1,p2](MTD[\[Nu]1,\[Mu]2]MTD[\[Nu]2,\[Mu]3]MTD[\[Nu]3,\[Mu]1]- 1/(D-2) MTD[\[Mu]1,\[Nu]1]MTD[\[Mu]2,\[Nu]3]MTD[\[Mu]3,\[Nu]2]);
 GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=1/2 (GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]+GravitonVertexCRhhh[\[Nu]1,\[Mu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]);
 GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=1/2 (GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3]+GravitonVertexCRhhh[\[Mu]1,\[Nu]1,p1,\[Nu]2,\[Mu]2,p2,\[Mu]3,\[Nu]3,p3]);
@@ -444,6 +493,8 @@ GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]
 GravitonVertexCRhhh[\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_,\[Mu]3_,\[Nu]3_,p3_]=\[Kappa]^(5-D) Total[GravitonVertexCRhhh@@@Flatten/@Permutations[Partition[{\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2,\[Mu]3,\[Nu]3,p3},3]]];
 
 
+(* Bhh: seed, auxiliary-index exchange and both graviton-index exchanges,
+   then graviton-leg exchange with the final phase and coupling factor. *)
 GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_] = -1/4 (FVD[p1,\[Alpha]]MTD[\[Rho],\[Mu]1]MTD[\[Sigma],\[Mu]2]MTD[\[Nu]1,\[Nu]2]- FVD[p1,\[Rho]](MTD[\[Alpha],\[Mu]1]MTD[\[Sigma],\[Mu]2]MTD[\[Nu]1,\[Nu]2]-1/(D-2) MTD[\[Alpha],\[Mu]2]MTD[\[Sigma],\[Nu]2]MTD[\[Mu]1,\[Nu]1])+FVD[p1,\[Mu]2](MTD[\[Alpha],\[Mu]1]MTD[\[Sigma],\[Nu]1]MTD[\[Rho],\[Nu]2]-1/(D-2) MTD[\[Alpha],\[Sigma]]MTD[\[Mu]1,\[Nu]1]MTD[\[Nu]2,\[Rho]]));
 GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Sigma],\[Rho],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2];
 GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Nu]1,\[Mu]1,p1,\[Mu]2,\[Nu]2,p2];
@@ -451,6 +502,8 @@ GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu
 GravitonVertexCRBhh[\[Alpha]_,\[Rho]_,\[Sigma]_,\[Mu]1_,\[Nu]1_,p1_,\[Mu]2_,\[Nu]2_,p2_]=-I \[Kappa]^(4-D) (GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]1,\[Nu]1,p1,\[Mu]2,\[Nu]2,p2]+GravitonVertexCRBhh[\[Alpha],\[Rho],\[Sigma],\[Mu]2,\[Nu]2,p2,\[Mu]1,\[Nu]1,p1]);
 
 
+(* BBh: seed, both auxiliary-index exchanges and the graviton-index exchange,
+   then auxiliary-leg exchange and the final coupling factor. *)
 GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=1/8 (- (MTD[\[Alpha]1,\[Rho]2]MTD[\[Alpha]2,\[Rho]1]-1/(D-1) MTD[\[Alpha]1,\[Rho]1]MTD[\[Alpha]2,\[Rho]2])MTD[\[Mu],\[Sigma]1]MTD[\[Nu],\[Sigma]2]);
 GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]1,\[Sigma]1,\[Rho]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]];
 GravitonVertexCRBBh[\[Alpha]1_,\[Rho]1_,\[Sigma]1_,\[Alpha]2_,\[Rho]2_,\[Sigma]2_,\[Mu]_,\[Nu]_]=GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Rho]2,\[Sigma]2,\[Mu],\[Nu]]+GravitonVertexCRBBh[\[Alpha]1,\[Rho]1,\[Sigma]1,\[Alpha]2,\[Sigma]2,\[Rho]2,\[Mu],\[Nu]];
@@ -473,8 +526,11 @@ importPrintOutput[head_, opts_List] := Module[{rules = Flatten[opts], unknown, r
             "Function" -> (Context[head] <> SymbolName[head]), "Value" -> resolved|>]]
 ];
 
+
+
 (* ::Subsection:: *)
 (* Library import provenance *)
+
 
 (* These are records of successful imports, not a history of arbitrary user
    redefinitions or of the settings used to generate older library files.
@@ -1109,17 +1165,26 @@ PolarizationTensor[p_Symbol, mu_Symbol, nu_Symbol,phase : (I | -I) : I,opts : Op
 
 
 (* Load the report definitions without printing or inspecting session settings. *)
-Get[FileNameJoin[{packageDirectory, "Conventions.wl"}]];
+Module[{file = FileNameJoin[{packageDirectory, "Conventions.wl"}], result, ready},
+    $requiredCompanionLoads["Conventions"] = Failure["CompanionLoadIncomplete", <|"File" -> file|>];
+    result = Check[Get[file], $Failed];
+    ready = Length[DownValues[FeynGravConventions]] > 0;
+    $requiredCompanionLoads["Conventions"] =
+        If[result =!= $Failed && result =!= $Aborted && !FailureQ[result] && TrueQ[ready], Null,
+            Failure["RequiredCompanionFailed", <|"File" -> file,
+                "LoadResult" -> result, "Ready" -> ready|>]]
+];
 
 
-(* Retain and report initial import failures instead of discarding them. *)
+(* Report required companion and library failures before marking initialisation
+   complete. Continue to End/EndPackage even on these ordinary load failures. *)
 initializationResult = Module[{results, failed},
     results = Association @@ Map[Function[head, SymbolName[head] -> head[2]],
         {FeynGravImportGravitons, FeynGravImportScalars, FeynGravImportFermions, FeynGravImportVectors}];
-    failed = Select[results, FailureQ];
+    failed = Select[Join[$requiredCompanionLoads, results], FailureQ];
     If[Length[failed] > 0,
         Message[FeynGravInitialized::init, StringRiffle[Keys[failed], ", "]];
-        Failure["InitializationFailed", <|"MessageTemplate" -> "Required FeynGrav libraries could not be imported.",
+        Failure["InitializationFailed", <|"MessageTemplate" -> "Required FeynGrav companions or libraries could not be loaded.",
             "Failures" -> failed|>],
         FeynGravInitialized = True;
         Null
@@ -1157,7 +1222,7 @@ EndPackage[];
 (* This line ensures that one shall not specify the Nieuwenhuizen context every time they call for a command from the Nieuwenhuizen package. *)
 
 
-AppendTo[$ContextPath, "Nieuwenhuizen`"];
+If[!MemberQ[$ContextPath, "Nieuwenhuizen`"], AppendTo[$ContextPath, "Nieuwenhuizen`"]];
 
 
 (* Keep converter commands visible after closing the FeynGrav context. *)
