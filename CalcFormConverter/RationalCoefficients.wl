@@ -59,9 +59,7 @@ rcPlan[data_Association] := Module[
     If[inverses === $Failed, Return[<||>]];
     rules = Join[inverses,
         MapThread["id " <> StringRiffle[#1, "."] <> "=" <> #2 <> ";" &, {pairs, names}],
-        Flatten[Map[Function[s, {
-            "id " <> s <> "^cfcRPower?pos_=cfcRat(" <> s <> "^cfcRPower,1);",
-            "id " <> s <> "^cfcRPower?neg_=cfcRat(1," <> s <> "^(-cfcRPower));"}], variables]],
+        rcPowerRules[variables, "cfcRat"],
         {"Multiply cfcRat(1,1);"}];
     <|"Declarations" -> "\nSymbols " <> StringRiffle[
             Join[{"cfcRPower", "cfcRNum", "cfcRDen"}, names], ","] <>
@@ -87,3 +85,84 @@ rcWrite[plan_Association, path_String, fallback_String] := If[plan === <||>, fal
     StringReplace[rcTemplate["RationalCoefficientOutput.frm.in"], {
         "@RESULT@" -> path, "@RESTORE@" -> plan["Restore"]}] <>
     "\n#else\n" <> fallback <> "\n#endif\n"];
+
+(* The two callers share native rational arithmetic, but select work differently.
+   Propagator coefficients keep their historical guards. Final master coefficients
+   inspect the actual shared definitions in FORM before exposing their algebra. *)
+rcPowerRules[variables_List, head_String] := Flatten[Map[Function[s, {
+    "id " <> s <> "^cfcRPower?pos_=" <> head <> "(" <> s <> "^cfcRPower,1);",
+    "id " <> s <> "^cfcRPower?neg_=" <> head <> "(1," <> s <> "^(-cfcRPower));"}], variables]];
+
+$rcMasterMaximumTerms = 1000;
+$rcMasterMaximumDegree = 24;
+rcMasterPlan[entries_List] := Module[{variables, vectors, pairs, names, powers, inspect, polarisation, polNames, polPlan},
+    If[$rcMasterMaximumTerms <= 0, Return[<||>]];
+    variables = Lookup[Select[entries, #["Kind"] === "Scalar" &], "Name", {}];
+    vectors = Lookup[Select[entries, #["Kind"] === "Vector" &], "Name", {}];
+    pairs = Flatten[Table[{vectors[[i]],vectors[[j]]},{i,Length[vectors]},{j,i,Length[vectors]}],1];
+    names = Table["cfcMRX" <> intString[j],{j,Length[pairs]}];
+    polarisation = Lookup[Select[entries, #["Kind"] === "Vector" &&
+        MatchQ[#["Expression"], {"Polarization", ___}] &], "Name", {}];
+    polNames = Pick[names, AnyTrue[#, MemberQ[polarisation, #] &] & /@ pairs];
+    polPlan = rcPolarisationPlan[pairs, names, polNames, Join[variables, names]];
+    variables = Join[variables,names];
+    powers = StringRiffle[rcPowerRules[Append[variables,"cfcMRImag"],"cfcMRat"],"\n"];
+    inspect = StringJoin[Map[Function[s,
+        "id " <> s <> "^cfcRPower?pos_=" <> s <> "*cfcMRDegree^cfcRPower;\n" <>
+        "id " <> s <> "^cfcRPower?neg_=" <> s <> "*cfcMRDegree^(-cfcRPower);\n"], variables]];
+    <|"Declarations" -> "\nSymbols cfcRPower,cfcMRIndex,cfcMRN,cfcMRD,cfcMRDegree,cfcMRImag" <>
+            If[names === {},"",","<>StringRiffle[names,","]] <> ";\nCFunctions cfcMRat,cfcMRDenProbe;\nTable sparse cfcMRMeta(1);\n" <> Lookup[polPlan, "Declarations", ""],
+      "Polarisation" -> polPlan,
+      "Procedure" -> StringReplace[rcTemplate["MasterRationalCoefficients.frm.in"], {
+        "@LIMIT@" -> intString[$rcMasterMaximumTerms], "@DEGREE@" -> intString[$rcMasterMaximumDegree],
+        "@VARIABLE_LIMIT@" -> intString[$rcMaximumVariables], "@VARIABLES@" -> StringRiffle[variables,","],
+        "@DOTS@" -> StringRiffle[MapThread["id "<>StringRiffle[#1,"."]<>"^cfcRPower?="<>#2<>"^cfcRPower;"&,{pairs,names}],"\n"],
+        "@NATIVE_DEN_INSPECT@" -> If[polPlan === <||>, "", "id denom_(?a)=cfcMRDenProbe(?a);\nArgument cfcMRDenProbe;\nDropCoefficient;\nid i_=1;\n" <>
+            StringRiffle[MapThread["id "<>StringRiffle[#1,"."]<>"^cfcRPower?="<>#2<>"^cfcRPower;"&,{pairs,names}],"\n"] <>
+            "\n" <> inspect <> "EndArgument;\nid cfcMRDenProbe(cfcMRN?)=cfcMRN;\n"],
+        "@NATIVE_DEN_RATIONAL@" -> If[polPlan === <||>, "", "id denom_(?a)=cfcMRat(1,?a);\n"],
+        "@INSPECT@" -> inspect, "@POWERS@" -> powers,
+        "@RESTORE@" -> StringRiffle[MapThread["id "<>#1<>"="<>StringRiffle[#2,"."]<>";"&,{names,pairs}],"\n"],
+        "@FACTOR@" -> If[polPlan === <||>, "", "#call cfcPGFactor\n"]}]|>
+];
+
+
+(* Polarisation roles come from the validated dictionary, never identifier names.
+   No grouping data is persisted in mappings: all tables live in one FORM job. *)
+$rcPolarisationMaximumStructures = 1024;
+$rcPolarisationMaximumTerms = 10000;
+$rcPolarisationFactorMaximumTerms = 250;
+$rcPolarisationFactorMaximumVariables = 8;
+$rcPolarisationFactorMaximumDegree = 12;
+rcPolarisationPlan[pairs_List, names_List, polNames_List, variables_List] := Module[
+    {polPairs, plain, substitutions},
+    If[polNames === {} || $rcPolarisationMaximumStructures <= 0, Return[<||>]];
+    polPairs = Pick[pairs, MemberQ[polNames, #] & /@ names];
+    plain = Complement[variables, polNames];
+    substitutions = {
+        "@POL@" -> StringRiffle[polNames, ","],
+        "@STRUCTURES@" -> intString[$rcPolarisationMaximumStructures],
+        "@TERMS@" -> intString[$rcPolarisationMaximumTerms],
+        "@FACTOR_TERMS@" -> intString[$rcPolarisationFactorMaximumTerms],
+        "@FACTOR_VARIABLES@" -> intString[$rcPolarisationFactorMaximumVariables],
+        "@FACTOR_DEGREE@" -> intString[$rcPolarisationFactorMaximumDegree],
+        "@POL_DOTS@" -> StringRiffle[MapThread[
+            "id " <> StringRiffle[#1, "."] <> "^cfcRPower?=" <> #2 <> "^cfcRPower;" &,
+            {polPairs, polNames}], "\n"],
+        "@ALL_DOTS@" -> StringRiffle[MapThread[
+            "id " <> StringRiffle[#1, "."] <> "^cfcRPower?=" <> #2 <> "^cfcRPower;" &,
+            {pairs, names}], "\n"],
+        "@POL_RESTORE@" -> StringRiffle[MapThread[
+            "id " <> #1 <> "=" <> StringRiffle[#2, "."] <> ";" &,
+            {polNames, polPairs}], "\n"],
+        "@PLAIN@" -> StringRiffle[plain, ","],
+        "@DENOMINATOR_KEYS@" -> StringJoin[("id " <> # <> "^cfcRPower?neg_=cfcPGInverse(" <> # <> ")^(-cfcRPower);\n" &) /@
+            Join[Complement[variables, names], ("(" <> StringRiffle[#, "."] <> ")" &) /@
+                Pick[pairs, !MemberQ[polNames, #] & /@ names]]],
+        "@ATOM_COUNT@" -> StringRiffle[("theta_(abs_(count_(" <> # <> ",1))-1)+theta_(abs_(count_(" <> # <> ",1))-2)" &) /@
+            variables, "+"] <> "+count_(cfcShare,1,cfcPolyN,1,cfcPolyD,1)"};
+    <|"Declarations" -> "\nSymbols cfcPGHas,cfcPGFraction,cfcPGBad,cfcPGIndex;\n" <>
+        "CFunctions cfcPGTag,cfcPGRef,cfcPGCollect,cfcPGCollectPart,cfcPGInverse,cfcPGDenProbe,cfcPGReject,cfcPGRejectPart;\n" <>
+        "Table sparse cfcPGSize(1);\nTable sparse cfcPGDenOK(1);\nTable sparse cfcPGParts(1);\nTable sparse cfcPGReach(1);\nTable sparse cfcPGTerms(1);\nTable sparse cfcPGAtoms(1);\nTable sparse cfcPGRejectCost(1);\nTable sparse cfcPGRejectDegree(1);\nTable sparse cfcPGRejectVariables(1);\nTable sparse cfcPGResult(1);\nTable sparse cfcPGResultReady(1);\nTable sparse cfcPGInspectOK(1);\nTable sparse cfcPGInspectMeta(1);\nTable sparse cfcPGAlgebra(2);\nTable sparse cfcPGAlgebraReady(2);\nTable sparse cfcPGDenValue(1);\nTable sparse cfcPGDenReady(1);\n",
+      "Procedure" -> StringReplace[rcTemplate["PolarisationCoefficients.frm.in"], substitutions]|>
+];

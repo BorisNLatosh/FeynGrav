@@ -355,7 +355,8 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
         If[hasDiracProcessing || hasColourFormat, AssociateTo[payload, daMetadata[algebra, entries]]];
         If[hasColourFormat, AssociateTo[payload, caMetadata[entries]]];
         (*Single return value consumed by rendering and file writing: the dimension's FORM name, the body expression text, the remaining multiplication stages, the #define macros, the hoisted stage preparations, and the mapping payload.*)
-        <|"DimensionName" -> dimensionName, "Body" -> body, "Multiplications" -> multiplications,"Factors" -> macros, "Preparations" -> preparations, "SymmetryLinks" -> symmetryLinks, "Mapping" -> payload, "CancellationData" -> cancellationData|>
+        <|"DimensionName" -> dimensionName, "Body" -> body, "Multiplications" -> multiplications,"Factors" -> macros, "Preparations" -> preparations, "SymmetryLinks" -> symmetryLinks, "Mapping" -> payload, "CancellationData" -> cancellationData,
+          "DenominatorSupports" -> If[Length[loops] === 1, tdDenominatorSupports[expr, denominator], Automatic]|>
    ]];
 
 

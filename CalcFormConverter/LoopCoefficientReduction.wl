@@ -34,6 +34,32 @@ lrSavedRows[entries_] := Module[{pairs},
     (<|"Chord" -> encode[#[[1]]], "MassSquared" -> encode[#[[2]]]|> &) /@ pairs
 ];
 
+(* Saved integral factors retain separate families even in products. Their
+   coefficients are reduced independently, never interpreted as one integrand. *)
+lrSavedSupports[entries_, rows_] := Module[{pairs},
+    pairs = ({decode[#["Chord"]], decode[#["MassSquared"]]} &) /@ rows;
+    Union[Function[e, With[{x = smCoefficient[decode[e["Expression"]]]},
+        Union[(First[FirstPosition[pairs, #]] &) /@ Transpose[{x[[2]], x[[3]]}]]]]
+        /@ lrSavedEntries[entries]]
+];
+
+(* Cancellation and the existing recurrences only remove denominator slots or
+   change their powers. The downward closure therefore contains every possible
+   descendant, including same-route partial fractions. Automatic preserves the
+   conservative dictionary-wide planner for callers lacking support metadata. *)
+lrReachableFamilies[supports_List, maximum_] := SortBy[
+    Union[Flatten[Subsets[#, {1, Min[Length[#], maximum]}] & /@ supports, 1]],
+    {Length, Identity}];
+lrReductionFamilies[rows_, pairs_, maximum_, supports_] := Module[{groups, families},
+    If[ListQ[supports], families = Select[lrReachableFamilies[supports, maximum],
+            DuplicateFreeQ[pairs[[#, 1]]] &],
+        groups = GatherBy[Range[Length[rows]], pairs[[#, 1]] &];
+        families = Flatten[Table[Flatten[(Tuples[groups[[#]]] &) /@
+            Subsets[Range[Length[groups]], {k}], 1],
+            {k, 1, Min[Length[groups], maximum]}], 1]];
+    Select[families, smRowsCompatible[rows, #] &]
+];
+
 lrSavedProgram[entries_, rows_, drop_] := Module[{pairs, code},
     pairs = ({decode[#["Chord"]], decode[#["MassSquared"]]} &) /@ rows;
     code = Map[Function[e, Module[{x = smCoefficient[decode[e["Expression"]]], slots, powers, labels, effectivePowers, factor = 1, counts},
@@ -70,8 +96,14 @@ lrSavedProgram[entries_, rows_, drop_] := Module[{pairs, code},
    Products of integral coefficients retain the general recurrence: a product
    is not a single integral, and its factors must not share a lookup key. *)
 $lrSharedMinimumTerms = 4096;
+(* Scalar-master recurrences can turn a small tensor-coefficient dictionary
+   into large rational multipliers. Use the existing shared/factored assembly
+   for every nonzero eligible scalar-master job: its polynomial dictionary is
+   populated after reduction, when the large factors actually exist. The input
+   term threshold remains appropriate for the repeated-power-only path.
+   Algebra eligibility and the linear-coefficient guard are unchanged. *)
 lrSharedPreparation[plan_] := If[!TrueQ[Lookup[plan,"SharedBlocks",False]], "", StringJoin[
-    "#if termsin(cfcResult) > ",intString[$lrSharedMinimumTerms],"\n",
+    "#if termsin(cfcResult) > ",intString[If[TrueQ[$smEnabled],0,$lrSharedMinimumTerms]],"\n",
     "Collect cfcShared,cfcSharedPart,50;\nArgToExtraSymbol tonumber,cfcShared,cfcSharedPart;\n.sort\n",
     "id cfcShared(cfcDimNum?)=cfcShare(cfcDimNum);\nid cfcSharedPart(cfcDimNum?)=cfcShare(cfcDimNum);\n",
     "Bracket+ cfcTC;\n.sort\nHide cfcResult;\nLocal cfcShareKeys=cfcResult;\nBracket cfcShare;\n.sort\n",
@@ -160,12 +192,13 @@ lrMonomialRules[entries_] := Module[{scalars,vectors,read,integer,rules,tag=Uniq
    These are identity checks, not permutations or PaVe reduction. Labels are
    relabelled only in their argument range; denominator powers stay intact.
    Family enumeration depends on the denominator dictionary, not tensor rank. *)
-lrCanonicalRules[rows_, dim_, drop_:False] := Module[
+lrCanonicalRules[rows_, dim_, drop_:False, supports_:Automatic] := Module[
     {pairs, n=Length[rows], families, seen, code={}, signature, active, target,
      powers, moved, labels, chords, masses, invariants, key, emit},
     pairs=({decode[#["Chord"]],decode[#["MassSquared"]]}&) /@ rows;
     If[DuplicateFreeQ[Last /@ pairs] && !(TrueQ[drop] && MemberQ[Last /@ pairs,0]),Return[""]];
-    families=Select[Subsets[Range[n],{1,n}],smRowsCompatible[rows,#]&];
+    families=Select[If[ListQ[supports],lrReachableFamilies[supports,n],
+        Subsets[Range[n],{1,n}]],smRowsCompatible[rows,#]&];
     emit[active_,target_,unit_] := Module[{left,right,relabel},
         left=Table[If[MemberQ[active,j],If[unit,"1","cfcRN"<>intString[j]<>"?pos_"],"0"],{j,n}];
         right=ConstantArray["0",n];
@@ -202,9 +235,9 @@ lrCanonicalRules[rows_, dim_, drop_:False] := Module[
    Larger active subfamilies remain formal. Partial fractions can first lower
    a family containing many masses on at most four distinct routes. *)
 $lrMaximumChords = 4;
-lrPlan[rows_, originalEntries_, dimension_, masters_:False] := Module[
-    {entries = originalEntries, n = Length[rows], pairs, vars, pattern, names, serial, register, decl, code,
-     call, move, conditions, sameRoute, groups, subsets, mat, det, inverse,
+lrPlan[rows_, originalEntries_, dimension_, masters_:False, supports_:Automatic] := Module[
+    {entries = originalEntries, n = Length[rows], pairs, vars, pattern, names, serial, register, registry = <||>, decl, code,
+     call, move, conditions, sameRoute, subsets, mat, det, inverse,
      active, t, base, rhs, changed, coefficient, dimName, skipped = {}, k, masterPlan=<||>},
     pairs = ({decode[#["Chord"]], decode[#["MassSquared"]]} &) /@ rows;
     vars = Table["cfcRN" <> intString[j], {j,n}];
@@ -212,14 +245,21 @@ lrPlan[rows_, originalEntries_, dimension_, masters_:False] := Module[
     names = Lookup[entries, "Name", {}];
     serial = Max[Prepend[FromDigits[StringDrop[#,3]] & /@
         Select[names, StringMatchQ[#, "cfa" ~~ DigitCharacter..] &], 0]];
-    register[x_] := Module[{pos, name},
+    (* Decode existing scalar entries once per job. Keep the first matching
+       entry, as the former SelectFirst lookup did, including cross-kind aliases.
+       Keys freeze evaluated expressions; lookup adds no algebraic equivalences. *)
+    Scan[Function[e, With[{key = With[{value = decode[e["Expression"]]}, HoldComplete[value]]},
+        If[!KeyExistsQ[registry, key], AssociateTo[registry, key -> e["Name"]]]]],
+        Select[entries, MemberQ[{"Scalar", "Abbreviation"}, #["Kind"]] &]];
+    register[x_] := Module[{key, name},
         If[!scalarQ[x], throwFailure["UnsupportedScalar","A coefficient-reduction invariant is not a supported scalar."]];
         If[IntegerQ[x], Return[intString[x]]];
         If[Head[x] === Rational, Return["(" <> ToString[x,InputForm] <> ")"]];
-        pos = SelectFirst[entries, MemberQ[{"Scalar","Abbreviation"}, #["Kind"]] && decode[#["Expression"]] === x &, None];
-        If[pos =!= None, Return[pos["Name"]]];
+        key = With[{value = x}, HoldComplete[value]];
+        If[KeyExistsQ[registry, key], Return[registry[key]]];
         name = "cfa" <> intString[++serial];
-        AppendTo[entries, <|"Name"->name,"Kind"->"Abbreviation","Expression"->encode[x]|>]; name
+        AppendTo[entries, <|"Name"->name,"Kind"->"Abbreviation","Expression"->encode[x]|>];
+        AssociateTo[registry, key -> name]; name
     ];
     dimName = register[dimension];
     call[v_, labels_:"?a"] := "cfcIR(" <> StringRiffle[v,","] <> ",-2" <> If[labels === "", "", "," <> labels] <> ")";
@@ -228,7 +268,7 @@ lrPlan[rows_, originalEntries_, dimension_, masters_:False] := Module[
     code = "\n* Select only coefficients with repeated powers.\n";
     Do[conditions=ReplacePart[pattern,j->vars[[j]]<>"?{>1}"];
         code=code<>"id cfcTC("<>StringRiffle[conditions,","]<> ",-2,?a)="<>call[vars]<>";\n",{j,n}];
-    If[TrueQ[masters], masterPlan=smFamilyRules[rows,register,dimName,vars];
+    If[TrueQ[masters], masterPlan=smFamilyRules[rows,register,dimName,vars,supports];
         decl=decl<>"CFunction cfcSMHold;\n";
         code=masterPlan["Protection"]<>code<>"id cfcTC(?a)=cfcIR(?a);\n"];
     (* Parameter moments obey C_{...j}^{nu} = -2 nu_j
@@ -245,7 +285,8 @@ lrPlan[rows_, originalEntries_, dimension_, masters_:False] := Module[
     If[TrueQ[masters], code=code<>If[TrueQ[$smShareStates],"Bracket+ cfcIR,cfcTC,cfcSMHold;\n.sort\nKeep Brackets;\n",""]<>masterPlan["Code"]];
     (* D_j-D_i = m_i^2-m_j^2. Each branch lowers the sum of powers by one;
        no term is discarded and coincident masses are never divided by zero. *)
-    sameRoute=Select[Subsets[Range[n],{2}], pairs[[#[[1]],1]]===pairs[[#[[2]],1]] &];
+    sameRoute=Select[If[ListQ[supports],Select[lrReachableFamilies[supports,2],Length[#]===2&],Subsets[Range[n],{2}]],
+        pairs[[#[[1]],1]]===pairs[[#[[2]],1]] &];
     Do[With[{i=ij[[1]],j=ij[[2]],delta=Together[pairs[[ij[[1]],2]]-pairs[[ij[[2]],2]]]},
         If[delta =!= 0,
             conditions=pattern;conditions[[i]]=vars[[i]]<>"?pos_";conditions[[j]]=vars[[j]]<>"?pos_";
@@ -253,12 +294,7 @@ lrPlan[rows_, originalEntries_, dimension_, masters_:False] := Module[
             coefficient=register[1/delta];
             code=code<>"if (match("<>call[conditions]<>"));\nid once "<>call[conditions]<>"="<>coefficient<>"*("<>
                 call[move[vars,j,-1]]<>"-"<>call[move[vars,i,-1]]<>");\n$cfcIRChanged=1;\ngoto cfcReductionEnd;\nendif;\n"]],{ij,sameRoute}];
-    groups=GatherBy[Range[n],pairs[[#,1]]&];
-    (* Generate only subfamilies with at most one mass on each route. Avoid
-       constructing the full powerset when a dictionary contains many masses. *)
-    subsets=Flatten[Table[Flatten[(Tuples[groups[[#]]]&) /@ Subsets[Range[Length[groups]],{k}],1],
-        {k,1,Min[Length[groups],$lrMaximumChords]}],1];
-    subsets=Select[subsets,smRowsCompatible[rows,#]&];
+    subsets=lrReductionFamilies[rows,pairs,$lrMaximumChords,supports];
     Do[
         mat=Table[Together[pairs[[i,2]]+pairs[[j,2]]-
             lrSquare[pairs[[i,1]]-pairs[[j,1]],dimension]],{i,active},{j,active}];
@@ -353,7 +389,7 @@ lrReconstruct[x_] := x /. tdToken[a___] :> tdReconstruct[{a}];
 (* ::Section:: *)
 (* Export orchestration *)
 lrPrepare[data_Association, enabled_, drop_] := Module[
-    {result=data,mapping=data["Mapping"],entries,rows,plan,denominatorPlan,collection,meta,saved=False},
+    {result=data,mapping=data["Mapping"],entries,rows,plan,denominatorPlan,collection,meta,supports,saved=False},
     If[!MemberQ[{True,False},enabled],throwFailure["InvalidOption","ReduceLoopCoefficients must be True or False."]];
     If[!enabled,Return[data]];
     entries=mapping["Entries"];
@@ -380,17 +416,19 @@ lrPrepare[data_Association, enabled_, drop_] := Module[
         mapping=Join[mapping,<|"LoopCoefficientReduction"-><|"Method"->"PartialFractionsAndFixedDimensionIBP",
             "MaximumDistinctChords"->$lrMaximumChords,"Invariants"->{},"SingularSubfamilies"->{}|>|>];
         Return[Join[result,<|"Mapping"->mapping|>]]];
-    plan=lrPlan[rows,entries,decode[mapping["Dimension"]],TrueQ[$smEnabled]];
+    supports=If[saved,lrSavedSupports[entries,rows],Lookup[data,"LoopFamilySupports",Automatic]];
+    plan=lrPlan[rows,entries,decode[mapping["Dimension"]],TrueQ[$smEnabled],supports];
     denominatorPlan=ldgPlan[plan["Entries"]];
     plan["Entries"]=denominatorPlan["Entries"];
-    collection=<|"Dimension"->dcfPlan[<|"Mapping"->Join[mapping,<|"Entries"->plan["Entries"]|>]|>,False],"CanonicalRules"->(lrCanonicalRules[rows,decode[mapping["Dimension"]],drop]<>If[TrueQ[$smEnabled],smCanonicalRules[rows,decode[mapping["Dimension"]]],""]),"MonomialRules"->lrMonomialRules[plan["Entries"]],"Denominators"->denominatorPlan,"SharedBlocks"->(tdAlgebraMapping[mapping]["Version"]===1)|>;
+    collection=<|"Dimension"->dcfPlan[<|"Mapping"->Join[mapping,<|"Entries"->plan["Entries"]|>]|>,False],"CanonicalRules"->(lrCanonicalRules[rows,decode[mapping["Dimension"]],drop,supports]<>If[TrueQ[$smEnabled],smCanonicalRules[rows,decode[mapping["Dimension"]],supports],""]),"MonomialRules"->lrMonomialRules[plan["Entries"]],"Denominators"->denominatorPlan,"SharedBlocks"->(tdAlgebraMapping[mapping]["Version"]===1)|>;
+    collection["Rational"] = If[TrueQ[collection["SharedBlocks"]], rcMasterPlan[plan["Entries"]], <||>];
     plan["Processing"]=Block[{$lrCollectionPlan=collection},lrIsolatedProcessing[]];
     mapping=Join[mapping,<|"Entries"->plan["Entries"],"LoopCoefficientReduction"->
         <|"Method"->"PartialFractionsAndFixedDimensionIBP","CoefficientBlocks"->True,"DenominatorGroups"->True,"IncrementalSharedDefinitions"->collection["SharedBlocks"],"SharedCoefficientBlocks"->collection["SharedBlocks"],"MaximumDistinctChords"->$lrMaximumChords,
           "Invariants"->lrInvariantSnapshot[rows,decode[mapping["Dimension"]]],
           "SingularSubfamilies"->plan["SingularSubfamilies"]|>|>];
     Join[result,<|"Mapping"->mapping,
-        "TensorDeclarations"->result["TensorDeclarations"]<>plan["Declarations"]<>collection["Denominators"]["Declarations"]<>Lookup[collection["Dimension"],"Declarations",""]<>
+        "TensorDeclarations"->result["TensorDeclarations"]<>plan["Declarations"]<>collection["Denominators"]["Declarations"]<>Lookup[collection["Dimension"],"Declarations",""]<>Lookup[collection["Rational"],"Declarations",""]<>
             If[collection["SharedBlocks"],"\nCFunctions cfcShared,cfcSharedPart,cfcShare;\n", ""],
         "LoopCollectionPlan"->collection,"ScalarMasterPlan"->Lookup[plan,"MasterPlan",<||>],
         "LoopReductionProcessing"->plan["Processing"]|>]

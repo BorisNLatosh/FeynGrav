@@ -916,3 +916,71 @@ Future FORM procedures can be inserted at the marked processing boundary without
 Run `python3 Tests/run.py --suite core` for conversion, parser, transaction and mocked installer tests without FORM. The default `python3 Tests/run.py` additionally runs FORM, runtime and FeynGrav integration suites with their dependencies. The explicit focused facade suite is `python3 Tests/run.py --suite facade` after setting `FG_CONTRACTOR_TEST_FIXTURE` to an existing test double; it also requires FORM and does not require a real Contractor binary. A narrow phase selection is available with repeated `--facade-phase` arguments; for example, `--facade-phase Loading --facade-phase Facade` selects the two-phase bounded check. Add `--evidence-dir <directory>` to retain per-phase logs and raw completion records. The selector and completion protocol passed the focused Loading/Facade check (151/151), repeated after the directory rename. Other completion writers were not rerun in these batches; see the Stage E verification report for limits and historical failures. Tests do not install system packages, and the driver selects suites without supplying the task-owned resource bounds.
 
 See [DEVELOPER.md](DEVELOPER.md) for architecture, invariants, suite dependencies and measurement methodology. [FORMAT.md](FORMAT.md) is the persisted format contract; private helper associations are not public APIs.
+
+### Export preparation and large scalar-master results
+
+Scalar-master export reuses exact coefficient registrations within each job and
+prepares co-occurring denominator families with their possible pinches. No new
+option is needed. Scalar-product definitions are read afresh for each export.
+
+Eligible scalar-master jobs retain shared polynomial factors and factored
+multipliers even when the input is small. On the retained generic three-box
+test, this reduced output from 236 MB to 4.36 MB. All three new bounded trials
+completed: median import time was 4.50 seconds and median export–FORM–import
+time was 6.76 seconds. All 17 master coefficients matched the previous output
+exactly with symbolic D. These are workload-specific measurements; neither
+sharing nor incremental reading guarantees that an arbitrary final expression
+fits in memory. See the [output-sharing verification report](../Documentation/Verification/MasterOutputSharing-2026-10-23.md)
+and the earlier [export-planning report](../Documentation/Verification/ExportPlanning-2026-10-23.md)
+for measurement boundaries and omitted coverage. `ReduceToScalarMasters -> False`
+still stops at coefficient functions and returns a different representation.
+
+### Rational cancellation in final master coefficients
+
+Eligible scalar-master multipliers are now combined as exact rational functions
+inside FORM, after all contributions to that master have been assembled. For
+example, a multiplier `1/s - 1/(s+t) - t/(s (s+t))` reduces to zero instead of
+remaining split between different denominator groups. This applies to new loop
+calculations and supported saved PaVe coefficients on the shared output path.
+
+The pass keeps symbolic D and uses no additional kinematic identities. It does
+not use `$Assumptions`. Large or unsupported coefficients retain the existing
+factored/shared representation; the routine does not promise the shortest form
+for every expression. No new option is required. See the
+[final-coefficient verification report](../Documentation/Verification/FinalMasterRationals-2026-10-23.md)
+for exact checks and the additional measured cost.
+
+
+### Polarisation structures in scalar-master coefficients
+
+**Development candidate, not accepted:** cache warnings have been corrected,
+but the renewed large-workload check still reached its time limit. The hook is present in this working
+tree, but the verification report below lists the outstanding acceptance gates.
+
+On the shared scalar-master output path, FORM can collect a multiplier as
+
+\[
+\sum_\sigma P_\sigma R_\sigma,
+\]
+
+where each \(P_\sigma\) is a complete product of scalar products containing
+polarisation vectors. Incoming and outgoing polarisation labels remain distinct.
+The remaining scalar coefficients receive bounded exact rational cancellation
+and, for small polynomials, factorisation. Exact zero groups disappear when the
+new representation is selected.
+
+This is automatic algebraic grouping. It adds no option or result head and
+imposes no transversality, momentum conservation, mass-shell conditions, helicity
+relations or `$Assumptions`. A constant multiplier belongs to the unit structure.
+Negative powers of polarisation products and unsupported tensor objects retain
+the existing calculation path. Selection limits can also preserve a large group
+or an entire master in its previous shared form. Completion does not mean that
+every coefficient has been fully simplified.
+
+The implementation and its outstanding acceptance checks are recorded in the
+[polarisation-coefficient report](../Documentation/Verification/PolarisationCoefficients-2026-10-23.md).
+
+The latest work-reuse repair passes its focused mathematical fixtures but still
+reaches the bounded three-box timeout. The current automatic polarisation hook
+therefore remains an unaccepted development candidate. Partial output from a
+timeout is not a usable result; see the verification report above for limits.

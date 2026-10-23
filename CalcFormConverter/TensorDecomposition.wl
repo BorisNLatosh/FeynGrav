@@ -51,6 +51,32 @@ decode[{"TensorPaVe", ids_List, inv_List, masses_List}] := With[{i = decode /@ i
 
 (* ::Section:: *)
 (* Export inspection and deterministic denominator families *)
+(* Private export-only support sets. A support lists denominator identifiers
+   that can coexist, not their powers. Traverse sums/products without expanding
+   the numerator. If combinatorics exceed 256 alternatives, use their union:
+   extra planning is safe, whereas dropping an alternative would lose rules. *)
+tdDenominatorSupports[expression_, name_] := Module[{walk, combine, bounded, all},
+    all[x_] := Union[Flatten[(name /@ (List @@ #)) & /@ Cases[x, _FeynAmpDenominator, {0, Infinity}]]];
+    bounded[sets_] := If[Length[sets] > 256, {Union @@ sets}, Union[sets]];
+    combine[a_, b_] := If[Length[a] Length[b] > 256,
+        {Union[Flatten[a], Flatten[b]]},
+        bounded[Flatten[Table[Union[x, y], {x, a}, {y, b}], 1]]];
+    walk[x_] := Which[
+        FreeQ[x, _FeynAmpDenominator], {{}},
+        Head[x] === FeynAmpDenominator, {Union[name /@ (List @@ x)]},
+        Head[x] === Plus, Fold[bounded[Join[#1, #2]] &, {}, walk /@ (List @@ x)],
+        Head[x] === Times, Fold[combine, {{}}, walk /@ (List @@ x)],
+        Head[x] === Power && IntegerQ[x[[2]]] && x[[2]] > 0,
+            (* Repeated products can mix alternatives: (A+B)^2 includes AB.
+               At most the number of distinct denominators is needed to cover
+               every support; excess powers do not add denominator slots. *)
+            With[{base = walk[x[[1]]]}, Nest[combine[#, base] &, {{}},
+                Min[x[[2]], Length[all[x[[1]]]]]]],
+        True, {all[x]}
+    ];
+    walk[expression]
+];
+
 (* Derive routing from the authoritative denominator expression, not its
    redundant descriptive fields. Export and import share this normalisation. *)
 tdNormaliseDenominators[entries_, q_] := Module[
@@ -73,7 +99,7 @@ tdNormaliseDenominators[entries_, q_] := Module[
 ];
 
 tdPrepare[data_Association, enabled_, drop_] := Module[
-    {mapping = data["Mapping"], loops, q, qname, entries, rows, aliases, meta, result = data},
+    {mapping = data["Mapping"], loops, q, qname, entries, rows, aliases, meta, supports, slots, result = data},
     If[!MemberQ[{True, False}, enabled] || !MemberQ[{True, False}, drop],
         throwFailure["InvalidOption", "TensorDecomposition and DropScaleless must be True or False."]];
     loops = decode /@ mapping["LoopMomenta"];
@@ -89,6 +115,11 @@ tdPrepare[data_Association, enabled_, drop_] := Module[
         If[e["Kind"] === "Vector" && !FreeQ[decode[e["Expression"]], q] && decode[e["Expression"]] =!= q,
             throwFailure["UnsupportedLoopDependence", "Loop-dependent polarisation vectors are unsupported."]]], entries];
     {rows, aliases} = tdNormaliseDenominators[entries, q];
+    supports = Lookup[data, "DenominatorSupports", Automatic];
+    If[ListQ[supports],
+        slots = Association[(#["Name"] -> #["Slot"]) & /@ aliases];
+        supports = Union[(Union[(Lookup[slots, #, Nothing] &) /@ #]) & /@ supports]];
+    AssociateTo[result, "LoopFamilySupports" -> supports];
     meta = <|"LoopMomentum" -> encode[q], "Normalisation" -> "IntegralEqualsIPiSquaredTimesCoefficient",
         "Basis" -> "DistinctSymmetricPlacements", "Families" -> rows, "DropScaleless" -> drop|>;
     AssociateTo[mapping, {"AlgebraVersion" -> mapping["Version"], "Version" -> 6,

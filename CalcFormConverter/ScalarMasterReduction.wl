@@ -14,17 +14,16 @@
 (* ::Section:: *)
 (* Family recurrences *)
 $smShareStates = True;
-smFamilyRules[rows_, register_, dim_, vars_] := Module[
+smFamilyRules[rows_, register_, dim_, vars_, supports_:Automatic] := Module[
  {n=Length[rows], pairs, families, code={}, protect={}, restrictions={}, skipped={}, masses,
   invariants, delta, derivatives, second, gram, active, count, p, base,
   condition, rhs, call, lower, emit, formalMasses, symbolicY, symbolicDelta,
-  substitutions, groups, j, k},
+  substitutions, j, k},
  pairs=({decode[#["Chord"]],decode[#["MassSquared"]]}&) /@ rows;
  call[v_,labels_] := "cfcIR("<>StringRiffle[v,","]<>",-2"<>If[labels==="","",","<>labels]<>")";
  lower[v_,i_] := ReplacePart[v,i->"("<>v[[i]]<>"-1)"];
  emit[lhs_,rhs_] := "if (match("<>lhs<>"));\nid once "<>lhs<>"="<>rhs<>";\n$cfcIRChanged=1;\ngoto cfcReductionEnd;\nendif;\n";
- groups=GatherBy[Range[n],pairs[[#,1]]&];
- families=Select[Flatten[Table[Flatten[(Tuples[groups[[#]]]&) /@ Subsets[Range[Length[groups]],{k}],1],{k,1,Min[4,Length[groups]]}],1],smRowsCompatible[rows,#]&];
+ families=lrReductionFamilies[rows,pairs,4,supports];
  Do[
   count=Length[active];
   masses=pairs[[active,2]];
@@ -122,10 +121,11 @@ smRowsCompatible[rows_,active_] := smCompatible[(decode[#["Chord"]]&) /@ rows[[a
 (* Scalar unit-power integrals are invariant under permutation of all lines.
    Compare the complete mass/distance graph, not a guessed momentum ordering.
    Reuse an existing family token, and never apply these rules to tensor labels. *)
-smCanonicalRules[rows_,dim_] := Module[
+smCanonicalRules[rows_,dim_,supports_:Automatic] := Module[
  {pairs,n=Length[rows],families,seen=<||>,code={},active,permutation,signature,key,target,token},
  pairs=({decode[#["Chord"]],decode[#["MassSquared"]]}&)/@rows;
- families=Select[Subsets[Range[n],{1,Min[4,n]}],smRowsCompatible[rows,#]&];
+ families=Select[If[ListQ[supports],lrReachableFamilies[supports,4],
+  Subsets[Range[n],{1,Min[4,n]}]],smRowsCompatible[rows,#]&];
  token[a_] := "cfcTC("<>StringRiffle[Table[If[MemberQ[a,j],"1","0"],{j,n}],","]<>",-2)";
  Do[
   signature=First[Sort[Table[{pairs[[permutation,2]],tdInvariants[pairs[[permutation,1]],dim]},

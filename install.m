@@ -231,6 +231,8 @@ runtimeDependencies = {
     {"CalcFormConverter/LoopDenominatorGroups.wl", "CalcFormConverter/Templates/LoopDenominatorGroups.frm.in"},
     {"CalcFormConverter/PropagatorGroups.wl", "CalcFormConverter/Templates/PropagatorFactors.frm.in"},
     {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/RationalCoefficients.frm.in"},
+    { "CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/MasterRationalCoefficients.frm.in"},
+    {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/PolarisationCoefficients.frm.in"},
     {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/RationalCoefficientOutput.frm.in"},
     {"CalcFormConverter/DimensionCoefficients.wl", "CalcFormConverter/Templates/DimensionCoefficients.frm.in"},
     {"CalcFormConverter/DimensionCoefficients.wl", "CalcFormConverter/Templates/DimensionCoefficientOutput.frm.in"},

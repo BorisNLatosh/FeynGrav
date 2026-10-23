@@ -1,0 +1,976 @@
+* All caches below belong to this FORM job. Kinematic definitions stay opaque.
+* A size entry counts polarisation monomials, with dependency/fraction markers.
+* Unknown objects or polarisation denominators leave a nonnumeric rejection.
+#procedure cfcPGInspect(source)
+#$cfcPGOK=0;
+#$cfcPGDependent=0;
+#$cfcPGFractional=0;
+#$cfcPGCost=@TERMS@+1;
+#if termsin(`source') <= @TERMS@
+Skip;
+Local cfcPGEstimate=`source';
+DropCoefficient;
+id denom_(?a)=cfcPGDenProbe(?a);
+Argument cfcPGDenProbe;
+DropCoefficient;
+id i_=1;
+@ALL_DOTS@
+#do v={@PLAIN@}
+id `v'^cfcRPower?pos_=1;
+#enddo
+EndArgument;
+id cfcPGDenProbe(cfcMRN?number_)=cfcPGFraction;
+id i_=1;
+@ALL_DOTS@
+#do v={@POL@}
+id `v'^cfcRPower?neg_=cfcPGBad;
+id `v'^cfcRPower?pos_=cfcPGHas;
+#enddo
+#do v={@PLAIN@}
+id `v'^cfcRPower?neg_=cfcPGFraction;
+id `v'^cfcRPower?pos_=1;
+#enddo
+id cfcShare(cfcPGIndex?)=cfcPGSize(cfcPGIndex);
+id cfcPolyN(cfcPGIndex?)=cfcPGSize(cfcPGIndex);
+id cfcPolyD(cfcPGIndex?)=cfcPGFraction*cfcPGDenOK(cfcPGIndex);
+.sort
+Skip;
+NSkip cfcPGEstimate;
+if (occurs(cfcPGHas)); $cfcPGDependent=1; endif;
+if (occurs(cfcPGFraction)); $cfcPGFractional=1; endif;
+id cfcPGHas=1;
+id cfcPGFraction=1;
+ModuleOption noparallel;
+.sort
+#$cfcPGCost=cfcPGEstimate;
+#if isnumerical($cfcPGCost)
+#if `$cfcPGCost' <= @TERMS@
+#$cfcPGOK=1;
+#endif
+#endif
+Drop cfcPGEstimate;
+.sort
+NSkip;
+.sort
+#endif
+#endprocedure
+
+* Measure the root and build its transitive reference SET. DropCoefficient
+* removes multiplicities only in this bookkeeping expression, never the algebra.
+#procedure cfcPGMeasure(source)
+#$cfcPGOwnTerms=termsin_(`source');
+#$cfcPGOwnAtoms=0;
+Skip;
+Local cfcPGMeasureWork=`source';
+@ALL_DOTS@
+$cfcPGOwnAtoms=$cfcPGOwnAtoms+1+@ATOM_COUNT@;
+ModuleOption noparallel;
+.sort
+Drop cfcPGMeasureWork;
+Local cfcPGLinks=`source';
+Bracket cfcShare,cfcPolyN,cfcPolyD;
+.sort
+Skip;
+NSkip cfcPGLinks;
+Collect cfcPGCollect,cfcPGCollectPart,50;
+id cfcPGCollect(?a)=1;
+id cfcPGCollectPart(?a)=1;
+id cfcPolyN(cfcPGIndex?)=cfcShare(cfcPGIndex);
+id cfcPolyD(cfcPGIndex?)=cfcShare(cfcPGIndex);
+ChainIn cfcShare;
+id,all cfcShare(?a,cfcPGIndex?,?b)=cfcPGRef(cfcPGIndex);
+if (count(cfcPGRef,1)==0); Discard; endif;
+id cfcPGRef(cfcPGIndex?)=cfcPGReach(cfcPGIndex);
+.sort
+Skip;
+NSkip cfcPGLinks;
+DropCoefficient;
+.sort
+NSkip;
+.sort
+#endprocedure
+
+* Called in shared-definition dependency order. Keep a transitive reference set
+* and local storage costs, so repeated blocks count once in candidate selection.
+#procedure cfcPGRegister(source,index)
+#$cfcPGRegistered=cfcPGTerms(`index');
+#if isnumerical($cfcPGRegistered) == 0
+#call cfcPGMeasure(`source')
+Fill cfcPGTerms(`index')=`$cfcPGOwnTerms';
+Fill cfcPGAtoms(`index')=`$cfcPGOwnAtoms';
+Skip;
+Local cfcPGClosure=cfcPGTag(`index')*(cfcPGLinks+cfcPGRef(`index'));
+Bracket cfcPGTag;
+.sort
+FillExpression cfcPGReach=cfcPGClosure(cfcPGTag);
+Drop cfcPGClosure,cfcPGLinks;
+.sort
+#call cfcPGInspect(`source')
+#if (`$cfcPGOK' == 1) && (`$cfcPGDependent' == 0)
+#if `$cfcPGFractional' == 0
+Fill cfcPGSize(`index')=1;
+Fill cfcPGDenOK(`index')=1;
+#else
+Fill cfcPGSize(`index')=cfcPGFraction;
+Fill cfcPGDenOK(`index')=cfcPGBad;
+#endif
+Fill cfcPGParts(`index')=cfcShare(`index');
+#elseif `$cfcPGOK' == 1
+Skip;
+Local cfcPGDefinition=`source';
+@POL_DOTS@
+id cfcShare(cfcPGIndex?)=cfcPGParts(cfcPGIndex);
+id cfcPolyN(cfcPGIndex?)=cfcPGParts(cfcPGIndex);
+Bracket @POL@;
+.sort
+Skip;
+NSkip cfcPGDefinition;
+Collect cfcPGCollect;
+ArgToExtraSymbol tonumber,cfcPGCollect;
+id cfcPGCollect(cfcPGIndex?)=cfcShare(cfcPGIndex);
+.sort
+* Intern each scalar coefficient once; its child definitions are already known.
+#call cfcPGRegisterScalars(cfcPGDefinition)
+#$cfcPGSizeNow=termsin_(cfcPGDefinition);
+Fill cfcPGSize(`index')=`$cfcPGSizeNow'*cfcPGHas^`$cfcPGDependent'*cfcPGFraction^`$cfcPGFractional';
+Fill cfcPGDenOK(`index')=cfcPGBad;
+Skip;
+NSkip cfcPGDefinition;
+Multiply cfcPGTag(`index');
+Bracket cfcPGTag;
+.sort
+FillExpression cfcPGParts=cfcPGDefinition(cfcPGTag);
+Drop cfcPGDefinition;
+.sort
+#else
+Fill cfcPGSize(`index')=cfcPGBad;
+Fill cfcPGDenOK(`index')=cfcPGBad;
+Fill cfcPGParts(`index')=cfcShare(`index');
+#endif
+NSkip;
+.sort
+#endif
+#endprocedure
+
+* New scalar blocks produced by structural collection have no polarisation.
+* This separate leaf registration avoids recursive structural decomposition.
+#procedure cfcPGRegisterScalars(source)
+#$cfcPGScalarSavedOK=$cfcPGOK;
+#$cfcPGScalarSavedCost=$cfcPGCost;
+#$cfcPGScalarSavedDependent=$cfcPGDependent;
+#$cfcPGScalarSavedFractional=$cfcPGFractional;
+Skip;
+Local cfcPGScalarRefs=`source';
+Bracket cfcShare;
+.sort
+Skip;
+NSkip cfcPGScalarRefs;
+Collect cfcPGCollect;
+id cfcPGCollect(?a)=1;
+id cfcShare(cfcPGIndex?)=cfcPGInverse(cfcPGIndex,cfcPGTerms(cfcPGIndex));
+id cfcPGInverse(cfcPGIndex?,cfcMRN?number_)=0;
+id cfcPGInverse(cfcPGIndex?,?a)=cfcShare(cfcPGIndex);
+DropCoefficient;
+.sort
+Hide cfcPGScalarRefs;
+#do pgScalar=cfcPGScalarRefs
+Skip;
+Local cfcPGScalarDef=`pgScalar';
+id cfcShare(cfcPGIndex?$cfcPGScalarIndex)=extrasymbol_(cfcPGIndex);
+ModuleOption noparallel;
+.sort
+#$cfcPGScalarKnown=cfcPGTerms(`$cfcPGScalarIndex');
+#if isnumerical($cfcPGScalarKnown) == 0
+#call cfcMRInspect(cfcPGScalarDef)
+Fill cfcMRMeta(`$cfcPGScalarIndex')=`$cfcMRMeta';
+#call cfcPGMeasure(cfcPGScalarDef)
+Fill cfcPGTerms(`$cfcPGScalarIndex')=`$cfcPGOwnTerms';
+Fill cfcPGAtoms(`$cfcPGScalarIndex')=`$cfcPGOwnAtoms';
+Skip;
+Local cfcPGScalarClosure=cfcPGTag(`$cfcPGScalarIndex')*(cfcPGLinks+cfcPGRef(`$cfcPGScalarIndex'));
+Bracket cfcPGTag;
+.sort
+FillExpression cfcPGReach=cfcPGScalarClosure(cfcPGTag);
+Drop cfcPGScalarClosure,cfcPGLinks;
+.sort
+#call cfcPGInspect(cfcPGScalarDef)
+#if (`$cfcPGOK' == 1) && (`$cfcPGFractional' == 0) && (`$cfcPGDependent' == 0)
+Fill cfcPGSize(`$cfcPGScalarIndex')=1;
+Fill cfcPGDenOK(`$cfcPGScalarIndex')=1;
+#else
+Fill cfcPGSize(`$cfcPGScalarIndex')=cfcPGFraction;
+Fill cfcPGDenOK(`$cfcPGScalarIndex')=cfcPGBad;
+#endif
+Fill cfcPGParts(`$cfcPGScalarIndex')=cfcShare(`$cfcPGScalarIndex');
+#endif
+Drop cfcPGScalarDef;
+.sort
+#enddo
+Unhide cfcPGScalarRefs;
+Drop cfcPGScalarRefs;
+.sort
+#$cfcPGOK=$cfcPGScalarSavedOK;
+#$cfcPGCost=$cfcPGScalarSavedCost;
+#$cfcPGDependent=$cfcPGScalarSavedDependent;
+#$cfcPGFractional=$cfcPGScalarSavedFractional;
+NSkip;
+.sort
+#endprocedure
+
+#procedure cfcPGScore(source)
+#call cfcPGMeasure(`source')
+#$cfcPGScoreTerms=$cfcPGOwnTerms;
+#$cfcPGScoreAtoms=$cfcPGOwnAtoms;
+Skip;
+Local cfcPGTermCost=cfcPGLinks;
+Local cfcPGAtomCost=cfcPGLinks;
+InExpression cfcPGTermCost;
+id cfcPGRef(cfcPGIndex?)=cfcPGTerms(cfcPGIndex);
+EndInExpression;
+InExpression cfcPGAtomCost;
+id cfcPGRef(cfcPGIndex?)=cfcPGAtoms(cfcPGIndex);
+EndInExpression;
+.sort
+#$cfcPGScoreTerms=$cfcPGScoreTerms+cfcPGTermCost;
+#$cfcPGScoreAtoms=$cfcPGScoreAtoms+cfcPGAtomCost;
+Drop cfcPGLinks,cfcPGTermCost,cfcPGAtomCost;
+.sort
+NSkip;
+.sort
+#endprocedure
+
+* The rational pass creates polynomial-only numerator/denominator blocks.
+* Register those new blocks before scoring or reusing them, once per id.
+#procedure cfcPGRegisterResult(source)
+Skip;
+Local cfcPGNewRefs=`source';
+id cfcLRDen(cfcShare(cfcPGIndex?))=cfcShare(cfcPGIndex);
+id cfcShare(cfcPGIndex?)=cfcPGRef(cfcPGIndex);
+id cfcPolyN(cfcPGIndex?)=cfcPGRef(cfcPGIndex);
+id cfcPolyD(cfcPGIndex?)=cfcPGRef(cfcPGIndex);
+Bracket cfcPGRef;
+.sort
+Skip;
+NSkip cfcPGNewRefs;
+Collect cfcPGCollect,cfcPGCollectPart,50;
+id cfcPGCollect(?a)=1;
+id cfcPGCollectPart(?a)=1;
+ChainIn cfcPGRef;
+id,all cfcPGRef(?a,cfcPGIndex?,?b)=cfcPGRef(cfcPGIndex);
+if (count(cfcPGRef,1)==0); Discard; endif;
+* Known ids disappear before extrasymbol_ materialises any definition.
+id cfcPGRef(cfcPGIndex?)=cfcPGInverse(cfcPGIndex,cfcPGTerms(cfcPGIndex));
+id cfcPGInverse(cfcPGIndex?,cfcMRN?number_)=0;
+id cfcPGInverse(cfcPGIndex?,?a)=cfcPGRef(cfcPGIndex);
+DropCoefficient;
+.sort
+Hide cfcPGNewRefs;
+#do pgRef=cfcPGNewRefs
+Skip;
+Local cfcPGNewDef=`pgRef';
+id cfcPGRef(cfcPGIndex?$cfcPGNewIndex)=extrasymbol_(cfcPGIndex);
+ModuleOption noparallel;
+.sort
+#$cfcPGRegistered=cfcPGTerms(`$cfcPGNewIndex');
+#if isnumerical($cfcPGRegistered) == 0
+#call cfcMRInspect(cfcPGNewDef)
+Fill cfcMRMeta(`$cfcPGNewIndex')=`$cfcMRMeta';
+#call cfcPGRegister(cfcPGNewDef,`$cfcPGNewIndex')
+#endif
+Drop cfcPGNewDef;
+.sort
+#enddo
+Unhide cfcPGNewRefs;
+Drop cfcPGNewRefs;
+.sort
+NSkip;
+.sort
+#endprocedure
+
+* Memoise numerical inspections of an identical sorted expression. Shared
+* metadata is immutable; unresolved metadata is deliberately never cached.
+* Interning preserves shared references and does not expand their definitions.
+#procedure cfcPGCoefficientKey(source)
+Skip;
+Local cfcPGRejectKey=`source';
+* Collect operates on explicit brackets. The absent private head puts the
+* WHOLE expression inside one bracket; no bracket means no key is produced.
+Bracket cfcPGReject;
+.sort
+Skip;
+NSkip cfcPGRejectKey;
+Collect cfcPGReject,cfcPGRejectPart,50;
+ArgToExtraSymbol tonumber,cfcPGReject;
+#$cfcPGRejectIndex=0;
+id cfcPGReject(cfcPGIndex?$cfcPGRejectIndex)=1;
+ModuleOption noparallel;
+.sort
+Drop cfcPGRejectKey;
+.sort
+#endprocedure
+
+#procedure cfcPGInspectRational(source)
+#call cfcPGCoefficientKey(`source')
+#$cfcPGRejectedCost=cfcPGRejectCost(`$cfcPGRejectIndex');
+#if (`$cfcPGRejectIndex' > 0) && (isnumerical($cfcPGRejectedCost))
+#$cfcMROK=cfcPGInspectOK(`$cfcPGRejectIndex');
+#$cfcMRMeta=cfcPGInspectMeta(`$cfcPGRejectIndex');
+#$cfcMRCost=$cfcPGRejectedCost;
+#$cfcMRMax=cfcPGRejectDegree(`$cfcPGRejectIndex');
+#$cfcMRCount=cfcPGRejectVariables(`$cfcPGRejectIndex');
+#if `$cfcMROK' == 0
+#$cfcPGRejectedHits=$cfcPGRejectedHits+1;
+#endif
+#else
+#call cfcMRInspect(`source')
+* Oversized keys use the alternative Collect head and never enter the cache.
+#if (`$cfcPGRejectIndex' > 0) && (isnumerical($cfcMRCost))
+Fill cfcPGInspectOK(`$cfcPGRejectIndex')=`$cfcMROK';
+Fill cfcPGInspectMeta(`$cfcPGRejectIndex')=`$cfcMRMeta';
+Fill cfcPGRejectCost(`$cfcPGRejectIndex')=`$cfcMRCost';
+Fill cfcPGRejectDegree(`$cfcPGRejectIndex')=`$cfcMRMax';
+Fill cfcPGRejectVariables(`$cfcPGRejectIndex')=`$cfcMRCount';
+#endif
+#endif
+#endprocedure
+
+* Full factorisation is confined to small, prevalidated rational arguments.
+* This hook is reached with OldFactArg OFF in the shared-output pipeline.
+#procedure cfcPGFactor
+#ifdef `cfcPGActive'
+#$cfcPGFactorStart=`timer_';
+.sort
+On OldFactArg;
+Skip;
+NSkip cfcMRWork;
+Argument cfcLRNum,cfcLRDen;
+ToPolynomial;
+EndArgument;
+.sort
+Skip;
+NSkip cfcMRWork;
+FactArg cfcLRNum;
+FactArg cfcLRDen;
+ChainOut cfcLRNum;
+ChainOut cfcLRDen;
+FromPolynomial;
+Argument cfcLRNum,cfcLRDen;
+FromPolynomial;
+EndArgument;
+id cfcLRNum(cfcMRN?number_)=cfcMRN;
+id cfcLRDen(cfcMRN?number_)=1/cfcMRN;
+.sort
+Off OldFactArg;
+Skip;
+NSkip cfcMRWork;
+#endif
+#ifdef `cfcPGFactorEnabled'
+* Inspect the RESULT arguments, not the possibly much larger rational input.
+* Save the caller's eligibility record: these inspections are selection only.
+#$cfcPGSavedOK=$cfcMROK;
+#$cfcPGSavedCost=$cfcMRCost;
+#$cfcPGSavedDegree=$cfcMRMax;
+#$cfcPGSavedVars=$cfcMRCount;
+.sort
+Skip;
+Local cfcPGFactorNum=cfcMRWork;
+Local cfcPGFactorDen=cfcMRWork;
+InExpression cfcPGFactorNum;
+id cfcLRDen(?a)=1;
+id cfcLRNum(cfcMRN?)=cfcMRN;
+EndInExpression;
+InExpression cfcPGFactorDen;
+id cfcLRNum(?a)=1;
+id cfcLRDen(cfcMRN?)=cfcMRN;
+EndInExpression;
+.sort
+#define cfcPGFactorNumOK "0"
+#if (termsin(cfcPGFactorNum) > 1) && (termsin(cfcPGFactorNum) <= @FACTOR_TERMS@)
+#call cfcPGInspectRational(cfcPGFactorNum)
+#if (`$cfcMROK' == 1) && (`$cfcMRCost' <= @FACTOR_TERMS@) && (`$cfcMRCount' <= @FACTOR_VARIABLES@) && (`$cfcMRMax' <= @FACTOR_DEGREE@)
+#redefine cfcPGFactorNumOK "1"
+#endif
+#endif
+#define cfcPGFactorDenOK "0"
+#if (termsin(cfcPGFactorDen) > 1) && (termsin(cfcPGFactorDen) <= @FACTOR_TERMS@)
+#call cfcPGInspectRational(cfcPGFactorDen)
+#if (`$cfcMROK' == 1) && (`$cfcMRCost' <= @FACTOR_TERMS@) && (`$cfcMRCount' <= @FACTOR_VARIABLES@) && (`$cfcMRMax' <= @FACTOR_DEGREE@)
+#redefine cfcPGFactorDenOK "1"
+#endif
+#endif
+Drop cfcPGFactorNum,cfcPGFactorDen;
+Skip;
+NSkip cfcMRWork;
+#if `cfcPGFactorNumOK' == 1
+#$cfcPGFactorCalls=$cfcPGFactorCalls+1;
+FactArg cfcLRNum;
+#endif
+#if `cfcPGFactorDenOK' == 1
+#$cfcPGFactorCalls=$cfcPGFactorCalls+1;
+FactArg cfcLRDen;
+#endif
+ChainOut cfcLRNum;
+ChainOut cfcLRDen;
+FromPolynomial;
+Argument cfcLRNum,cfcLRDen;
+FromPolynomial;
+EndArgument;
+id cfcLRNum(cfcMRN?number_)=cfcMRN;
+id cfcLRDen(cfcMRN?number_)=1/cfcMRN;
+#$cfcMROK=$cfcPGSavedOK;
+#$cfcMRCost=$cfcPGSavedCost;
+#$cfcMRMax=$cfcPGSavedDegree;
+#$cfcMRCount=$cfcPGSavedVars;
+#undefine cfcPGFactorNumOK
+#undefine cfcPGFactorDenOK
+#endif
+#ifdef `cfcPGActive'
+.sort
+#$cfcPGFactorMS=$cfcPGFactorMS+`timer_'-$cfcPGFactorStart;
+Skip;
+NSkip cfcMRWork;
+#endif
+#endprocedure
+
+#procedure cfcPGChoose(candidate,original)
+#$cfcPGChosen=1;
+#call cfcPGScore(`original')
+#$cfcPGBeforeTerms=$cfcPGScoreTerms;
+#$cfcPGBeforeAtoms=$cfcPGScoreAtoms;
+#call cfcPGScore(`candidate')
+#if ( `$cfcPGScoreTerms' > `$cfcPGBeforeTerms' ) || (( `$cfcPGScoreTerms' == `$cfcPGBeforeTerms' ) && ( `$cfcPGScoreAtoms' >= `$cfcPGBeforeAtoms' ))
+#$cfcPGChosen=0;
+Drop `candidate';
+.sort
+Skip;
+Local `candidate'=`original';
+.sort
+#endif
+#endprocedure
+
+* Expose only shared RATIONAL skeletons for denominator grouping. Polynomial
+* numerator blocks stay shared. Estimate each next substitution before doing it;
+* a rejected layer leaves the current exact representation intact.
+#procedure cfcPGExposeDenominators(source)
+#do pgLayer=1,1
+Skip;
+Local cfcPGSkeletonCost=`source';
+DropCoefficient;
+id denom_(?a)=1;
+id i_=1;
+@ALL_DOTS@
+#do v={@PLAIN@}
+id `v'^cfcRPower?=1;
+#enddo
+id cfcPolyD(?a)=1;
+id cfcPolyN(?a)=1;
+id cfcShare(cfcPGIndex?)=cfcPGInverse(cfcPGIndex,cfcPGDenOK(cfcPGIndex));
+id cfcPGInverse(cfcPGIndex?,1)=1;
+.sort
+Skip;
+NSkip cfcPGSkeletonCost;
+#$cfcPGSkeletonMore=0;
+if (match(cfcPGInverse(cfcPGIndex?,cfcPGBad))); $cfcPGSkeletonMore=1; endif;
+id cfcPGInverse(cfcPGIndex?,cfcPGBad)=cfcPGTerms(cfcPGIndex);
+ModuleOption noparallel;
+.sort
+#$cfcPGSkeletonEstimate=cfcPGSkeletonCost;
+Drop cfcPGSkeletonCost;
+.sort
+#if (`$cfcPGSkeletonMore' == 0) || (isnumerical($cfcPGSkeletonEstimate) == 0)
+#breakdo
+#endif
+#if `$cfcPGSkeletonEstimate' > @TERMS@
+#write "CFC_PG_SKIP rational_skeleton_limit"
+#breakdo
+#endif
+Skip;
+NSkip `source';
+id cfcShare(cfcPGIndex?)=cfcPGInverse(cfcPGIndex,cfcPGDenOK(cfcPGIndex));
+id cfcPGInverse(cfcPGIndex?,1)=cfcShare(cfcPGIndex);
+id cfcPGInverse(cfcPGIndex?,cfcPGBad)=extrasymbol_(cfcPGIndex);
+.sort
+Skip;
+NSkip `source';
+repeat;
+id cfcShare(cfcPGIndex?)*cfcPolyD(cfcPGIndex?)=1;
+id cfcPolyN(cfcPGIndex?)*cfcPolyD(cfcPGIndex?)=1;
+endrepeat;
+.sort
+#redefine pgLayer "0"
+#enddo
+NSkip;
+.sort
+#endprocedure
+
+* Larger rational groups are partitioned by their COMPLETE denominator product.
+* Only the numerator of each such group is exposed to the existing guard.
+#procedure cfcPGDenominatorGroups(source)
+Skip;
+NSkip `source';
+id denom_(?a)=cfcLRDen(?a);
+ArgToExtraSymbol tonumber,cfcLRDen;
+id cfcLRDen(cfcPGIndex?)=cfcPolyD(cfcPGIndex);
+.sort
+#call cfcPGRegisterResult(`source')
+#define cfcPGFactorEnabled "1"
+Skip;
+Local cfcPGDenWork=`source';
+@DENOMINATOR_KEYS@
+Bracket cfcPolyD,cfcPGInverse;
+.sort
+Skip;
+Local cfcPGDenKeys=cfcPGDenWork;
+Bracket cfcPolyD,cfcPGInverse;
+.sort
+Skip;
+NSkip cfcPGDenKeys;
+Collect cfcPGCollect,cfcPGCollectPart,50;
+id cfcPGCollect(?a)=1;
+id cfcPGCollectPart(?a)=1;
+DropCoefficient;
+.sort
+Hide cfcPGDenWork,cfcPGDenKeys;
+Skip;
+Local cfcPGDenResult=0;
+.sort
+#do pgDenKey=cfcPGDenKeys
+Skip;
+Local cfcPGDenPiece=cfcPGDenWork[`pgDenKey'];
+Local cfcPGDenRest=(`pgDenKey');
+Local cfcPGDenOutside=1;
+.sort
+* Cache a complete denominator-product subproblem before planning its factors.
+* This exact key includes the numerator and every denominator power.
+Skip;
+Local cfcPGDenInput=cfcPGDenPiece*cfcPGDenRest;
+.sort
+#call cfcPGCoefficientKey(cfcPGDenInput)
+#$cfcPGDenCacheIndex=$cfcPGRejectIndex;
+#$cfcPGDenCacheKnown=cfcPGDenReady(`$cfcPGDenCacheIndex');
+#if (`$cfcPGDenCacheIndex' > 0) && (isnumerical($cfcPGDenCacheKnown))
+Drop cfcPGDenInput;
+.sort
+Skip;
+Local cfcPGDenInput=cfcPGDenValue(`$cfcPGDenCacheIndex');
+.sort
+#else
+* First simplify the numerator, then cancel one shared denominator factor at a
+* time. Each attempt has the SAME rational bounds; rejected factors stay outside.
+#call cfcMRFinal(cfcPGDenPiece)
+#call cfcPGRegisterResult(cfcPGDenPiece)
+#do pgStep=1,1
+#$cfcPGDenIndex=-1;
+#$cfcPGDenBest=-1;
+Skip;
+Local cfcPGDenChoices=cfcPGDenRest;
+id cfcPGInverse(?a)=1;
+ChainIn cfcPolyD;
+id,all cfcPolyD(?a,cfcPGIndex?,?b)=cfcPGTag(cfcPGIndex);
+if (count(cfcPGTag,1)==0); Discard; endif;
+DropCoefficient;
+id cfcPGTag(cfcPGIndex?)=cfcPGTag(cfcPGIndex)*cfcPGTerms(cfcPGIndex);
+.sort
+Skip;
+NSkip cfcPGDenChoices;
+if (coefficient > $cfcPGDenBest);
+ $cfcPGDenBest=coeff_;
+ if (match(cfcPGTag(cfcPGIndex?$cfcPGDenIndex))); endif;
+endif;
+ModuleOption noparallel;
+.sort
+Drop cfcPGDenChoices;
+Skip;
+NSkip cfcPGDenRest;
+id once cfcPolyD(`$cfcPGDenIndex')=1;
+.sort
+#if `$cfcPGDenIndex' >= 0
+Skip;
+Local cfcPGDenTrial=cfcPGDenPiece*cfcPolyD(`$cfcPGDenIndex');
+.sort
+#call cfcMRFinal(cfcPGDenTrial)
+#if `$cfcMROK' == 1
+#call cfcPGRegisterResult(cfcPGDenTrial)
+Drop cfcPGDenPiece;
+.sort
+Skip;
+Drop cfcPGDenTrial;
+Local cfcPGDenPiece=cfcPGDenTrial;
+.sort
+#else
+Drop cfcPGDenTrial;
+Skip;
+NSkip cfcPGDenOutside;
+Multiply cfcPolyD(`$cfcPGDenIndex');
+.sort
+#endif
+#redefine pgStep "0"
+#endif
+#enddo
+Skip;
+NSkip cfcPGDenRest;
+id cfcPGInverse(cfcMRN?)=1/cfcMRN;
+.sort
+Skip;
+Drop cfcPGDenInput;
+Local cfcPGDenCombined=cfcPGDenPiece*cfcPGDenRest*cfcPGDenOutside;
+.sort
+Skip;
+Drop cfcPGDenCombined;
+Local cfcPGDenInput=cfcPGDenCombined;
+.sort
+#if `$cfcPGDenCacheIndex' > 0
+#$cfcPGDenCacheValue=cfcPGDenInput;
+Fill cfcPGDenValue(`$cfcPGDenCacheIndex')=`$cfcPGDenCacheValue';
+Fill cfcPGDenReady(`$cfcPGDenCacheIndex')=1;
+#endif
+#endif
+Skip;
+Drop cfcPGDenResult;
+Local cfcPGDenNext=cfcPGDenResult+cfcPGDenInput;
+.sort
+Skip;
+Drop cfcPGDenNext,cfcPGDenPiece,cfcPGDenRest,cfcPGDenOutside,cfcPGDenInput;
+Local cfcPGDenResult=cfcPGDenNext;
+.sort
+#enddo
+Skip;
+NSkip cfcPGDenResult;
+id cfcPGInverse(cfcMRN?)=1/cfcMRN;
+repeat;
+id cfcPolyN(cfcPGIndex?)*cfcPolyD(cfcPGIndex?)=1;
+endrepeat;
+.sort
+Drop `source';
+.sort
+Skip;
+Drop cfcPGDenResult;
+Local `source'=cfcPGDenResult;
+.sort
+Unhide cfcPGDenWork,cfcPGDenKeys;
+Drop cfcPGDenWork,cfcPGDenKeys;
+.sort
+NSkip;
+.sort
+#undefine cfcPGFactorEnabled
+#endprocedure
+
+* After complete-product cancellation, combine fractions sharing one explicit
+* denominator factor. These subsets are algebraic (not arbitrary term batches).
+* The common factor stays outside each bounded rational attempt.
+#procedure cfcPGOverlaps(source)
+#define cfcPGFactorEnabled "1"
+Skip;
+Local cfcPGOverlapKeys=`source';
+Bracket cfcPolyD;
+.sort
+Skip;
+NSkip cfcPGOverlapKeys;
+Collect cfcPGCollect,cfcPGCollectPart,50;
+id cfcPGCollect(?a)=1;
+id cfcPGCollectPart(?a)=1;
+ChainIn cfcPolyD;
+id,all cfcPolyD(?a,cfcPGIndex?,?b)=cfcPGTag(cfcPGIndex);
+if (count(cfcPGTag,1)==0); Discard; endif;
+DropCoefficient;
+.sort
+Hide cfcPGOverlapKeys;
+#do pgOverlapKey=cfcPGOverlapKeys
+#$cfcPGOverlapIndex=-1;
+Skip;
+Local cfcPGOverlapKey=`pgOverlapKey';
+id cfcPGTag(cfcPGIndex?$cfcPGOverlapIndex)=1;
+ModuleOption noparallel;
+.sort
+Drop cfcPGOverlapKey;
+Skip;
+Local cfcPGOverlapSlice=`source';
+Local cfcPGOverlapRest=`source';
+InExpression cfcPGOverlapSlice;
+if (match(cfcPolyD(`$cfcPGOverlapIndex'))==0); Discard; endif;
+id once cfcPolyD(`$cfcPGOverlapIndex')=1;
+EndInExpression;
+InExpression cfcPGOverlapRest;
+if (match(cfcPolyD(`$cfcPGOverlapIndex'))); Discard; endif;
+EndInExpression;
+.sort
+#call cfcMRFinal(cfcPGOverlapSlice)
+#if `$cfcMROK' == 1
+#call cfcPGRegisterResult(cfcPGOverlapSlice)
+Drop `source';
+.sort
+Skip;
+Local `source'=cfcPGOverlapRest+cfcPolyD(`$cfcPGOverlapIndex')*cfcPGOverlapSlice;
+.sort
+#endif
+Drop cfcPGOverlapSlice,cfcPGOverlapRest;
+.sort
+#enddo
+Unhide cfcPGOverlapKeys;
+Drop cfcPGOverlapKeys;
+.sort
+NSkip;
+.sort
+#undefine cfcPGFactorEnabled
+#endprocedure
+
+* Add structural layers without materialising their combined expansion. When
+* the next substitution would exceed the budget, collect the accumulated scalar
+* coefficients into shared blocks first. No rational algebra is done on batches.
+#procedure cfcPGMasterParts(source)
+#$cfcPGMasterOK=1;
+Skip;
+Local cfcPGMaster=0;
+.sort
+#$cfcPGAccumulated=0;
+#do pgTerm=`source'
+Skip;
+Local cfcPGTerm=`pgTerm';
+.sort
+#call cfcPGInspect(cfcPGTerm)
+#if `$cfcPGOK' == 0
+#$cfcPGMasterOK=0;
+Drop cfcPGTerm;
+.sort
+#breakdo
+#endif
+#$cfcPGNextCost=$cfcPGAccumulated+$cfcPGCost;
+#if `$cfcPGNextCost' > @TERMS@
+Skip;
+NSkip cfcPGMaster;
+Bracket @POL@;
+.sort
+Skip;
+NSkip cfcPGMaster;
+Collect cfcPGCollect;
+ArgToExtraSymbol tonumber,cfcPGCollect;
+id cfcPGCollect(cfcPGIndex?)=cfcShare(cfcPGIndex);
+.sort
+#call cfcPGRegisterScalars(cfcPGMaster)
+#$cfcPGAccumulated=termsin_(cfcPGMaster);
+#endif
+#$cfcPGNextCost=$cfcPGAccumulated+$cfcPGCost;
+#if `$cfcPGNextCost' > @TERMS@
+#$cfcPGMasterOK=0;
+Drop cfcPGTerm;
+.sort
+#breakdo
+#endif
+#$cfcPGAccumulated=$cfcPGAccumulated+$cfcPGCost;
+Skip;
+NSkip cfcPGTerm;
+@POL_DOTS@
+id cfcShare(cfcPGIndex?)=cfcPGParts(cfcPGIndex);
+id cfcPolyN(cfcPGIndex?)=cfcPGParts(cfcPGIndex);
+.sort
+Skip;
+Drop cfcPGMaster;
+Local cfcPGJoined=cfcPGMaster+cfcPGTerm;
+.sort
+Skip;
+Drop cfcPGJoined,cfcPGTerm;
+Local cfcPGMaster=cfcPGJoined;
+.sort
+#enddo
+Skip;
+NSkip cfcPGMaster;
+Bracket @POL@;
+.sort
+#endprocedure
+
+#procedure cfcPGFinal(source)
+#$cfcPGStart=`timer_';
+#$cfcPGRationalMS=0;
+#$cfcPGFactorMS=0;
+#$cfcPGFactorCalls=0;
+#$cfcPGImproved=0;
+#$cfcPGZeros=0;
+#$cfcPGPartial=0;
+#$cfcPGRejectedHits=0;
+#$cfcPGResultHits=0;
+#$cfcPGUnchangedFallbacks=0;
+#call cfcPGInspect(`source')
+#if (isnumerical($cfcPGCost)) && (`$cfcPGDependent' == 1)
+#define cfcPGActive "1"
+#if `$cfcPGOK' == 1
+Skip;
+Local cfcPGMaster=`source';
+@POL_DOTS@
+id cfcShare(cfcPGIndex?)=cfcPGParts(cfcPGIndex);
+id cfcPolyN(cfcPGIndex?)=cfcPGParts(cfcPGIndex);
+Bracket @POL@;
+.sort
+#$cfcPGMasterOK=1;
+#else
+#call cfcPGMasterParts(`source')
+#endif
+#if `$cfcPGMasterOK' == 1
+Skip;
+Local cfcPGKeys=cfcPGMaster;
+Bracket @POL@;
+.sort
+Skip;
+NSkip cfcPGKeys;
+Collect cfcPGCollect,cfcPGCollectPart,50;
+id cfcPGCollect(?a)=1;
+id cfcPGCollectPart(?a)=1;
+DropCoefficient;
+.sort
+#$cfcPGGroups=termsin_(cfcPGKeys);
+#if `$cfcPGGroups' <= @STRUCTURES@
+#write "CFC polarisation groups: %$",$cfcPGGroups
+Hide cfcPGMaster,cfcPGKeys;
+Skip;
+Local cfcPGAssembled=0;
+.sort
+#do pgKey=cfcPGKeys
+Skip;
+Local cfcPGOriginal=cfcPGMaster[`pgKey'];
+Local cfcPGCoefficient=cfcPGMaster[`pgKey'];
+InExpression cfcPGCoefficient;
+ToPolynomial;
+EndInExpression;
+.sort
+* Strip numerical and scalar monomial content only. A shared sum is not a
+* monomial: removing its reference here would hide all arithmetic from the guard.
+#$cfcPGContent=content_(cfcPGCoefficient);
+Skip;
+Local cfcPGContent=$cfcPGContent;
+FromPolynomial;
+id cfcShare(?a)=1;
+id cfcPolyN(?a)=1;
+.sort
+Skip;
+NSkip cfcPGContent;
+ToPolynomial;
+.sort
+#$cfcPGContent=cfcPGContent;
+Skip;
+NSkip cfcPGCoefficient,cfcPGContent;
+InExpression cfcPGCoefficient;
+Multiply 1/$cfcPGContent;
+EndInExpression;
+FromPolynomial;
+.sort
+* Normalisation has removed only common content. Identical remaining
+* coefficients use the same algebra and immutable shared definitions, so the
+* completed candidate can be reused across structures and masters in this job.
+#call cfcPGCoefficientKey(cfcPGCoefficient)
+#$cfcPGResultIndex=$cfcPGRejectIndex;
+#$cfcPGResultKnown=cfcPGResultReady(`$cfcPGResultIndex');
+#if (`$cfcPGResultIndex' > 0) && (isnumerical($cfcPGResultKnown))
+Drop cfcPGCoefficient;
+.sort
+Skip;
+Local cfcPGCoefficient=cfcPGResult(`$cfcPGResultIndex');
+.sort
+#$cfcPGResultHits=$cfcPGResultHits+1;
+#else
+#call cfcMRFinal(cfcPGCoefficient)
+#write "CFC polarisation rational eligible: %$, cost %$, degree %$, variables %$",$cfcMROK,$cfcMRCost,$cfcMRMax,$cfcMRCount
+#if `$cfcMROK' == 0
+#$cfcPGPartial=$cfcPGPartial+1;
+#call cfcPGExposeDenominators(cfcPGCoefficient)
+Skip;
+Local cfcPGFallbackBefore=cfcPGCoefficient;
+.sort
+#call cfcPGScore(cfcPGFallbackBefore)
+#$cfcPGFallbackTerms=$cfcPGScoreTerms;
+#$cfcPGFallbackAtoms=$cfcPGScoreAtoms;
+#call cfcPGDenominatorGroups(cfcPGCoefficient)
+#call cfcPGOverlaps(cfcPGCoefficient)
+#call cfcMRFinal(cfcPGCoefficient)
+#if `$cfcMROK' == 0
+* A new reference id is not progress. A second pass requires a strictly
+* smaller reachable representation, measured without expanding shared blocks.
+#call cfcPGScore(cfcPGCoefficient)
+#if (`$cfcPGScoreTerms' < `$cfcPGFallbackTerms') || ((`$cfcPGScoreTerms' == `$cfcPGFallbackTerms') && (`$cfcPGScoreAtoms' < `$cfcPGFallbackAtoms'))
+#call cfcPGDenominatorGroups(cfcPGCoefficient)
+#call cfcPGOverlaps(cfcPGCoefficient)
+#call cfcMRFinal(cfcPGCoefficient)
+#else
+#$cfcPGUnchangedFallbacks=$cfcPGUnchangedFallbacks+1;
+#endif
+#endif
+Drop cfcPGFallbackBefore;
+.sort
+#endif
+#$cfcPGCanFactor=$cfcMROK;
+#call cfcPGRegisterResult(cfcPGCoefficient)
+* Factorisation is a second candidate: it cannot displace a better rational form.
+Skip;
+Local cfcPGRational=cfcPGCoefficient;
+.sort
+* A rejected unchanged coefficient cannot gain eligibility from enabling
+* factorisation; that hook runs only after rationalisation has succeeded.
+#if `$cfcPGCanFactor' == 1
+#define cfcPGFactorEnabled "1"
+#call cfcMRFinal(cfcPGCoefficient)
+#undefine cfcPGFactorEnabled
+#call cfcPGRegisterResult(cfcPGCoefficient)
+#call cfcPGChoose(cfcPGCoefficient,cfcPGRational)
+#endif
+Drop cfcPGRational;
+.sort
+#if `$cfcPGResultIndex' > 0
+* Store the shared expression itself, never its expanded kinematic polynomials.
+#$cfcPGResultValue=cfcPGCoefficient;
+Fill cfcPGResult(`$cfcPGResultIndex')=`$cfcPGResultValue';
+Fill cfcPGResultReady(`$cfcPGResultIndex')=1;
+#endif
+#endif
+Skip;
+NSkip cfcPGCoefficient;
+Multiply cfcPGContent;
+.sort
+#call cfcPGChoose(cfcPGCoefficient,cfcPGOriginal)
+#$cfcPGImproved=$cfcPGImproved+$cfcPGChosen;
+#if termsin(cfcPGCoefficient) == 0
+#$cfcPGZeros=$cfcPGZeros+1;
+#endif
+Skip;
+Drop cfcPGAssembled;
+Local cfcPGNext=cfcPGAssembled+(`pgKey')*cfcPGCoefficient;
+.sort
+Skip;
+Drop cfcPGNext;
+Local cfcPGAssembled=cfcPGNext;
+.sort
+Drop cfcPGCoefficient,cfcPGOriginal,cfcPGContent;
+.sort
+#enddo
+Skip;
+NSkip cfcPGAssembled;
+@POL_RESTORE@
+.sort
+#call cfcPGChoose(cfcPGAssembled,`source')
+#$cfcPGGroupingMS=`timer_'-$cfcPGStart-$cfcPGRationalMS-$cfcPGFactorMS;
+#write "CFC_PG_SUMMARY structures=%$ improved=%$ zero=%$ partial=%$ factor_calls=%$ selected=%$ grouping_ms=%$ rational_ms=%$ factor_ms=%$ rejected_cache_hits=%$ unchanged_fallbacks=%$ result_cache_hits=%$",$cfcPGGroups,$cfcPGImproved,$cfcPGZeros,$cfcPGPartial,$cfcPGFactorCalls,$cfcPGChosen,$cfcPGGroupingMS,$cfcPGRationalMS,$cfcPGFactorMS,$cfcPGRejectedHits,$cfcPGUnchangedFallbacks,$cfcPGResultHits
+Drop `source';
+.sort
+Skip;
+Local `source'=cfcPGAssembled;
+.sort
+Drop cfcPGAssembled;
+.sort
+Unhide cfcPGMaster,cfcPGKeys;
+#else
+#write "CFC_PG_SKIP structure_limit"
+#endif
+Drop cfcPGKeys;
+.sort
+#else
+#write "CFC_PG_SKIP intermediate_limit"
+#endif
+Drop cfcPGMaster;
+.sort
+NSkip;
+.sort
+#undefine cfcPGActive
+#else
+#write "CFC_PG_SKIP unsupported_or_no_polarisation cost=%$",$cfcPGCost
+* Includes the no-polarisation path and unsupported structures. The old guard
+* remains authoritative, so this does not broaden the mathematical vocabulary.
+#call cfcMRFinal(`source')
+#endif
+#endprocedure

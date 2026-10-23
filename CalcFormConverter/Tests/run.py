@@ -181,6 +181,10 @@ def main():
                 run_kernel('LoopDenominatorGroups')
                 run_kernel('LoopCoefficientParameters')
                 run_kernel('ScalarMasterReduction')
+                run_kernel('ExportPlanning')
+                run_kernel('MasterOutputSharing')
+                run_kernel('MasterRationalCoefficients')
+                run_kernel('PolarisationCoefficients')
                 continue
             run_kernel('Export' if suite == 'form' else 'GravityExport')
             if suite == 'form':

@@ -1,3 +1,4 @@
+@RATIONAL_PROCEDURE@
 * Collect complete denominator products while retaining shared numerators.
 Hide cfcResult;
 .sort
@@ -95,6 +96,9 @@ Hide cfcRefs;
 #do key=cfcRefs
 Local def=`key';
 id cfcRef(cfcDGNum?$index)=extrasymbol_(cfcDGNum);
+ModuleOption noparallel;
+.sort
+@RATIONAL_METADATA@
 id cfcPolyN(cfcDGNum?)=cfcLRNum(extrasymbol_(cfcDGNum));
 id cfcPolyD(cfcDGNum?)=cfcLRDen(extrasymbol_(cfcDGNum));
 ModuleOption noparallel;
@@ -120,6 +124,7 @@ repeat;
 id cfcPolyN(cfcDGNum?)*cfcPolyD(cfcDGNum?)=1;
 endrepeat;
 .sort
+@RATIONAL_FINAL@
 @NEGATIVE_POWERS@
 id cfcPolyN(cfcDGNum?)=cfcShare(cfcDGNum);
 id cfcPolyD(cfcDGNum?)=cfcLRDen(cfcShare(cfcDGNum));
@@ -148,7 +153,9 @@ id cfcFinalPart(cfcDGNum?)=cfcShare(cfcDGNum);
 NSkip;
 Hide kval,piece;
 .sort
+@REGISTER_FINAL_SHARES@
 Local cfcPending=piece;
+id cfcLRDen(cfcShare(cfcDGNum?))=cfcShare(cfcDGNum);
 Bracket cfcShare;
 .sort
 Collect cfcNum,cfcNumPart,50;
@@ -159,6 +166,7 @@ id,all cfcShare(?a,cfcDGNum?,?b)=cfcRef(cfcDGNum);
 .sort
 DropCoefficient;
 if (count(cfcRef,1)==0); Discard; endif;
+@PENDING_DEPENDENCIES@
 id cfcRef(cfcDGNum?)=cfcRef(cfcDGNum)*cfcKnown(cfcDGNum);
 if (count(cfcKnown,1)==0); Discard; endif;
 id cfcKnown(?a)=1;

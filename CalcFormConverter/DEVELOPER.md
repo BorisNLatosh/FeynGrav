@@ -639,7 +639,49 @@ denominator products in each final multiplier. Scalar identity groups and
 preserved singular families follow the same path. Products of coefficients
 retain the general recurrence.
 
-Large algebra-version-one jobs use shared numerator factors. The embedded
+Nonzero linear scalar-master jobs with algebra version one always use shared
+numerator factors. Their small input dictionaries can grow substantially during
+reduction, so the input term count is not a suitable output-size predictor.
+Repeated-power-only jobs retain the 4,096-term input threshold. The nonlinear
+coefficient-product and algebra eligibility guards are unchanged. This selection
+reuses the existing writer and mapping capabilities; it changes no recurrence,
+format version or importer. `Tests/MasterOutputSharing.wls` compares it exactly
+with the former direct-output selector on manageable fixtures.
+
+Final commuting master multipliers now have a bounded rational pass before
+complete denominator grouping. `rcMasterPlan` and
+`Templates/MasterRationalCoefficients.frm.in` reuse the native power translation
+from `RationalCoefficients.wl`; the original propagator-specific guards remain
+unchanged. This pass does not invoke Wolfram `Simplify` or consume `$Assumptions`.
+
+Each shared definition receives conservative metadata: an expanded-term estimate,
+a maximum absolute degree per term (including denominator factors), and the union
+of scalar variables. The metadata contains counts/markers, not expanded copies of
+shared polynomials. Child estimates are combined multiplicatively for products
+and additively for sums. Unknown or unavailable dependencies reject the candidate.
+The current selection limits are 1,000 estimated terms, degree 24 and 12 actual
+variables per coefficient; unrelated mapping entries do not count. These limits
+are heuristics for selecting work, not hard resource or GCD-complexity bounds.
+
+Only selected coefficients expose their shared definitions in a temporary FORM
+expression. `PolyRatFun` combines fractions and cancels polynomial factors.
+Temporary dot-product symbols and the polynomial placeholder for `i_` are restored
+before output. Zero coefficients reconstruct as zero; their empty group frames
+are retained to honour the existing incremental grammar. Other results regain
+shared numerator/denominator definitions. Newly created denominator references
+must be included in the pending-definition scan, even when nested in `cfcLRDen`.
+No mapping version, recurrence identity or reader behaviour changes.
+
+FORM `Skip` applies only to its current module: the metadata and arithmetic
+procedures renew expression selection after each sort. Table metadata uses a
+preprocessor snapshot of its value, not a reference to a mutable dollar variable.
+These invariants prevent inspection from changing the coefficient being inspected.
+`Tests/MasterRationalCoefficients.wls` covers exact cancellation, complex arithmetic,
+dot products, fallback, manual/tiny-chunk import and unchanged mappings. Matrix,
+epsilon, nonlinear coefficient-product and unshared paths retain their existing
+behaviour; this is not unrestricted rational simplification of every output.
+
+The embedded
 `LoopDenominatorGroups.frm.in` first exposes denominator factors in the original
 amplitude blocks and recurrence weights separately. Final assembly joins them,
 cancels matching exposed factors and brackets complete denominator products.
@@ -797,3 +839,117 @@ The chosen representative is an existing family, so no new routing is invented.
 `Templates/LoopDenominatorGroups.frm.in` sorts an extracted integral bracket before substituting original amplitude blocks when `NTHREADS_ > 2`. FORM includes its master in that count. This gives multiple TFORM workers terms to expand; serial FORM and one-worker TFORM skip the barrier. The change affects scheduling only, with no public-option or format change. `Tests/Fixtures/MaterialiseBlocks.frm`, exercised by `LoopDenominatorGroups.wls`, compares baseline and materialised results including cancelled, missing and free-index blocks.
 
 A bounded realistic trial completed FORM after this change, but its import remained incomplete. Sampled per-process RSS limits do not constitute an enforced aggregate memory cap. Do not infer complete-call success from backend completion.
+
+## Scalar-master export planning
+
+Coefficient registration in `lrPlan` uses a job-local association keyed by held,
+evaluated expressions. Decode existing scalar/abbreviation entries once and keep
+the first matching name. Preserve structural equality, allocation order and
+validation; do not introduce algebraic normalisation or a persistent cache.
+
+`tdDenominatorSupports` records which denominator identifiers can coexist in the
+normalised expression without expanding its numerator. `tdPrepare` maps these to
+loop slots, excluding spectator denominators. Saved coefficients provide their
+own supports through `lrSavedSupports`. `lrReachableFamilies` supplies possible
+pinches to the power/master planners and canonicalisers. Tensor moments change
+powers within an existing support; the current cancellation/recurrence rules do
+not introduce a new denominator slot. Revisit that invariant when adding a new
+identity. Canonical representatives must belong to the retained closure.
+
+Support analysis is conservative: more than 256 alternatives are replaced by
+their union; missing support metadata selects the old dictionary-wide planner.
+These are private planning data, not a saved-format extension. Restricting the
+families can change abbreviation numbering and remove unused generic restrictions
+from newly generated mappings, while their interpretation remains unchanged.
+
+`Tests/ExportPlanning.wls` is part of the `runtime` suite. See
+[export-planning verification](../Documentation/Verification/ExportPlanning-2026-10-23.md)
+for exact comparisons, timing boundaries and the incomplete full-box import.
+
+
+## Polarisation grouping at final scalar-master assembly
+
+**Unaccepted working-tree candidate.** Cache registration and repeated-coefficient
+work have been repaired and pass focused checks. The native-denominator path
+still reaches the three-box timeout; duplicate cache warnings are gone. Do not interpret the
+implementation description below as acceptance; see the report and remaining
+work before using it for a release.
+
+`rcMasterPlan` recognises encoded `Polarization` entries by role. It assigns one
+temporary commuting symbol to each unordered vector pair containing a
+polarisation, preserving the complete encoded polarisation label. The dedicated
+`Templates/PolarisationCoefficients.frm.in` is concatenated with the rational
+procedure at the existing final-assembly hook. No mapping or public API extension
+is involved; non-polarisation jobs retain the old hook.
+
+The FORM procedures have four responsibilities:
+
+1. `cfcPGInspect`, `cfcPGRegister` and `cfcPGRegisterScalars` classify and cache
+   shared definitions in dependency order. Polynomial scalar blocks stay shared;
+   polarisation-dependent definitions collect each monomial's scalar coefficient
+   into a shared block. Native `denom_` objects introduced by FORM's dimension
+   arithmetic are inspected as denominators, never as new independent scalars.
+2. `cfcPGMasterParts` combines structural layers before the next substitution
+   would exceed its budget. These are structural additions, not separate
+   rational simplifications of arbitrary batches of summands.
+3. `cfcPGFinal` extracts complete groups, removes common content and invokes the
+   existing rational selector per group. `cfcPGExposeDenominators` exposes bounded
+   rational skeletons while retaining polynomial blocks. Larger groups are
+   collected by their complete denominator products. Eligible numerators are
+   simplified, denominator factors are attempted individually, and a finite
+   overlap pass collects terms sharing an explicit denominator factor. At most
+   two such rounds are attempted, with the second requiring a strictly smaller
+   reachable term/atom score; every rational call keeps the same limits.
+4. `cfcPGMeasure`, `cfcPGScore` and `cfcPGChoose` compare reachable storage costs.
+   Distinct shared definitions count once; private identifier spelling does not
+   contribute. A scalar symbol contributes its occurrence and, for a non-unit
+   exponent, its power node. Original forms win ties. Both each coefficient and
+   the assembled master must pass this comparison.
+
+The private initial limits are 1,024 structures per master and 10,000 structural
+terms per substitution layer. Rational selection remains at 1,000 estimated
+terms, 12 actual scalar variables and degree 24. Polarisation atoms are outside
+that scalar budget. Full `FactArg` is attempted only on reduced arguments with
+at most 250 terms, eight variables and degree 12. Common-content extraction uses
+`OldFactArg` locally; the surrounding shared-output pipeline enters and leaves
+with full factorisation mode restored. Factors are interned separately. A
+runtime FORM error or resource failure propagates normally; there is no retry in
+this code. These guards bound selected work, not GCD complexity or physical RAM.
+
+Cache tables are FORM-job-local and each entry is written once. Known reference
+IDs are filtered before their definitions are materialised. Both successful and
+rejected numerical inspections are keyed by the complete sorted shared expression; unresolved
+metadata and oversized keys are not cached. `cfcPGCoefficientKey` must explicitly
+bracket the complete expression before `Collect`; an unset key must never enter
+a cache. Completed normalised candidates are reused before common content is
+restored, with representation selection still performed per use. A still-rejected
+coefficient is not retried only to enable factorisation. New result blocks carry
+transitive dependency sets. Successful intermediate algebra reuses the inspection
+key, with separate rational-only and factorisation modes. Complete denominator
+products have an exact subproblem cache before factor planning. Constants and
+single monomials bypass full factorisation inspection after common-content
+extraction. The writer emits required children before references; the existing
+restricted incremental reader reconstructs ordinary arithmetic and PaVe objects.
+No temporary polarisation, scoring or cache head may appear in imported results.
+Do not replace the dependency walk by a flat expansion of all kinematic blocks.
+
+`CFC_PG_SUMMARY` reports attempted structures, improved/zero/partial groups,
+factorisation calls, whether the whole-master candidate was selected, and FORM
+running-time counters in milliseconds, rejected/result cache hits and unchanged
+fallback rounds (the existing `unchanged_fallbacks` label includes rounds skipped
+for lack of score improvement). The counters split factorisation from
+rational processing and remaining grouping/scoring work; they are not external
+wall-clock measurements. A rejected whole-master candidate can have improved
+individual groups: interpret its `selected=0` field before claiming a delivered
+simplification. Skip diagnostics identify unsupported structures, intermediate
+limits and rational-skeleton limits. Individual rational diagnostics report the
+estimated cost, degree and variable count.
+
+`Tests/PolarisationCoefficients.wls` covers exact identities, conjugation, powers,
+complex numbers, symbolic D, separate masters, protected paths, lowered selector
+boundaries, manual export/import, tiny read chunks and serial/TFORM agreement.
+The retained workload report distinguishes these fixtures from unresolved large
+coefficient checks. Production performs no Wolfram `Simplify`, `Together` or
+`Factor` calls. See the [verification report](../Documentation/Verification/PolarisationCoefficients-2026-10-23.md)
+and the [FORM manual](https://form-dev.github.io/form-docs/stable/manual/),
+sections 7.56, 8.11 and 11, for factorisation and native denominator conventions.

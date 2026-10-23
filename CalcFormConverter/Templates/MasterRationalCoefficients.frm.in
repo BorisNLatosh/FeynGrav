@@ -1,0 +1,156 @@
+* Estimate expanded work without multiplying the actual shared polynomials.
+* A metadata entry is an upper term count times z^(upper total degree), with
+* one marker for each scalar variable. Child entries overestimate unions and
+* degrees deliberately. Unknown objects/forward references reject the candidate.
+#procedure cfcMRInspect(source)
+#$cfcMROK=0;
+#$cfcMRCost=@LIMIT@+1;
+#$cfcMRMax=@DEGREE@+1;
+#$cfcMRCount=0;
+#$cfcMRMeta=(@LIMIT@+1)*cfcMRDegree^(@DEGREE@+1);
+#if termsin(`source') <= @LIMIT@
+Skip;
+Local cfcMREstimate=`source';
+DropCoefficient;
+@NATIVE_DEN_INSPECT@
+id i_=1;
+@DOTS@
+@INSPECT@
+id cfcShare(cfcMRIndex?)=cfcMRMeta(cfcMRIndex);
+id cfcPolyN(cfcMRIndex?)=cfcMRMeta(cfcMRIndex);
+id cfcPolyD(cfcMRIndex?)=cfcMRMeta(cfcMRIndex);
+.sort
+* Skip is module-local; renew it after each sort to protect the source.
+Skip;
+NSkip cfcMREstimate;
+#$cfcMRMax=0;
+#$cfcMRVars=1;
+#$cfcMRCount=0;
+#do v={@VARIABLES@}
+#$cfcMRUsed`v'=0;
+#enddo
+$cfcMRMax=max_($cfcMRMax,count_(cfcMRDegree,1));
+#do v={@VARIABLES@}
+if (occurs(`v')); $cfcMRUsed`v'=1; endif;
+id `v'=1;
+#enddo
+id cfcMRDegree=1;
+ModuleOption noparallel;
+.sort
+#do v={@VARIABLES@}
+#if `$cfcMRUsed`v'' != 0
+#$cfcMRCount=$cfcMRCount+1;
+#$cfcMRVars=$cfcMRVars*`v';
+#endif
+#enddo
+#$cfcMRCost=cfcMREstimate;
+#if isnumerical($cfcMRCost)
+#if ( `$cfcMRCost' <= @LIMIT@ ) && ( `$cfcMRMax' <= @DEGREE@ ) && ( `$cfcMRCount' <= @VARIABLE_LIMIT@ )
+#$cfcMROK=1;
+#$cfcMRMeta=$cfcMRCost*cfcMRDegree^$cfcMRMax*$cfcMRVars;
+#endif
+#endif
+Drop cfcMREstimate;
+.sort
+NSkip;
+.sort
+#endif
+#endprocedure
+
+* Rationalise one fully assembled commuting multiplier. The original remains
+* intact until the candidate succeeds. Treat i_ as a temporary polynomial
+* variable, then restore i_^2=-1 in numerator and denominator before writing.
+#procedure cfcMRFinal(source)
+#ifdef `cfcPGActive'
+#$cfcPGRationalStart=`timer_';
+#$cfcPGFactorBefore=$cfcPGFactorMS;
+#endif
+#ifdef `cfcPGActive'
+#call cfcPGInspectRational(`source')
+#else
+#call cfcMRInspect(`source')
+#endif
+#if `$cfcMROK' == 1
+#define cfcMRCompute "1"
+#ifdef `cfcPGActive'
+* The inspection supplied the immutable input key. Keep it across factor
+* inspections, which use the same key helper. Mode 1 includes full factoring.
+#$cfcPGAlgebraIndex=$cfcPGRejectIndex;
+#define cfcPGAlgebraMode "0"
+#ifdef `cfcPGFactorEnabled'
+#redefine cfcPGAlgebraMode "1"
+#endif
+#$cfcPGAlgebraKnown=cfcPGAlgebraReady(`$cfcPGAlgebraIndex',`cfcPGAlgebraMode');
+#if (`$cfcPGAlgebraIndex' > 0) && (isnumerical($cfcPGAlgebraKnown))
+Drop `source';
+.sort
+Skip;
+Local `source'=cfcPGAlgebra(`$cfcPGAlgebraIndex',`cfcPGAlgebraMode');
+.sort
+#redefine cfcMRCompute "0"
+#endif
+#endif
+#if `cfcMRCompute' == 1
+Skip;
+Local cfcMRWork=`source';
+repeat;
+id cfcShare(cfcMRIndex?)=extrasymbol_(cfcMRIndex);
+id cfcPolyN(cfcMRIndex?)=extrasymbol_(cfcMRIndex);
+endrepeat;
+id cfcPolyD(cfcMRIndex?)=cfcMRat(1,extrasymbol_(cfcMRIndex));
+@NATIVE_DEN_RATIONAL@
+id i_=cfcMRImag;
+@DOTS@
+Argument cfcMRat;
+id i_=cfcMRImag;
+@DOTS@
+EndArgument;
+.sort
+PolyRatFun cfcMRat;
+Skip;
+NSkip cfcMRWork;
+@POWERS@
+Multiply cfcMRat(1,1);
+.sort
+PolyRatFun;
+Skip;
+NSkip cfcMRWork;
+id cfcMRat(cfcMRN?,cfcMRD?)=cfcLRNum(cfcMRN)*cfcLRDen(cfcMRD);
+Argument cfcLRNum,cfcLRDen;
+id cfcMRImag=i_;
+@RESTORE@
+EndArgument;
+@FACTOR@
+id cfcLRDen(1)=1;
+id cfcLRNum(cfcMRN?number_)=cfcMRN;
+.sort
+Skip;
+NSkip cfcMRWork;
+ArgToExtraSymbol tonumber,cfcLRNum,cfcLRDen;
+id cfcLRNum(cfcMRIndex?)=cfcPolyN(cfcMRIndex);
+id cfcLRDen(cfcMRIndex?)=cfcPolyD(cfcMRIndex);
+.sort
+#ifdef `cfcPGActive'
+#if `$cfcPGAlgebraIndex' > 0
+#$cfcPGAlgebraValue=cfcMRWork;
+Fill cfcPGAlgebra(`$cfcPGAlgebraIndex',`cfcPGAlgebraMode')=`$cfcPGAlgebraValue';
+Fill cfcPGAlgebraReady(`$cfcPGAlgebraIndex',`cfcPGAlgebraMode')=1;
+#endif
+#endif
+Drop `source';
+.sort
+Drop cfcMRWork;
+Local `source'=cfcMRWork;
+.sort
+NSkip;
+.sort
+#endif
+#ifdef `cfcPGActive'
+#undefine cfcPGAlgebraMode
+#endif
+#undefine cfcMRCompute
+#endif
+#ifdef `cfcPGActive'
+#$cfcPGRationalMS=$cfcPGRationalMS+`timer_'-$cfcPGRationalStart-($cfcPGFactorMS-$cfcPGFactorBefore);
+#endif
+#endprocedure

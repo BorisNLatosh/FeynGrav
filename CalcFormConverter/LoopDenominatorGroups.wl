@@ -161,10 +161,17 @@ ldgCommonFactors[first_String, second_String, indices_List: {}] := Module[{guard
         "Argument ", first, ",", second, ";\nFromPolynomial;\nEndArgument;\n", end, restore]
 ];
 
-ldgSharedOutput[plan_Association,path_String] := Module[{den=plan["Denominators"], substitutions, preparation},
+ldgSharedOutput[plan_Association,path_String] := Module[{den=plan["Denominators"], substitutions, preparation, rational, polarisation},
     preparation=plan["MonomialRules"]<>".sort\n"<>
         If[plan["Dimension"]===<||>,"","PolyRatFun cfcDimRat;\n"<>plan["Dimension"]["Rules"]<>"\n.sort\nPolyRatFun;\n"];
-    substitutions={"@RESULT@"->path,"@NORMALISE@"->den["Rules"],
+    rational = Lookup[plan, "Rational", <||>];
+    polarisation = Lookup[rational, "Polarisation", <||>];
+    substitutions={"@RESULT@"->path,
+        "@REGISTER_FINAL_SHARES@" -> If[polarisation === <||>, "", "#call cfcPGRegisterResult(piece)\n"],
+        "@PENDING_DEPENDENCIES@" -> If[polarisation === <||>, "", "id cfcRef(cfcDGNum?)=cfcPGReach(cfcDGNum);\nid cfcPGRef(cfcDGNum?)=cfcRef(cfcDGNum);\n.sort\nDropCoefficient;\n"],
+        "@RATIONAL_PROCEDURE@" -> Lookup[rational,"Procedure", ""] <> "\n" <> Lookup[polarisation,"Procedure", ""],
+        "@RATIONAL_METADATA@" -> If[Lookup[plan,"Rational",<||>]===<||>,"","#call cfcMRInspect(def)\nFill cfcMRMeta(`$index')=`$cfcMRMeta';\n" <> If[polarisation === <||>, "", "#call cfcPGRegister(def,`$index')\n"]],
+        "@RATIONAL_FINAL@" -> If[Lookup[plan,"Rational",<||>]===<||>,"",If[polarisation === <||>, "#call cfcMRFinal(piece)\n", "#call cfcPGFinal(piece)\n"]],"@NORMALISE@"->den["Rules"],
         "@WEIGHT_PREPARATION@"->preparation,
         "@PROPAGATORS@"->StringRiffle[den["Denominators"],","],
         "@NEGATIVE_POWERS@"->ldgNegativePowerRules[den["Atoms"]]};
