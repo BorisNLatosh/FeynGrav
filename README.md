@@ -1,12 +1,15 @@
-# FeynGrav 4.1.0
+# FeynGrav 4.2.0
 
-**Development branch:** this checkout adds one-loop tensor decomposition and scalar-master reduction to the published 4.1.0 baseline. These extensions are not in the v4.1.0 release.
+**4.2.0 development version — not yet released.** This checkout adds the unified
+`FeynGravSimplify` interface, one-loop tensor decomposition and scalar-master
+reduction to the published 4.1.0 baseline.
 
 Wolfram Language Feynman rules for gravity and matter, using FeynCalc notation,
 with FORM calculation support and four native FeynArts models.
 
-**Version 4.1.0 — 20 October 2026.** See the [release notes](Documentation/ReleaseNotes-4.1.0.md)
-for migration instructions, scientific corrections and known limitations.
+See the [4.2.0 draft release notes](Documentation/ReleaseNotes-4.2.0.md) for changes,
+compatibility and verification limits. The [4.1.0 release notes](Documentation/ReleaseNotes-4.1.0.md)
+remain the record of the published 20 October 2026 release.
 
 ## Start here
 

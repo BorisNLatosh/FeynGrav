@@ -1,5 +1,8 @@
 # FeynGrav documentation
 
+**Current target: 4.2.0, unreleased.** See the [draft release notes](ReleaseNotes-4.2.0.md)
+for the unified interface, calculation improvements and verification limits.
+
 - [4.1.0 release notes](ReleaseNotes-4.1.0.md): the published baseline, not the additional loop-reduction work on this branch.
 - [4.1.0 release preparation](Verification/ReleasePreparation-4.1.0.md): historical packaging checks and publication boundaries.
 
@@ -21,6 +24,8 @@ Latest scoped FORM acceptance: [PERF-04 complete three-box measurements](Verific
 The reference covers main-package commands, public gauge parameters and the automatically loaded Nieuwenhuizen helpers. Generator-side routines have separate signatures: do not substitute them for library-backed main-package functions simply because their short names match.
 
 ## Verification and history
+
+- [Example syntax and interface audit](Verification/ExamplesSyntax-2026-10-25.md): all 11 notebooks, six narrow input repairs, preserved outputs and explicit execution limits.
 
 - [Main/FORM merge checks](Verification/FORMMainMerge-2026-10-20.md): focused checks on the combined development branch, with explicit limits.
 

@@ -1,10 +1,10 @@
-# Development note: unified public calculation interface (API-01)
+# FeynGrav 4.2.0 interface note: unified calculation commands (API-01)
 
-**Status: unreleased development work. Not part of FeynGrav 4.1.0.** This note
-records additions made on the `FORM_Simplification` development branch. It does
-not change the published 4.1.0 interface, notes, tag or GitHub Release, and it
-assigns no version number. Do not cite or announce these commands as released
-functionality. The implementation was accepted on 20 October 2026 within the recorded
+**Target: 4.2.0, unreleased. Not part of FeynGrav 4.1.0.** This note
+records additions made on the `FORM_Simplification` development branch. The
+[4.2.0 draft release notes](ReleaseNotes-4.2.0.md) consolidate the current delivery.
+The published 4.1.0 notes, tag and GitHub Release remain unchanged. Do not cite
+or announce these commands as released functionality. The implementation was accepted on 20 October 2026 within the recorded
 verification scope. The 23 October development checkpoint includes the subsequent
 modularisation, reliability and example changes; it remains unreleased.
 
@@ -131,11 +131,23 @@ is not a warning-free run or a complete final-source rerun of every suite.
 
 Not established by this work: non-Linux behaviour, front-end rendering,
 performance or benchmark claims, loop-level certification, library or model
-regeneration, and any change to published commands. A future release must fold
-this note into its release notes, decide the version under the project policy
-and obtain separate authorisation.
+regeneration, and any change to published commands. The 4.2.0 draft release
+notes now summarise this work. Publishing still requires separate authorisation;
+the version decision does not widen the verification scope.
+
+## Current delivery — 25 October 2026
+
+The export and output-sharing repairs and bounded polarisation work are included
+in the accepted [PERF-04 delivery](Verification/PERF04-2026-10-25.md).
+[EXAMPLES-01](Verification/ExamplesSyntax-2026-10-25.md) has completed the
+syntax/interface audit of all 11 notebooks. These records supersede the open
+export limitation and pending-audit statements in the historical checkpoint
+below; broader QED and loop-physics limits remain. No new calculations were
+performed to select version 4.2.0.
 
 ## Development checkpoint — 23 October 2026
+
+This section records the earlier checkpoint, before the subsequent repairs.
 
 The converter now separates mapping/encoding, export assembly and import
 reconstruction. The facade and restricted adapters live in `FeynGravSimplify/`.

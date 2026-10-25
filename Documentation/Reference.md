@@ -1,6 +1,6 @@
 # FeynGrav function reference
 
-Development reference checked against the working source on 6 October 2026. This describes the current checkout, not a guarantee about older releases. Start with [installation](UserGuide.md#installation-and-help); complete calculations are in the [example notebooks](../Examples/README.md). For generator-side functions, use the [Rules contracts](../Rules/Contracts.md) and [generator guide](../Libs/Generator.md).
+Reference for the unreleased 4.2.0 development checkout. The original reference review was on 6 October 2026; later interface additions are documented below. Version labelling does not constitute a fresh check of every entry or a guarantee about older releases. Start with [installation](UserGuide.md#installation-and-help); complete calculations are in the [example notebooks](../Examples/README.md). For generator-side functions, use the [Rules contracts](../Rules/Contracts.md) and [generator guide](../Libs/Generator.md).
 
 ## Contents
 
@@ -292,7 +292,8 @@ The default worker setting is `FORMThreads -> Automatic`. Supported Dirac algebr
 Five short facade commands are supplied as a convenient public front end to the
 converter pipeline and, without any fallback, to a restricted benchmarking
 adapter. They are implemented in `FeynGravSimplify/` and described in
-[the unreleased development note](ReleaseNotes-API01-Development.md); they are
+[the detailed interface note](ReleaseNotes-API01-Development.md). They are
+planned for [4.2.0](ReleaseNotes-4.2.0.md), which remains unreleased, and are
 not part of the published 4.1.0 interface.
 
 - `FeynGravSimplify[expr, opts]` — one-call simplified calculation. `Method` is

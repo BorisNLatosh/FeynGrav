@@ -1,7 +1,8 @@
 # FeynGravSimplify: unified facade over the converter pipeline and Contractor-backed restricted methods
 
 ``CalcFormConverter`FeynGravSimplify[expr]`` is the unified front end of this
-directory (API-01 development work). `Method -> Automatic` (the default) and
+directory, planned for [FeynGrav 4.2.0](../Documentation/ReleaseNotes-4.2.0.md)
+(currently unreleased). `Method -> Automatic` (the default) and
 `Method -> "FORM"` resolve the call through the full `CalcFormConverter`
 pipeline with `CalcFormCalculate` semantics: resolved converter options are
 forwarded as ordinary rules and no `Method` option reaches the pipeline.

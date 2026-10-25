@@ -1,6 +1,10 @@
-# FeynGrav 4.1.0
+# FeynGrav 4.2.0
 
 [Directory overview](../README.md)
+
+**Development version; 4.2.0 is not yet released.** See the
+[4.2.0 draft release notes](ReleaseNotes-4.2.0.md). Installation from `main`
+continues to select that branch, not this local development checkout.
 
 FeynGrav is a Wolfram Mathematica package that implements gravitational Feynman rules in the FeynCalc framework. It provides propagators, interaction vertices, polarisation tensors, and tools for working with the Nieuwenhuizen operators.
 
@@ -44,13 +48,13 @@ Importing the script only defines the installer and prints instructions. `Instal
 
 The default remains installation from `main`; ordinary installation does not require choosing a tag.
 
-To select a particular published release, supply its tag. Once `v4.1.0` exists:
+To select a particular published release, supply its tag; for example:
 
 ```mathematica
 InstallFeynGrav[FeynGravReference -> "v4.1.0"]
 ```
 
-This selects the package archive at that tag; the preceding `Import` still loads the installer from `main`. For a fully pinned workflow, load `install.m` from the same tag by replacing `main` in its URL with `v4.1.0`. Neither tagged command is usable before that tag is published. A commit hash may also be supplied through `FeynGravReference`.
+This selects the package archive at that tag; the preceding `Import` still loads the installer from `main`. For a fully pinned workflow, load `install.m` from the same tag by replacing `main` in its URL with `v4.1.0`. The planned `v4.2.0` tag is not available from this version update; use it only after publication. A commit hash may also be supplied through `FeynGravReference`.
 
 </details>
 
@@ -86,7 +90,7 @@ The installer accepts ordinary ZIP archives; encrypted, split, ZIP64 and link-co
 ### Manual installation and help
 
 1. Install FeynCalc and verify that it loads in a fresh kernel.
-2. Evaluate `$UserBaseDirectory` in Mathematica. Place the complete `FeynGrav` directory inside its `Applications` subdirectory, so the main file is at `Applications/FeynGrav/FeynGrav.wl`. Retain the `Rules`, `Libs`, and `CalcFormConverter` subdirectories.
+2. Evaluate `$UserBaseDirectory` in Mathematica. Place the complete `FeynGrav` directory inside its `Applications` subdirectory, so the main file is at `Applications/FeynGrav/FeynGrav.wl`. Retain all package subdirectories, including `Rules`, `Libs`, `CalcFormConverter` and `FeynGravSimplify`.
 3. Load FeynGrav:
 
    ```mathematica
@@ -154,9 +158,9 @@ See the [user guide](../CalcFormConverter/UserGuide.md) for workflows, supported
 
 ### Simplified front end (development, unreleased)
 
-An additional five-command facade, described with the converter guide and the
-[unreleased development note](ReleaseNotes-API01-Development.md), is supplied on
-the development branch: ``CalcFormConverter`FeynGravSimplify[expr, opts]``
+The five-command facade planned for 4.2.0 is described in the converter guide,
+[4.2.0 draft release notes](ReleaseNotes-4.2.0.md) and
+[detailed interface note](ReleaseNotes-API01-Development.md): ``CalcFormConverter`FeynGravSimplify[expr, opts]``
 selects the full pipeline (`Method -> Automatic` or `"FORM"`) or the restricted
 external adapter (`"Contractor"`, `"FORMBenchmark"`) without fallback, and
 `FeynGravFORMExport`, `FeynGravFORMImport`, `FeynGravFORMCheck` and
@@ -168,6 +172,8 @@ interface and are unchanged.
 ## Examples
 
 The [examples guide](../Examples/README.md) lists the numbered notebooks in their suggested reading order, with requirements and scope. Run each notebook in a fresh kernel and evaluate its setup cells before its calculation cells.
+
+All 11 notebooks passed the [25 October syntax and interface audit](Verification/ExamplesSyntax-2026-10-25.md). Saved outputs were preserved; follow the [rerunning guidance](../Examples/README.md#syntax-and-interface-audit) for repaired cells in examples 07, 09 and 11. This audit did not rerun the complete loop calculations.
 
 | No. | Notebook | Topic |
 | --- | --- | --- |
@@ -181,7 +187,7 @@ The [examples guide](../Examples/README.md) lists the numbered notebooks in thei
 | 08 | [08. Graviton_Scalar_Vertex_One_Loop.nb](../Examples/08.%20Graviton_Scalar_Vertex_One_Loop.nb) | One-loop scalar–graviton vertex. |
 | 09 | [09. Scalar_Scattering_Tree_Level_FeynArts.nb](../Examples/09.%20Scalar_Scattering_Tree_Level_FeynArts.nb) | Massive scalar scattering with gravity and cubic/quartic self-interactions, using FeynArts. |
 | 10 | [10. Scalar_Scattering_John_Tree_Level_FeynArts.nb](../Examples/10.%20Scalar_Scattering_John_Tree_Level_FeynArts.nb) | On-shell scalar scattering with the John interaction, using FeynArts. |
-| 11 | [11. Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb](../Examples/11.%20Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb) | EsGB scalar annihilation into gravitons; diagnostic example with unresolved longitudinal checks in the minimal sector. |
+| 11 | [11. Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb](../Examples/11.%20Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb) | EsGB scalar annihilation into gravitons, helicity amplitudes and generic graviton Ward checks; see the [scalar-contact correction record](Verification/ScalarWardCorrection.md). |
 
 The converter's [ScalarBubble.wl](../CalcFormConverter/Examples/ScalarBubble.wl) demonstrates manual and automated FORM workflows for a scalar-projected quadratic-gravity bubble. It requires the cubic quadratic-gravity library, loaded with `FeynGravImportQuadraticGravity[1]`, and FORM/TFORM for execution.
 
@@ -214,6 +220,16 @@ The [Benchmark notebooks](../Benchmark/UserGuide.md) measure export, FORM execut
 Report problems through [GitHub issues](https://github.com/BorisNLatosh/FeynGrav/issues) or contact Dr Boris Latosh at [latosh.boris@gmail.com](mailto:latosh.boris@gmail.com). Include your operating system, Wolfram and FeynCalc versions, FeynGrav revision, and a minimal reproducible expression. For converter issues, include the FORM/TFORM version, options, full failure details, and relevant logs.
 
 ## Version history
+
+### Version 4.2.0 — unreleased
+
+The next release is a minor version because it adds compatible public commands
+and calculation capabilities. It introduces `FeynGravSimplify` and four
+`FeynGravFORM*` wrappers, one-loop coefficient/master reduction, shared output
+and bounded coefficient simplification, plus reliability and example repairs.
+The existing `CalcForm*` commands remain available. See the
+[4.2.0 draft release notes](ReleaseNotes-4.2.0.md) for verification and migration
+limits. No release date or tag has been assigned by this preparation.
 
 <a id="version-410--unreleased"></a>
 
