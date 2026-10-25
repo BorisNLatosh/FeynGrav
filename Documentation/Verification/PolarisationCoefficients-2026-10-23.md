@@ -1,5 +1,9 @@
 # Polarisation coefficient grouping — 23 October 2026
 
+> Historical snapshot. The repaired development candidate and fixed PERF-04
+> workload were accepted on 25 October; see [the later report](PERF04-2026-10-25.md).
+> The failures and larger-QED limitations below remain historical evidence.
+
 ## Status: implemented candidate, not accepted
 
 Branch `FORM_Simplification`, base commit `f30dd8e3d58e8b3ffdb801eed9836caee646fc5b`,

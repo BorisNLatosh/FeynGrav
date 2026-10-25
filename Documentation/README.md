@@ -6,6 +6,8 @@
 This development branch combines the published 4.1.0 changes with the one-loop tensor decomposition, repeated-power and scalar-master reduction work. It is not the published 4.1.0 snapshot. Earlier verification retains its recorded dates and source identities; merging does not imply that every check has been rerun. Consult `?FunctionName` and `Options[FunctionName]` in a fresh kernel after changing package files.
 
 
+Latest scoped FORM acceptance: [PERF-04 complete three-box measurements](Verification/PERF04-2026-10-25.md).
+
 ## Choose a route
 
 | Reader | Start here | Continue with |

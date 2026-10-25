@@ -61,6 +61,19 @@ NSkip;
 * intact until the candidate succeeds. Treat i_ as a temporary polynomial
 * variable, then restore i_^2=-1 in numerator and denominator before writing.
 #procedure cfcMRFinal(source)
+* Charge a complete rational pass, including its bounded factor inspections.
+* A denied pass changes no expression and is never cached as a computed result.
+#define cfcMRRun "1"
+#ifdef `cfcPGActive'
+#if `$cfcPGWorkUsed' >= `$cfcPGWorkLimit'
+#redefine cfcMRRun "0"
+#$cfcPGWorkExhausted=1;
+#$cfcMROK=0;
+#else
+#$cfcPGWorkUsed=$cfcPGWorkUsed+1;
+#endif
+#endif
+#if `cfcMRRun' == 1
 #ifdef `cfcPGActive'
 #$cfcPGRationalStart=`timer_';
 #$cfcPGFactorBefore=$cfcPGFactorMS;
@@ -153,4 +166,6 @@ NSkip;
 #ifdef `cfcPGActive'
 #$cfcPGRationalMS=$cfcPGRationalMS+`timer_'-$cfcPGRationalStart-($cfcPGFactorMS-$cfcPGFactorBefore);
 #endif
+#endif
+#undefine cfcMRRun
 #endprocedure

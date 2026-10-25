@@ -1,3 +1,12 @@
+* Output labels are dense and independent of speculative internal interning.
+* Only disposable output expressions are renamed; internal tables keep their ids.
+#procedure cfcOutputReferences
+id cfcShare(cfcDGNum?)=cfcShare(cfcKnown(cfcDGNum));
+Argument cfcLRNum,cfcLRDen;
+id cfcShare(cfcDGNum?)=cfcShare(cfcKnown(cfcDGNum));
+EndArgument;
+#endprocedure
+#$cfcWrittenShares=0;
 @RATIONAL_PROCEDURE@
 * Collect complete denominator products while retaining shared numerators.
 Hide cfcResult;
@@ -103,8 +112,11 @@ id cfcPolyN(cfcDGNum?)=cfcLRNum(extrasymbol_(cfcDGNum));
 id cfcPolyD(cfcDGNum?)=cfcLRDen(extrasymbol_(cfcDGNum));
 ModuleOption noparallel;
 .sort
-#write <@RESULT@> "cfcShare(`$index')=%E;",def
-Fill cfcKnown(`$index')=1;
+#call cfcOutputReferences
+.sort
+#$cfcWrittenShares=$cfcWrittenShares+1;
+#write <@RESULT@> "cfcShare(`$cfcWrittenShares')=%E;",def
+Fill cfcKnown(`$index')=`$cfcWrittenShares';
 Drop def;
 .sort
 #enddo
@@ -181,8 +193,11 @@ id cfcPolyN(cfcDGNum?)=cfcLRNum(extrasymbol_(cfcDGNum));
 id cfcPolyD(cfcDGNum?)=cfcLRDen(extrasymbol_(cfcDGNum));
 ModuleOption noparallel;
 .sort
-#write <@RESULT@> "cfcShare(`$index')=%E;",cfcNewDef
-Fill cfcKnown(`$index')=1;
+#call cfcOutputReferences
+.sort
+#$cfcWrittenShares=$cfcWrittenShares+1;
+#write <@RESULT@> "cfcShare(`$cfcWrittenShares')=%E;",cfcNewDef
+Fill cfcKnown(`$index')=`$cfcWrittenShares';
 Drop cfcNewDef;
 .sort
 #enddo
@@ -190,6 +205,7 @@ Unhide cfcPending;
 Drop cfcPending;
 .sort
 Unhide kval,piece;
+#call cfcOutputReferences
 Bracket cfcLRDen,@PROPAGATORS@;
 .sort
 #write <@RESULT@> "CFC_GROUP"

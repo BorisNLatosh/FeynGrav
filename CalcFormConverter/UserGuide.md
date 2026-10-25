@@ -953,9 +953,9 @@ for exact checks and the additional measured cost.
 
 ### Polarisation structures in scalar-master coefficients
 
-**Development candidate, not accepted:** cache warnings have been corrected,
-but the renewed large-workload check still reached its time limit. The hook is present in this working
-tree, but the verification report below lists the outstanding acceptance gates.
+**Accepted for the documented development scope:** the repaired hook passes
+focused checks and the retained complete three-box target. Larger QED checks
+remain incomplete; see the dated report below.
 
 On the shared scalar-master output path, FORM can collect a multiplier as
 
@@ -977,10 +977,14 @@ the existing calculation path. Selection limits can also preserve a large group
 or an entire master in its previous shared form. Completion does not mean that
 every coefficient has been fully simplified.
 
-The implementation and its outstanding acceptance checks are recorded in the
-[polarisation-coefficient report](../Documentation/Verification/PolarisationCoefficients-2026-10-23.md).
+A private job-wide allowance limits speculative polarisation work to 1,024
+rational passes, in addition to the per-coefficient limits. When it is spent,
+the complete original master is restored and later masters keep their shared
+representation. A prefix that already loses the compactness comparison can also
+stop early. These choices preserve exact coefficients but may leave further
+cancellations undiscovered. They do not turn a FORM error or timeout into success.
 
-The latest work-reuse repair passes its focused mathematical fixtures but still
-reaches the bounded three-box timeout. The current automatic polarisation hook
-therefore remains an unaccepted development candidate. Partial output from a
-timeout is not a usable result; see the verification report above for limits.
+The retained three-box public calls completed in 25.3–28.6 seconds with exactly
+the reference result, 17 scalar masters and 4,355,957 output bytes. These timings
+are workload-specific. See the [PERF-04 verification report](../Documentation/Verification/PERF04-2026-10-25.md)
+for full timing boundaries, the memory investigation and remaining QED limits.

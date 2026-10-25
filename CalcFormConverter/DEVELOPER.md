@@ -869,11 +869,10 @@ for exact comparisons, timing boundaries and the incomplete full-box import.
 
 ## Polarisation grouping at final scalar-master assembly
 
-**Unaccepted working-tree candidate.** Cache registration and repeated-coefficient
-work have been repaired and pass focused checks. The native-denominator path
-still reaches the three-box timeout; duplicate cache warnings are gone. Do not interpret the
-implementation description below as acceptance; see the report and remaining
-work before using it for a release.
+**Accepted within the recorded development scope, 25 October 2026.** The
+complete retained three-box target and affected focused regressions pass. This
+is not a claim of complete simplification or validation of the larger QED cases.
+See [PERF-04 acceptance](../Documentation/Verification/PERF04-2026-10-25.md).
 
 `rcMasterPlan` recognises encoded `Polarization` entries by role. It assigns one
 temporary commuting symbol to each unordered vector pair containing a
@@ -916,6 +915,34 @@ with full factorisation mode restored. Factors are interned separately. A
 runtime FORM error or resource failure propagates normally; there is no retry in
 this code. These guards bound selected work, not GCD complexity or physical RAM.
 
+The private `$rcPolarisationMaximumRationalPasses = 1024` is a separate,
+job-wide allowance. `cfcMRFinal` charges each attempted pass while `cfcPGActive`
+is defined, including cache inspection and bounded factor trials within it.
+A denied pass sets the exhaustion flag and leaves the expression alone.
+Denominator loops stop and subsequent overlap passes are skipped; incomplete
+denominator/group cache writes are
+suppressed, and `cfcPGFinal` restores the complete original master. Completed
+subproblem entries remain reusable. Later masters skip polarisation processing;
+non-polarisation rational passes are unaffected. This is a deterministic quality
+tradeoff, not a time estimate; traversal order can affect which masters receive
+additional simplification. Do not infer savings from cache-hit counts alone.
+
+The original master's storage score is computed once. Each completed prefix
+is scored after restoring its polarisation atoms. Different complete monomials
+cannot cancel across groups, so reachable term/reference cost is monotonic.
+Once that prefix loses, restore the whole original rather than process the
+remaining groups. Hide the original/bracketed master and keys before scoring:
+a helper sort must not erase the brackets used to extract the next group.
+Inactive snapshots and the completed accumulator remain hidden during local work.
+The denominator-group visibility was deliberately retained after regression checks.
+
+`LoopDenominatorGroups.frm.in` numbers emitted shared definitions densely.
+`cfcKnown` records the output ID for each known internal ID, rather than just a
+presence bit. The disposable definition/group expression is renamed at emission;
+internal interning tables and algebra retain their IDs. Increasing dependency
+order and backward-only references are preserved. Speculative discarded blocks
+therefore cannot lengthen output labels. The mapping schema is unchanged.
+
 Cache tables are FORM-job-local and each entry is written once. Known reference
 IDs are filtered before their definitions are materialised. Both successful and
 rejected numerical inspections are keyed by the complete sorted shared expression; unresolved
@@ -942,12 +969,17 @@ rational processing and remaining grouping/scoring work; they are not external
 wall-clock measurements. A rejected whole-master candidate can have improved
 individual groups: interpret its `selected=0` field before claiming a delivered
 simplification. Skip diagnostics identify unsupported structures, intermediate
-limits and rational-skeleton limits. Individual rational diagnostics report the
+limits, rational-skeleton limits, `work_limit`, `work_limit_restore` and
+`dominated_prefix`. The latter two restore the complete master; improvement
+counters from its discarded groups are not delivered simplifications.
+Individual rational diagnostics report the
 estimated cost, degree and variable count.
 
 `Tests/PolarisationCoefficients.wls` covers exact identities, conjugation, powers,
 complex numbers, symbolic D, separate masters, protected paths, lowered selector
 boundaries, manual export/import, tiny read chunks and serial/TFORM agreement.
+`Tests/PolarisationWorkBudget.wls` adds exhaustion/restore boundaries and dense
+output-reference checks and is registered in the integration suite.
 The retained workload report distinguishes these fixtures from unresolved large
 coefficient checks. Production performs no Wolfram `Simplify`, `Together` or
 `Factor` calls. See the [verification report](../Documentation/Verification/PolarisationCoefficients-2026-10-23.md)

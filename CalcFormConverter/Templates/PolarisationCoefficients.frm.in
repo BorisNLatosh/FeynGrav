@@ -1,3 +1,8 @@
+* This allowance belongs to the FORM job, not to a master or cached result.
+* It bounds aggregate speculative calls; existing arithmetic guards still apply.
+#$cfcPGWorkLimit=@WORK_LIMIT@;
+#$cfcPGWorkUsed=0;
+#$cfcPGWorkExhausted=0;
 * All caches below belong to this FORM job. Kinematic definitions stay opaque.
 * A size entry counts polarisation monomials, with dependency/fraction markers.
 * Unknown objects or polarisation denominators leave a nonnumeric rejection.
@@ -535,6 +540,9 @@ Skip;
 Local cfcPGDenResult=0;
 .sort
 #do pgDenKey=cfcPGDenKeys
+#if `$cfcPGWorkExhausted' == 1
+#breakdo
+#endif
 Skip;
 Local cfcPGDenPiece=cfcPGDenWork[`pgDenKey'];
 Local cfcPGDenRest=(`pgDenKey');
@@ -560,6 +568,9 @@ Local cfcPGDenInput=cfcPGDenValue(`$cfcPGDenCacheIndex');
 #call cfcMRFinal(cfcPGDenPiece)
 #call cfcPGRegisterResult(cfcPGDenPiece)
 #do pgStep=1,1
+#if `$cfcPGWorkExhausted' == 1
+#breakdo
+#endif
 #$cfcPGDenIndex=-1;
 #$cfcPGDenBest=-1;
 Skip;
@@ -619,7 +630,7 @@ Skip;
 Drop cfcPGDenCombined;
 Local cfcPGDenInput=cfcPGDenCombined;
 .sort
-#if `$cfcPGDenCacheIndex' > 0
+#if (`$cfcPGDenCacheIndex' > 0) && (`$cfcPGWorkExhausted' == 0)
 #$cfcPGDenCacheValue=cfcPGDenInput;
 Fill cfcPGDenValue(`$cfcPGDenCacheIndex')=`$cfcPGDenCacheValue';
 Fill cfcPGDenReady(`$cfcPGDenCacheIndex')=1;
@@ -659,6 +670,7 @@ NSkip;
 * denominator factor. These subsets are algebraic (not arbitrary term batches).
 * The common factor stays outside each bounded rational attempt.
 #procedure cfcPGOverlaps(source)
+#if `$cfcPGWorkExhausted' == 0
 #define cfcPGFactorEnabled "1"
 Skip;
 Local cfcPGOverlapKeys=`source';
@@ -694,6 +706,7 @@ InExpression cfcPGOverlapRest;
 if (match(cfcPolyD(`$cfcPGOverlapIndex'))); Discard; endif;
 EndInExpression;
 .sort
+Hide cfcPGOverlapRest;
 #call cfcMRFinal(cfcPGOverlapSlice)
 #if `$cfcMROK' == 1
 #call cfcPGRegisterResult(cfcPGOverlapSlice)
@@ -703,6 +716,7 @@ Skip;
 Local `source'=cfcPGOverlapRest+cfcPolyD(`$cfcPGOverlapIndex')*cfcPGOverlapSlice;
 .sort
 #endif
+Unhide cfcPGOverlapRest;
 Drop cfcPGOverlapSlice,cfcPGOverlapRest;
 .sort
 #enddo
@@ -712,13 +726,17 @@ Drop cfcPGOverlapKeys;
 NSkip;
 .sort
 #undefine cfcPGFactorEnabled
+#endif
 #endprocedure
 
 * Add structural layers without materialising their combined expansion. When
 * the next substitution would exceed the budget, collect the accumulated scalar
 * coefficients into shared blocks first. No rational algebra is done on batches.
 #procedure cfcPGMasterParts(source)
+* Keep the immutable input off the active streams during structural assembly.
+Hide `source';
 #$cfcPGMasterOK=1;
+#$cfcPGAccParity=0;
 Skip;
 Local cfcPGMaster=0;
 .sort
@@ -736,6 +754,13 @@ Drop cfcPGTerm;
 #endif
 #$cfcPGNextCost=$cfcPGAccumulated+$cfcPGCost;
 #if `$cfcPGNextCost' > @TERMS@
+#if `$cfcPGAccParity' == 1
+Skip;
+Drop cfcPGMasterB;
+Local cfcPGMaster=cfcPGMasterB;
+.sort
+#$cfcPGAccParity=0;
+#endif
 Skip;
 NSkip cfcPGMaster;
 Bracket @POL@;
@@ -764,21 +789,35 @@ id cfcShare(cfcPGIndex?)=cfcPGParts(cfcPGIndex);
 id cfcPolyN(cfcPGIndex?)=cfcPGParts(cfcPGIndex);
 .sort
 Skip;
-Drop cfcPGMaster;
-Local cfcPGJoined=cfcPGMaster+cfcPGTerm;
-.sort
-Skip;
-Drop cfcPGJoined,cfcPGTerm;
-Local cfcPGMaster=cfcPGJoined;
+#if `$cfcPGAccParity' == 0
+Drop cfcPGMaster,cfcPGTerm;
+Local cfcPGMasterB=cfcPGMaster+cfcPGTerm;
+#$cfcPGAccParity=1;
+#else
+Drop cfcPGMasterB,cfcPGTerm;
+Local cfcPGMaster=cfcPGMasterB+cfcPGTerm;
+#$cfcPGAccParity=0;
+#endif
 .sort
 #enddo
+#if `$cfcPGAccParity' == 1
+Skip;
+Drop cfcPGMasterB;
+Local cfcPGMaster=cfcPGMasterB;
+.sort
+#$cfcPGAccParity=0;
+#endif
 Skip;
 NSkip cfcPGMaster;
 Bracket @POL@;
 .sort
+Unhide `source';
 #endprocedure
 
 #procedure cfcPGFinal(source)
+#if `$cfcPGWorkUsed' >= `$cfcPGWorkLimit'
+#write "CFC_PG_SKIP work_limit used=%$ limit=%$",$cfcPGWorkUsed,$cfcPGWorkLimit
+#else
 #$cfcPGStart=`timer_';
 #$cfcPGRationalMS=0;
 #$cfcPGFactorMS=0;
@@ -819,10 +858,20 @@ DropCoefficient;
 #$cfcPGGroups=termsin_(cfcPGKeys);
 #if `$cfcPGGroups' <= @STRUCTURES@
 #write "CFC polarisation groups: %$",$cfcPGGroups
-Hide cfcPGMaster,cfcPGKeys;
+* Distinct complete polarisation monomials cannot cancel one another. After
+* restoring their dots, every assembled prefix is a lower bound on the final
+* reachable-storage score: root terms and the union of shared blocks only grow.
+* Original forms win ties, so a dominated prefix can stop this master exactly.
+Hide cfcPGMaster,cfcPGKeys,`source';
+#call cfcPGScore(`source')
+#$cfcPGMasterTerms=$cfcPGScoreTerms;
+#$cfcPGMasterAtoms=$cfcPGScoreAtoms;
+#$cfcPGMasterRejected=0;
+#$cfcPGProcessed=0;
 Skip;
 Local cfcPGAssembled=0;
 .sort
+Hide cfcPGAssembled;
 #do pgKey=cfcPGKeys
 Skip;
 Local cfcPGOriginal=cfcPGMaster[`pgKey'];
@@ -852,6 +901,7 @@ Multiply 1/$cfcPGContent;
 EndInExpression;
 FromPolynomial;
 .sort
+Hide cfcPGOriginal,cfcPGContent;
 * Normalisation has removed only common content. Identical remaining
 * coefficients use the same algebra and immutable shared definitions, so the
 * completed candidate can be reused across structures and masters in this job.
@@ -868,7 +918,7 @@ Local cfcPGCoefficient=cfcPGResult(`$cfcPGResultIndex');
 #else
 #call cfcMRFinal(cfcPGCoefficient)
 #write "CFC polarisation rational eligible: %$, cost %$, degree %$, variables %$",$cfcMROK,$cfcMRCost,$cfcMRMax,$cfcMRCount
-#if `$cfcMROK' == 0
+#if (`$cfcMROK' == 0) && (`$cfcPGWorkExhausted' == 0)
 #$cfcPGPartial=$cfcPGPartial+1;
 #call cfcPGExposeDenominators(cfcPGCoefficient)
 Skip;
@@ -877,10 +927,11 @@ Local cfcPGFallbackBefore=cfcPGCoefficient;
 #call cfcPGScore(cfcPGFallbackBefore)
 #$cfcPGFallbackTerms=$cfcPGScoreTerms;
 #$cfcPGFallbackAtoms=$cfcPGScoreAtoms;
+Hide cfcPGFallbackBefore;
 #call cfcPGDenominatorGroups(cfcPGCoefficient)
 #call cfcPGOverlaps(cfcPGCoefficient)
 #call cfcMRFinal(cfcPGCoefficient)
-#if `$cfcMROK' == 0
+#if (`$cfcMROK' == 0) && (`$cfcPGWorkExhausted' == 0)
 * A new reference id is not progress. A second pass requires a strictly
 * smaller reachable representation, measured without expanding shared blocks.
 #call cfcPGScore(cfcPGCoefficient)
@@ -892,6 +943,7 @@ Local cfcPGFallbackBefore=cfcPGCoefficient;
 #$cfcPGUnchangedFallbacks=$cfcPGUnchangedFallbacks+1;
 #endif
 #endif
+Unhide cfcPGFallbackBefore;
 Drop cfcPGFallbackBefore;
 .sort
 #endif
@@ -901,6 +953,7 @@ Drop cfcPGFallbackBefore;
 Skip;
 Local cfcPGRational=cfcPGCoefficient;
 .sort
+Hide cfcPGRational;
 * A rejected unchanged coefficient cannot gain eligibility from enabling
 * factorisation; that hook runs only after rationalisation has succeeded.
 #if `$cfcPGCanFactor' == 1
@@ -910,9 +963,10 @@ Local cfcPGRational=cfcPGCoefficient;
 #call cfcPGRegisterResult(cfcPGCoefficient)
 #call cfcPGChoose(cfcPGCoefficient,cfcPGRational)
 #endif
+Unhide cfcPGRational;
 Drop cfcPGRational;
 .sort
-#if `$cfcPGResultIndex' > 0
+#if (`$cfcPGResultIndex' > 0) && (`$cfcPGWorkExhausted' == 0)
 * Store the shared expression itself, never its expanded kinematic polynomials.
 #$cfcPGResultValue=cfcPGCoefficient;
 Fill cfcPGResult(`$cfcPGResultIndex')=`$cfcPGResultValue';
@@ -929,6 +983,7 @@ Multiply cfcPGContent;
 #$cfcPGZeros=$cfcPGZeros+1;
 #endif
 Skip;
+Unhide cfcPGAssembled;
 Drop cfcPGAssembled;
 Local cfcPGNext=cfcPGAssembled+(`pgKey')*cfcPGCoefficient;
 .sort
@@ -936,16 +991,48 @@ Skip;
 Drop cfcPGNext;
 Local cfcPGAssembled=cfcPGNext;
 .sort
+Hide cfcPGAssembled;
+Unhide cfcPGOriginal,cfcPGContent;
 Drop cfcPGCoefficient,cfcPGOriginal,cfcPGContent;
 .sort
+#$cfcPGProcessed=$cfcPGProcessed+1;
+#if `$cfcPGWorkExhausted' == 1
+* No partial master is published, even if earlier groups improved. Individual
+* completed subproblem caches remain valid; incomplete group caches were skipped.
+#$cfcPGMasterRejected=1;
+#write "CFC_PG_SKIP work_limit_restore used=%$ limit=%$ processed=%$ groups=%$",$cfcPGWorkUsed,$cfcPGWorkLimit,$cfcPGProcessed,$cfcPGGroups
+#breakdo
+#endif
+Skip;
+Local cfcPGPrefix=cfcPGAssembled;
+@POL_RESTORE@
+.sort
+#call cfcPGScore(cfcPGPrefix)
+Drop cfcPGPrefix;
+.sort
+#if (`$cfcPGScoreTerms' > `$cfcPGMasterTerms') || ((`$cfcPGScoreTerms' == `$cfcPGMasterTerms') && (`$cfcPGScoreAtoms' >= `$cfcPGMasterAtoms'))
+#$cfcPGMasterRejected=1;
+#write "CFC_PG_SKIP dominated_prefix processed=%$ groups=%$ prefix_terms=%$ original_terms=%$",$cfcPGProcessed,$cfcPGGroups,$cfcPGScoreTerms,$cfcPGMasterTerms
+#breakdo
+#endif
 #enddo
+Unhide cfcPGAssembled;
 Skip;
 NSkip cfcPGAssembled;
 @POL_RESTORE@
 .sort
+#if `$cfcPGMasterRejected' == 1
+Skip;
+Drop cfcPGAssembled;
+Local cfcPGAssembled=`source';
+.sort
+#$cfcPGChosen=0;
+#else
 #call cfcPGChoose(cfcPGAssembled,`source')
+#endif
 #$cfcPGGroupingMS=`timer_'-$cfcPGStart-$cfcPGRationalMS-$cfcPGFactorMS;
 #write "CFC_PG_SUMMARY structures=%$ improved=%$ zero=%$ partial=%$ factor_calls=%$ selected=%$ grouping_ms=%$ rational_ms=%$ factor_ms=%$ rejected_cache_hits=%$ unchanged_fallbacks=%$ result_cache_hits=%$",$cfcPGGroups,$cfcPGImproved,$cfcPGZeros,$cfcPGPartial,$cfcPGFactorCalls,$cfcPGChosen,$cfcPGGroupingMS,$cfcPGRationalMS,$cfcPGFactorMS,$cfcPGRejectedHits,$cfcPGUnchangedFallbacks,$cfcPGResultHits
+Unhide `source';
 Drop `source';
 .sort
 Skip;
@@ -972,5 +1059,6 @@ NSkip;
 * Includes the no-polarisation path and unsupported structures. The old guard
 * remains authoritative, so this does not broaden the mathematical vocabulary.
 #call cfcMRFinal(`source')
+#endif
 #endif
 #endprocedure

@@ -131,6 +131,9 @@ rcMasterPlan[entries_List] := Module[{variables, vectors, pairs, names, powers, 
    No grouping data is persisted in mappings: all tables live in one FORM job. *)
 $rcPolarisationMaximumStructures = 1024;
 $rcPolarisationMaximumTerms = 10000;
+(* Total speculative rational passes across all polarisation groups in one job.
+   Exhaustion restores the complete original master; it is not a runtime limit. *)
+$rcPolarisationMaximumRationalPasses = 1024;
 $rcPolarisationFactorMaximumTerms = 250;
 $rcPolarisationFactorMaximumVariables = 8;
 $rcPolarisationFactorMaximumDegree = 12;
@@ -142,6 +145,7 @@ rcPolarisationPlan[pairs_List, names_List, polNames_List, variables_List] := Mod
     substitutions = {
         "@POL@" -> StringRiffle[polNames, ","],
         "@STRUCTURES@" -> intString[$rcPolarisationMaximumStructures],
+        "@WORK_LIMIT@" -> intString[Max[0, $rcPolarisationMaximumRationalPasses]],
         "@TERMS@" -> intString[$rcPolarisationMaximumTerms],
         "@FACTOR_TERMS@" -> intString[$rcPolarisationFactorMaximumTerms],
         "@FACTOR_VARIABLES@" -> intString[$rcPolarisationFactorMaximumVariables],

@@ -185,6 +185,7 @@ def main():
                 run_kernel('MasterOutputSharing')
                 run_kernel('MasterRationalCoefficients')
                 run_kernel('PolarisationCoefficients')
+                run_kernel('PolarisationWorkBudget')
                 continue
             run_kernel('Export' if suite == 'form' else 'GravityExport')
             if suite == 'form':
