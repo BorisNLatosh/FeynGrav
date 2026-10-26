@@ -100,6 +100,17 @@ Independent off-shell action comparisons, all native contacts and selected
 AA → AA, AA → Ah and AA → hh Ward checks passed; see the [verification
 report](Verification/GRSUNYM-2026-10-26.md). Native loop validation remains deferred.
 
+## Quark–gluon rule correction
+
+The same missing κⁿ factor was confirmed and corrected in both quark–gluon
+source variants. The two stored libraries with one/two gravitons were regenerated
+and checked exactly against an independent determinant–inverse-vierbein
+expansion with symbolic D. Their colour, gamma and tensor coefficients are
+unchanged; the flat vertex is unchanged. Restart the kernel, reload with
+`FeynGravImportSUNYM[2]`, and recompute affected results. The native pure-YM
+model contains no quarks and is unchanged. See the
+[verification report](Verification/QuarkGluonKappa-2026-10-26.md).
+
 ## Verification and performance
 
 [PERF-04](Verification/PERF04-2026-10-25.md) records the retained three-box

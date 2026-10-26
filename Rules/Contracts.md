@@ -235,6 +235,11 @@ Verification scripts are kept outside the repository; no top-level `Tests` folde
 returned by `QuarkGluonVertex[..., Explicit -> True]` and the named coupling
 `SMP["g_s"]`. There is no four-dimensional gamma substitution for FORM transport.
 
+Both quark–gluon source variants include κⁿn! for n graviton pairs: the CE
+tensor contains geometric Taylor coefficients only. The order-one/two stored
+libraries were regenerated after correcting the missing κⁿ. See the
+[independent normalisation and public-import checks](../Documentation/Verification/QuarkGluonKappa-2026-10-26.md).
+
 Both axion–vector rules use the internal tensor
 
 ```mathematica
