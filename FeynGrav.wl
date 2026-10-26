@@ -46,7 +46,7 @@ DisplayInitializationMessages[] := Module[{},
         "Scalar field with a potential minimally coupled to gravity",
         "Scalar field with a non-minimal kinetic coupling",
         "Einstein-scalar-Gauss-Bonnet model",
-        "SU(N) Yang-Mills field coupled to gravity"
+        "SU(N) Yang-Mills field and one massive quark flavour coupled to gravity"
     }];
     Print[Style["The supplied models retain interactions through order \!\(\*SuperscriptBox[\(\[Kappa]\), \(2\)]\) per vertex. Use matching Model and GenericModel names with FeynCalc-patched FeynArts in a fresh kernel. Models are not initialised automatically.", "Text"]];
     If[$FrontEnd === Null,
@@ -443,6 +443,8 @@ FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 
 \[Kappa] =. ;
 
+
+QuarkMass::usage = "QuarkMass is the unassigned symbolic mass of the single fundamental Dirac flavour in the native GR-SU-N-Yang-Mills model. Specialise it after FCFAConvert.";
 
 YangMillsCoupling::usage = "YangMillsCoupling is the unassigned gauge coupling g_s in the native GR-SU-N-Yang-Mills model. Specialise it by replacement after conversion.";
 

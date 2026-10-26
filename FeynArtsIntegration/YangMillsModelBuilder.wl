@@ -1,6 +1,7 @@
-(* Private builder for the fixed-gauge GR + pure SU(N) model through kappa^2.
+(* Private builder for the fixed-gauge GR + SU(N) with one massive Dirac quark model through kappa^2.
    Definitions only: explicit developer scripts supply a fresh destination.
    Reuses Basis.wl and ModelBuilder.wl; generated bundles have no build dependency. *)
+Get[FileNameJoin[{DirectoryName[$InputFileName],"FermionModelBasis.wl"}]];
 Begin["FeynGrav`FeynArtsIntegration`Private`"];
 $ymSourceRoot=DirectoryName[DirectoryName[$InputFileName]];
 ymRequire[ok_,message_]:=If[!TrueQ[ok],Throw[faModelFailure["YangMillsBuild",message],"YMBuild"]];
@@ -37,7 +38,7 @@ ymColourEncode[e_]:=e/.{
 (* All leg slots are assigned together. The last two slots of a ghost family
    are antighost, ghost; public source routines take ghost, antighost instead. *)
 ymSlots[types_]:=Module[{next=0,lor},Table[
- lor=Table[Symbol["FeynArts`li"<>ToString[++next]],{Switch[types[[j]],"T",2,"V"|"F",1,_,0]}];
+ lor=Table[Symbol["FeynArts`li"<>ToString[++next]],{Switch[types[[j]],"T",2,"V"|"S",1,_,0]}];
  <|"Type"->types[[j]],"Momentum"->Symbol["FeynArts`mom"<>ToString[j]],"Lorentz"->lor,
  "Colour"->Symbol["FeynArts`c"<>ToString[j]]|>,{j,Length[types]}]];
 ymRule[family_String]:=Module[{types=Characters[family],slots,h,grav,n,vs,gs,raw,canonical},
@@ -46,7 +47,7 @@ ymRule[family_String]:=Module[{types=Characters[family],slots,h,grav,n,vs,gs,raw
  vs=Select[slots,#["Type"]=="V"&];gs=Take[slots,-2];
  raw=Which[
   family=="TTT"||family=="TTTT",FeynGrav`GravitonVertex@@grav,
-  family=="TFF",FeynGrav`GravitonGhostVertex[Sequence@@First[h],slots[[1]]["Momentum"],First[gs[[2]]["Lorentz"]],gs[[2]]["Momentum"],First[gs[[1]]["Lorentz"]],gs[[1]]["Momentum"]],
+  family=="TSS",FeynGrav`GravitonGhostVertex[Sequence@@First[h],slots[[1]]["Momentum"],First[gs[[2]]["Lorentz"]],gs[[2]]["Momentum"],First[gs[[1]]["Lorentz"]],gs[[1]]["Momentum"]],
   StringEndsQ[family,"UU"]&&Length[vs]==0,FeynGrav`GravitonYMGhostVertex[Flatten[h],gs[[2]]["Momentum"],gs[[2]]["Colour"],gs[[1]]["Momentum"],gs[[1]]["Colour"]],
   StringEndsQ[family,"UU"],If[n==0,
     -FeynCalc`SMP["g_s"] FeynCalc`SUNF[vs[[1]]["Colour"],gs[[2]]["Colour"],gs[[1]]["Colour"]] FeynCalc`FVD[gs[[1]]["Momentum"],First[vs[[1]]["Lorentz"]]],
@@ -66,45 +67,47 @@ ymRule[family_String]:=Module[{types=Characters[family],slots,h,grav,n,vs,gs,raw
 ymGenericRow[family_,vector_]:=Module[{slots=ymSlots[Characters[family]],left,right},
  left=MapIndexed[Function[{s,pos},With[{j=ToString[First[pos]]},"s"<>j<>" "<>s["Type"]<>"[j"<>j<>",mom"<>j<>If[s["Lorentz"]==={},"",","<>faEncode[s["Lorentz"]]]<>"]"]],slots];
  right=MapIndexed[("s"<>ToString[First[#2]]<>" "<>#1["Type"]<>"[j"<>ToString[First[#2]]<>"]")&,slots];
- "AnalyticalCoupling["<>StringRiffle[left,","]<>"]==G[1]["<>StringRiffle[right,","]<>"]."<>faEncode[vector]];
+ "AnalyticalCoupling["<>StringRiffle[left,","]<>"]==G["<>If[StringStartsQ[family,"FF"],"-1","1"]<>"]["<>StringRiffle[right,","]<>"]."<>faEncode[vector]];
 ymClassRow[family_,coefficients_]:=Module[{types=Characters[family],last,fields},last=Length[types];
- fields=MapIndexed[Function[{t,pos},With[{j=First[pos]},If[MemberQ[{"U","F"},t]&&j==last-1,"-",""]<>t<>"[1"<>If[MemberQ[{"V","U"},t],",{c"<>ToString[j]<>"}",""]<>"]"]],types];
+ fields=MapIndexed[Function[{t,pos},With[{j=First[pos]},If[MemberQ[{"U","S"},t]&&j==last-1,"-",""]<>t<>"[1"<>If[MemberQ[{"V","U"},t],",{c"<>ToString[j]<>"}",""]<>"]"]],types];
  "C["<>StringRiffle[fields,","]<>"]=="<>faEncode[List/@coefficients]];
 
 ymBuild[target_String]:=Catch[Module[{families,rules,bases,props,generic,classes,manifest,files,li},
  ymRequire[StringStartsQ[target,"/"]&&ExpandFileName[target]===target&&!FileExistsQ[target]&&DirectoryQ[DirectoryName[target]],"Supply a fresh absolute output directory with an existing parent."];
- ymRequire[faDependencyCheck[]===True&&FeynGrav`GaugeFixingEpsilonSUNYM===-1&&OwnValues[FeynCalc`SUNN]==={}&&OwnValues[FeynGrav`YangMillsCoupling]==={},"Use a fresh kernel with symbolic N/coupling and the fixed gauges."];
- ymRequire[!FailureQ[FeynGrav`FeynGravImportGravitons[2]]&&!FailureQ[FeynGrav`FeynGravImportSUNYM[2]],"Source import failed."];
- families={"TTT","TTTT","TFF","TVV","TTVV","VVV","TVVV","TTVVV","VVVV","TVVVV","TTVVVV","TUU","TTUU","VUU","TVUU","TTVUU"};
- rules=AssociationMap[ymRule,families];bases=AssociationMap[faBasisRecord[rules[#],#]&,families];
+ ymRequire[faDependencyCheck[]===True&&FeynGrav`GaugeFixingEpsilonSUNYM===-1&&OwnValues[FeynCalc`SUNN]==={}&&OwnValues[FeynGrav`YangMillsCoupling]==={}&&OwnValues[FeynGrav`QuarkMass]==={},"Use a fresh kernel with symbolic N/coupling and the fixed gauges."];
+ ymRequire[!FailureQ[FeynGrav`FeynGravImportGravitons[2]]&&!FailureQ[FeynGrav`FeynGravImportSUNYM[2]]&&!FailureQ[FeynGrav`FeynGravImportFermions[2]],"Source import failed."];
+ families={"TTT","TTTT","TSS","TVV","TTVV","VVV","TVVV","TTVVV","VVVV","TVVVV","TTVVVV","TUU","TTUU","VUU","TVUU","TTVUU","FFV","FFT","FFTT","FFTV","FFTTV"};
+ rules=AssociationMap[If[StringStartsQ[#,"FF"],qfRule[#],ymRule[#]]&,families];bases=AssociationMap[If[StringStartsQ[#,"FF"],qfBasisRecord[rules[#],#],faBasisRecord[rules[#],#]]&,families];
  ymRequire[FreeQ[Values[bases],_Failure],"Lorentz basis reconstruction failed."];
  ymRequire[FreeQ[Values[rules],FeynCalc`SUNF|FeynCalc`SUNDelta|FeynCalc`SUNTrace|FeynCalc`SUNT],"Untranslated colour object."];
  li=Table[Symbol["FeynArts`li"<>ToString[j]],{j,4}];
  props={faPropagator[FeynCalc`FCI[FeynGrav`GravitonPropagator[Sequence@@li,FeynArts`mom]],FeynArts`mom],
  faPropagator[FeynCalc`FCI[FeynGrav`GhostVectorPropagator[li[[1]],li[[2]],FeynArts`mom]],FeynArts`mom]};
  ymRequire[FreeQ[props,_Failure],"Propagator translation failed."];
- generic="(* GR + pure SU(N), fixed gauges; explicit snapshot through kappa^2. *)\n"<>
- "KinematicIndices[T]={Lorentz,Lorentz}; KinematicIndices[F]={Lorentz}; KinematicIndices[V]={Lorentz}; KinematicIndices[U]={};\n"<>
- "$FermionLines=True; P$NonCommuting=F|U; P$ChainBuildOrder={F,U}; M$FlippingRules={};\nAttributes[FAMetricTensor]={Orderless};\n"<>
+ generic="(* GR + SU(N) with one massive Dirac quark, fixed gauges; explicit snapshot through kappa^2. *)\n"<>
+ "KinematicIndices[T]={Lorentz,Lorentz}; KinematicIndices[S]={Lorentz}; KinematicIndices[F]={}; KinematicIndices[V]={Lorentz}; KinematicIndices[U]={};\n"<>
+ "$FermionLines=True; P$NonCommuting=F|U|S; P$ChainBuildOrder={F,U,S}; M$FlippingRules={FANonCommutative[g:(_Global`FADiracMatrix|_Global`FADiracSlash)..]:>(-1)^Length[{g}] Apply[FANonCommutative,Reverse[{g}]]};\nAttributes[FAMetricTensor]={Orderless};\n"<>
  "M$GenericPropagators={AnalyticalPropagator[External][s1 T[j1,mom,{li1,li2}]]==Global`FAPolarizationTensor[T[j1],mom,li1,li2],"<>
  "AnalyticalPropagator[Internal][s1 T[j1,mom,{li1,li2}->{li3,li4}]]=="<>faEncode[props[[1]]]<> ","<>
- "AnalyticalPropagator[External][s1 F[j1,mom,{li1}]]==1,AnalyticalPropagator[Internal][s1 F[j1,mom,{li1}->{li2}]]=="<>faEncode[props[[2]]]<> ","<>
+ "AnalyticalPropagator[External][s1 S[j1,mom,{li1}]]==1,AnalyticalPropagator[Internal][s1 S[j1,mom,{li1}->{li2}]]=="<>faEncode[props[[2]]]<> ","<>
  "AnalyticalPropagator[External][s1 V[j1,mom,{li1}]]==Global`FAPolarizationVector[V[j1],mom,li1],AnalyticalPropagator[Internal][s1 V[j1,mom,{li1}->{li2}]]==-I Global`FAMetricTensor[li1,li2] FAPropagatorDenominator[mom,0],"<>
- "AnalyticalPropagator[External][s1 U[j1,mom]]==1,AnalyticalPropagator[Internal][s1 U[j1,mom]]==I FAPropagatorDenominator[mom,0]};\n"<>
+ "AnalyticalPropagator[External][s1 U[j1,mom]]==1,AnalyticalPropagator[Internal][s1 U[j1,mom]]==I FAPropagatorDenominator[mom,0],AnalyticalPropagator[External][s1 F[j1,mom]]==FANonCommutative[Global`FADiracSpinor[-mom,Mass[F[j1]]]],AnalyticalPropagator[Internal][s1 F[j1,mom]]==I FANonCommutative[Global`FADiracSlash[-mom]+Mass[F[j1]]] FAPropagatorDenominator[mom,Mass[F[j1]]]};\n"<>
  "M$GenericCouplings={"<>StringRiffle[(ymGenericRow[#,bases[#]["Vector"]]&/@families),","]<>"};\nM$GenericCouplings=CloseKinematicVector/@M$GenericCouplings;\n"<>
- "M$TruncationRules={_Global`FAPolarizationTensor->1,_Global`FAPolarizationVector->1};\nM$LastGenericRules={Global`FAPolarizationVector[p_,_. mom:FourMomentum[Outgoing,_],li_]:>Conjugate[Global`FAPolarizationVector][p,mom,li]};\n";
- classes="IndexRange[Index[Gluon]]=NoUnfold[FeynCalc`SUNN^2-1];\nM$ClassesDescription={"<>
+ "M$TruncationRules={_Global`FAPolarizationTensor->1,_Global`FAPolarizationVector->1,_Global`FADiracSpinor->1};\nM$LastGenericRules={Global`FAPolarizationVector[p_,_. mom:FourMomentum[Outgoing,_],li_]:>Conjugate[Global`FAPolarizationVector][p,mom,li]};\n";
+ classes="IndexRange[Index[Colour]]=NoUnfold[FeynCalc`SUNN];\nIndexRange[Index[Gluon]]=NoUnfold[FeynCalc`SUNN^2-1];\nM$ClassesDescription={"<>
  "T[1]=={SelfConjugate->True,Mass->0,PropagatorLabel->\"h\",PropagatorType->Sine},"<>
- "F[1]=={SelfConjugate->False,Mass->0,PropagatorLabel->\"cG\",PropagatorType->GhostDash,PropagatorArrow->Forward},"<>
+ "S[1]=={SelfConjugate->False,Mass->0,PropagatorLabel->\"cG\",PropagatorType->GhostDash,PropagatorArrow->Forward},"<>
+ "F[1]=={SelfConjugate->False,Indices->{Index[Colour]},Mass->FeynGrav`QuarkMass,PropagatorLabel->\"q\",PropagatorType->Straight,PropagatorArrow->Forward},"<>
  "V[1]=={SelfConjugate->True,Indices->{Index[Gluon]},Mass->0,PropagatorLabel->\"A\",PropagatorType->Cycles,PropagatorArrow->None},"<>
  "U[1]=={SelfConjugate->False,Indices->{Index[Gluon]},Mass->0,PropagatorLabel->\"cYM\",PropagatorType->GhostDash,PropagatorArrow->Forward}};\n"<>
- "M$CouplingMatrices={"<>StringRiffle[(ymClassRow[#,bases[#]["Coefficients"]]&/@families),","]<>"};\nM$CouplingMatrices=CloseCouplingVector/@M$CouplingMatrices; M$LastModelRules={};\n";
- files=Join[{"FeynGrav.wl","FeynArtsIntegration/Basis.wl","FeynArtsIntegration/ModelBuilder.wl","FeynArtsIntegration/YangMillsModelBuilder.wl","FeynArtsIntegration/BuildGRSUNYM.wl","Rules/GravitonSUNYM.wl"},
- Flatten[Table["Libs/"<>f<>"_"<>ToString[n],{f,{"GravitonVertex","GravitonGluonVertex","GravitonThreeGluonVertex","GravitonFourGluonVertex","GravitonYMGhostVertex","GravitonGluonGhostVertex"}},{n,2}]]];
- manifest=<|"Schema"->1,"ModelName"->"GR-SU-N-Yang-Mills","VertexOrderCutoff"->2,"GaugeFixingEpsilon"->2,"GaugeFixingEpsilonSUNYM"->-1,"LorentzDimension"->"Symbolic D","ColourGroup"->"SU(N), N=FeynCalc`SUNN","Parameters"->{"FeynGrav`\[Kappa]","FeynGrav`YangMillsCoupling","FeynCalc`SUNN"},
- "Action"->"-2 R/kappa^2 - F^a_mn F_a^mn/4 - (nabla.A)^2/2 + g^mn partial_m antighost^a (partial_n ghost^a + g_s f^abc A_n^b ghost^c), with sqrt(-g); plus accepted GR gauge fixing and FP determinant",
- "FieldClasses"->{"T[1]","F[1]","-F[1]","V[1]","U[1]","-U[1]"},"InteractionFamilies"->families,
- "GhostRepresentation"->"F: Lorentz-vector gravitational Grassmann ghost; U: adjoint Lorentz-scalar YM Grassmann ghost; no spinor field",
+ "M$CouplingMatrices={"<>StringRiffle[(If[StringStartsQ[#,"FF"],qfClassRow[#,bases[#]["Coefficients"]],ymClassRow[#,bases[#]["Coefficients"]]]&/@families),","]<>"};\nM$CouplingMatrices=CloseCouplingVector/@M$CouplingMatrices; M$LastModelRules={};\nTheMass[F[1,{colour_}]]=FeynGrav`QuarkMass;\n";
+ files=Join[{"FeynGrav.wl","FeynArtsIntegration/Basis.wl","FeynArtsIntegration/ModelBuilder.wl","FeynArtsIntegration/YangMillsModelBuilder.wl","FeynArtsIntegration/BuildGRSUNYM.wl","Rules/GravitonSUNYM.wl","Rules/GravitonFermionVertex.wl","FeynArtsIntegration/FermionModelBasis.wl"},
+ Flatten[Table["Libs/"<>f<>"_"<>ToString[n],{f,{"GravitonVertex","GravitonGluonVertex","GravitonThreeGluonVertex","GravitonFourGluonVertex","GravitonYMGhostVertex","GravitonGluonGhostVertex","GravitonFermionVertex","GravitonQuarkGluonVertex"}},{n,2}]]];
+ manifest=<|"Schema"->1,"ModelName"->"GR-SU-N-Yang-Mills","VertexOrderCutoff"->2,"GaugeFixingEpsilon"->2,"GaugeFixingEpsilonSUNYM"->-1,"LorentzDimension"->"Symbolic D","ColourGroup"->"SU(N), N=FeynCalc`SUNN","Parameters"->{"FeynGrav`\[Kappa]","FeynGrav`YangMillsCoupling","FeynGrav`QuarkMass","FeynCalc`SUNN"},
+ "Action"->"-2 R/kappa^2 - F^a_mn F_a^mn/4 - (nabla.A)^2/2 + g^mn partial_m antighost^a (partial_n ghost^a + g_s f^abc A_n^b ghost^c), with sqrt(-g); plus accepted GR gauge fixing and FP determinant and the minimally coupled symmetrised Dirac action with one fundamental flavour of mass QuarkMass",
+ "FieldClasses"->{"T[1]","F[1]","-F[1]","S[1]","-S[1]","V[1]","U[1]","-U[1]"},"InteractionFamilies"->families,
+ "DiracMomentumMap"->"Source exp(+ikx) to native incoming exp(-ipx): source fermion=-mom2, antifermion=-mom1, every graviton momentum=-momj; gamma order retained",
+ "GhostRepresentation"->"F: one fundamental Dirac quark; S: Lorentz-vector gravitational Grassmann ghost (previously F); U: adjoint Lorentz-scalar YM Grassmann ghost",
  "Sources"->AssociationMap[FileHash[FileNameJoin[{$ymSourceRoot,#}],"SHA256","HexString"]&,files],"BasisSizes"->AssociationMap[bases[#]["TermCount"]&,families],"RuleSHA256"->AssociationMap[bases[#]["RuleSHA256"]&,families]|>;
  CreateDirectory[target];Export[FileNameJoin[{target,"GR-SU-N-Yang-Mills.gen"}],generic,"Text"];Export[FileNameJoin[{target,"GR-SU-N-Yang-Mills.mod"}],classes,"Text"];
  AppendTo[manifest,"ModelFileSHA256"->AssociationMap[FileHash[FileNameJoin[{target,"GR-SU-N-Yang-Mills"<>#}],"SHA256","HexString"]&,{".gen",".mod"}]];

@@ -6,7 +6,7 @@ These examples target the [unreleased FeynGrav 4.2.0](../Documentation/ReleaseNo
 
 ## Numbered examples and suggested reading order
 
-The numbers define the suggested reading order, from operator algebra and tree-level scattering to loop calculations. All notebooks require FeynGrav and FeynCalc. Examples 01–08 also use FORM; TFORM is optional. Examples 09–12 evaluate their tree tensors directly with FeynCalc. Additional tools are listed below.
+The numbers define the suggested reading order, from operator algebra and tree-level scattering to loop calculations. All notebooks require FeynGrav and FeynCalc. Examples 01–08 and 13 also use FORM; TFORM is optional. Examples 09–12 evaluate their tree tensors directly with FeynCalc. Additional tools are listed below.
 
 | No. | Notebook | What you learn | Additional requirements |
 | --- | --- | --- | --- |
@@ -22,6 +22,7 @@ The numbers define the suggested reading order, from operator algebra and tree-l
 | 10 | [10. Scalar_Scattering_John_Tree_Level_FeynArts.nb](10.%20Scalar_Scattering_John_Tree_Level_FeynArts.nb) | John scalar scattering, three graviton exchanges, and minimal/mixed/John amplitude contributions | FeynCalc-patched FeynArts |
 | 11 | [11. Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb](11.%20Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb) | Six scalar–scalar to graviton–graviton diagrams and on-shell polarisation-dependent amplitude; helicity amplitude and two generic graviton Ward checks using the corrected model | FeynCalc-patched FeynArts |
 | 12 | [12. Yang_Mills_Graviton_Emission_Tree_Level_FeynArts.nb](12.%20Yang_Mills_Graviton_Emission_Tree_Level_FeynArts.nb) | SU(N) gauge-field scattering with graviton emission, four diagrams, symbolic-D on-shell amplitude, gauge/graviton Ward checks and a four-dimensional helicity expression | FeynCalc-patched FeynArts |
+| 13 | [13. Quark_Graviton_Emission_Tree_Level_FeynArts.nb](13.%20Quark_Graviton_Emission_Tree_Level_FeynArts.nb) | Massive quark annihilation into a gluon and graviton, FORM Dirac algebra and both Ward identities | FeynArts and FORM |
 
 Example 09 can be read immediately after example 04: it gives the scalar counterpart of the native FeynArts workflow, with incoming momenta `p1`, `p2` and outgoing momenta `p3`, `p4`. It displays the contact, scalar-exchange and graviton-exchange contributions to `M` after removing the overall `I` from the diagram result.
 
@@ -50,7 +51,7 @@ For performance measurements use the separate [Benchmark notebooks](../Benchmark
 
 The updated loop examples extract the pure-gravity and massive-fermion coefficient forms from the current rules rather than asserting the older hard-coded formulas. Their reconstruction checks verify algebraic decomposition, not an independent physical reference. Other reference comparisons are retained where they agree with the computed expressions.
 
-All algebra previously performed through the legacy Calc chain now uses `FeynGravSimplify`. FeynCalc propagator shorthand is expanded with `Explicit`. In these notebooks, fermion and colour expressions first use FeynCalc’s dedicated algebra functions (including `DiracOrder -> True` for open chains); `Collect` passes their bosonic coefficients to FORM. Examples 05–06 and 08 use explicit FeynCalc `TID` steps for their bubble/vertex reductions. The tadpole calls in 05–06 and the loop reductions in 07 instead declare `LoopMomenta -> {k}` to `FeynGravSimplify`; its enabled tensor decomposition then returns integral coefficients. Calls on those already-reduced coefficients leave `LoopMomenta` empty.
+All algebra previously performed through the legacy Calc chain now uses `FeynGravSimplify`. FeynCalc propagator shorthand is expanded with `Explicit`. In examples 01–11, fermion and colour expressions first use FeynCalc’s dedicated algebra functions (including `DiracOrder -> True` for open chains); `Collect` passes their bosonic coefficients to FORM. Examples 05–06 and 08 use explicit FeynCalc `TID` steps for their bubble/vertex reductions. The tadpole calls in 05–06 and the loop reductions in 07 instead declare `LoopMomenta -> {k}` to `FeynGravSimplify`; its enabled tensor decomposition then returns integral coefficients. Calls on those already-reduced coefficients leave `LoopMomenta` empty.
 
 This preprocessing describes the notebooks as currently written. It is not a requirement to remove all Dirac or colour structures before using the converter: supported chains, traces and colour tensors can now be processed directly. See the [converter vocabulary](../CalcFormConverter/UserGuide.md#supported-vocabulary). The command migration preserves saved outputs; these outputs have not been recalculated with the new entry point.
 
@@ -72,3 +73,13 @@ outputs are preserved; rerun affected presentation/check cells before relying
 on them. This audit did not rerun the complete loop calculations. See the
 [verification ledger](../Documentation/Verification/ExamplesSyntax-2026-10-25.md)
 for exact checks, notebook identities and front-end verification limits.
+
+### Example 13: massive quark graviton emission
+
+The existing SU(N) bundle now contains one quark flavour with arbitrary mass.
+Example 13 uses `FeynGravSimplify` directly for the supported open Dirac matrix,
+Lorentz and colour algebra. Spinors are attached afterwards. All fourteen input
+cells were evaluated; both Ward checks and the coupling limits return `True`.
+D/N/m remain symbolic. The notebook retains generated diagram graphics and
+outputs; kernel/box validation does not certify a Mathematica front-end session.
+See the [delivery report](../Documentation/Verification/GRSUNYMQuarks-2026-10-26.md).

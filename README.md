@@ -26,7 +26,7 @@ FeynCalc's requirements. FORM is optional for ordinary package loading. After
 installation, restart the kernel and load with `` << FeynGrav` ``.
 
 The native models cover GR, a massive scalar with cubic/quartic potential,
-John, Einstein–scalar–Gauss–Bonnet and GR + pure SU(N) Yang–Mills through κ² per vertex. Selected tree
+John, Einstein–scalar–Gauss–Bonnet and GR + SU(N) Yang–Mills with one massive quark flavour through κ² per vertex. Selected tree
 checks are documented; loop validation remains deferred.
 
 Evaluate `FeynGravHowToCite[]` for citation guidance. See the

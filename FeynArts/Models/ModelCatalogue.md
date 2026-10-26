@@ -22,7 +22,7 @@ Each model directory contains `<Model>.gen`, `<Model>.mod`, `manifest.json` and 
 | `Single-Scalar-Tensor-Minimal-Coupling` | Massive scalar with independent positive cubic and quartic potential couplings; includes five- and six-leg contacts | [Single-Scalar-Tensor-Minimal-Coupling](Single-Scalar-Tensor-Minimal-Coupling/ModelGuide.md) |
 | `John` | Massive scalar with the John derivative interaction | [John](John/ModelGuide.md) |
 | `Einstein-scalar-Gauss-Bonnet` | Massive scalar with independent linear and quadratic scalar–Gauss–Bonnet couplings | [Einstein-scalar-Gauss-Bonnet](Einstein-scalar-Gauss-Bonnet/ModelGuide.md) |
-| `GR-SU-N-Yang-Mills` | Pure SU(N) gauge field with gravitational and YM ghosts; includes five/six-leg mixed contacts | [GR-SU-N-Yang-Mills](GR-SU-N-Yang-Mills/ModelGuide.md) |
+| `GR-SU-N-Yang-Mills` | SU(N) gauge field, one massive Dirac quark flavour and both ghost species; includes five/six-leg mixed contacts | [GR-SU-N-Yang-Mills](GR-SU-N-Yang-Mills/ModelGuide.md) |
 
 For every supplied model, `<Model>.gen` contains its kinematic structures and propagators; `<Model>.mod` contains fields and coupling coefficients; `manifest.json` records provenance and hashes; `README.md` documents use and verification limits. Future models should follow this layout. The directory name and the `.gen`/`.mod` basenames must agree. Developer builders remain in `FeynArtsIntegration/` and write their files into the explicitly chosen model directory.
 
@@ -76,8 +76,12 @@ The [19 October naming checks](../../Documentation/Verification/ModelNames.md) v
 
 ## Yang–Mills model verification
 
-The [GR + SU(N) guide](GR-SU-N-Yang-Mills/ModelGuide.md) describes its two distinct
-ghost species and symbolic colour range. All 16 contacts and selected AA → AA,
-AA → Ah and AA → hh trees passed exact checks; see the [audit and delivery
-report](../../Documentation/Verification/GRSUNYM-2026-10-26.md). The optional GR
-bridge is unchanged. No loop or quark-sector verification is implied.
+The [GR + SU(N) guide](GR-SU-N-Yang-Mills/ModelGuide.md) describes one massive
+fundamental quark flavour and two ghost species, with symbolic D and N.
+The original [pure-YM audit](../../Documentation/Verification/GRSUNYM-2026-10-26.md)
+is supplemented by the [quark delivery](../../Documentation/Verification/GRSUNYMQuarks-2026-10-26.md):
+21 families, all five new native contacts, selected massive quark trees and
+corrected direct bosonic Ward regressions. `F[1]` now denotes the quark;
+`S[1]` denotes the vector gravitational ghost. Restart the kernel and update
+explicit old ghost selections. The optional GR bridge is unchanged. Native
+loop validation remains deferred.

@@ -138,11 +138,12 @@ InitializeModel["GR", GenericModel -> "GR"];
 
 A separate [Single-Scalar-Tensor-Minimal-Coupling model](../FeynArts/Models/Single-Scalar-Tensor-Minimal-Coupling/ModelGuide.md) adds one real minimally coupled scalar of arbitrary symbolic mass, including `TSS` and `TTSS` through $\kappa^2$. It is supplied ready for the tested native tree workflows; no rebuild is needed. Use `InitializeModel["Single-Scalar-Tensor-Minimal-Coupling", GenericModel -> "Single-Scalar-Tensor-Minimal-Coupling"]` with the same loading workflow; its guide also shows explicit path registration without loading FeynGrav. The optional pure-GR bridge is unchanged; independent positive cubic and quartic scalar self-interactions are included. Setting both couplings to zero gives the minimal massive scalar sector. Non-minimal couplings and loop validation are outside this model.
 
-The [GR + pure SU(N) Yang–Mills model](../FeynArts/Models/GR-SU-N-Yang-Mills/ModelGuide.md)
-uses `"GR-SU-N-Yang-Mills"` for both model names. It includes all 16 families
+The [GR + SU(N) Yang–Mills model](../FeynArts/Models/GR-SU-N-Yang-Mills/ModelGuide.md)
+uses `"GR-SU-N-Yang-Mills"` for both model names. It includes all 21 families
 through κ² per vertex, with symbolic D/N, `YangMillsCoupling`, both ghost species
-and five/six-leg contacts. Selected native tree Ward checks passed; quarks and
-loop validation are outside its scope.
+and five/six-leg contacts. It includes one massive fundamental quark flavour (`QuarkMass`), with `F[1]`
+for quarks, `S[1]` for vector GR ghosts and `U[1]` for YM ghosts. Selected native
+tree Ward checks passed; native loop validation remains deferred.
 
 ## CalcFormConverter
 

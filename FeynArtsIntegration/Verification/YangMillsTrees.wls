@@ -1,4 +1,4 @@
-(* Run one selected tree in a fresh externally bounded kernel. No FORM needed. *)
+(* Run one selected tree in a fresh externally bounded kernel. Requires FORM for the tensor reductions. *)
 $HistoryLength=0;$FeynCalcStartupMessages=False;$LoadAddOns={"FeynArts"};
 treeRoot=DirectoryName[$InputFileName];
 treeRepo=DirectoryName[DirectoryName[treeRoot]];

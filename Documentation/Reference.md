@@ -331,13 +331,16 @@ for topology limits, singular cases and normalisation.
 
 The native EsGB model uses unassigned `GaussBonnetG1` and `GaussBonnetG2` for the positive terms phi G and phi^2 G / 2!, respectively. `ScalarMass` remains independent. Select `Model -> "Einstein-scalar-Gauss-Bonnet"` and `GenericModel -> "Einstein-scalar-Gauss-Bonnet"`; specialise parameters by replacement after conversion. Two TTS vertices generate g1-squared diagrams of total order kappa^4 even though each vertex is at most order kappa^2. The [model guide](../FeynArts/Models/Einstein-scalar-Gauss-Bonnet/ModelGuide.md) gives the exact action and native recipe.
 
-`GR-SU-N-Yang-Mills` adds pure SU(N) Yang–Mills with symbolic `SUNN` and
-unassigned `YangMillsCoupling`. It uses `F[1]` for vector gravitational ghosts
-and `U[1]` for scalar YM ghosts; `F` has no spinor meaning in this model.
-Both gauges are fixed (GR 2, YM −1). The [model guide](../FeynArts/Models/GR-SU-N-Yang-Mills/ModelGuide.md)
-documents its 16 families, colour sums, native workflow and selected tree checks.
-The cubic/quartic gluon source routines now include the required κ^n; see the
-[source correction record](Verification/GRSUNYM-2026-10-26.md).
+`GR-SU-N-Yang-Mills` contains SU(N) Yang–Mills and one fundamental Dirac quark
+flavour with symbolic `SUNN`, unassigned `YangMillsCoupling` and `QuarkMass`.
+`F[1]`/`-F[1]` are quark/antiquark, `S[1]`/`-S[1]` the vector gravitational
+ghosts (formerly `F`), and `U[1]`/`-U[1]` the scalar YM ghosts. Both gauges are
+fixed (GR 2, YM −1). The [model guide](../FeynArts/Models/GR-SU-N-Yang-Mills/ModelGuide.md)
+documents its 21 families, colour/fermion conventions and native workflow.
+See the [quark verification](Verification/GRSUNYMQuarks-2026-10-26.md), including
+selected symbolic-D/mass Ward checks and the FORM example. Native loop validation
+remains deferred. The previous [source correction](Verification/GRSUNYM-2026-10-26.md)
+for mixed gluon κ powers is retained separately.
 
 ## Citation guidance
 

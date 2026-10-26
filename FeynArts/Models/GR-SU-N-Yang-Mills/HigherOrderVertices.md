@@ -7,12 +7,18 @@ higher orders; merely importing a larger library does not extend the model.
 
 1. **Derive the inventory from the same action.** At target order K, include
    pure GR valences through K+2, and h^n AA, h^n AAA, h^n AAAA, h^n ghost-antighost
-   and h^n A ghost-antighost at every allowed n through K. Reassess the FP operator
+   and h^n A ghost-antighost at every allowed n through K. Also include
+   h^n qbar q (n≥1) and h^n qbar q A (n≥0), with the same single massive
+   flavour and no invented qbar q AA or quark–ghost contacts. Reassess the FP operator
    if changing either gauge; preserve the distinction between vector gravitational
    ghosts and scalar YM ghosts. Include contacts with more than six legs when
    required. A per-vertex cutoff is not an amplitude-order cutoff.
 2. **Verify sources before generating libraries.** Read
-   `Rules/GravitonSUNYM.wl`, `Rules/Contracts.md` and `Libs/Generator.md`.
+   `Rules/GravitonSUNYM.wl`, `Rules/GravitonFermionVertex.wl`,
+   `Rules/Contracts.md` and `Libs/Generator.md`. Independently expand the Dirac
+   kinetic, mass and torsion-free spin-connection terms; preserve ordered gamma
+   products. Apply the full source-to-native Fourier map from the model guide,
+   including all graviton momenta, rather than fitting signs to a Ward test.
    For n gravitons the cubic/quartic gluon rules must contain κ^n, not merely
    graviton symmetrisation factorials. Independently differentiate the action,
    including covariant gauge fixing and the two ghost determinants, with labelled
@@ -22,7 +28,10 @@ higher orders; merely importing a larger library does not extend the model.
    been validated by the present repair.
 3. **Extend the private builder deliberately.**
    `FeynArtsIntegration/YangMillsModelBuilder.wl` reuses `Basis.wl` and
-   `ModelBuilder.wl` for translation, basis reconstruction and encoding. Its
+   `ModelBuilder.wl` for translation, basis reconstruction and encoding.
+   `FermionModelBasis.wl` handles ordered Dirac words. Its present one/three-gamma
+   support is finite: derive any new structures and their flipping rules before
+   extending it. Keep `F` for quarks, `S` for vector GR ghosts and `U` for YM ghosts. The builder's
    family list, imports, power guards and `ymDensity` derivatives are currently
    fixed to orders 0–2. Extend all these together, with the manifest inventory,
    provenance and cutoff. Preserve the independently verified quartic colour

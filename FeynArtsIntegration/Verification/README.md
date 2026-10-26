@@ -15,8 +15,8 @@ not install or certify the model. Its source libraries must already be generated
 from the corrected rules; it must not compensate for old source normalisation.
 Source generation uses the existing library generator, not model loading.
 
-The portable native tree check uses the installed repository bundle and only
-FeynCalc/patched FeynArts. Select exactly one process per fresh kernel:
+The portable native tree check uses the installed repository bundle with
+FeynCalc/patched FeynArts and serial FORM through `FeynGravSimplify`. Select exactly one process per fresh kernel:
 
 ```sh
 FG_YM_PROCESS=VVTT FG_YM_EVIDENCE=/absolute/new/evidence \
@@ -40,3 +40,20 @@ The [delivery report](../../Documentation/Verification/GRSUNYM-2026-10-26.md)
 records independent source, ghost-sign, all-contact and tree evidence, including
 historical harness failures. The portable tree checks are a subset, not the full
 source-action audit. The existing bridge's loop gates remain unchanged.
+
+The quark extension adds a private ordered-Dirac companion,
+`../FermionModelBasis.wl`, and five families to the same builder. Its finite
+one/three-gamma basis preserves chain order and rejects unsupported objects.
+The gravitational vector ghost now uses `S`, leaving `F` for quarks. See the
+[quark verification report](../../Documentation/Verification/GRSUNYMQuarks-2026-10-26.md)
+for independent action checks, all five native contacts, selected massive trees,
+identical-quark signs and the evaluated FORM example.
+
+The graviton Ward check now uses the direct symmetric variation
+`(A[e+p] - A[e-p])/2`. Extracting a formal coefficient without first expanding
+all momentum dependence can produce a vacuous zero. The corrected check leaves
+the tested gauge vector arbitrary. FORM handles the tensor algebra; FeynCalc
+handles notation, routing and the final commuting rational comparison.
+Successful FORM job files are retained in the evidence directory. External
+resource controls still apply; the FA-YM-02 follow-up used the maintainer's
+explicit 600-second override, with the same memory/swap/grace limits.

@@ -9,13 +9,16 @@
 	"Parameters":[
 		"FeynGrav`κ",
 		"FeynGrav`YangMillsCoupling",
+		"FeynGrav`QuarkMass",
 		"FeynCalc`SUNN"
 	],
-	"Action":"-2 R\/kappa^2 - F^a_mn F_a^mn\/4 - (nabla.A)^2\/2 + g^mn partial_m antighost^a (partial_n ghost^a + g_s f^abc A_n^b ghost^c), with sqrt(-g); plus accepted GR gauge fixing and FP determinant",
+	"Action":"-2 R\/kappa^2 - F^a_mn F_a^mn\/4 - (nabla.A)^2\/2 + g^mn partial_m antighost^a (partial_n ghost^a + g_s f^abc A_n^b ghost^c), with sqrt(-g); plus accepted GR gauge fixing and FP determinant and the minimally coupled symmetrised Dirac action with one fundamental flavour of mass QuarkMass",
 	"FieldClasses":[
 		"T[1]",
 		"F[1]",
 		"-F[1]",
+		"S[1]",
+		"-S[1]",
 		"V[1]",
 		"U[1]",
 		"-U[1]"
@@ -23,7 +26,7 @@
 	"InteractionFamilies":[
 		"TTT",
 		"TTTT",
-		"TFF",
+		"TSS",
 		"TVV",
 		"TTVV",
 		"VVV",
@@ -36,16 +39,24 @@
 		"TTUU",
 		"VUU",
 		"TVUU",
-		"TTVUU"
+		"TTVUU",
+		"FFV",
+		"FFT",
+		"FFTT",
+		"FFTV",
+		"FFTTV"
 	],
-	"GhostRepresentation":"F: Lorentz-vector gravitational Grassmann ghost; U: adjoint Lorentz-scalar YM Grassmann ghost; no spinor field",
+	"DiracMomentumMap":"Source exp(+ikx) to native incoming exp(-ipx): source fermion=-mom2, antifermion=-mom1, every graviton momentum=-momj; gamma order retained",
+	"GhostRepresentation":"F: one fundamental Dirac quark; S: Lorentz-vector gravitational Grassmann ghost (previously F); U: adjoint Lorentz-scalar YM Grassmann ghost",
 	"Sources":{
-		"FeynGrav.wl":"a569abe50074b13ff7066f37ded9c6769da6c887652a152ecc1e7728a5795709",
+		"FeynGrav.wl":"c4cae221e2c7ce7e90df1a714276443d53af674f4ad5768f60595b2a9e818101",
 		"FeynArtsIntegration\/Basis.wl":"c1e12d6a406bfffbb2a03c8659a81ef3e54b4745ca5be813112f44426b72b698",
 		"FeynArtsIntegration\/ModelBuilder.wl":"b0771c6fa9cb9e13feb772aae8d6d62b4a1420dea3185b9ee66767b9911f067e",
-		"FeynArtsIntegration\/YangMillsModelBuilder.wl":"3fe48f8eb5a9943dbc9c37517358f420ff71ccfa040a96db8d77d88609cbfd74",
+		"FeynArtsIntegration\/YangMillsModelBuilder.wl":"e5b953ea86d9e4ef80eafbaf38ad95eb7dc55ea8a81691ee380dc3a9971bf600",
 		"FeynArtsIntegration\/BuildGRSUNYM.wl":"fffdd16de8bc4dec4731f0560f1a5b6c21f3faaed399a448d52334e043e3147d",
-		"Rules\/GravitonSUNYM.wl":"28b1ddd6341aa7f28f0035545f03839fc69570890709e7fd47f4ee590c592a79",
+		"Rules\/GravitonSUNYM.wl":"3072d40fa73e4d13a5dd99f0993aed1ffa89c584e6498ac249a2cc46c87f6c90",
+		"Rules\/GravitonFermionVertex.wl":"40468e2c5973c901f790fad2ee256df43ff482ac8ecf75219eb8981bdf3fb96d",
+		"FeynArtsIntegration\/FermionModelBasis.wl":"985fc3d937d934c382cab27cef00cdd20ee1233e200f688c617806418e1dd27d",
 		"Libs\/GravitonVertex_1":"ce60b3ed3c357c59b3c35715f2f7a083475fe6c0b0cd7e1fd4772066898544fe",
 		"Libs\/GravitonVertex_2":"7e3b0bcb1cb897f00387f96a427d43ef99ac38fab687403abeb3c74ebc7db5d5",
 		"Libs\/GravitonGluonVertex_1":"a7fac95acf1d2314dc0c09fa33db3881dac47655123db80fb720709f42c26972",
@@ -57,12 +68,16 @@
 		"Libs\/GravitonYMGhostVertex_1":"582c1f314833665f29da72fee22496d8ca0fc7eb16e9b8846993e4e546fc66bf",
 		"Libs\/GravitonYMGhostVertex_2":"c96f3abc289c4a5479ec9e143570f644bf2f0326f51b2c0e3e71b1008e9bd763",
 		"Libs\/GravitonGluonGhostVertex_1":"68638e1c0ba9b946836f2789b233420c75d3dc66cd6cc21de860f981420f2ded",
-		"Libs\/GravitonGluonGhostVertex_2":"04c02a335a71c2615135799ead28c741e0748e96be99256e393dff9e0dee9d82"
+		"Libs\/GravitonGluonGhostVertex_2":"04c02a335a71c2615135799ead28c741e0748e96be99256e393dff9e0dee9d82",
+		"Libs\/GravitonFermionVertex_1":"2b6ef681a95bde9b35beeb883501137f8bda86d5e5268012fe10a64d20294adf",
+		"Libs\/GravitonFermionVertex_2":"1813170e681933283524e04ce31681838294f4a2d74859364728629e75222e2b",
+		"Libs\/GravitonQuarkGluonVertex_1":"4d73e5f05496b836bc0f0e5b625789a23220608bbb895ad2e2aeb1484896f73d",
+		"Libs\/GravitonQuarkGluonVertex_2":"79232c603c9bc7c68612bad8fe6db2dcc2f86178c6ce6dcd09e555e049221dd2"
 	},
 	"BasisSizes":{
 		"TTT":231,
 		"TTTT":4158,
-		"TFF":9,
+		"TSS":9,
 		"TVV":21,
 		"TTVV":207,
 		"VVV":6,
@@ -75,12 +90,17 @@
 		"TTUU":15,
 		"VUU":1,
 		"TVUU":3,
-		"TTVUU":15
+		"TTVUU":15,
+		"FFV":1,
+		"FFT":7,
+		"FFTT":61,
+		"FFTV":3,
+		"FFTTV":15
 	},
 	"RuleSHA256":{
 		"TTT":"de35d3cf81bc7fc56db05eb862627410c9ac80945a2e33c10db8221c97acc031",
 		"TTTT":"b4c8f6b4bf3423bd11d15f2574dc52f02f8bd8ca7c03c80077799a229553758a",
-		"TFF":"b46e9bef232a8ec8f7034265b1f175ca719eda8cf1495759a763bc8e8ad891ae",
+		"TSS":"b46e9bef232a8ec8f7034265b1f175ca719eda8cf1495759a763bc8e8ad891ae",
 		"TVV":"3bd45e20a19bdefb132cd0fce996d9be4791242e124c95a61cc2ea1f43afbeba",
 		"TTVV":"4b34a4b2eb8e0cc0d66b298f0cfa8a008ed1a0c80f87ba4c75599854474095b0",
 		"VVV":"4c036322e88ade86bede74b92786078c1ebb0d519d038aaa74d324845db793ed",
@@ -93,10 +113,15 @@
 		"TTUU":"b7f9629caabf604c3edd99fae2c2bf447028fad228a1cb5e0f66f484f891aad4",
 		"VUU":"1d1fc805a81d5effefab398df5f0a697c66c49411d90f2310ba7e4d02979e18d",
 		"TVUU":"d7da2224570edc81f9416f40c11b40e93542f9b781b765e478b3c7a5e72d3e39",
-		"TTVUU":"b9f753a8b58fb00c7af7d3e90396351478fb49f25e959796d321a366bc9a73fc"
+		"TTVUU":"b9f753a8b58fb00c7af7d3e90396351478fb49f25e959796d321a366bc9a73fc",
+		"FFV":"bbf1e9128b6bed0b2362681991b5cd950ced96e6f3f036b01c291f550f746392",
+		"FFT":"89cfcc0e159cce4ce9e4451d0875b0d6d87297fd359e47cebd05439f17765ef4",
+		"FFTT":"ed7ee16f365ee1477904cdda42fc1854873b5b166f39fa1df0dec1794ad528f7",
+		"FFTV":"f1185b1e9fea323833b7a223c318889b0e05015f48e8ee8c1ccbe0d5bd15ef91",
+		"FFTTV":"076d06c8505a8407b8d9c58c4b8f045d7e4d4fc9103122420a7893f3418d87bc"
 	},
 	"ModelFileSHA256":{
-		".gen":"d41a3702ee42bcdd7ff7a3732165e4bb83e8ee429418a0735d200eabfb94eb4c",
-		".mod":"3c35e41bff0a14979b0e77a89eee721c5892999cc60f0dd74cf9c35063aa5d72"
+		".gen":"75ce50fc481af1e3437f16a323c9e2b03b022589b324422d3bb064217de00553",
+		".mod":"2ff5b477182b50fcb1e9e31f788e30d3dfa53e2960680936326801ae78218182"
 	}
 }

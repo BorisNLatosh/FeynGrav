@@ -1,6 +1,7 @@
 (* Native tree checks at generic massless Mandelstam invariants and symbolic D.
    External polarisation vectors remain independent; no helicity or D=4 limit. *)
 Needs["FeynCalc`"];
+Get[FileNameJoin[{treeRepo,"CalcFormConverter","CalcFormConverter.wl"}]];
 CheckAbort[
 AppendTo[FeynArts`$ModelPath,treeCandidate];
 treeNeed["standalone initialisation",FeynArts`InitializeModel["GR-SU-N-Yang-Mills",FeynArts`GenericModel->"GR-SU-N-Yang-Mills"]===True];
@@ -54,10 +55,12 @@ treePhysical[e_,omit_:0]:=Module[{out,rules={},ep,pp},
   AppendTo[rules,If[j==4,FeynCalc`Pair[ep,FeynCalc`Momentum[p3,D]]->FeynCalc`Pair[ep,FeynCalc`Momentum[p1,D]]+FeynCalc`Pair[ep,FeynCalc`Momentum[p2,D]],FeynCalc`Pair[ep,pp]->0]];
   If[treeTypes[[j]]=="T",AppendTo[rules,FeynCalc`Pair[ep,ep]->0]]],{j,4}];
  out=out/.rules/.u->-s-t;
- Together[Expand[FeynCalc`SUNSimplify[out,Explicit->True,FeynCalc`SUNTraceEvaluate->False,FeynCalc`SUNNToCACF->False]]]];
+ out=Quiet[CalcFormConverter`FeynGravSimplify[out,Method->"FORM",CalcFormConverter`FORMThreads->1,FeynCalc`LoopMomenta->{},CalcFormConverter`TensorDecomposition->False,CalcFormConverter`KeepFiles->True,CalcFormConverter`WorkingDirectory->treeRun],{CalcFormConverter`CalcFormCalculate::files}];
+ If[FailureQ[out],Put[out,FileNameJoin[{treeRun,"FORM-failure.wl"}]];treeStop["FORM failed"]];
+ Together[Expand[out/.rules/.u->-s-t]]];
 treeWard[e_,j_]:=Module[{ep=Symbol["Global`e"<>ToString[j]],pp=Symbol["Global`p"<>ToString[j]],out},
  If[treeTypes[[j]]=="V",out=e/.FeynCalc`Momentum[ep,D]->FeynCalc`Momentum[pp,D];treePhysical[out],
-  out=Coefficient[Expand[FeynCalc`ExpandScalarProduct[e/.FeynCalc`Momentum[ep,D]->FeynCalc`Momentum[ep+wardZ pp,D]]],wardZ,1];treePhysical[out,j]]];
+  out=FeynCalc`ExpandScalarProduct[((e/.FeynCalc`Momentum[ep,D]->FeynCalc`Momentum[ep+pp,D])-(e/.FeynCalc`Momentum[ep,D]->FeynCalc`Momentum[ep-pp,D]))/2];treePhysical[out,j]]];
 Put[<|"Converted"->treeConverted,"PolarisedDiagrams"->treePolarised,"Contact"->treeContact,"Amplitude"->treeAmplitude|>,FileNameJoin[{treeRun,"before-ward.wl"}]];
 treeResiduals=Table[treeRes=treeWard[treeAmplitude,j];
  Put[treeRes,FileNameJoin[{treeRun,"ward-"<>ToString[j]<>".wl"}]];

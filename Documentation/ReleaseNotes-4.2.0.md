@@ -83,10 +83,13 @@ recomputation with its corrected bubble weight. See the
 
 ## Native GR + SU(N) Yang–Mills
 
-The new `GR-SU-N-Yang-Mills` bundle contains all 16 interaction families through
-κ² per vertex for a pure SU(N) gauge field coupled to GR, including covariant
+The new `GR-SU-N-Yang-Mills` bundle contains all 21 interaction families through
+κ² per vertex for an SU(N) gauge field and one Dirac quark flavour coupled to GR, including covariant
 YM gauge fixing, two ghost sectors and five/six-leg contacts. D and N remain
-symbolic, with unassigned `YangMillsCoupling`. No quarks are included.
+symbolic, with unassigned `YangMillsCoupling` and `QuarkMass`. The five new
+quark families include the five-leg hh qbar q A contact. `F[1]` now denotes
+the quark and `S[1]` the gravitational vector ghost; update old explicit ghost
+selections and restart the kernel. The bundle name is unchanged.
 
 The audit found a missing κ^n factor in both contracted and uncontracted cubic/
 quartic gluon source routines. These four routines are corrected, and the four
@@ -107,8 +110,9 @@ source variants. The two stored libraries with one/two gravitons were regenerate
 and checked exactly against an independent determinant–inverse-vierbein
 expansion with symbolic D. Their colour, gamma and tensor coefficients are
 unchanged; the flat vertex is unchanged. Restart the kernel, reload with
-`FeynGravImportSUNYM[2]`, and recompute affected results. The native pure-YM
-model contains no quarks and is unchanged. See the
+`FeynGravImportSUNYM[2]`, and recompute affected results. At that correction checkpoint the native pure-YM
+model had no quarks and was unchanged. The subsequent quark extension now
+uses these corrected libraries; no further source/library change was needed. See the
 [verification report](Verification/QuarkGluonKappa-2026-10-26.md).
 
 ## Verification and performance
@@ -153,3 +157,14 @@ See the [installation guide](UserGuide.md#installation-and-help).
 The version selection and draft notes do not merge branches, commit, push, tag,
 publish or establish that the eventual release archive has passed installation
 checks. Those operations and the final release review remain separate.
+
+## Native quark extension
+
+Independent Dirac-action comparisons establish the kinetic, mass and spin terms
+through κ². The native adapter reverses every source momentum to match FeynArts
+spinor/Fourier conventions, including graviton momenta. All five new contacts
+and selected massive quark trees pass; FORM-backed comparisons and genuine
+direct Ward regressions are recorded in the [quark delivery report](Verification/GRSUNYMQuarks-2026-10-26.md).
+[Example 13](../Examples/13.%20Quark_Graviton_Emission_Tree_Level_FeynArts.nb)
+computes quark annihilation with graviton emission using `FeynGravSimplify`.
+Existing notebooks and the four other model bundles are preserved.
