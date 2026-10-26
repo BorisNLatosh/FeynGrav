@@ -6,7 +6,7 @@ These examples target the [unreleased FeynGrav 4.2.0](../Documentation/ReleaseNo
 
 ## Numbered examples and suggested reading order
 
-The numbers define the suggested reading order, from operator algebra and tree-level scattering to loop calculations. All notebooks require FeynGrav and FeynCalc. Examples 01–08 also use FORM; TFORM is optional. Examples 09–11 evaluate their tree tensors directly with FeynCalc. Additional tools are listed below.
+The numbers define the suggested reading order, from operator algebra and tree-level scattering to loop calculations. All notebooks require FeynGrav and FeynCalc. Examples 01–08 also use FORM; TFORM is optional. Examples 09–12 evaluate their tree tensors directly with FeynCalc. Additional tools are listed below.
 
 | No. | Notebook | What you learn | Additional requirements |
 | --- | --- | --- | --- |
@@ -21,8 +21,11 @@ The numbers define the suggested reading order, from operator algebra and tree-l
 | 09 | [09. Scalar_Scattering_Tree_Level_FeynArts.nb](09.%20Scalar_Scattering_Tree_Level_FeynArts.nb) | Seven scalar-scattering diagrams, on-shell kinematics and the massive amplitude with independent cubic/quartic couplings | FeynCalc-patched FeynArts |
 | 10 | [10. Scalar_Scattering_John_Tree_Level_FeynArts.nb](10.%20Scalar_Scattering_John_Tree_Level_FeynArts.nb) | John scalar scattering, three graviton exchanges, and minimal/mixed/John amplitude contributions | FeynCalc-patched FeynArts |
 | 11 | [11. Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb](11.%20Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb) | Six scalar–scalar to graviton–graviton diagrams and on-shell polarisation-dependent amplitude; helicity amplitude and two generic graviton Ward checks using the corrected model | FeynCalc-patched FeynArts |
+| 12 | [12. Yang_Mills_Graviton_Emission_Tree_Level_FeynArts.nb](12.%20Yang_Mills_Graviton_Emission_Tree_Level_FeynArts.nb) | SU(N) gauge-field scattering with graviton emission, four diagrams, symbolic-D on-shell amplitude, gauge/graviton Ward checks and a four-dimensional helicity expression | FeynCalc-patched FeynArts |
 
 Example 09 can be read immediately after example 04: it gives the scalar counterpart of the native FeynArts workflow, with incoming momenta `p1`, `p2` and outgoing momenta `p3`, `p4`. It displays the contact, scalar-exchange and graviton-exchange contributions to `M` after removing the overall `I` from the diagram result.
+
+Example 12 uses `GR-SU-N-Yang-Mills` for $A^a(p_1) + A^b(p_2) \to A^c(p_3) + h(p_4)$. It separates the common $g_s\kappa f^{abc}$ colour/coupling factor, uses conjugate outgoing polarisations, and keeps D and N symbolic. Three gauge-field Ward checks and one graviton check with an arbitrary gauge vector vanish; removing the contact gives a nonzero gauge residual. Its [verification report](../Documentation/Verification/Example12YangMills-2026-10-26.md) records a complete fresh-kernel evaluation. The final subsection defines polarisation scalar products and gives one helicity expression in `h1`, `h2`, `h3`, `h4`, `s` and `t`; the graviton helicity is `2 h4`. FORM is not needed.
 
 The two larger matter notebooks contain separate field sectors. Example 06 begins with the scalar sector; example 07 begins with fermions, then covers massive vectors, massless vectors and Yang–Mills theory. One-loop reduction and symbolic phase-space integration can take appreciably longer than the small projector checks.
 
@@ -61,7 +64,7 @@ The native construction and comparisons are recorded in [Example 08 verification
 
 ### Syntax and interface audit
 
-All 11 notebooks (274 executable cells) were audited on 25 October 2026. The
+The then-existing 11 notebooks (274 executable cells) were audited on 25 October 2026. The
 repairs concern four `B0[__]` collection patterns in 07, the gravity-only
 contribution in 09, and equality checks instead of assignments to `Contract` in
 11. Restart the kernel if the old assignment cell in 11 was evaluated. Saved

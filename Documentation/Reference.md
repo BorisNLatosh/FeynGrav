@@ -331,8 +331,16 @@ for topology limits, singular cases and normalisation.
 
 The native EsGB model uses unassigned `GaussBonnetG1` and `GaussBonnetG2` for the positive terms phi G and phi^2 G / 2!, respectively. `ScalarMass` remains independent. Select `Model -> "Einstein-scalar-Gauss-Bonnet"` and `GenericModel -> "Einstein-scalar-Gauss-Bonnet"`; specialise parameters by replacement after conversion. Two TTS vertices generate g1-squared diagrams of total order kappa^4 even though each vertex is at most order kappa^2. The [model guide](../FeynArts/Models/Einstein-scalar-Gauss-Bonnet/ModelGuide.md) gives the exact action and native recipe.
 
+`GR-SU-N-Yang-Mills` adds pure SU(N) Yang–Mills with symbolic `SUNN` and
+unassigned `YangMillsCoupling`. It uses `F[1]` for vector gravitational ghosts
+and `U[1]` for scalar YM ghosts; `F` has no spinor meaning in this model.
+Both gauges are fixed (GR 2, YM −1). The [model guide](../FeynArts/Models/GR-SU-N-Yang-Mills/ModelGuide.md)
+documents its 16 families, colour sums, native workflow and selected tree checks.
+The cubic/quartic gluon source routines now include the required κ^n; see the
+[source correction record](Verification/GRSUNYM-2026-10-26.md).
+
 ## Citation guidance
 
 `FeynGravHowToCite[]` prints the four FeynGrav references with links, followed by a reminder to cite dependencies when used, and returns `Null`. Cite the publications relevant to the version and features used. Notebook references are clickable; a kernel without a front end prints citation text and URLs. No libraries, settings, network requests or calculations are involved. Any supplied arguments return `Failure["InvalidArgumentCount", ...]`. The command appears in `FeynGravCommands[]` and in startup help.
 
-The initialisation banner identifies the default import requests: cubic/quartic gravity and matter interactions with up to two gravitons. It lists the four supported FeynArts models by their descriptive names, without initialising them. The banner uses FeynCalc-style text with automatic wrapping and links to the help commands; publication references are shown by `FeynGravHowToCite[]`. Actual import failures remain reported by the existing initialisation diagnostics; consult `FeynGravLibraryInformation[]` for successful imports.
+The initialisation banner identifies the default import requests: cubic/quartic gravity and matter interactions with up to two gravitons. It lists the five supported FeynArts models by their descriptive names, without initialising them. The banner uses FeynCalc-style text with automatic wrapping and links to the help commands; publication references are shown by `FeynGravHowToCite[]`. Actual import failures remain reported by the existing initialisation diagnostics; consult `FeynGravLibraryInformation[]` for successful imports.

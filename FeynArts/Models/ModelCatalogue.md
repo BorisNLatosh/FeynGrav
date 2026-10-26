@@ -10,7 +10,8 @@ FeynArts/Models/
 ├── GR/
 ├── Single-Scalar-Tensor-Minimal-Coupling/
 ├── John/
-└── Einstein-scalar-Gauss-Bonnet/
+├── Einstein-scalar-Gauss-Bonnet/
+└── GR-SU-N-Yang-Mills/
 ```
 
 Each model directory contains `<Model>.gen`, `<Model>.mod`, `manifest.json` and `README.md`.
@@ -21,6 +22,7 @@ Each model directory contains `<Model>.gen`, `<Model>.mod`, `manifest.json` and 
 | `Single-Scalar-Tensor-Minimal-Coupling` | Massive scalar with independent positive cubic and quartic potential couplings; includes five- and six-leg contacts | [Single-Scalar-Tensor-Minimal-Coupling](Single-Scalar-Tensor-Minimal-Coupling/ModelGuide.md) |
 | `John` | Massive scalar with the John derivative interaction | [John](John/ModelGuide.md) |
 | `Einstein-scalar-Gauss-Bonnet` | Massive scalar with independent linear and quadratic scalar–Gauss–Bonnet couplings | [Einstein-scalar-Gauss-Bonnet](Einstein-scalar-Gauss-Bonnet/ModelGuide.md) |
+| `GR-SU-N-Yang-Mills` | Pure SU(N) gauge field with gravitational and YM ghosts; includes five/six-leg mixed contacts | [GR-SU-N-Yang-Mills](GR-SU-N-Yang-Mills/ModelGuide.md) |
 
 For every supplied model, `<Model>.gen` contains its kinematic structures and propagators; `<Model>.mod` contains fields and coupling coefficients; `manifest.json` records provenance and hashes; `README.md` documents use and verification limits. Future models should follow this layout. The directory name and the `.gen`/`.mod` basenames must agree. Developer builders remain in `FeynArtsIntegration/` and write their files into the explicitly chosen model directory.
 
@@ -71,3 +73,11 @@ Earlier checks are recorded in [GR](../../Documentation/Verification/PureGRTreeR
 `Einstein-scalar-Gauss-Bonnet` is supplied after correction of its two-graviton source and stored library. Nine source/regeneration checks, six construction checks and twenty native checks passed. Higher-order EsGB source routines remain outside this delivery. See [scalar-model verification](../../Documentation/Verification/ScalarModelExtensions.md). John subsequently passed full independent cubic/quartic tensor comparisons with symbolic D and generic off-shell momenta, as described in the [John verification section](John/ModelGuide.md#verification). Higher orders are not established by those checks.
 
 The [19 October naming checks](../../Documentation/Verification/ModelNames.md) verify all four exact names, including hyphenated names, in fresh kernels.
+
+## Yang–Mills model verification
+
+The [GR + SU(N) guide](GR-SU-N-Yang-Mills/ModelGuide.md) describes its two distinct
+ghost species and symbolic colour range. All 16 contacts and selected AA → AA,
+AA → Ah and AA → hh trees passed exact checks; see the [audit and delivery
+report](../../Documentation/Verification/GRSUNYM-2026-10-26.md). The optional GR
+bridge is unchanged. No loop or quark-sector verification is implied.

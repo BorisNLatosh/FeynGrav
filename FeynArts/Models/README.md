@@ -10,6 +10,7 @@ Loop validation is deferred.
 | [Single-Scalar-Tensor-Minimal-Coupling](Single-Scalar-Tensor-Minimal-Coupling/README.md) | Massive scalar with cubic/quartic potential |
 | [John](John/README.md) | Massive scalar with non-minimal kinetic coupling |
 | [Einstein-scalar-Gauss-Bonnet](Einstein-scalar-Gauss-Bonnet/README.md) | Massive scalar with linear/quadratic Gauss–Bonnet couplings |
+| [GR-SU-N-Yang-Mills](GR-SU-N-Yang-Mills/README.md) | Pure SU(N) gauge field, mixed gravity contacts and both ghost sectors |
 
 See the [catalogue and common loading guide](ModelCatalogue.md) for registration,
 standalone use, naming migration and verification. Use a fresh kernel and

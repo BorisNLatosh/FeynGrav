@@ -81,10 +81,24 @@ cell in 11 was evaluated, and recompute affected presentation/check cells. Examp
 recomputation with its corrected bubble weight. See the
 [examples guide](../Examples/README.md#syntax-and-interface-audit).
 
-No interaction rule, stored library or native model bundle is changed relative
-to the 4.1.0 baseline by this branch's converter and example work. The four native
-models retain their existing per-vertex kappa-squared scope and verification
-limits; general native-model loop validation remains deferred.
+## Native GR + SU(N) Yang–Mills
+
+The new `GR-SU-N-Yang-Mills` bundle contains all 16 interaction families through
+κ² per vertex for a pure SU(N) gauge field coupled to GR, including covariant
+YM gauge fixing, two ghost sectors and five/six-leg contacts. D and N remain
+symbolic, with unassigned `YangMillsCoupling`. No quarks are included.
+
+The audit found a missing κ^n factor in both contracted and uncontracted cubic/
+quartic gluon source routines. These four routines are corrected, and the four
+order-one/two gluon libraries were regenerated and independently checked. This
+changes affected mixed gluon rules; restart the kernel and recompute previous
+results that used them. Existing GR and scalar model bundles are unchanged.
+The four corrected stored libraries are tracked repository files. The new
+model is self-contained and does not read them at runtime.
+
+Independent off-shell action comparisons, all native contacts and selected
+AA → AA, AA → Ah and AA → hh Ward checks passed; see the [verification
+report](Verification/GRSUNYM-2026-10-26.md). Native loop validation remains deferred.
 
 ## Verification and performance
 

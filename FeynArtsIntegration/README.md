@@ -2,10 +2,12 @@
 
 The optional bridge has a restricted pure-GR process interface. Use the
 [native model catalogue](../FeynArts/Models/README.md) for ordinary model loading
-and scalar theories. Loading FeynGrav does not initialise a model.
+and scalar/Yang–Mills theories. Loading FeynGrav does not initialise a model.
 
 - [Bridge and builder guide](BridgeGuide.md): commands, source contract,
   construction, verification and loop safeguards.
+- [Yang–Mills builder and checks](Verification/README.md): explicit builds,
+  resource policy and portable selected-tree checks.
 - [GR model guide](../FeynArts/Models/GR/ModelGuide.md): native diagrams.
 
 Loop validation is deferred. Do not bypass the bridge's completeness gate.

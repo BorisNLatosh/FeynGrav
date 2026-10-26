@@ -125,7 +125,7 @@ The [library generator](../Libs/Generator.wl) is a separate developer tool for p
 
 ## FeynArts models
 
-`FeynArts/Models` contains one folder per model, each with matching `.gen`, `.mod`, `manifest.json` and `README.md` files. Loading FeynArts together with FeynGrav registers these model folders on FeynArts' `$ModelPath`, so both supplied models are available by name:
+`FeynArts/Models` contains one folder per model, each with matching `.gen`, `.mod`, `manifest.json` and `README.md` files. Loading FeynArts together with FeynGrav registers these model folders on FeynArts' `$ModelPath`, so the supplied models are available by name:
 
 ```wl
 $LoadAddOns = {"FeynArts"};
@@ -137,6 +137,12 @@ InitializeModel["GR", GenericModel -> "GR"];
 `GenericModel` is required because the classes file does not name its generic model and the FeynArts default is the stock `"Lorentz"` file. The snapshot covers the cubic and quartic graviton interactions and the oriented ghost coupling at gauge parameter 2 with symbolic `D`. The ordinary ghost line is `-I MTD[mu,nu] FAD[p]`. This release is ready for three-/four-graviton trees; loop compatibility checks are deferred and the optional bridge deliberately rejects the new snapshot's loop requests. Start a fresh kernel after updating the model. See the [GR guide](../FeynArts/Models/GR/ModelGuide.md) for details and hashes, and [Examples/04. Graviton_Scattering_Tree_Level_FeynArts.nb](../Examples/04.%20Graviton_Scattering_Tree_Level_FeynArts.nb) for a worked off-shell four-graviton tree calculation.
 
 A separate [Single-Scalar-Tensor-Minimal-Coupling model](../FeynArts/Models/Single-Scalar-Tensor-Minimal-Coupling/ModelGuide.md) adds one real minimally coupled scalar of arbitrary symbolic mass, including `TSS` and `TTSS` through $\kappa^2$. It is supplied ready for the tested native tree workflows; no rebuild is needed. Use `InitializeModel["Single-Scalar-Tensor-Minimal-Coupling", GenericModel -> "Single-Scalar-Tensor-Minimal-Coupling"]` with the same loading workflow; its guide also shows explicit path registration without loading FeynGrav. The optional pure-GR bridge is unchanged; independent positive cubic and quartic scalar self-interactions are included. Setting both couplings to zero gives the minimal massive scalar sector. Non-minimal couplings and loop validation are outside this model.
+
+The [GR + pure SU(N) Yang–Mills model](../FeynArts/Models/GR-SU-N-Yang-Mills/ModelGuide.md)
+uses `"GR-SU-N-Yang-Mills"` for both model names. It includes all 16 families
+through κ² per vertex, with symbolic D/N, `YangMillsCoupling`, both ghost species
+and five/six-leg contacts. Selected native tree Ward checks passed; quarks and
+loop validation are outside its scope.
 
 ## CalcFormConverter
 
@@ -173,7 +179,7 @@ interface and are unchanged.
 
 The [examples guide](../Examples/README.md) lists the numbered notebooks in their suggested reading order, with requirements and scope. Run each notebook in a fresh kernel and evaluate its setup cells before its calculation cells.
 
-All 11 notebooks passed the [25 October syntax and interface audit](Verification/ExamplesSyntax-2026-10-25.md). Saved outputs were preserved; follow the [rerunning guidance](../Examples/README.md#syntax-and-interface-audit) for repaired cells in examples 07, 09 and 11. This audit did not rerun the complete loop calculations.
+The then-existing 11 notebooks passed the [25 October syntax and interface audit](Verification/ExamplesSyntax-2026-10-25.md). Saved outputs were preserved; follow the [rerunning guidance](../Examples/README.md#syntax-and-interface-audit) for repaired cells in examples 07, 09 and 11. This audit did not rerun the complete loop calculations.
 
 | No. | Notebook | Topic |
 | --- | --- | --- |
@@ -188,6 +194,9 @@ All 11 notebooks passed the [25 October syntax and interface audit](Verification
 | 09 | [09. Scalar_Scattering_Tree_Level_FeynArts.nb](../Examples/09.%20Scalar_Scattering_Tree_Level_FeynArts.nb) | Massive scalar scattering with gravity and cubic/quartic self-interactions, using FeynArts. |
 | 10 | [10. Scalar_Scattering_John_Tree_Level_FeynArts.nb](../Examples/10.%20Scalar_Scattering_John_Tree_Level_FeynArts.nb) | On-shell scalar scattering with the John interaction, using FeynArts. |
 | 11 | [11. Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb](../Examples/11.%20Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb) | EsGB scalar annihilation into gravitons, helicity amplitudes and generic graviton Ward checks; see the [scalar-contact correction record](Verification/ScalarWardCorrection.md). |
+| 12 | [12. Yang_Mills_Graviton_Emission_Tree_Level_FeynArts.nb](../Examples/12.%20Yang_Mills_Graviton_Emission_Tree_Level_FeynArts.nb) | SU(N) gauge-field scattering with graviton emission, fixed-colour amplitude and all four external-leg Ward checks at symbolic D. |
+
+Example 12 was added and [evaluated separately on 26 October](Verification/Example12YangMills-2026-10-26.md), preserving the preceding notebooks. It uses the native Yang–Mills model and FeynCalc without FORM.
 
 The converter's [ScalarBubble.wl](../CalcFormConverter/Examples/ScalarBubble.wl) demonstrates manual and automated FORM workflows for a scalar-projected quadratic-gravity bubble. It requires the cubic quadratic-gravity library, loaded with `FeynGravImportQuadraticGravity[1]`, and FORM/TFORM for execution.
 
@@ -204,7 +213,7 @@ The [Benchmark notebooks](../Benchmark/UserGuide.md) measure export, FORM execut
 | [Rules](../Rules) | Interaction-rule construction, structural validation and projector utilities. |
 | [Libs](../Libs) | Precomputed vertex libraries and the [library generator](../Libs/Generator.md), which uses CalcFormConverter. |
 | [Examples](../Examples) | Calculation notebooks. |
-| [FeynArts/Models](../FeynArts/Models/ModelCatalogue.md) | Four native gravity/scalar model bundles and tree-use guides. |
+| [FeynArts/Models](../FeynArts/Models/ModelCatalogue.md) | Five native gravity, scalar and Yang–Mills model bundles and tree-use guides. |
 | [Documentation](README.md) | Main-package reference, documentation routes and verification records. |
 | [Benchmark](../Benchmark/UserGuide.md) | Reproducible converter and library-generation measurements. |
 | [CalcFormConverter](../CalcFormConverter) | Converter, FORM runtime, templates, documentation, examples, and tests. |

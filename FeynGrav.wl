@@ -45,7 +45,8 @@ DisplayInitializationMessages[] := Module[{},
         "Pure general relativity",
         "Scalar field with a potential minimally coupled to gravity",
         "Scalar field with a non-minimal kinetic coupling",
-        "Einstein-scalar-Gauss-Bonnet model"
+        "Einstein-scalar-Gauss-Bonnet model",
+        "SU(N) Yang-Mills field coupled to gravity"
     }];
     Print[Style["The supplied models retain interactions through order \!\(\*SuperscriptBox[\(\[Kappa]\), \(2\)]\) per vertex. Use matching Model and GenericModel names with FeynCalc-patched FeynArts in a fresh kernel. Models are not initialised automatically.", "Text"]];
     If[$FrontEnd === Null,
@@ -442,6 +443,8 @@ FeynGrav`GaugeFixingEpsilonSUNYM = -1;
 
 \[Kappa] =. ;
 
+
+YangMillsCoupling::usage = "YangMillsCoupling is the unassigned gauge coupling g_s in the native GR-SU-N-Yang-Mills model. Specialise it by replacement after conversion.";
 
 ScalarMass::usage = "ScalarMass is the unassigned scalar mass parameter in the native FeynArts scalar models. Specialise it by replacement after conversion.";
 ScalarLambda3::usage = "ScalarLambda3 is the independent coupling of the positive cubic scalar potential term phi^3/3! in Single-Scalar-Tensor-Minimal-Coupling.";
