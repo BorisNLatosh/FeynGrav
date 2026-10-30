@@ -19,6 +19,10 @@ This guide describes implementation and maintenance of CalcFormConverter. Start 
 
 ## Architecture and extension points
 
+The private processing plan and first PERF-05 increment are documented in
+[ProcessingContracts.md](ProcessingContracts.md). The existing preparers and renderer
+remain authoritative; the common coefficient policy is not yet implemented.
+
 | Module | Responsibility |
 | --- | --- |
 | `CalcFormConverter.wl` | Package shell, public vocabulary and option declarations, shared failure/serialization primitives, companion loading and facade guard |
@@ -985,3 +989,46 @@ coefficient checks. Production performs no Wolfram `Simplify`, `Together` or
 `Factor` calls. See the [verification report](../Documentation/Verification/PolarisationCoefficients-2026-10-23.md)
 and the [FORM manual](https://form-dev.github.io/form-docs/stable/manual/),
 sections 7.56, 8.11 and 11, for factorisation and native denominator conventions.
+
+## API-03 final output boundary — 30 October 2026
+
+`FeynGravSimplify/Facade.wl` owns `executeFullBackend`: it delegates the unchanged
+converter rules, then optionally invokes ``FeynCalc`PaVeToABCD`` once on successful
+PaVe-containing output. The Boolean option belongs only to the facade store.
+Conversion diagnostics/aborts produce stage-labelled failures; total timing
+includes conversion. Raw reconstruction, shared-output format and legacy stores
+are untouched. The readiness inventory includes the helper, and failed loads
+clear its private context before retrying. See the
+[public contract](UserGuide.md#final-pave-conversion-feyngravsimplify-only).
+
+`FeynGravSimplify/Tests/PaVeOutput.wls` is registered as the `PaVeOutput` facade
+phase in `Tests/run.py`. It combines explicit named-function expectations,
+controlled converter outcomes and small real serial FORM jobs. Existing facade,
+loading and standalone test expectations include the intentional nineteenth
+option. The [verification report](../Documentation/Verification/API03PaVeOutput-2026-10-30.md)
+records which tests actually ran; registration is not full-suite certification.
+
+## Shared coefficient policy — PERF-05 increment 2
+
+The existing arithmetic planners share the mapping-role, polynomial-domain and
+allowance helpers in `RationalCoefficients.wl`; dimension-only compilation uses
+an explicit one-variable dictionary. FORM execution, semantic normalisation,
+shared-definition inspection, cache/score/rollback ownership are retained.
+See [CoefficientPolicy.md](CoefficientPolicy.md) for the actual domains, selection
+profiles and remaining orchestration work. `CoefficientPolicy` and
+`CoefficientArithmetic` are registered runtime suites; the [dated report](../Documentation/Verification/PERF05Coefficients-2026-10-30.md)
+records two bounded focused runs (72/72 and 52/52), not complete-suite or
+whole-call performance acceptance. API-03 conversion still follows processing.
+
+## Collection around reduction — PERF-05 increment 3
+
+`lrCoefficientCollectionPlan` applies the shared scalar policy at the complete
+linear `cfcTC` bracket boundary. Safe Laurent-monomial definitions are exposed
+first; generated recurrence weights must not disable this pass merely because
+they are not inverse polynomials. A disposable native FORM procedure collects
+pre-reduction weights, removes exact-zero keys, and processes direct-output
+multipliers after reduction. Existing shared-output final processing stays in
+charge for large jobs. See [IntegralCollection.md](IntegralCollection.md) for
+key/scope/fallback and counter ownership, and the [verification report](../Documentation/Verification/PERF05Collection-2026-10-30.md)
+for the final 69/69 checks and both retained failures. `IntegralCollection` is
+registered in the runtime suite. No new public option or mapping grammar.

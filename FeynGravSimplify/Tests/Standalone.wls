@@ -36,7 +36,7 @@ check["capability refusal",CalcFormConverter`FeynGravSimplify[MTD[mu,mu],System`
     FeynCalc`LoopMomenta -> {q}][[1]]==="MethodCapability"];
 check["wrapper unknown option",CalcFormConverter`FeynGravFORMExport[MTD[mu,mu],"unused.file",
     System`Method -> "FORM"][[1]]==="InvalidOption"];
-check["four option stores",Length[Options[CalcFormConverter`FeynGravSimplify]]===18&&
+check["four option stores",Length[Options[CalcFormConverter`FeynGravSimplify]]===19&&
   Length[Options[CalcFormConverter`FeynGravFORMExport]]===9&&
   Length[Options[CalcFormConverter`FeynGravFORMCheck]]===3&&
   Length[Options[CalcFormConverter`FeynGravFORMInstall]]===1];

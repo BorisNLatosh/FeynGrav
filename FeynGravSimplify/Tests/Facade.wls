@@ -11,7 +11,7 @@ passed=0;failed=0;
 check[name_,test_]:=If[TrueQ[test],passed++,failed++;Print["FAIL: ",name]];
 tag[x_]:=If[FailureQ[x],x[[1]],None];
 removeFailure[x_]:=If[FailureQ[x]&&StringQ[Lookup[x[[2]],"JobDirectory",None]]&&DirectoryQ[x[[2]]["JobDirectory"]],DeleteDirectory[x[[2]]["JobDirectory"],DeleteContents->True]];
-equal[a_,b_]:=!FailureQ[a]&&!FailureQ[b]&&TrueQ[Together[ExpandScalarProduct[Contract[FeynAmpDenominatorExplicit[FCI[a-b]]]]]===0];
+equal[a_,b_]:=!FailureQ[a]&&!FailureQ[b]&&TrueQ[Together[ExpandScalarProduct[Contract[FeynAmpDenominatorExplicit[FCI[PaVeToABCD[a]-PaVeToABCD[b]]]]]]===0];
 (* Per-call emitted-diagnostic capture for the four intentional loop-vacuum
    calls. Only $Messages is redirected; System`Message is not replaced, so
    internal Quiet/Check behaviour is preserved. $MessageList appends each
@@ -127,7 +127,7 @@ fixture=Environment["FG_CONTRACTOR_TEST_FIXTURE"];
    of counting unevaluated calls as success. Only qualified names and string
    patterns appear in this expression. *)
 facadeLoaded=Names["CalcFormConverter`FeynGravSimplify"]=!={}&&
-  Length[Options[CalcFormConverter`FeynGravSimplify]]===18&&
+  Length[Options[CalcFormConverter`FeynGravSimplify]]===19&&
   Length[DownValues[CalcFormConverter`FeynGravSimplify]]>=2&&
   Length[Options[CalcFormConverter`FeynGravFORMExport]]===9&&
   Length[Options[CalcFormConverter`FeynGravFORMCheck]]===3&&
@@ -139,6 +139,7 @@ If[!TrueQ[facadeLoaded],
   Quit[1]];
 (* Accepted contract literals copied from the accepted Facade.wl snapshot
    (sha256 6fe8b052…; evidence 2026-10-20-api01-maintainability/snapshot/Facade.wl).
+   API-03 adds the explicit PaVeToABCD -> True entry and name below.
    They are the independent reference: expectations must not be derived from the
    implementation under test. *)
 acceptedSimplifyDefaults = {
@@ -150,7 +151,7 @@ acceptedSimplifyDefaults = {
     CalcFormConverter`TensorDecomposition -> True, CalcFormConverter`ReduceLoopCoefficients -> False,
     CalcFormConverter`ReduceToScalarMasters -> True, FeynCalc`DropScaleless -> False,
     CalcFormConverter`DiracAlgebra -> Automatic, CalcFormConverter`ColourAlgebra -> True,
-    FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}};
+    FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}, FeynCalc`PaVeToABCD -> True};
 acceptedSimplifyOptionNames = {System`Method, FeynGrav`ContractorExecutable,
     FeynGrav`ContractorThreads, System`TimeConstraint, CalcFormConverter`FORMExecutable,
     CalcFormConverter`FORMThreads, CalcFormConverter`KeepFiles,
@@ -158,7 +159,7 @@ acceptedSimplifyOptionNames = {System`Method, FeynGrav`ContractorExecutable,
     CalcFormConverter`WorkingDirectory, CalcFormConverter`TensorDecomposition,
     CalcFormConverter`ReduceLoopCoefficients, CalcFormConverter`ReduceToScalarMasters,
     FeynCalc`DropScaleless, CalcFormConverter`DiracAlgebra,
-    CalcFormConverter`ColourAlgebra, FeynCalc`Dimension, FeynCalc`LoopMomenta};
+    CalcFormConverter`ColourAlgebra, FeynCalc`Dimension, FeynCalc`LoopMomenta, FeynCalc`PaVeToABCD};
 acceptedRestrictedBaseline = {
     FeynCalc`LoopMomenta -> {}, CalcFormConverter`TensorDecomposition -> True,
     CalcFormConverter`ReduceLoopCoefficients -> False,
@@ -183,8 +184,8 @@ acceptedCheckOptionNames = {CalcFormConverter`FORMExecutable,
     CalcFormConverter`FORMThreads, System`TimeConstraint};
 acceptedInstallDefaults = {CalcFormConverter`FORMThreads -> Automatic};
 acceptedInstallOptionNames = {CalcFormConverter`FORMThreads};
-check["simplify defaults unchanged",Options[CalcFormConverter`FeynGravSimplify]===acceptedSimplifyDefaults];
-check["simplify names unchanged",FeynGrav`Simplification`Private`$simplifyOptionNames===acceptedSimplifyOptionNames];
+check["simplify defaults with API-03",Options[CalcFormConverter`FeynGravSimplify]===acceptedSimplifyDefaults];
+check["simplify names with API-03",FeynGrav`Simplification`Private`$simplifyOptionNames===acceptedSimplifyOptionNames];
 check["restricted baseline unchanged",FeynGrav`Simplification`Private`$simplifyRestrictedBaseline===acceptedRestrictedBaseline];
 check["export defaults unchanged",Options[CalcFormConverter`FeynGravFORMExport]===acceptedExportDefaults];
 (* The export validator uses membership only and emits no SupportedOptions

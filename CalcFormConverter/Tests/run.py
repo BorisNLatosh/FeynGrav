@@ -11,7 +11,7 @@ import subprocess
 import tempfile
 import sys
 
-FACADE_PHASES = ('Adapter', 'Loading', 'Standalone', 'Reliability', 'Facade')
+FACADE_PHASES = ('Adapter', 'Loading', 'Standalone', 'Reliability', 'Facade', 'PaVeOutput')
 COMPLETION_KEYS = {'Suite', 'Passed', 'Failed', 'Status'}
 
 
@@ -182,6 +182,10 @@ def main():
                 run_kernel('LoopCoefficientParameters')
                 run_kernel('ScalarMasterReduction')
                 run_kernel('ExportPlanning')
+                run_kernel('ProcessingPlan')
+                run_kernel('CoefficientPolicy')
+                run_kernel('CoefficientArithmetic')
+                run_kernel('IntegralCollection')
                 run_kernel('MasterOutputSharing')
                 run_kernel('MasterRationalCoefficients')
                 run_kernel('PolarisationCoefficients')

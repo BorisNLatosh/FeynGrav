@@ -1,0 +1,112 @@
+* One allowance for the new pre/direct-post collection calls in this job.
+* Exhaustion retains complete coefficients; it never retries or resets the count.
+#$cfcCCWorkUsed=0;
+#$cfcCCWorkLimit=@WORK@;
+#procedure cfcCollectScalar(source)
+#if (termsin(`source') > 0) && (termsin(`source') <= @LIMIT@) && (`$cfcCCWorkUsed' < `$cfcCCWorkLimit')
+#$cfcCCWorkUsed=$cfcCCWorkUsed+1;
+Skip;
+Local cfcCCWork=`source';
+#$cfcCCUnsafe=0;
+if (@UNSAFE@); $cfcCCUnsafe=1; endif;
+ModuleOption maximum,$cfcCCUnsafe;
+.sort
+#if `$cfcCCUnsafe' == 0
+PolyRatFun cfcRat;
+Skip;
+NSkip cfcCCWork;
+@MONOMIALS@
+@RULES@
+.sort
+PolyRatFun;
+Skip;
+NSkip cfcCCWork;
+#$cfcCCNumerator=0;
+#$cfcCCDenominator=1;
+if (match(cfcRat(cfcRNum?$cfcCCNumerator,cfcRDen?$cfcCCDenominator)));
+id cfcRat(?a)=1;
+endif;
+ModuleOption noparallel;
+.sort
+#$cfcCCResidual=cfcCCWork;
+#if ("`$cfcCCResidual'" == "1") || ("`$cfcCCResidual'" == "0")
+* Only a complete rational coefficient (or exact zero) replaces the original.
+* Restore all scalar-product atoms inside the established numerator/denominator
+* representation before recombination; no new public result grammar is used.
+Drop cfcCCWork;
+.sort
+Skip;
+Local cfcCCWork=cfcLRNum($cfcCCNumerator)*cfcLRDen($cfcCCDenominator);
+Argument cfcLRNum,cfcLRDen;
+@RESTORE@
+EndArgument;
+id cfcLRNum(cfcRNum?number_)=cfcRNum;
+id cfcLRDen(cfcRDen?number_)=1/cfcRDen;
+.sort
+Drop `source';
+.sort
+Drop cfcCCWork;
+Local `source'=cfcCCWork;
+.sort
+#else
+Drop cfcCCWork;
+.sort
+#endif
+#else
+Drop cfcCCWork;
+.sort
+#endif
+NSkip;
+.sort
+#endif
+#endprocedure
+
+#procedure cfcCollectBeforeReduction
+* The caller has already proved linearity in cfcTC. The complete ordered key
+* includes denominator powers and tensor labels. Do not canonicalise a family
+* here or reinterpret products of coefficients as a single integral.
+Hide cfcResult;
+.sort
+Local cfcCCKeys=$cfcLRKeys;
+.sort
+#if termsin(cfcCCKeys) <= `$cfcCCWorkLimit'
+Hide cfcCCKeys;
+Local cfcCCSum=0;
+.sort
+Hide cfcCCSum;
+#do cfcCCKey=cfcCCKeys
+Local cfcCCPiece=cfcResult[`cfcCCKey'];
+.sort
+#call cfcCollectScalar(cfcCCPiece)
+Unhide cfcCCSum;
+.sort
+Drop cfcCCSum,cfcCCPiece;
+Local cfcCCNext=cfcCCSum+(`cfcCCKey')*cfcCCPiece;
+.sort
+Drop cfcCCNext;
+Local cfcCCSum=cfcCCNext;
+.sort
+Hide cfcCCSum;
+#enddo
+Unhide cfcResult;
+Drop cfcResult;
+.sort
+Unhide cfcCCSum,cfcCCKeys;
+Drop cfcCCSum,cfcCCKeys;
+Local cfcResult=cfcCCSum;
+.sort
+* Rebuild the dictionary after exact zero removal, before any recurrence runs.
+Bracket cfcTC;
+.sort
+#$cfcLRKeys=0;
+Keep Brackets;
+$cfcLRKeys=$cfcLRKeys+term_;
+Bracket+ cfcTC;
+ModuleOption noparallel;
+.sort
+#else
+Drop cfcCCKeys;
+Unhide cfcResult;
+.sort
+#endif
+#endprocedure

@@ -19,48 +19,94 @@
 $rcMaximumTerms = 1000;
 $rcMaximumVariables = 12;
 
-rcPlan[data_Association] := Module[
-    {entries, scalars, vectors, pairs, inverses, polynomial, integer, rules,
-     names, variables, tag = Unique["rcPlan"]},
-    If[!pgFactorisationQ[data] || $rcMaximumTerms <= 0, Return[<||>]];
-    entries = data["Mapping"]["Entries"];
+(* Shared coefficient policy. The exporter has already validated dimensions,
+   exactness and matrix spaces and expanded supported linear momentum routing.
+   This policy reads encoded data only: it never decodes/evaluates user symbols.
+   Runtime FORM inspection remains authoritative for complete coefficients and
+   shared definitions. Mapping size is only the conservative propagator guard. *)
+coefficientRoles[entries_List, pairPrefix_String] := Module[
+    {scalars, vectors, pairs, pairNames, polarisation, polarisationNames},
     scalars = Association[Cases[entries, e_ /; e["Kind"] === "Scalar" :>
         (e["Expression"][[2]] -> e["Name"])]];
     vectors = Lookup[Select[entries, #["Kind"] === "Vector" &], "Name", {}];
     pairs = Flatten[Table[{vectors[[i]], vectors[[j]]},
         {i, Length[vectors]}, {j, i, Length[vectors]}], 1];
-    names = Table["cfcRX" <> IntegerString[i], {i, Length[pairs]}];
-    variables = Join[Values[scalars], names];
-    If[Length[variables] > $rcMaximumVariables, Return[<||>]];
-    (* Read the already encoded, validated export vocabulary. Symbol contexts
-       are compared as strings; nothing is re-evaluated through ToExpression. *)
-    integer[{"Integer", s_String}] := If[StringStartsQ[s, "-"],
-        -FromDigits[StringDrop[s, 1]], FromDigits[s]];
-    integer[_] := Throw[$Failed, tag];
-    polynomial[e_] := Switch[First[e],
-        "Symbol", Lookup[scalars, e[[2]], Throw[$Failed, tag]],
-        "Integer", e[[2]],
-        "Rational", "(" <> e[[2]] <> "/" <> e[[3]] <> ")",
-        "Plus" | "Times", "(" <> StringRiffle[polynomial /@ Rest[e],
-            If[First[e] === "Plus", "+", "*"]] <> ")",
-        "Power", With[{n = integer[e[[3]]]},
-            If[!Between[n, {0, 32}], Throw[$Failed, tag]];
-            "(" <> polynomial[e[[2]]] <> ")^" <> IntegerString[n]],
-        _, Throw[$Failed, tag]];
-    inverses = Catch[Map[Function[e, Module[{x = e["Expression"], n},
-        If[First[x] =!= "Power", Throw[$Failed, tag]];
-        n = integer[x[[3]]];
-        If[!Between[n, {-8, -1}], Throw[$Failed, tag]];
-        "id " <> e["Name"] <> "=cfcRat(1,(" <> polynomial[x[[2]]] <>
-            ")^" <> IntegerString[-n] <> ");"
-    ]], Select[entries, #["Kind"] === "Abbreviation" &]], tag];
-    (* An opaque radical/function may be algebraically related to other atoms.
-       Until that vocabulary is tested, retain the original path for the job. *)
-    If[inverses === $Failed, Return[<||>]];
-    rules = Join[inverses,
+    pairNames = Table[pairPrefix <> intString[j], {j, Length[pairs]}];
+    polarisation = Lookup[Select[entries, #["Kind"] === "Vector" &&
+        MatchQ[#["Expression"], {"Polarization", ___}] &], "Name", {}];
+    polarisationNames = Pick[pairNames,
+        AnyTrue[#, MemberQ[polarisation, #] &] & /@ pairs];
+    <|"Scalars" -> scalars, "Pairs" -> pairs, "PairNames" -> pairNames,
+      "PolarisationNames" -> polarisationNames,
+      "Variables" -> Join[Values[scalars], pairNames]|>
+];
+
+(* One source for stage allowances. The private legacy controls remain usable
+   by focused tests. These profiles deliberately retain their different domains:
+   propagator grouping cannot use the final master's shared-definition inspector.
+   Limits select optional work; they neither cap memory nor catch runtime errors. *)
+coefficientLimits["Propagator"] := <|"Terms" -> $rcMaximumTerms,
+    "Variables" -> $rcMaximumVariables|>;
+coefficientLimits["Master"] := <|"Terms" -> $rcMasterMaximumTerms,
+    "Variables" -> $rcMaximumVariables, "Degree" -> $rcMasterMaximumDegree|>;
+coefficientLimits["Polarisation"] := <|"Structures" -> $rcPolarisationMaximumStructures,
+    "Terms" -> $rcPolarisationMaximumTerms,
+    "RationalPasses" -> Max[0, $rcPolarisationMaximumRationalPasses]|>;
+coefficientLimits["Factor"] := <|"Terms" -> $rcPolarisationFactorMaximumTerms,
+    "Variables" -> $rcPolarisationFactorMaximumVariables,
+    "Degree" -> $rcPolarisationFactorMaximumDegree|>;
+coefficientLimits["Dimension"] := <|"PreconditionTerms" -> $dcfPreconditionMinimumTerms|>;
+coefficientLimits["Polynomial"] := <|"Power" -> {0,32}, "InversePower" -> {-8,-1}|>;
+
+(* Compile only the existing rational polynomial domain. A supplied scalar
+   dictionary defines that domain: all commuting parameters for the general
+   path, just the selected dimension for the univariate path. Unknown symbols,
+   Pair components, radicals, approximate/complex leaves and opaque functions
+   are ineligible here. Exact complex arithmetic remains with the final FORM
+   inspector/imaginary-unit restoration; do not turn it into a real variable. *)
+coefficientPolynomial[e_, scalars_Association, tag_] := Switch[First[e],
+    "Symbol", Lookup[scalars, e[[2]], Throw[$Failed, tag]],
+    "Integer", e[[2]],
+    "Rational", "(" <> e[[2]] <> "/" <> e[[3]] <> ")",
+    "Plus" | "Times", "(" <> StringRiffle[
+        coefficientPolynomial[#, scalars, tag] & /@ Rest[e],
+        If[First[e] === "Plus", "+", "*"]] <> ")",
+    "Power", With[{n = coefficientInteger[e[[3]], tag]},
+        If[!Between[n, coefficientLimits["Polynomial"]["Power"]], Throw[$Failed, tag]];
+        "(" <> coefficientPolynomial[e[[2]], scalars, tag] <> ")^" <> intString[n]],
+    _, Throw[$Failed, tag]
+];
+coefficientInteger[{"Integer", s_String}, tag_] := integerData[s];
+coefficientInteger[_, tag_] := Throw[$Failed, tag];
+
+(* No successful or failed translation is cached across jobs. Each abbreviation
+   is visited once per domain. $Failed means predictable ineligibility only;
+   FORM errors/aborts are never handled by this selector. *)
+coefficientInverseRules[entries_List, scalars_Association, head_String] :=
+    Map[Function[e, Module[{x = e["Expression"], tag = Unique["coefficient"], n},
+        Catch[
+            If[First[x] =!= "Power", Throw[$Failed, tag]];
+            n = coefficientInteger[x[[3]], tag];
+            If[!Between[n, coefficientLimits["Polynomial"]["InversePower"]], Throw[$Failed, tag]];
+            {e["Name"], "id " <> e["Name"] <> "=" <> head <> "(1,(" <>
+                coefficientPolynomial[x[[2]], scalars, tag] <> ")^" <> intString[-n] <> ");"},
+            tag]
+    ]], Select[entries, #["Kind"] === "Abbreviation" &]];
+
+rcPlan[data_Association, requirePropagators_: True] := Module[
+    {roles, pairs, names, variables, inverses, rules, limits = coefficientLimits["Propagator"]},
+    If[data["Mapping"]["Version"] =!= 1 ||
+        (TrueQ[requirePropagators] && !pgFactorisationQ[data]) || limits["Terms"] <= 0, Return[<||>]];
+    roles = coefficientRoles[data["Mapping"]["Entries"], "cfcRX"];
+    pairs = roles["Pairs"]; names = roles["PairNames"]; variables = roles["Variables"];
+    If[Length[variables] > limits["Variables"], Return[<||>]];
+    inverses = coefficientInverseRules[data["Mapping"]["Entries"], roles["Scalars"], "cfcRat"];
+    (* All abbreviations must belong to this domain. The dimension-only pass
+       instead leaves unrecognised definitions opaque, as before. *)
+    If[MemberQ[inverses, $Failed], Return[<||>]];
+    rules = Join[If[inverses === {}, {}, inverses[[All,2]]],
         MapThread["id " <> StringRiffle[#1, "."] <> "=" <> #2 <> ";" &, {pairs, names}],
-        rcPowerRules[variables, "cfcRat"],
-        {"Multiply cfcRat(1,1);"}];
+        rcPowerRules[variables, "cfcRat"], {"Multiply cfcRat(1,1);"}];
     <|"Declarations" -> "\nSymbols " <> StringRiffle[
             Join[{"cfcRPower", "cfcRNum", "cfcRDen"}, names], ","] <>
             ";\nCFunction cfcRat;\n",
@@ -79,7 +125,7 @@ rcTemplate[name_String] := Module[{text},
 ];
 rcReduction[plan_Association] := If[plan === <||>, "",
     StringReplace[rcTemplate["RationalCoefficients.frm.in"], {
-        "@LIMIT@" -> IntegerString[$rcMaximumTerms], "@RULES@" -> plan["Rules"]}]];
+        "@LIMIT@" -> intString[coefficientLimits["Propagator"]["Terms"]], "@RULES@" -> plan["Rules"]}]];
 rcWrite[plan_Association, path_String, fallback_String] := If[plan === <||>, fallback,
     "#if `$cfcRDone`cfcSlot'' == 1\n" <>
     StringReplace[rcTemplate["RationalCoefficientOutput.frm.in"], {
@@ -95,17 +141,13 @@ rcPowerRules[variables_List, head_String] := Flatten[Map[Function[s, {
 
 $rcMasterMaximumTerms = 1000;
 $rcMasterMaximumDegree = 24;
-rcMasterPlan[entries_List] := Module[{variables, vectors, pairs, names, powers, inspect, polarisation, polNames, polPlan},
-    If[$rcMasterMaximumTerms <= 0, Return[<||>]];
-    variables = Lookup[Select[entries, #["Kind"] === "Scalar" &], "Name", {}];
-    vectors = Lookup[Select[entries, #["Kind"] === "Vector" &], "Name", {}];
-    pairs = Flatten[Table[{vectors[[i]],vectors[[j]]},{i,Length[vectors]},{j,i,Length[vectors]}],1];
-    names = Table["cfcMRX" <> intString[j],{j,Length[pairs]}];
-    polarisation = Lookup[Select[entries, #["Kind"] === "Vector" &&
-        MatchQ[#["Expression"], {"Polarization", ___}] &], "Name", {}];
-    polNames = Pick[names, AnyTrue[#, MemberQ[polarisation, #] &] & /@ pairs];
-    polPlan = rcPolarisationPlan[pairs, names, polNames, Join[variables, names]];
-    variables = Join[variables,names];
+rcMasterPlan[entries_List] := Module[{roles, variables, pairs, names, powers, inspect, polNames, polPlan,
+    limits = coefficientLimits["Master"]},
+    If[limits["Terms"] <= 0, Return[<||>]];
+    roles = coefficientRoles[entries, "cfcMRX"];
+    pairs = roles["Pairs"]; names = roles["PairNames"];
+    polNames = roles["PolarisationNames"]; variables = roles["Variables"];
+    polPlan = rcPolarisationPlan[pairs, names, polNames, variables];
     powers = StringRiffle[rcPowerRules[Append[variables,"cfcMRImag"],"cfcMRat"],"\n"];
     inspect = StringJoin[Map[Function[s,
         "id " <> s <> "^cfcRPower?pos_=" <> s <> "*cfcMRDegree^cfcRPower;\n" <>
@@ -114,8 +156,8 @@ rcMasterPlan[entries_List] := Module[{variables, vectors, pairs, names, powers, 
             If[names === {},"",","<>StringRiffle[names,","]] <> ";\nCFunctions cfcMRat,cfcMRDenProbe;\nTable sparse cfcMRMeta(1);\n" <> Lookup[polPlan, "Declarations", ""],
       "Polarisation" -> polPlan,
       "Procedure" -> StringReplace[rcTemplate["MasterRationalCoefficients.frm.in"], {
-        "@LIMIT@" -> intString[$rcMasterMaximumTerms], "@DEGREE@" -> intString[$rcMasterMaximumDegree],
-        "@VARIABLE_LIMIT@" -> intString[$rcMaximumVariables], "@VARIABLES@" -> StringRiffle[variables,","],
+        "@LIMIT@" -> intString[limits["Terms"]], "@DEGREE@" -> intString[limits["Degree"]],
+        "@VARIABLE_LIMIT@" -> intString[limits["Variables"]], "@VARIABLES@" -> StringRiffle[variables,","],
         "@DOTS@" -> StringRiffle[MapThread["id "<>StringRiffle[#1,"."]<>"^cfcRPower?="<>#2<>"^cfcRPower;"&,{pairs,names}],"\n"],
         "@NATIVE_DEN_INSPECT@" -> If[polPlan === <||>, "", "id denom_(?a)=cfcMRDenProbe(?a);\nArgument cfcMRDenProbe;\nDropCoefficient;\nid i_=1;\n" <>
             StringRiffle[MapThread["id "<>StringRiffle[#1,"."]<>"^cfcRPower?="<>#2<>"^cfcRPower;"&,{pairs,names}],"\n"] <>
@@ -138,18 +180,19 @@ $rcPolarisationFactorMaximumTerms = 250;
 $rcPolarisationFactorMaximumVariables = 8;
 $rcPolarisationFactorMaximumDegree = 12;
 rcPolarisationPlan[pairs_List, names_List, polNames_List, variables_List] := Module[
-    {polPairs, plain, substitutions},
-    If[polNames === {} || $rcPolarisationMaximumStructures <= 0, Return[<||>]];
+    {polPairs, plain, substitutions, limits = coefficientLimits["Polarisation"],
+     factorLimits = coefficientLimits["Factor"]},
+    If[polNames === {} || limits["Structures"] <= 0, Return[<||>]];
     polPairs = Pick[pairs, MemberQ[polNames, #] & /@ names];
     plain = Complement[variables, polNames];
     substitutions = {
         "@POL@" -> StringRiffle[polNames, ","],
-        "@STRUCTURES@" -> intString[$rcPolarisationMaximumStructures],
-        "@WORK_LIMIT@" -> intString[Max[0, $rcPolarisationMaximumRationalPasses]],
-        "@TERMS@" -> intString[$rcPolarisationMaximumTerms],
-        "@FACTOR_TERMS@" -> intString[$rcPolarisationFactorMaximumTerms],
-        "@FACTOR_VARIABLES@" -> intString[$rcPolarisationFactorMaximumVariables],
-        "@FACTOR_DEGREE@" -> intString[$rcPolarisationFactorMaximumDegree],
+        "@STRUCTURES@" -> intString[limits["Structures"]],
+        "@WORK_LIMIT@" -> intString[limits["RationalPasses"]],
+        "@TERMS@" -> intString[limits["Terms"]],
+        "@FACTOR_TERMS@" -> intString[factorLimits["Terms"]],
+        "@FACTOR_VARIABLES@" -> intString[factorLimits["Variables"]],
+        "@FACTOR_DEGREE@" -> intString[factorLimits["Degree"]],
         "@POL_DOTS@" -> StringRiffle[MapThread[
             "id " <> StringRiffle[#1, "."] <> "^cfcRPower?=" <> #2 <> "^cfcRPower;" &,
             {polPairs, polNames}], "\n"],

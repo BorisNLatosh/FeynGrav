@@ -24,7 +24,7 @@
 
 Begin["FeynGrav`Simplification`Private`"];
 
-CalcFormConverter`FeynGravSimplify::usage = "FeynGravSimplify[expr, options] is the unified calculation entry point. Method -> Automatic (the default) and Method -> \"FORM\" select the full CalcFormConverter pipeline; Method -> \"Contractor\" and Method -> \"FORMBenchmark\" select the restricted external backends. No automatic fallback occurs. Wolfram performs validation, representation conversion and reconstruction only. Full-pipeline binary equalities are calculated as lhs - rhs; True and False pass through. Restricted methods accept only exact commuting scalar/Lorentz expressions and no equations. The listed full-pipeline settings are accepted on restricted methods only at their documented baseline; non-default values return a MethodCapability failure. Options: Method -> Automatic, ContractorExecutable -> Automatic, ContractorThreads -> 8, FORMExecutable -> Automatic, FORMThreads -> Automatic, TimeConstraint -> Infinity, KeepFiles -> False, ShowProgress -> False, ShowTiming -> False, WorkingDirectory -> Automatic, TensorDecomposition -> True, ReduceLoopCoefficients -> False, ReduceToScalarMasters -> True, DropScaleless -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True, Dimension -> Automatic, LoopMomenta -> {}. ContractorExecutable and ContractorThreads use the FeynGrav` context in standalone sessions. Failed restricted jobs are retained and reported; full-pipeline failure handling belongs to CalcFormCalculate.";
+CalcFormConverter`FeynGravSimplify::usage = "FeynGravSimplify[expr, options] is the unified calculation entry point. Method -> Automatic (the default) and Method -> \"FORM\" select the full CalcFormConverter pipeline; Method -> \"Contractor\" and Method -> \"FORMBenchmark\" select the restricted external backends. No automatic fallback occurs. Wolfram performs validation, representation conversion and reconstruction only. Full-pipeline binary equalities are calculated as lhs - rhs; True and False pass through. Restricted methods accept only exact commuting scalar/Lorentz expressions and no equations. The listed full-pipeline settings are accepted on restricted methods only at their documented baseline; non-default values return a MethodCapability failure. Options: Method -> Automatic, ContractorExecutable -> Automatic, ContractorThreads -> 8, FORMExecutable -> Automatic, FORMThreads -> Automatic, TimeConstraint -> Infinity, KeepFiles -> False, ShowProgress -> False, ShowTiming -> False, WorkingDirectory -> Automatic, TensorDecomposition -> True, ReduceLoopCoefficients -> False, ReduceToScalarMasters -> True, DropScaleless -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True, Dimension -> Automatic, LoopMomenta -> {}, PaVeToABCD -> True. PaVeToABCD converts supported final PaVe functions to named functions; False preserves the pipeline output. Both Boolean values are no-ops on restricted methods. With ShowTiming -> True, the full-pipeline total includes final conversion. ContractorExecutable and ContractorThreads use the FeynGrav` context in standalone sessions. Failed restricted jobs are retained and reported; full-pipeline failure handling belongs to CalcFormCalculate.";
 CalcFormConverter`FeynGravFORMExport::usage = "FeynGravFORMExport[expr, filename, options] is the preferred export wrapper for CalcFormExport, with its own independent option store starting from the same documented defaults. It forwards the resolved effective values of every supported option to CalcFormExport; unknown option names (including names added with SetOptions) return an InvalidOption failure without touching files. Options: TensorDecomposition -> True, ReduceLoopCoefficients -> False, ReduceToScalarMasters -> True, DropScaleless -> False, DiracAlgebra -> Automatic, ColourAlgebra -> True, Dimension -> Automatic, LoopMomenta -> {}, OverwriteTarget -> False.";
 CalcFormConverter`FeynGravFORMImport::usage = "FeynGravFORMImport[resultFile, mappingFile] is the preferred wrapper for CalcFormImport. It takes exactly the two file argument strings and no options; any additional argument returns an InvalidArguments failure.";
 CalcFormConverter`FeynGravFORMCheck::usage = "FeynGravFORMCheck[options] is the preferred wrapper for CalcFormCheck with its own independent option store. It probes FORM on demand and returns availability, version and diagnostics. Options: FORMExecutable -> Automatic, FORMThreads -> Automatic, TimeConstraint -> 10.";
@@ -45,7 +45,7 @@ $simplifyOptionDefaults = {
     CalcFormConverter`TensorDecomposition -> True, CalcFormConverter`ReduceLoopCoefficients -> False,
     CalcFormConverter`ReduceToScalarMasters -> True, FeynCalc`DropScaleless -> False,
     CalcFormConverter`DiracAlgebra -> Automatic, CalcFormConverter`ColourAlgebra -> True,
-    FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}
+    FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}, FeynCalc`PaVeToABCD -> True
 };
 $simplifyOptionNames = First /@ $simplifyOptionDefaults;
 (* One owner assigns the public store on first package loading; later Needs must
@@ -114,6 +114,29 @@ executeRestrictedBackend[expression_, method_String, adapterRules_List,
         ]]
 ];
 
+(* Full-pipeline completion belongs to the facade only for this final conversion.
+   Raw import/export and CalcFormCalculate retain their original representation.
+   A reported conversion failure is not silently replaced with unconverted output.
+   The existing full-pipeline abort convention returns an Aborted Failure. *)
+executeFullBackend[expression_, forward_List, convert_, timing_, startTime_] := Module[
+    {result, status = "Aborted"},
+    WithCleanup[Null,
+        result = CalcFormConverter`CalcFormCalculate[expression, Sequence @@ forward];
+        If[convert && !FailureQ[result] && !BooleanQ[result] && !FreeQ[result, _FeynCalc`PaVe],
+            result = CheckAbort[
+                Check[FeynCalc`PaVeToABCD[result],
+                    failure["PaVeConversionFailed", "Final PaVe conversion emitted a diagnostic.",
+                        <|"Stage" -> "PaVeToABCD"|>]],
+                failure["Aborted", "Final PaVe conversion was aborted.",
+                    <|"Stage" -> "PaVeToABCD"|>]]];
+        status = Which[MatchQ[result, Failure["Aborted", _Association]], "Aborted",
+            FailureQ[result], "Failed", True, "Complete"];
+        result,
+        If[TrueQ[timing], Print["FeynGravSimplify total (FORM, ", status, "): ",
+            AbsoluteTime[] - startTime, " s elapsed (wall clock)."]]
+    ]
+];
+
 (* Public coordinator: validate names, select the path once, resolve only the
    values that path uses (each exactly once), refuse non-baseline restricted
    requests before any process starts, and hand the restricted call to
@@ -122,13 +145,15 @@ executeRestrictedBackend[expression_, method_String, adapterRules_List,
 CalcFormConverter`FeynGravSimplify[expression_, opts : OptionsPattern[]] := Module[
     {method, restricted, bad, forward, started = AbsoluteTime[],
      resolvedSettings, refusals, timeConstraint, keepFiles, progressSetting,
-     timingSetting, backendRules, adapterRules},
+     timingSetting, backendRules, adapterRules, convert},
     bad = validateOptionNames[CalcFormConverter`FeynGravSimplify, {opts}, $simplifyOptionNames, True];
     If[bad =!= Null, Return[bad]];
     method = OptionValue[System`Method];
     If[!MemberQ[{Automatic, "FORM", "FORMBenchmark", "Contractor"}, method],
         Return[failure["UnsupportedMethod",
             "Method must be Automatic, \"FORM\", \"FORMBenchmark\" or \"Contractor\"."]]];
+    convert = OptionValue[FeynCalc`PaVeToABCD];
+    If[!BooleanQ[convert], Return[failure["InvalidOption", "PaVeToABCD must be True or False."]]];
     restricted = MemberQ[{"FORMBenchmark", "Contractor"}, method];
     If[!restricted,
         (* Full pipeline: CalcFormCalculate owns every remaining validation. *)
@@ -148,7 +173,8 @@ CalcFormConverter`FeynGravSimplify[expression_, opts : OptionsPattern[]] := Modu
             CalcFormConverter`ShowTiming -> OptionValue[CalcFormConverter`ShowTiming],
             CalcFormConverter`ShowProgress -> OptionValue[CalcFormConverter`ShowProgress],
             CalcFormConverter`FORMThreads -> OptionValue[CalcFormConverter`FORMThreads]};
-        Return[CalcFormConverter`CalcFormCalculate[expression, Sequence @@ forward]]];
+        Return[executeFullBackend[expression, forward, convert,
+            CalcFormConverter`ShowTiming /. forward, started]]];
     (* Restricted methods: resolve the capability settings once and compare each
        with its documented baseline; the baseline list is the single source of
        truth for the accepted restricted configuration. *)
@@ -284,7 +310,7 @@ facadeReadyQ[] := Module[{required},
         formConfiguration, formProgram, formDecode, formPreparation,
         runJob, reportProgress, simplify,
         validateOptionNames, restrictedCapabilityRefusals,
-        executeRestrictedBackend,
+        executeRestrictedBackend, executeFullBackend,
         CalcFormConverter`FeynGravSimplify, CalcFormConverter`FeynGravFORMExport,
         CalcFormConverter`FeynGravFORMCheck, CalcFormConverter`FeynGravFORMInstall,
         CalcFormConverter`FeynGravFORMImport};

@@ -300,7 +300,10 @@ not part of the published 4.1.0 interface.
   a new option symbol: `Automatic` (default) and `"FORM"` dispatch to the full
   converter pipeline (`CalcFormCalculate` semantics, no `Method` forwarding);
   `"Contractor"` and `"FORMBenchmark"` dispatch to the restricted external
-  adapter. There is no automatic backend fallback.
+  adapter. There is no automatic backend fallback. `PaVeToABCD -> True` converts
+  supported final PaVe functions to named functions; `False` preserves prior
+  output. Both settings are no-ops on restricted methods. See the
+  [conversion contract](../CalcFormConverter/UserGuide.md#final-pave-conversion-feyngravsimplify-only).
 - `FeynGravFORMExport[expr, file, opts]`, `FeynGravFORMImport[resultFile, mappingFile]`,
   `FeynGravFORMCheck[opts]` and `FeynGravFORMInstall[opts]` are wrappers over
   the corresponding `CalcForm*` commands, each with its own option store and

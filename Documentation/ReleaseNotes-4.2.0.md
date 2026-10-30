@@ -23,6 +23,10 @@ release-validation run.
   `Method -> Automatic` and `Method -> "FORM"` use the converter;
   `"Contractor"` and `"FORMBenchmark"` select explicit restricted methods.
   Unsupported settings fail rather than silently selecting another backend.
+- `FeynGravSimplify` now defaults to `PaVeToABCD -> True`, converting supported
+  final coefficients to named integral functions. `False` preserves the existing
+  output. Raw converter/import/export behaviour is unchanged; unsupported
+  coefficients remain. See the [API-03 report](Verification/API03PaVeOutput-2026-10-30.md).
 - `FeynGravFORMExport`, `FeynGravFORMImport`, `FeynGravFORMCheck` and
   `FeynGravFORMInstall` wrap the existing converter commands with independent
   option stores. `CalcFormCalculate` and the other `CalcForm*` names remain

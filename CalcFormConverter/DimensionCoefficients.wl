@@ -17,33 +17,14 @@
 $dcfPreconditionMinimumTerms = 1000;
 
 dcfPlan[data_Association, requirePropagators_: True] := Module[
-    {dim = data["Mapping"]["Dimension"], entries, dimension, polynomial,
-     inverses, names, integer, tag = Unique["dimensionPolynomial"]},
+    {dim = data["Mapping"]["Dimension"], entries, dimension, inverses, names},
     If[(TrueQ[requirePropagators] && !pgFactorisationQ[data]) || !MatchQ[dim, {"Symbol", _String}], Return[<||>]];
     entries = data["Mapping"]["Entries"];
     names = Lookup[Select[entries, MemberQ[{"Scalar","Abbreviation"}, #["Kind"]] && #["Expression"] === dim &], "Name", {}];
     If[Length[names] =!= 1, Return[<||>]];
     dimension = First[names];
-    integer[{"Integer", s_String}] := integerData[s];
-    integer[_] := Throw[$Failed, tag];
-    polynomial[e_] := Switch[First[e],
-        "Symbol", If[e === dim, dimension, Throw[$Failed, tag]],
-        "Integer", e[[2]],
-        "Rational", "(" <> e[[2]] <> "/" <> e[[3]] <> ")",
-        "Plus" | "Times", "(" <> StringRiffle[polynomial /@ Rest[e],
-            If[First[e] === "Plus", "+", "*"]] <> ")",
-        "Power", With[{n = integer[e[[3]]]},
-            If[!Between[n, {0, 32}], Throw[$Failed, tag]];
-            "(" <> polynomial[e[[2]]] <> ")^" <> intString[n]],
-        _, Throw[$Failed, tag]];
-    inverses = Map[Function[e, Catch[Module[{x = e["Expression"], n},
-        If[First[x] =!= "Power", Throw[$Failed, tag]];
-        n = integer[x[[3]]];
-        If[!Between[n, {-8, -1}], Throw[$Failed, tag]];
-        {e["Name"], "id " <> e["Name"] <> "=cfcDimRat(1,(" <>
-            polynomial[x[[2]]] <> ")^" <> intString[-n] <> ");"}
-    ], tag]], Select[entries, #["Kind"] === "Abbreviation" &]];
-    inverses = DeleteCases[inverses, $Failed];
+    inverses = DeleteCases[coefficientInverseRules[entries,
+        <|dim[[2]] -> dimension|>, "cfcDimRat"], $Failed];
     (* Other abbreviations stay opaque. Treating them as independent scalar
        factors preserves identities, even if their hidden definitions involve D. *)
     <|"Declarations" -> "\nSymbols cfcDimPower,cfcDimNum,cfcDimDen;\nCFunction cfcDimRat;\n",
@@ -79,7 +60,7 @@ dcfWrite[plan_Association, path_String, fallback_String] := If[plan === <||>, fa
 dcfPrecondition[plan_Association] := If[plan === <||>, "",
     "\n* Compress dimension dependence before general numerator cancellation.\n.sort\n" <>
     "#$cfcDimInputTerms=termsin_(cfcResult);\n" <>
-    "#if `$cfcDimInputTerms' > " <> intString[$dcfPreconditionMinimumTerms] <> "\n" <>
+    "#if `$cfcDimInputTerms' > " <> intString[coefficientLimits["Dimension"]["PreconditionTerms"]] <> "\n" <>
     "PolyRatFun cfcDimRat;\n" <> plan["Rules"] <>
     "\n.sort\nPolyRatFun;\n" <>
     "id cfcDimRat(cfcDimNum?number_,cfcDimDen?number_)=cfcDimNum/cfcDimDen;\n.sort\n" <>

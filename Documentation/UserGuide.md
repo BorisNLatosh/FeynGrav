@@ -176,6 +176,12 @@ methods accept only the fixed capability baseline. These commands are additions;
 `CalcFormCalculate` and all `CalcForm*` commands above remain the published
 interface and are unchanged.
 
+`FeynGravSimplify` defaults to `PaVeToABCD -> True`: supported final coefficients
+become named integral functions such as `A0`, `B0`, `C0` and `D0`. Use `False`
+to preserve the prior PaVe output. Unsupported coefficients remain. This option
+is independent of tensor/master reduction and is a Boolean no-op on restricted
+methods. See the [full contract](../CalcFormConverter/UserGuide.md#final-pave-conversion-feyngravsimplify-only).
+
 ## Examples
 
 The [examples guide](../Examples/README.md) lists the numbered notebooks in their suggested reading order, with requirements and scope. Run each notebook in a fresh kernel and evaluate its setup cells before its calculation cells.

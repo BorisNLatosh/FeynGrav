@@ -268,14 +268,56 @@ call options and stored options before any process work; a non-documented
 key present in a directly modified store also produces `InvalidOption`.
 `FeynGravFORMImport` accepts exactly two arguments (`InvalidArguments`).
 
-Full-pipeline option semantics, failures and file behaviour are those of
-[CalcFormCalculate](#automated-workflow). Restricted-method semantics follow
+Except for final PaVe conversion described below, full-pipeline option semantics,
+failures and file behaviour are those of [CalcFormCalculate](#automated-workflow). Restricted-method semantics follow
 the adapter description in `FeynGravSimplify/README.md`, which also states the
 restricted input domain and the shared-native-IO cancellation limitation. Run
 the focused checks in `FeynGravSimplify/Tests/` from fresh kernels; see
 [the development note](../Documentation/ReleaseNotes-API01-Development.md) for
 the loader guard and the status of these commands relative to the published
 interface.
+
+### Final PaVe conversion (`FeynGravSimplify` only)
+
+`PaVeToABCD -> True` is the default. After the full FORM pipeline succeeds,
+the facade calls FeynCalc's `PaVeToABCD` once on results containing `PaVe`.
+Supported coefficients become `A0`, `A00`, `B0`, `B1`, `B00`, `B11`, `C0` or
+`D0`; unsupported PaVe coefficients and formal `LoopTensorCoefficient` objects
+remain. Set `PaVeToABCD -> False` to return the existing pipeline representation
+without this conversion:
+
+```mathematica
+FeynGravSimplify[expr, LoopMomenta -> {l}]
+FeynGravSimplify[expr, LoopMomenta -> {l}, PaVeToABCD -> False]
+SetOptions[FeynGravSimplify, PaVeToABCD -> False];
+```
+
+This uses the existing `FeynCalc` context symbol and does not change global
+`PaVeAutoOrder` or `PaVeAutoReduce` settings. It is independent of
+`TensorDecomposition` and `ReduceToScalarMasters`: named tensor coefficients
+need not be scalar masters. Named functions can apply FeynCalc's evaluation
+rules, so conversion is not merely display formatting and does not promise
+smaller output. It introduces no new analytic integral evaluator. Supported
+named scalar input still round-trips; named tensor output does not automatically
+extend the converter's accepted input vocabulary.
+
+`CalcFormCalculate`, standalone export/import and the `FeynGravFORM*` wrappers
+retain their existing output and option stores. Both Boolean settings are valid
+no-ops on restricted methods, whose input domain is unchanged; other values
+return `InvalidOption`. Boolean and Failure results pass through unchanged.
+Existing partial-reduction diagnostics are retained. A diagnostic during final
+conversion returns `Failure["PaVeConversionFailed", ...]`; a conversion abort
+returns `Failure["Aborted", ...]`, both identifying the conversion stage. Since
+pipeline cleanup has already occurred, conversion failure does not guarantee
+retained job files; request `KeepFiles -> True` beforehand if needed.
+
+With `ShowTiming -> True`, the facade also prints a total wall time including
+pipeline execution, cleanup and final conversion. The existing FORM execution
+timing and progress belong to the underlying pipeline; its `Complete` progress
+message precedes this final conversion. `TimeConstraint` remains a process
+execution limit, not a new limit on final Wolfram conversion.
+
+See the [focused verification report](../Documentation/Verification/API03PaVeOutput-2026-10-30.md).
 
 ## One-loop tensor decomposition
 
@@ -988,3 +1030,25 @@ The retained three-box public calls completed in 25.3–28.6 seconds with exactl
 the reference result, 17 scalar masters and 4,355,957 output bytes. These timings
 are workload-specific. See the [PERF-04 verification report](../Documentation/Verification/PERF04-2026-10-25.md)
 for full timing boundaries, the memory investigation and remaining QED limits.
+
+## Coefficient processing and its limits
+
+The FORM paths share a mapping-driven coefficient policy for eligible commuting
+scalar content. Existing tensor/matrix protections, dimension-only processing,
+bounded rational arithmetic and conservative fallback remain in force. The
+policy introduces no on-shell assumptions, numerical rationalisation or new
+integration rules. A successful calculation need not be maximally simplified.
+The [policy description](CoefficientPolicy.md) distinguishes current processing
+points from the remaining PERF-05 collection/recurrence work. Its focused checks
+do not establish a new full-workload performance result.
+
+### Collection around one-loop reduction
+
+Eligible complete coefficients are now combined before runtime repeated-power or
+scalar-master reduction, so an exact-zero weight can remove an integral from the
+reduction dictionary. This follows tensor decomposition; loop numerators keep
+their integration scope. Complete coefficients are collected again after
+reduction, including the smaller direct-output path. Products of integrals,
+protected algebra and oversized/unsupported coefficients retain conservative
+handling. This does not guarantee complete simplification or faster execution.
+See the [collection contract](IntegralCollection.md) and [focused verification](../Documentation/Verification/PERF05Collection-2026-10-30.md).

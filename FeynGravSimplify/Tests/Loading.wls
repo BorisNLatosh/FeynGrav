@@ -44,7 +44,7 @@ check["simplify store",Options[CalcFormConverter`FeynGravSimplify]==={
     CalcFormConverter`TensorDecomposition -> True, CalcFormConverter`ReduceLoopCoefficients -> False,
     CalcFormConverter`ReduceToScalarMasters -> True, FeynCalc`DropScaleless -> False,
     CalcFormConverter`DiracAlgebra -> Automatic, CalcFormConverter`ColourAlgebra -> True,
-    FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}}];
+    FeynCalc`Dimension -> Automatic, FeynCalc`LoopMomenta -> {}, FeynCalc`PaVeToABCD -> True}];
 check["export wrapper store",Options[CalcFormConverter`FeynGravFORMExport]==={
     CalcFormConverter`TensorDecomposition -> True, CalcFormConverter`ReduceLoopCoefficients -> False,
     CalcFormConverter`ReduceToScalarMasters -> True, FeynCalc`DropScaleless -> False,

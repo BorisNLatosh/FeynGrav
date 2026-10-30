@@ -116,6 +116,37 @@ lrDirectPreamble[plan_, path_] := If[!TrueQ[Lookup[plan, "SharedBlocks", False]]
     "#write <" <> path <> "> \"CFC_SHARED 0\"\n" <>
     "#write <" <> path <> "> \"CFC_BODY\"\n"];
 
+(* Collect complete external multipliers before key enumeration/reduction and
+   on the direct linear-output path afterwards. Existing shared output owns its
+   post-reduction processing. Tensor decomposition has already removed the loop
+   momentum from these coefficients; no integrand factor is pulled out here.
+   A private switch supplies matched regression references, not a public option. *)
+$lrCollectCoefficients = True;
+lrCoefficientCollectionPlan[mapping_Association] := Module[{plan, indices, guard, monomials, filtered},
+    If[!TrueQ[$lrCollectCoefficients], Return[<||>]];
+    monomials = lrMonomialDefinitions[mapping["Entries"]];
+    (* Generated recurrence weights include Laurent monomials, not just inverse
+       polynomials. The established monomial reader exposes them without sums;
+       only the remaining abbreviations need the stricter rational reader. *)
+    filtered = Join[mapping, <|"Entries" -> Select[mapping["Entries"],
+        !MemberQ[First /@ monomials, #["Name"]] &]|>];
+    plan = rcPlan[<|"Mapping" -> tdAlgebraMapping[filtered]|>, False];
+    If[plan === <||>, Return[<||>]];
+    indices = Lookup[Select[mapping["Entries"], #["Kind"] === "Index" &], "Name", {}];
+    guard = "occurs(i_" <> If[indices === {}, "", "," <> StringRiffle[indices, ","]] <>
+        ") || match(cfcDimRat(?a)) || match(cfcLRNum(?a)) || match(cfcLRDen(?a))" <>
+        " || match(cfA0(?a)) || match(cfB0(?a)) || match(cfC0(?a)) || match(cfD0(?a))" <>
+        If[Length[indices] < 2, "", " || match(d_(" <> indices[[1]] <> "?," <> indices[[2]] <> "?))"];
+    <|"Declarations" -> plan["Declarations"] <> StringReplace[
+        rcTemplate["CoefficientCollection.frm.in"], {
+            "@LIMIT@" -> intString[coefficientLimits["Propagator"]["Terms"]],
+            "@WORK@" -> intString[coefficientLimits["Polarisation"]["RationalPasses"]],
+            "@UNSAFE@" -> guard, "@MONOMIALS@" -> lrMonomialRules[mapping["Entries"]],
+            "@RULES@" -> plan["Rules"], "@RESTORE@" -> plan["Restore"]}],
+      "Before" -> "#call cfcCollectBeforeReduction\n",
+      "After" -> "#call cfcCollectScalar(cfcLRPiece)\n"|>
+];
+
 lrIsolatedProcessing[] := StringJoin[
     "\n* Isolate the coefficient dictionary before running the recurrence.\n",
     ".sort\nBracket cfcTC;\n.sort\n",
@@ -124,6 +155,7 @@ lrIsolatedProcessing[] := StringJoin[
     "if (count(cfcTC,1)>1); $cfcLRNonlinear=1; endif;\n",
     "Bracket+ cfcTC;\nModuleOption noparallel;\n.sort\n",
     "#if `$cfcLRNonlinear' == 0\n",
+    Lookup[Lookup[$lrCollectionPlan,"CoefficientCollection",<||>],"Before",""],
     lrSharedPreparation[$lrCollectionPlan],
     "Hide cfcResult;\n.sort\nLocal cfcLRWork=$cfcLRKeys;\n.sort\n",
     If[TrueQ[$smEnabled], "Skip cfcLRWork;\nLocal cfcMSKeys=cfcLRWork;\nif (count(cfcTC,1)==0); Discard; endif;\n.sort\n#$cfcMSRequested=termsin_(cfcMSKeys);\n#write \"CFC_MASTER_REQUESTED %$\",$cfcMSRequested\nDrop cfcMSKeys;\n.sort\nNSkip;\n", ""],
@@ -152,6 +184,7 @@ lrOutput[data_Association,path_String] := Module[{plan=data["LoopCollectionPlan"
         "#do cfcLRFinalKey=cfcLRFinalKeys\nLocal cfcLRKeyValue=`cfcLRFinalKey';\nLocal cfcLRPiece=cfcLRWork[`cfcLRFinalKey'];\n",
         "id cfcLRKey()=cfcResult[1];\nid cfcLRKey(?a)=cfcResult[cfcTC(?a)];\n",
         plan["MonomialRules"],".sort\n",
+        Lookup[Lookup[plan,"CoefficientCollection",<||>],"After",""],
         If[plan["Dimension"]===<||>,"","PolyRatFun cfcDimRat;\nSkip cfcLRKeyValue;\n"<>plan["Dimension"]["Rules"]<>"\n.sort\nPolyRatFun;\nNSkip;\n"],
         "Skip cfcLRKeyValue;\n",den["Rules"],den["Bracket"],".sort\nNSkip;\n",
         "#write <",path,"> \"+(%E)*(\",cfcLRKeyValue\n#write <",path,"> \"%E\",cfcLRPiece\n#write <",path,"> \")\"\n",
@@ -164,7 +197,7 @@ lrOutput[data_Association,path_String] := Module[{plan=data["LoopCollectionPlan"
 (* Expand only mapped Laurent monomials: this joins native mass/momentum
    factors to identical ones introduced by reduction, without distributing
    sums or exposing general inverse polynomials. *)
-lrMonomialRules[entries_] := Module[{scalars,vectors,read,integer,rules,tag=Unique["lrMonomial"]},
+lrMonomialDefinitions[entries_] := Module[{scalars,vectors,read,integer,rules,tag=Unique["lrMonomial"]},
     scalars=Association[(#["Expression"][[2]]->#["Name"]&) /@
         Select[entries,#["Kind"]==="Scalar"&]];
     vectors=Association[(With[{v=#["Expression"]},HoldComplete[v]]->#["Name"]&) /@
@@ -179,10 +212,12 @@ lrMonomialRules[entries_] := Module[{scalars,vectors,read,integer,rules,tag=Uniq
             "("<>StringRiffle[(With[{v=#[[2]]},Lookup[vectors,HoldComplete[v],Throw[$Failed,tag]]]&) /@ Rest[e],"."]<>")",
         _,Throw[$Failed,tag]];
     rules=Map[Function[e,With[{body=Catch[read[e["Expression"]],tag]},
-        If[body===$Failed,"","id "<>e["Name"]<>"="<>body<>";\n"]]],
+        If[body===$Failed,Nothing,{e["Name"],body}]]],
         Select[entries,#["Kind"]==="Abbreviation"&]];
-    StringJoin[rules]
+    rules
 ];
+lrMonomialRules[entries_] := StringJoin[("id "<>#[[1]]<>"="<>#[[2]]<>";\n" &) /@
+    lrMonomialDefinitions[entries]];
 
 (* ::Section:: *)
 (* Canonical final coefficient identities *)
@@ -422,13 +457,14 @@ lrPrepare[data_Association, enabled_, drop_] := Module[
     plan["Entries"]=denominatorPlan["Entries"];
     collection=<|"Dimension"->dcfPlan[<|"Mapping"->Join[mapping,<|"Entries"->plan["Entries"]|>]|>,False],"CanonicalRules"->(lrCanonicalRules[rows,decode[mapping["Dimension"]],drop,supports]<>If[TrueQ[$smEnabled],smCanonicalRules[rows,decode[mapping["Dimension"]],supports],""]),"MonomialRules"->lrMonomialRules[plan["Entries"]],"Denominators"->denominatorPlan,"SharedBlocks"->(tdAlgebraMapping[mapping]["Version"]===1)|>;
     collection["Rational"] = If[TrueQ[collection["SharedBlocks"]], rcMasterPlan[plan["Entries"]], <||>];
+    collection["CoefficientCollection"] = lrCoefficientCollectionPlan[Join[mapping,<|"Entries"->plan["Entries"]|>]];
     plan["Processing"]=Block[{$lrCollectionPlan=collection},lrIsolatedProcessing[]];
     mapping=Join[mapping,<|"Entries"->plan["Entries"],"LoopCoefficientReduction"->
         <|"Method"->"PartialFractionsAndFixedDimensionIBP","CoefficientBlocks"->True,"DenominatorGroups"->True,"IncrementalSharedDefinitions"->collection["SharedBlocks"],"SharedCoefficientBlocks"->collection["SharedBlocks"],"MaximumDistinctChords"->$lrMaximumChords,
           "Invariants"->lrInvariantSnapshot[rows,decode[mapping["Dimension"]]],
           "SingularSubfamilies"->plan["SingularSubfamilies"]|>|>];
     Join[result,<|"Mapping"->mapping,
-        "TensorDeclarations"->result["TensorDeclarations"]<>plan["Declarations"]<>collection["Denominators"]["Declarations"]<>Lookup[collection["Dimension"],"Declarations",""]<>Lookup[collection["Rational"],"Declarations",""]<>
+        "TensorDeclarations"->result["TensorDeclarations"]<>plan["Declarations"]<>collection["Denominators"]["Declarations"]<>Lookup[collection["Dimension"],"Declarations",""]<>Lookup[collection["Rational"],"Declarations",""]<>Lookup[collection["CoefficientCollection"],"Declarations",""]<>
             If[collection["SharedBlocks"],"\nCFunctions cfcShared,cfcSharedPart,cfcShare;\n", ""],
         "LoopCollectionPlan"->collection,"ScalarMasterPlan"->Lookup[plan,"MasterPlan",<||>],
         "LoopReductionProcessing"->plan["Processing"]|>]

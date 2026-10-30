@@ -4,12 +4,19 @@
 directory, planned for [FeynGrav 4.2.0](../Documentation/ReleaseNotes-4.2.0.md)
 (currently unreleased). `Method -> Automatic` (the default) and
 `Method -> "FORM"` resolve the call through the full `CalcFormConverter`
-pipeline with `CalcFormCalculate` semantics: resolved converter options are
+pipeline with `CalcFormCalculate` semantics followed by optional final PaVe
+conversion: resolved converter options are
 forwarded as ordinary rules and no `Method` option reaches the pipeline.
 `Method -> "Contractor"` and `Method -> "FORMBenchmark"` select the restricted
 external adapter documented on this page, whose FORM variant is described in
 [FORM.md](FORM.md). `CalcFormCalculate` remains independent and unchanged;
 there is no automatic backend fallback.
+
+The full pipeline defaults to `PaVeToABCD -> True`, returning supported named
+integral functions. `False` preserves the existing pipeline output. Both settings
+are no-ops for restricted methods. See the [conversion contract and timing/failure
+behaviour](../CalcFormConverter/UserGuide.md#final-pave-conversion-feyngravsimplify-only)
+and [bounded verification](../Documentation/Verification/API03PaVeOutput-2026-10-30.md).
 
 This README primarily documents the **restricted adapter** itself
 (`Contractor` and `FORMBenchmark` methods): its input domain, options, process
@@ -84,6 +91,7 @@ expression does not assert that it is in a unique or maximally simplified form.
 
 | Option | Default | Meaning |
 | --- | --- | --- |
+| `PaVeToABCD` | `True` | Final conversion of supported PaVe functions on the full pipeline; False preserves prior output. Boolean no-op on restricted methods. |
 | `Method` | `Automatic` | Full-pipeline dispatch through `CalcFormConverter` (`Automatic` or `"FORM"`); `"Contractor"` and `"FORMBenchmark"` select the restricted adapter methods. No fallback. |
 | `ContractorExecutable` | `Automatic` | Contractor method only. Prefer sibling `contractor/bin/contractor`, then search the kernel PATH; an explicit path/name never falls back. Inert on full-pipeline and FORM methods. |
 | `ContractorThreads` | `8` | Contractor method only: number of parallel contraction workers, passed as `-threads n`. `Automatic` leaves Contractor's default unchanged. This is a worker count, not a total CPU cap. Inert otherwise. |

@@ -356,9 +356,51 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
         If[hasColourFormat, AssociateTo[payload, caMetadata[entries]]];
         (*Single return value consumed by rendering and file writing: the dimension's FORM name, the body expression text, the remaining multiplication stages, the #define macros, the hoisted stage preparations, and the mapping payload.*)
         <|"DimensionName" -> dimensionName, "Body" -> body, "Multiplications" -> multiplications,"Factors" -> macros, "Preparations" -> preparations, "SymmetryLinks" -> symmetryLinks, "Mapping" -> payload, "CancellationData" -> cancellationData,
-          "DenominatorSupports" -> If[Length[loops] === 1, tdDenominatorSupports[expr, denominator], Automatic]|>
+          "DenominatorSupports" -> If[Length[loops] === 1, tdDenominatorSupports[expr, denominator], Automatic],
+          "HasNamedIntegralFunctions" -> !FreeQ[expr, _A0 | _B0 | _C0 | _D0]|>
    ]];
 
+
+(* Private processing contract. This is job-local planning data, never part of
+   the persisted mapping. A declared measure applies to the whole expression,
+   including constants and already represented integral factors. Presence flags
+   are not permission to split a mixed expression into different measures. *)
+processingPlan[input_Association, requested_Association, prepared_Association] := Module[
+    {mapping = input["Mapping"], selected = prepared["Mapping"], kinds, represented},
+    kinds = Lookup[mapping["Entries"], "Kind", {}];
+    represented = MemberQ[kinds, "IntegralCoefficient"] || TrueQ[input["HasNamedIntegralFunctions"]];
+    <|"InputCase" -> Which[mapping["LoopMomenta"] =!= {}, "DeclaredIntegrand",
+          represented, "RepresentedIntegrals", True, "NoDeclaredIntegration"],
+      "IntegrationScope" -> If[mapping["LoopMomenta"] === {}, "None", "WholeExpression"],
+      "LoopMomenta" -> mapping["LoopMomenta"], "Dimension" -> mapping["Dimension"],
+      "HasPropagators" -> MemberQ[kinds, "Denominator"],
+      "HasIntegralCoefficients" -> MemberQ[kinds, "IntegralCoefficient"],
+      "HasNamedIntegralFunctions" -> input["HasNamedIntegralFunctions"],
+      "InputAlgebraVersion" -> mapping["Version"],
+      "Requested" -> requested,
+      "Selected" -> <|"TensorDecomposition" -> (mapping["LoopMomenta"] =!= {} && KeyExistsQ[selected, "TensorDecomposition"]),
+          "LoopCoefficientReduction" -> KeyExistsQ[selected, "LoopCoefficientReduction"],
+          "ScalarMasterReduction" -> KeyExistsQ[selected, "ScalarMasterReduction"]|>,
+      "CoefficientPolicy" -> "SharedScalarPolicy",
+      "RevisitPolicy" -> "ExistingPassesOnly"|>
+];
+
+(* Hold option expressions until the same point as the previous nested call:
+   tensor validation precedes evaluation of reduction options. DropScaleless
+   is intentionally read at both original sites (including delayed options).
+   Existing preparers own capability checks, warnings and stopping decisions;
+   selected stages do not promise complete reduction of exceptional families. *)
+SetAttributes[prepareProcessing, HoldAll];
+prepareProcessing[input_, tensor_, tensorDrop_, masters_, powers_, reductionDrop_, dimension_] := Module[
+    {data = input, td = tensor, drop = tensorDrop, prepared, reduction, requested},
+    prepared = tdPrepare[data, td, drop];
+    reduction = {masters, powers, reductionDrop, dimension};
+    prepared = smPrepare[prepared, Sequence @@ reduction];
+    requested = <|"TensorDecomposition" -> td, "TensorDropScaleless" -> drop,
+        "ReduceToScalarMasters" -> reduction[[1]], "ReduceLoopCoefficients" -> reduction[[2]],
+        "ReductionDropScaleless" -> reduction[[3]], "Dimension" -> reduction[[4]]|>;
+    Join[prepared, <|"ProcessingPlan" -> processingPlan[data, requested, prepared]|>]
+];
 
 (* ::Subsection:: *)
 (*Render the FORM program and mapping*)
@@ -763,7 +805,7 @@ CalcFormConverter`CalcFormExport[expression_, file_String,
       OptionValue[FeynCalc`LoopMomenta], OptionValue[CalcFormConverter`DiracAlgebra], OptionValue[CalcFormConverter`ColourAlgebra]];
         (*Step 3: render the FORM program. readProgramTemplate[] does the one piece of file I/O this stage needs (reading the template); the result path comes from paths, so the .out filename is fixed before the program text is generated.*)
         rendered = 
-     renderExport[smPrepare[tdPrepare[data, OptionValue[CalcFormConverter`TensorDecomposition], OptionValue[FeynCalc`DropScaleless]], OptionValue[CalcFormConverter`ReduceToScalarMasters], OptionValue[CalcFormConverter`ReduceLoopCoefficients], OptionValue[FeynCalc`DropScaleless], OptionValue[FeynCalc`Dimension]], paths["ResultFile"], readProgramTemplate[]];
+     renderExport[prepareProcessing[data, OptionValue[CalcFormConverter`TensorDecomposition], OptionValue[FeynCalc`DropScaleless], OptionValue[CalcFormConverter`ReduceToScalarMasters], OptionValue[CalcFormConverter`ReduceLoopCoefficients], OptionValue[FeynCalc`DropScaleless], OptionValue[FeynCalc`Dimension]], paths["ResultFile"], readProgramTemplate[]];
         (*Step 4: publish both files before announcing success. Preserve any
           returned failure, including transaction cleanup/recovery diagnostics. *)
         result = writeExport[paths, rendered, overwrite];
