@@ -45,6 +45,14 @@ coefficientRoles[entries_List, pairPrefix_String] := Module[
    by focused tests. These profiles deliberately retain their different domains:
    propagator grouping cannot use the final master's shared-definition inspector.
    Limits select optional work; they neither cap memory nor catch runtime errors. *)
+(* One job-wide envelope for optional multivariate coefficient work. Legacy
+   per-path controls remain local gates; lowering either gate can only skip work.
+   The private switch supplies matched references, never a public escape hatch. *)
+$rcCoordinateWork = True;
+$rcMaximumRationalPasses = 1024;
+$rcMaximumFactorisations = 2048;
+coefficientLimits["Job"] := <|"RationalPasses" -> Max[0, $rcMaximumRationalPasses],
+    "Factorisations" -> Max[0, $rcMaximumFactorisations]|>;
 coefficientLimits["Propagator"] := <|"Terms" -> $rcMaximumTerms,
     "Variables" -> $rcMaximumVariables|>;
 coefficientLimits["Master"] := <|"Terms" -> $rcMasterMaximumTerms,
@@ -55,6 +63,9 @@ coefficientLimits["Polarisation"] := <|"Structures" -> $rcPolarisationMaximumStr
 coefficientLimits["Factor"] := <|"Terms" -> $rcPolarisationFactorMaximumTerms,
     "Variables" -> $rcPolarisationFactorMaximumVariables,
     "Degree" -> $rcPolarisationFactorMaximumDegree|>;
+(* Bound retained collector results independently of the arithmetic allowance. *)
+$rcCollectionMaximumCacheEntries = 64;
+coefficientLimits["Collection"] := <|"CacheEntries" -> Max[0, $rcCollectionMaximumCacheEntries]|>;
 coefficientLimits["Dimension"] := <|"PreconditionTerms" -> $dcfPreconditionMinimumTerms|>;
 coefficientLimits["Polynomial"] := <|"Power" -> {0,32}, "InversePower" -> {-8,-1}|>;
 
@@ -123,6 +134,12 @@ rcTemplate[name_String] := Module[{text},
     If[!StringQ[text], throwFailure["MissingTemplate", "Cannot read the rational coefficient template."]];
     text
 ];
+rcWorkBudget[] := With[{limits = coefficientLimits["Job"]},
+    StringReplace[rcTemplate["CoefficientWorkLimits.frm.in"], {
+        "@ENABLED@" -> If[TrueQ[$rcCoordinateWork], "1", "0"],
+        "@RATIONAL@" -> intString[limits["RationalPasses"]],
+        "@FACTORS@" -> intString[limits["Factorisations"]]}] <> "\n"];
+
 rcReduction[plan_Association] := If[plan === <||>, "",
     StringReplace[rcTemplate["RationalCoefficients.frm.in"], {
         "@LIMIT@" -> intString[coefficientLimits["Propagator"]["Terms"]], "@RULES@" -> plan["Rules"]}]];

@@ -1,0 +1,67 @@
+(* Accepted in the 495-check combined regression; see PERF05WorkLimits-2026-10-30.md. *)
+$FeynCalcStartupMessages=False;
+root=DirectoryName[DirectoryName[DirectoryName[$InputFileName]]];
+Get[FileNameJoin[{root,"CalcFormConverter","CalcFormConverter.wl"}]];
+checks=<||>;maps=<||>;records=<||>;
+assert[label_,v_]:=(AssociateTo[checks,label->TrueQ[v]];If[!TrueQ[v],Print["FAIL\t",label]]);
+finish[]:=(passed=Count[Values[checks],True];failed=Count[Values[checks],False];Export["baseline-result.json",<|"Completed"->True,"Passed"->passed,"Failed"->failed,"Checks"->checks|>,"RawJSON"];Export["records.json",records,"RawJSON"];Export["test-completed","WorkLimits","Text"];Print["SUMMARY\tpassed=",passed,"\tfailed=",failed];Quit[If[failed===0,0,1]]);
+Clear[s,t,u,m,n,p,q,l];
+master=PaVe[0,{}, {m^2},PaVeAutoOrder->False,PaVeAutoReduce->False];
+other=PaVe[0,{}, {n^2},PaVeAutoOrder->False,PaVeAutoReduce->False];
+pol=Pair[Momentum[p,D],Momentum[Polarization[q,I],D]];
+tree=Sum[FAD[{p,j m}](s^2+2s t+t^2),{j,17}];
+represented=(master+other)(1/s+1/t);
+polarised=pol master (s^2+2s t+t^2)/(u^2+2u+1);
+second=LoopTensorCoefficient[{0},{0},{m^2},{2},D];
+equal[x_,y_]:=!FailureQ[x]&&Together[ExpandScalarProduct[FeynAmpDenominatorExplicit[x-FCI[y]]]]===0;
+runWorkLimits[label_,family_,expr_,expected_,r_,f_,collect_:True,enabled_:True,workers_:1,opts___]:=Module[{job,code,extra,proc,got,counts,map,fields},
+job=Block[{CalcFormConverter`Private`$rcMaximumRationalPasses=r,CalcFormConverter`Private`$rcMaximumFactorisations=f,CalcFormConverter`Private`$rcCoordinateWork=enabled,CalcFormConverter`Private`$lrCollectCoefficients=collect},CalcFormExport[expr,FileNameJoin[{Directory[],"worklimits-"<>label<>".frm"}],opts]];
+If[!AssociationQ[job],Print["FAIL\t export ",label," ",InputForm[job]];Quit[1]];
+code=Import[job["InputFile"],"Text"];
+assert[label<>" initialise once",StringCount[code,"#$cfcCWRationalUsed=0;"]===1&&StringCount[code,"#$cfcCWFactorUsed=0;"]===1];
+extra="\n#$testCC=0;\n#$testPG=0;\n#$testEX=0;\n#$testCH=0;\n#$testCE=0;\n"<>
+ If[StringContainsQ[code,"#$cfcCCWorkUsed=0;"],"#$testCC=$cfcCCWorkUsed;\n#$testCH=$cfcCCHits;\n#$testCE=$cfcCCEntries;\n",""]<>
+ If[StringContainsQ[code,"#$cfcPGWorkUsed=0;"],"#$testPG=$cfcPGWorkUsed;\n#$testEX=$cfcPGWorkExhausted;\n",""]<>
+ "#write \"CW r=%$ f=%$ rd=%$ fd=%$ cc=%$ pg=%$ ex=%$ ch=%$ ce=%$\",$cfcCWRationalUsed,$cfcCWFactorUsed,$cfcCWRationalDenied,$cfcCWFactorDenied,$testCC,$testPG,$testEX,$testCH,$testCE\n.end";
+If[StringCount[code,"\n.end"]=!=1,Print["FAIL\t end marker ",label];Quit[1]];
+Export[job["InputFile"],StringReplace[code,"\n.end"->extra],"Text"];
+proc=RunProcess[If[workers===1,{"form","-q",job["InputFile"]},{"tform","-w2","-q",job["InputFile"]}]];
+Export["worklimits-"<>label<>".stdout",proc["StandardOutput"],"Text"];Export["worklimits-"<>label<>".stderr",proc["StandardError"],"Text"];
+If[proc["ExitCode"]=!=0||proc["StandardError"]=!=""||StringContainsQ[proc["StandardOutput"],"Warning"|"Program terminating"|"-->"],Print["FAIL\t FORM ",label,"\n",proc["StandardOutput"]];Quit[1]];
+got=CalcFormImport[job["ResultFile"],job["MappingFile"]];
+counts=StringCases[proc["StandardOutput"],RegularExpression["CW r=([0-9]+) f=([0-9]+) rd=([0-9]+) fd=([0-9]+) cc=([0-9]+) pg=([0-9]+) ex=([0-9]+) ch=([0-9]+) ce=([0-9]+)"]->{"$1","$2","$3","$4","$5","$6","$7","$8","$9"}];
+If[Length[counts]=!=1,Print["FAIL\t counter record ",label];Quit[1]];
+fields=AssociationThread[{"r","f","rd","fd","cc","pg","ex","ch","ce"},FromDigits/@First[counts]];
+AssociateTo[fields,"restored"->StringContainsQ[proc["StandardOutput"],"work_limit_restore"]];
+assert[label<>" exact",equal[got,expected]];
+assert[label<>" rational bounded",!enabled||fields["r"]<=Max[0,r]];
+assert[label<>" factors bounded",!enabled||fields["f"]<=Max[0,f]];
+assert[label<>" no private objects",FreeQ[got,_Symbol?(StringStartsQ[SymbolName[#],"cfc"]&)]];
+map=Import[job["MappingFile"],"RawJSON"];
+If[!KeyExistsQ[maps,family],AssociateTo[maps,family->map]];
+assert[label<>" mapping unchanged",maps[family]===map];
+AssociateTo[records,label->fields];fields];
+Do[runWorkLimits["tree-"<>ToString[k],"tree",tree,tree,Sequence@@{{0,0},{1,0},{1,1},{1,2},{2,4},{32,64}}[[k]]],{k,6}];
+Do[runWorkLimits["represented-"<>ToString[k],"represented",represented,represented,k-1,64],{k,4}];
+Do[runWorkLimits["pol-"<>ToString[k],"polarised",polarised,polarised,Sequence@@{{0,0},{1,0},{2,0},{32,0},{32,1},{32,2},{32,64}}[[k]],False],{k,7}];
+runWorkLimits["mixed","polarised",polarised,polarised,32,64];
+runWorkLimits["direct-zero","direct",second-(D-2)/(2m^2)master,0,1,0,True,True,1,ReduceToScalarMasters->False,ReduceLoopCoefficients->True];
+runWorkLimits["reference-tree","tree",tree,tree,0,0,True,False];
+runWorkLimits["reference-pol","polarised",polarised,polarised,0,0,False,False];
+runWorkLimits["constant","constant",1,1,0,0];
+runWorkLimits["threaded","tree",tree,tree,2,4,True,True,2];
+runWorkLimits["fresh-a","represented",represented,represented,1,0];
+runWorkLimits["fresh-b","represented",represented,represented,1,0];
+assert["batch rational exhaustion",records["tree-5"]["r"]===2&&records["tree-5"]["rd"]>0];
+assert["factor pair atomic denial",records["tree-3"]["f"]===0&&records["tree-3"]["fd"]>0];
+assert["factor pair admitted",records["tree-4"]["f"]===2];
+assert["polarisation factor attempted",records["pol-7"]["f"]>0];
+assert["factor denial restores master",records["pol-4"]["fd"]>0&&records["pol-4"]["ex"]===1&&TrueQ[records["pol-4"]["restored"]]];
+assert["nested rational denial restores master",AnyTrue[Lookup[records,{"pol-2","pol-3"}],#["rd"]>0&&#["ex"]===1&&TrueQ[#["restored"]]&]];
+assert["collection and polarisation share allowance",With[{z=records["mixed"]},z["cc"]>0&&z["pg"]>0&&z["r"]===z["cc"]+z["pg"]]];
+assert["fresh jobs reset",records["fresh-a"]===records["fresh-b"]&&records["fresh-a"]["r"]===1];
+assert["negative control",!equal[polarised,polarised+master]];
+assert["constant no speculative work",records["constant"]["r"]===0&&records["constant"]["f"]===0];
+assert["denial is not cached",records["represented-1"]["cc"]===0&&records["represented-1"]["ce"]===0];
+assert["completed collection hits survive exhausted arithmetic",records["represented-2"]["cc"]===1&&records["represented-2"]["ch"]>0];
+finish[];

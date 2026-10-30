@@ -2,8 +2,105 @@
 * Exhaustion retains complete coefficients; it never retries or resets the count.
 #$cfcCCWorkUsed=0;
 #$cfcCCWorkLimit=@WORK@;
+* Exact expression keys use FORM's job-local interner, as in the existing
+* polarisation cache. Collect's alternate head prevents a split argument from
+* being mistaken for a complete key. Neither the source nor its definitions
+* are expanded by key construction. No key is ever written to the result.
+CFunctions cfcCCKeyTag,cfcCCKeyPart;
+Table sparse cfcCCReady(1);
+Table sparse cfcCCValue(1);
+#$cfcCCVisits=0;
+#$cfcCCEntries=0;
+#$cfcCCHits=0;
+#$cfcCCSkipped=0;
+#procedure cfcCollectionKey(source)
+Skip;
+Local cfcCCKeyWork=`source';
+Bracket cfcCCKeyTag;
+.sort
+Skip;
+NSkip cfcCCKeyWork;
+Collect cfcCCKeyTag,cfcCCKeyPart,50;
+ArgToExtraSymbol tonumber,cfcCCKeyTag;
+#$cfcCCKey=0;
+id cfcCCKeyTag(cfcRNum?$cfcCCKey)=1;
+ModuleOption noparallel;
+.sort
+#$cfcCCKeyResidual=cfcCCKeyWork;
+#if "`$cfcCCKeyResidual'" != "1"
+#$cfcCCKey=0;
+#endif
+Drop cfcCCKeyWork;
+.sort
+#endprocedure
+
+* Revisit only an exact changed coefficient at the existing phase boundaries.
+* The compiled rules/mapping/domain are immutable for this job; no shared
+* definition is dereferenced here. Caches must never cross a FORM job.
 #procedure cfcCollectScalar(source)
+#if @REUSE@ == 0
+#call cfcCollectScalarOnce(`source')
+#else
+#if (termsin(`source') > 0) && (termsin(`source') <= @LIMIT@) && (`$cfcCCVisits' < `$cfcCCWorkLimit')
+#$cfcCCVisits=$cfcCCVisits+1;
+#call cfcCollectionKey(`source')
+#$cfcCCInputKey=$cfcCCKey;
+#$cfcCCKnown=cfcCCReady(`$cfcCCInputKey');
+#if (`$cfcCCInputKey' > 0) && (isnumerical($cfcCCKnown))
+#$cfcCCHits=$cfcCCHits+1;
+#if `$cfcCCKnown' == 2
+Drop `source';
+.sort
+Skip;
+Local `source'=cfcCCValue(`$cfcCCInputKey');
+.sort
+#endif
+#else
+* Reserve room for the input and the settled-output alias BEFORE arithmetic.
+* At capacity existing hits remain usable, but new inputs keep their original.
+#if (`$cfcCCInputKey' > 0) && ({`$cfcCCEntries'+2} <= @CACHE@) && (`$cfcCCWorkUsed' < `$cfcCCWorkLimit')
+#call cfcCollectScalarOnce(`source')
+#if `$cfcCCChanged' == 1
+#$cfcCCSaved=`source';
+Fill cfcCCValue(`$cfcCCInputKey')=`$cfcCCSaved';
+Fill cfcCCReady(`$cfcCCInputKey')=2;
+#$cfcCCEntries=$cfcCCEntries+1;
+* An already normalised output is settled even when its spelling differs.
+* Zero needs no alias: it is excluded by the entry guard above.
+#if termsin(`source') > 0
+#call cfcCollectionKey(`source')
+#$cfcCCKnown=cfcCCReady(`$cfcCCKey');
+#if (`$cfcCCKey' > 0) && (isnumerical($cfcCCKnown) == 0)
+Fill cfcCCReady(`$cfcCCKey')=1;
+#$cfcCCEntries=$cfcCCEntries+1;
+#endif
+#endif
+#else
+* Cache only a completed conservative rejection, not an allowance denial.
+#if `$cfcCCAttempted' == 1
+Fill cfcCCReady(`$cfcCCInputKey')=1;
+#$cfcCCEntries=$cfcCCEntries+1;
+#endif
+#endif
+#else
+#$cfcCCSkipped=$cfcCCSkipped+1;
+#endif
+#endif
+NSkip;
+.sort
+#else
+#$cfcCCSkipped=$cfcCCSkipped+1;
+#endif
+#endif
+#endprocedure
+
+#procedure cfcCollectScalarOnce(source)
+#$cfcCCChanged=0;
+#$cfcCCAttempted=0;
 #if (termsin(`source') > 0) && (termsin(`source') <= @LIMIT@) && (`$cfcCCWorkUsed' < `$cfcCCWorkLimit')
+#call cfcReserveRational
+#if `$cfcCWGranted' == 1
+#$cfcCCAttempted=1;
 #$cfcCCWorkUsed=$cfcCCWorkUsed+1;
 Skip;
 Local cfcCCWork=`source';
@@ -43,6 +140,7 @@ EndArgument;
 id cfcLRNum(cfcRNum?number_)=cfcRNum;
 id cfcLRDen(cfcRDen?number_)=1/cfcRDen;
 .sort
+#$cfcCCChanged=1;
 Drop `source';
 .sort
 Drop cfcCCWork;
@@ -58,6 +156,9 @@ Drop cfcCCWork;
 #endif
 NSkip;
 .sort
+#else
+#$cfcCCSkipped=$cfcCCSkipped+1;
+#endif
 #endif
 #endprocedure
 

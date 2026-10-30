@@ -21,7 +21,9 @@ This guide describes implementation and maintenance of CalcFormConverter. Start 
 
 The private processing plan and first PERF-05 increment are documented in
 [ProcessingContracts.md](ProcessingContracts.md). The existing preparers and renderer
-remain authoritative; the common coefficient policy is not yet implemented.
+remain authoritative. The common policy, pre/post collection, job-local reuse
+and coordinated work limits are implemented; see [DependencyPaths.md](DependencyPaths.md)
+and [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md).
 
 | Module | Responsibility |
 | --- | --- |
@@ -1015,7 +1017,7 @@ allowance helpers in `RationalCoefficients.wl`; dimension-only compilation uses
 an explicit one-variable dictionary. FORM execution, semantic normalisation,
 shared-definition inspection, cache/score/rollback ownership are retained.
 See [CoefficientPolicy.md](CoefficientPolicy.md) for the actual domains, selection
-profiles and remaining orchestration work. `CoefficientPolicy` and
+profiles and conservative exclusions. `CoefficientPolicy` and
 `CoefficientArithmetic` are registered runtime suites; the [dated report](../Documentation/Verification/PERF05Coefficients-2026-10-30.md)
 records two bounded focused runs (72/72 and 52/52), not complete-suite or
 whole-call performance acceptance. API-03 conversion still follows processing.
@@ -1032,3 +1034,30 @@ charge for large jobs. See [IntegralCollection.md](IntegralCollection.md) for
 key/scope/fallback and counter ownership, and the [verification report](../Documentation/Verification/PERF05Collection-2026-10-30.md)
 for the final 69/69 checks and both retained failures. `IntegralCollection` is
 registered in the runtime suite. No new public option or mapping grammar.
+
+## Changed-coefficient reuse — PERF-05 increment 4
+
+The collector now separates its single-attempt algebra from bounded job-local
+reuse. Complete sorted keys distinguish changed coefficients; successful-output
+aliases and conservative rejections prevent redundant work. The mapping/rules
+context is fixed for one job, and no cache survives it. Arithmetic attempts,
+eligible visits and retained entries have separate counters and conservative
+stopping behaviour. Existing polarisation caches and resource ownership remain
+unchanged. See [IntegralCollection.md](IntegralCollection.md#changed-coefficient-reuse--increment-4).
+
+`Tests/CoefficientReuse.wls` exercises the actual FORM template with controlled
+literal rules; `IntegralCollection` checks actual planner/export/import paths.
+The final combined check passed 130/130 after two documented harness corrections.
+See [the report](../Documentation/Verification/PERF05Reuse-2026-10-30.md) for exact
+scope, source pins and the omitted performance/large-case gates. Registration
+in the runtime suite does not mean the complete suite was executed.
+
+## Coordinated work limits — PERF-05 increment 5
+
+Optional rational processing and full factorisation share job-wide allowances
+while retaining local guards and complete-original fallback. See
+[WorkLimits.md](WorkLimits.md) for ownership and exclusions. The corrected combined
+batch passes 495/495 assertions under unchanged bounded resources; [the report](../Documentation/Verification/PERF05WorkLimits-2026-10-30.md)
+retains earlier failures and the final evidence. The [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md)
+completes dependency, retained QED and three-box checks with default named output.
+This is not a general performance guarantee.

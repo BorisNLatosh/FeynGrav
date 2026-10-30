@@ -382,7 +382,8 @@ processingPlan[input_Association, requested_Association, prepared_Association] :
           "LoopCoefficientReduction" -> KeyExistsQ[selected, "LoopCoefficientReduction"],
           "ScalarMasterReduction" -> KeyExistsQ[selected, "ScalarMasterReduction"]|>,
       "CoefficientPolicy" -> "SharedScalarPolicy",
-      "RevisitPolicy" -> "ExistingPassesOnly"|>
+      "RevisitPolicy" -> "JobLocalCollectionReuse",
+      "WorkPolicy" -> "JobRationalAndFactorAllowances"|>
 ];
 
 (* Hold option expressions until the same point as the previous nested call:
@@ -463,7 +464,7 @@ renderExport[data_Association, result_String, template_String] :=
       "@RESULTMARKER@" -> resultMarker[data["Mapping"]["Version"]],
           (*Declare the FORM functions for the masters (A0..D0). The names come from $masterSpecByFORMName, i.e. the "FORMName" fields of the spec table -- again, no name is hard-coded here.*)
           "@FUNCTIONS@" -> 
-       "CFunctions " <> StringRiffle[Keys[$masterSpecByFORMName], ","] <> ";" <> daDeclarations[data] <> caDeclarations[data] <> Lookup[rationalPlan, "Declarations", ""] <> Lookup[cancellationPlan, "Declarations", ""] <> Lookup[dimensionPlan, "Declarations", ""] <> Lookup[symmetryPlan, "Declarations", ""] <> Lookup[data, "TensorDeclarations", ""],
+       rcWorkBudget[] <> "CFunctions " <> StringRiffle[Keys[$masterSpecByFORMName], ","] <> ";" <> daDeclarations[data] <> caDeclarations[data] <> Lookup[rationalPlan, "Declarations", ""] <> Lookup[cancellationPlan, "Declarations", ""] <> Lookup[dimensionPlan, "Declarations", ""] <> Lookup[symmetryPlan, "Declarations", ""] <> Lookup[data, "TensorDeclarations", ""],
           (*Declarations grouped by class, driven by $kindSpecs. Note "Symbols" covers Scalars, Abbreviations and Denominators -- they share a FORM class by design.*)
           "@SCALARS@" -> declaration["Symbols"], 
       "@DIMENSION@" -> data["DimensionName"],

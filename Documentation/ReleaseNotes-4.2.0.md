@@ -58,6 +58,14 @@ exhausted. This preserves a valid result without claiming maximal simplification
 No transversality, on-shell condition, helicity relation or Wolfram `$Assumptions`
 is introduced by that grouping.
 
+The coefficient strategy now distinguishes undeclared algebra, declared integrands
+and represented integrals. Eligible complete coefficients are collected before
+and after reduction, with bounded job-local reuse and coordinated optional
+rational/factor work. [PERF-05 verification](Verification/PERF05Final-2026-10-30.md)
+records exact agreement for all 17 retained three-box masters, preserved small
+QED checks and full calls of 30.03–30.55 seconds including default named output.
+Output size is unchanged; this is not a general speedup or large-QED certification.
+
 Symbolic `D`, incoming-momentum conventions and the documented FeynCalc
 `I Pi^2` conversion normalisation are retained. `DropScaleless -> False` preserves
 formal scaleless terms. Singular or unsupported families may remain unreduced

@@ -1,0 +1,33 @@
+* Initialise once in the program declarations, never in a master or batch.
+* These are optional-work counts, not estimates of time or process memory.
+#$cfcCWEnabled=@ENABLED@;
+#$cfcCWRationalLimit=@RATIONAL@;
+#$cfcCWFactorLimit=@FACTORS@;
+#$cfcCWRationalUsed=0;
+#$cfcCWFactorUsed=0;
+#$cfcCWRationalDenied=0;
+#$cfcCWFactorDenied=0;
+
+* Callers inspect Granted immediately; nested calls may overwrite that flag.
+* Completed work stays charged even when a larger candidate is rolled back.
+#procedure cfcReserveRational
+#$cfcCWGranted=0;
+#if (`$cfcCWEnabled' == 0) || (`$cfcCWRationalUsed' < `$cfcCWRationalLimit')
+#$cfcCWRationalUsed=$cfcCWRationalUsed+1;
+#$cfcCWGranted=1;
+#else
+#$cfcCWRationalDenied=$cfcCWRationalDenied+1;
+#endif
+#endprocedure
+
+* A propagator numerator/denominator pair reserves two attempts atomically.
+* Polarisation arguments reserve one each after their local eligibility check.
+#procedure cfcReserveFactors(count)
+#$cfcCWGranted=0;
+#if (`$cfcCWEnabled' == 0) || ({`$cfcCWFactorUsed'+`count'} <= `$cfcCWFactorLimit')
+#$cfcCWFactorUsed=$cfcCWFactorUsed+`count';
+#$cfcCWGranted=1;
+#else
+#$cfcCWFactorDenied=$cfcCWFactorDenied+1;
+#endif
+#endprocedure

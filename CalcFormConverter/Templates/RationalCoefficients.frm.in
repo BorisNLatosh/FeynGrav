@@ -4,7 +4,10 @@
 #$cfcRDone`cfcSlot'=0;
 #$cfcRTerms=termsin_(cfcCoefficient`cfcSlot');
 #if ( `$cfcRTerms' > 0 ) && ( `$cfcRTerms' <= @LIMIT@ ) && ( `$cfcIndexed`cfcSlot'' == 0 ) && ( `$cfcRUnsafe`cfcSlot'' == 0 )
+#call cfcReserveRational
+#if `$cfcCWGranted' == 1
 #$cfcRDone`cfcSlot'=1;
+#endif
 #endif
 #enddo
 PolyRatFun cfcRat;
@@ -47,6 +50,16 @@ Skip;
 #$cfcRResidual=cfcRWork`cfcSlot';
 Drop cfcRWork`cfcSlot';
 #if ( "`$cfcRResidual'" != "1" ) && ( "`$cfcRResidual'" != "0" )
+#$cfcRDone`cfcSlot'=0;
+#endif
+#endif
+#enddo
+* Reserve full numerator/denominator factoring before creating candidates.
+* A denial uses the original coefficient and the existing output fallback.
+#do cfcSlot=1,`$cfcBatchCount'
+#if `$cfcRDone`cfcSlot'' == 1
+#call cfcReserveFactors(2)
+#if `$cfcCWGranted' == 0
 #$cfcRDone`cfcSlot'=0;
 #endif
 #endif

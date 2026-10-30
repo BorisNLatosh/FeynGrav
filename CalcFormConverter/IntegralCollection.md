@@ -1,4 +1,4 @@
-# Coefficient collection around reduction — PERF-05 increment 3
+# Coefficient collection around reduction — PERF-05 increments 3–4
 
 The eligible linear one-loop path now processes complete coefficients **before
 runtime repeated-power/scalar-master reduction**. Tensor decomposition and
@@ -55,12 +55,14 @@ already wrapped rational factors retain their conservative path at this stage.
 The established final master machinery can handle cases beyond this narrow
 pre-collection domain.
 
-One counter covers **both new pre- and direct-post calls** in a FORM job, with
-1,024 attempts from the existing rational-pass allowance profile. Rejected
-attempts also spend it. A pre-collection dictionary larger than that limit is
+One arithmetic counter covers **both pre- and direct-post calls** in a FORM
+job, with 1,024 attempts from the existing rational-pass allowance profile.
+Rejected new attempts also spend it; exact cache hits do not. A pre-collection dictionary larger than that limit is
 left untouched; a spent allowance preserves the complete current coefficient.
-The old polarisation counter remains separate: this is not yet a universal
-pipeline-wide budget. No pass replenishes its own allowance, retries an error
+The local polarisation counter remains separate, but the increment-5 implementation
+adds common rational/factor reservations above both paths. Denied arithmetic is
+not cached as a rejection. This is not a universal operation budget; see
+[WorkLimits.md](WorkLimits.md) and its focused verification. No pass replenishes its own allowance, retries an error
 or swallows a FORM failure. Resource limits remain authoritative.
 
 A private `$lrCollectCoefficients` switch exists for matched regression
@@ -69,8 +71,61 @@ reduction disabled, ordinary tree expressions and represented integrals retain
 the existing requested-stage behaviour. Matrix/colour/epsilon jobs keep their
 existing domain protections. No new Wolfram algebra pass is added.
 
+## Changed-coefficient reuse — increment 4
+
+`cfcCollectScalar` is now a bounded reuse coordinator around the unchanged
+single-attempt algebra in `cfcCollectScalarOnce`. It uses FORM's native exact
+argument interner to identify complete sorted coefficients. A split `Collect`
+argument is ineligible: its alternate head must not supply a partial key.
+This follows [FORM's documented argument and collection semantics](https://form-dev.github.io/form-docs/stable/manual/),
+sections 7.8 and 7.20. No algebraic equivalence beyond FORM's existing sorting is
+inferred from these keys.
+
+The cache belongs to one generated FORM program with immutable mapping,
+scalar-product rules, dimension, arithmetic domain and monomial definitions.
+No shared-definition metadata is dereferenced by this collector. A different
+complete coefficient gets a different key; a new job starts empty, even if its
+identifiers happen to have the same spelling. Reuse across changed definitions,
+new kinematics or mappings is deliberately unavailable.
+
+Completed successful results and conservative rejections are remembered. A
+successful result also gets a settled-output alias when it fits a complete key,
+so revisiting its new representation does not repeat rational processing.
+Readiness and value are separate; zero is a valid result, not a cache miss.
+No table is filled from a caught FORM error: runtime failures remain failures.
+No new iteration or expand/factor cycle is introduced. The existing pre/post
+boundaries are the only revisiting points.
+
+Additional initial storage/lookup limits are conservative selection choices:
+
+- At most 1,024 eligible visits, including hits, use the existing allowance
+  profile. This bounds key-building work separately from arithmetic attempts.
+- At most 64 ready entries store results, rejections and output aliases. Two
+  slots are reserved before new arithmetic; existing hits can still be used at
+  capacity until the visit allowance is spent. New inputs retain their complete
+  original when capacity is insufficient. This can skip useful simplification.
+- Each visit builds at most two complete keys, subject to the existing 1,000-term
+  selection and FORM's argument capacity. These limits are not memory guarantees.
+
+Private `$lrReuseCoefficients` and `$rcCollectionMaximumCacheEntries` support
+matched checks; neither is a public option. Counters `cfcCCVisits`, `cfcCCWorkUsed`,
+`cfcCCHits`, `cfcCCEntries` and `cfcCCSkipped` are job-local developer state, not
+new output records or exported objects. The initial capacity is not a measured
+optimum. No cache is shared with or substituted for the mature polarisation
+inspection/algebra caches, whose modes and rollback semantics stay unchanged.
+
 ## Remaining PERF-05 work
 
-Changed-block recurrence, broader coordination of work allowances and whole-call
-measurements remain. Full three-box and retained QED gates have not been renewed
-by these small checks. See the [verification report](../Documentation/Verification/PERF05Collection-2026-10-30.md).
+Reuse at these collection boundaries is implemented and focused-tested. Work-allowance coordination is accepted in increment 5 with 495/495 combined
+assertions. Remaining changed-dependency paths and complete strategy acceptance
+still need review and whole-call measurements. Full three-box
+and retained QED gates have not been renewed by these small checks. See the
+[increment 3 report](../Documentation/Verification/PERF05Collection-2026-10-30.md)
+and [increment 4 report](../Documentation/Verification/PERF05Reuse-2026-10-30.md).
+
+## Final dependency and workload review
+
+[DependencyPaths.md](DependencyPaths.md) documents immutable context and readiness
+ownership. The [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md) completes retained regression, QED
+and whole-call checks. Isolated final-guard fixtures disable earlier collection
+locally; separate default-path assertions verify its legitimate earlier zeros.

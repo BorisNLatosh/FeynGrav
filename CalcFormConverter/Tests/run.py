@@ -186,6 +186,8 @@ def main():
                 run_kernel('CoefficientPolicy')
                 run_kernel('CoefficientArithmetic')
                 run_kernel('IntegralCollection')
+                run_kernel('CoefficientReuse')
+                run_kernel('CoefficientWorkLimits')
                 run_kernel('MasterOutputSharing')
                 run_kernel('MasterRationalCoefficients')
                 run_kernel('PolarisationCoefficients')

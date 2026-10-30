@@ -1039,8 +1039,10 @@ bounded rational arithmetic and conservative fallback remain in force. The
 policy introduces no on-shell assumptions, numerical rationalisation or new
 integration rules. A successful calculation need not be maximally simplified.
 The [policy description](CoefficientPolicy.md) distinguishes current processing
-points from the remaining PERF-05 collection/recurrence work. Its focused checks
-do not establish a new full-workload performance result.
+points and bounded collection/reuse. The [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md) records
+three complete calls at 30.03–30.55 s, with default PaVe-to-ABCD conversion,
+unchanged output size and exact agreement for all 17 retained masters.
+These are fixed-workload results; larger QED checks remain unverified.
 
 ### Collection around one-loop reduction
 
@@ -1052,3 +1054,21 @@ reduction, including the smaller direct-output path. Products of integrals,
 protected algebra and oversized/unsupported coefficients retain conservative
 handling. This does not guarantee complete simplification or faster execution.
 See the [collection contract](IntegralCollection.md) and [focused verification](../Documentation/Verification/PERF05Collection-2026-10-30.md).
+
+Within one job, this collector reuses unchanged complete coefficients and
+remembers conservative rejections. Changed coefficients are reconsidered at the
+existing collection boundaries. Work or storage exhaustion preserves the full
+current expression; it can leave further simplification undone. No persistent
+cache, new option or automatic repeated whole-expression simplification is added.
+The [reuse verification](../Documentation/Verification/PERF05Reuse-2026-10-30.md)
+is focused evidence, not a renewed full-workload speed claim.
+
+## Coordinated work limits — PERF-05 increment 5
+
+Optional rational processing and full factorisation share job-wide allowances
+while retaining local guards and complete-original fallback. See
+[WorkLimits.md](WorkLimits.md) for ownership and exclusions. The corrected combined
+batch passes 495/495 assertions under unchanged bounded resources; [the report](../Documentation/Verification/PERF05WorkLimits-2026-10-30.md)
+retains earlier failures and the final evidence. The [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md)
+completes dependency, retained QED and three-box checks with default named output.
+This is not a general performance guarantee.

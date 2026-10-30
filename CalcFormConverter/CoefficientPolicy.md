@@ -49,7 +49,9 @@ variable counting. The profiles are intentionally different:
 | Profile | Selection and stopping |
 | --- | --- |
 | Polynomial recognition | Nonnegative polynomial powers 0–32; inverse abbreviation powers −8…−1. Unknown domain objects retain the old representation. |
+| Job envelope (increment 5) | 1,024 rational passes and 2,048 full factor attempts; local limits also apply. |
 | Propagator | At most 1,000 coefficient terms and 12 mapping scalar/dot variables; existing indexed/unsafe-object checks remain. |
+| Collection reuse | At most 64 ready entries and 1,024 eligible visits in the pre/direct-post collector; saturation retains the complete current coefficient. See [IntegralCollection.md](IntegralCollection.md). |
 | Dimension | Optional univariate processing; existing preconditioning threshold greater than 1,000 terms, with stage compaction at its existing locations. |
 | Master | At most 1,000 estimated terms, 12 actual scalar variables and degree 24, including shared dependencies. |
 | Polarisation | At most 1,024 structures, 10,000 structural terms and 1,024 speculative rational passes across the existing job. Negative private pass allowance clamps to zero. |
@@ -65,12 +67,14 @@ and complete-original rollback remain with their FORM procedures. No new cache,
 retry loop or allowance replenishment is added. Unsupported work and spent
 allowances preserve a complete valid result; actual errors, warnings, aborts or
 resource events remain execution failures. This is consolidation of existing
-stopping safeguards, not a new aggregate budget covering every pipeline stage.
+stopping safeguards, not a budget covering every pipeline stage. Increment 5 adds a
+shared envelope for optional multivariate rational/factor work; see
+[WorkLimits.md](WorkLimits.md) for exclusions and focused verification.
 
 ## Scope and remaining work
 
 The private processing plan now records `CoefficientPolicy -> "SharedScalarPolicy"`;
-its revisit policy remains `ExistingPassesOnly`. Plan metadata is not serialised.
+its revisit policy is `JobLocalCollectionReuse`. Plan metadata is not serialised.
 The shared policy is used by current processors, while ordinary loop-free inputs
 without eligible processing still use their previous path. No new integral
 identity, integration scope, reduction rule, public mathematical head or API-03
@@ -78,8 +82,8 @@ conversion behaviour is introduced. Production Wolfram code does not call
 `Simplify`, `Together`, `Factor`, `N` or `Rationalize`.
 
 Increment 3 supplies bounded collection before and after reduction on the
-eligible linear one-loop path. Changed-block recurrence and coordinated aggregate
-stopping remain future work.
-Whole-call performance and the full retained QED/three-box acceptance gates remain
-required before PERF-05 closes. See the
-[verification report](../Documentation/Verification/PERF05Coefficients-2026-10-30.md).
+eligible linear one-loop path. Collection-boundary reuse is delivered in increment 4. Increment 5 implements
+common optional rational/factor allowances, accepted with 495/495 combined checks;
+see [WorkLimits.md](WorkLimits.md). [Dependency ownership](DependencyPaths.md)
+and [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md) complete the retained QED/three-box gates.
+The full selected QED tadpole and 1,490-term equality remain outside this acceptance.

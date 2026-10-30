@@ -39,7 +39,10 @@ The renderer still owns its existing algebra, cancellation, coefficient-processi
 and output order. It does not serialise this private plan into the mapping or FORM
 program. There is no new mathematical head, mapping version, persistent cache,
 public option or additional iteration. `CoefficientPolicy -> "SharedScalarPolicy"`
-and `RevisitPolicy -> "ExistingPassesOnly"` explicitly record this boundary.
+records that boundary. Increment 4 records
+`RevisitPolicy -> "JobLocalCollectionReuse"`: exact reuse at the existing
+pre/direct-post collection boundaries, under one immutable job context. It does
+not add a general iteration or change requested output stages.
 
 ## Coefficient and stopping contract for subsequent increments
 
@@ -50,14 +53,18 @@ and shared-definition dependencies. Reuse and stopping must distinguish changed
 context, ineligibility and spent work allowance; runtime failures remain failures.
 Increment 2 consolidates selection; increment 3 adds bounded complete-coefficient
 collection around runtime reduction. See [IntegralCollection.md](IntegralCollection.md).
-Changed-block recurrence remains pending; no resource limit was increased.
+Collection-boundary changed-input reuse is delivered in increment 4 and optional
+rational/factor work coordination in increment 5. Dependency review and retained
+whole-workload validation are accepted; see [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md). No resource limit was increased.
 
 The recorded delivery order is: establish these PERF-05 contracts; deliver API-03
 separately at the final-output boundary; complete and measure PERF-05; then reprofile
 and pursue PERF-06. API-03 was delivered separately on 30 October 2026; see
 [its verification report](../Documentation/Verification/API03PaVeOutput-2026-10-30.md).
 The shared selection/compilation policy is delivered in increment 2; broader
-increment 3 delivers bounded linear collection; broader recurrence remains future PERF-05 work. Current conservative exceptional
+increment 3 delivers bounded linear collection and increment 4 adds bounded
+job-local reuse there. All five increments and their retained acceptance checks
+are complete. Current conservative exceptional
 and scaleless retention, LIMIT-02 and restricted-backend boundaries are unchanged.
 
 ## Focused verification
@@ -75,3 +82,11 @@ behaviour-preservation evidence. Full three-box performance, broader QED checks,
 new coefficient arithmetic and a complete option-product audit are not certified
 by this first increment. See the dated verification report for source identities,
 raw evidence and process-resource limits.
+
+## Work coordination — increment 5
+
+`WorkPolicy -> "JobRationalAndFactorAllowances"` records the shared optional-work
+owner. See [WorkLimits.md](WorkLimits.md) for the charged stages, unchanged local
+guards, exclusions and original-expression fallback. Accepted within focused
+scope after 495/495 combined assertions; the [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md)
+adds dependency, retained QED and complete three-box acceptance.

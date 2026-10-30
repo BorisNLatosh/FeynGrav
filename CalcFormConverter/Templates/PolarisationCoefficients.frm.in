@@ -406,13 +406,25 @@ EndInExpression;
 Drop cfcPGFactorNum,cfcPGFactorDen;
 Skip;
 NSkip cfcMRWork;
-#if `cfcPGFactorNumOK' == 1
+#if (`cfcPGFactorNumOK' == 1) && (`$cfcPGWorkExhausted' == 0)
+#call cfcReserveFactors(1)
+#if `$cfcCWGranted' == 1
 #$cfcPGFactorCalls=$cfcPGFactorCalls+1;
 FactArg cfcLRNum;
+#else
+* The caller restores the whole master and does not cache this partial mode.
+#$cfcPGWorkExhausted=1;
 #endif
-#if `cfcPGFactorDenOK' == 1
+#endif
+#if (`cfcPGFactorDenOK' == 1) && (`$cfcPGWorkExhausted' == 0)
+#call cfcReserveFactors(1)
+#if `$cfcCWGranted' == 1
 #$cfcPGFactorCalls=$cfcPGFactorCalls+1;
 FactArg cfcLRDen;
+#else
+* The caller restores the whole master and does not cache this partial mode.
+#$cfcPGWorkExhausted=1;
+#endif
 #endif
 ChainOut cfcLRNum;
 ChainOut cfcLRDen;
@@ -815,8 +827,9 @@ Unhide `source';
 #endprocedure
 
 #procedure cfcPGFinal(source)
-#if `$cfcPGWorkUsed' >= `$cfcPGWorkLimit'
+#if (`$cfcPGWorkExhausted' == 1) || (`$cfcPGWorkUsed' >= `$cfcPGWorkLimit') || ((`$cfcCWEnabled' == 1) && (`$cfcCWRationalUsed' >= `$cfcCWRationalLimit'))
 #write "CFC_PG_SKIP work_limit used=%$ limit=%$",$cfcPGWorkUsed,$cfcPGWorkLimit
+#write "CFC_CW_SKIP rational_used=%$ rational_limit=%$ factor_used=%$ factor_limit=%$",$cfcCWRationalUsed,$cfcCWRationalLimit,$cfcCWFactorUsed,$cfcCWFactorLimit
 #else
 #$cfcPGStart=`timer_';
 #$cfcPGRationalMS=0;

@@ -38,12 +38,15 @@ radical=(1/s+1/t)Sqrt[a+b]master;
 assert["opaque radical preserved",Together[calculate[radical]-withoutFinalRationals[calculate[radical]]]===0];
 assert["matrix spectator preserved",Together[calculate[zero master GAD[mu]]-withoutFinalRationals[calculate[zero master GAD[mu]]]]===0];
 large=(a+b)^30 zero master;
-largeResult=calculate[large];
+(* Isolate the final master selector: earlier collection may already find zero. *)
+largeResult=Block[{CalcFormConverter`Private`$lrCollectCoefficients=False},calculate[large]];
 assert["degree fallback retained",largeResult=!=0&&!FailureQ[largeResult]];
 assert["degree fallback exact",Together[largeResult]===0];
-smallLimit=Block[{CalcFormConverter`Private`$rcMasterMaximumTerms=1},calculate[zero master]];
+smallLimit=Block[{CalcFormConverter`Private`$lrCollectCoefficients=False,CalcFormConverter`Private`$rcMasterMaximumTerms=1},calculate[zero master]];
 assert["term fallback retained",smallLimit=!=0&&!FailureQ[smallLimit]];
 assert["term fallback exact",Together[smallLimit]===0];
+assert["earlier collection cancels high-degree coefficient",calculate[large]===0];
+assert["earlier collection precedes final term guard",Block[{CalcFormConverter`Private`$rcMasterMaximumTerms=1},calculate[zero master]]===0];
 (* Actual per-coefficient variables, not the complete mapping dictionary. *)
 many=Sum[zero PaVe[0,{}, {Symbol["mass"<>ToString[j]]^2},PaVeAutoOrder->False,PaVeAutoReduce->False],{j,1,15}];
 assert["unrelated mapped variables do not reject",calculate[many]===0];

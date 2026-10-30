@@ -61,16 +61,29 @@ NSkip;
 * intact until the candidate succeeds. Treat i_ as a temporary polynomial
 * variable, then restore i_^2=-1 in numerator and denominator before writing.
 #procedure cfcMRFinal(source)
-* Charge a complete rational pass, including its bounded factor inspections.
-* A denied pass changes no expression and is never cached as a computed result.
+* Both the local polarisation guard and common job allowance must admit a
+* pass. Preserve legacy accounting of cached inspections/algebra at this hook;
+* group-result cache hits bypass the hook entirely. Never reset on rollback.
 #define cfcMRRun "1"
 #ifdef `cfcPGActive'
 #if `$cfcPGWorkUsed' >= `$cfcPGWorkLimit'
 #redefine cfcMRRun "0"
 #$cfcPGWorkExhausted=1;
 #$cfcMROK=0;
+#endif
+#endif
+#if `cfcMRRun' == 1
+#call cfcReserveRational
+#if `$cfcCWGranted' == 0
+#redefine cfcMRRun "0"
+#$cfcMROK=0;
+#ifdef `cfcPGActive'
+#$cfcPGWorkExhausted=1;
+#endif
 #else
+#ifdef `cfcPGActive'
 #$cfcPGWorkUsed=$cfcPGWorkUsed+1;
+#endif
 #endif
 #endif
 #if `cfcMRRun' == 1
@@ -144,7 +157,7 @@ id cfcLRNum(cfcMRIndex?)=cfcPolyN(cfcMRIndex);
 id cfcLRDen(cfcMRIndex?)=cfcPolyD(cfcMRIndex);
 .sort
 #ifdef `cfcPGActive'
-#if `$cfcPGAlgebraIndex' > 0
+#if (`$cfcPGAlgebraIndex' > 0) && (`$cfcPGWorkExhausted' == 0)
 #$cfcPGAlgebraValue=cfcMRWork;
 Fill cfcPGAlgebra(`$cfcPGAlgebraIndex',`cfcPGAlgebraMode')=`$cfcPGAlgebraValue';
 Fill cfcPGAlgebraReady(`$cfcPGAlgebraIndex',`cfcPGAlgebraMode')=1;

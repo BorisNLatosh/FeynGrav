@@ -122,6 +122,8 @@ lrDirectPreamble[plan_, path_] := If[!TrueQ[Lookup[plan, "SharedBlocks", False]]
    momentum from these coefficients; no integrand factor is pulled out here.
    A private switch supplies matched regression references, not a public option. *)
 $lrCollectCoefficients = True;
+(* Matched-reference switch; reuse is confined to one immutable collection plan. *)
+$lrReuseCoefficients = True;
 lrCoefficientCollectionPlan[mapping_Association] := Module[{plan, indices, guard, monomials, filtered},
     If[!TrueQ[$lrCollectCoefficients], Return[<||>]];
     monomials = lrMonomialDefinitions[mapping["Entries"]];
@@ -141,6 +143,8 @@ lrCoefficientCollectionPlan[mapping_Association] := Module[{plan, indices, guard
         rcTemplate["CoefficientCollection.frm.in"], {
             "@LIMIT@" -> intString[coefficientLimits["Propagator"]["Terms"]],
             "@WORK@" -> intString[coefficientLimits["Polarisation"]["RationalPasses"]],
+            "@REUSE@" -> If[TrueQ[$lrReuseCoefficients], "1", "0"],
+            "@CACHE@" -> intString[coefficientLimits["Collection"]["CacheEntries"]],
             "@UNSAFE@" -> guard, "@MONOMIALS@" -> lrMonomialRules[mapping["Entries"]],
             "@RULES@" -> plan["Rules"], "@RESTORE@" -> plan["Restore"]}],
       "Before" -> "#call cfcCollectBeforeReduction\n",
