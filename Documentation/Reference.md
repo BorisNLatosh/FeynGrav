@@ -18,6 +18,10 @@ Reference for the unreleased 4.2.0 development checkout. The original reference 
 
 ## Conventions and return values
 
+Read [Common conventions](Conventions.md) for the shared mathematical
+definitions, momentum and polarisation conventions, and integral normalisation.
+For a first session, use [Getting started](GettingStarted.md).
+
 Load ``<< FeynGrav` `` in a fresh kernel. The main interface is in the `FeynGrav` context; projector utilities belong to `Nieuwenhuizen` and converter commands to `CalcFormConverter`. Their short names are available after loading. Use fully qualified names if another package exports the same spelling.
 
 In the signatures below:
@@ -120,6 +124,11 @@ Call `FeynGravImportSUNYM[n]` first. Colour labels are adjoint indices; all mome
 These functions return the expressions stored in the selected libraries. The generator now preserves dimensional quark gamma matrices and named `SMP` couplings; migration did not regenerate distributed libraries. Do not assume newly generated and older stored expressions use identical colour or coupling notation. `GaugeFixingEpsilonSUNYM` is applied during import.
 
 ### Horndeski, axion and scalar–Gauss–Bonnet interactions
+
+Read the [Horndeski model page](Models/Horndeski.md) for the action, definition of X,
+coupling normalisations and installed selections. Its corrected conventions are
+the implementation-audit target; current G4/G5 libraries are not certified merely
+by their availability. See the [audit plan](Verification/HorndeskiImplementationPlan.md).
 
 Each row requires its sector importer. There are no optional vertex arguments; coupling constants are explicit final arguments.
 

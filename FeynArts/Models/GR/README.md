@@ -2,8 +2,9 @@
 
 Native FeynArts bundle `GR`, with vertices through κ² per vertex.
 
-- [Model guide](ModelGuide.md): action, conventions, inventory, loading,
-  calculations, provenance and verification limits.
+- [General relativity](../../../Documentation/Models/GeneralRelativity.md): action,
+  gauge fixing, fields, commands and verification scope.
+- [Native model guide](ModelGuide.md): inventory, loading, calculations and provenance.
 - [Higher-order vertices](HigherOrderVertices.md): source verification, builder
   changes, candidate checks and installation beyond the supplied cutoff.
 - [All models](../README.md)

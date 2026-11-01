@@ -33,10 +33,15 @@ HorndeskiG5Uncontracted::usage = "";
 (* Keep helpers and memoised definitions local to this rule package. *)
 
 (* Structural failures are returned as values; callers should use FailureQ. *)
-HorndeskiG5::usage = HorndeskiG5::usage <> " Supported signatures: HorndeskiG5[gravitonParameters, scalarMomenta, b]; argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; The G5 TII dispatcher is implemented only through three gravitons. Condition: Length[gravitonParameters] <= 9 || b == 0.." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
-HorndeskiG5Uncontracted::usage = HorndeskiG5Uncontracted::usage <> " Supported signatures: HorndeskiG5Uncontracted[gravitonParameters, scalarMomenta, b]; argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; The G5 TII dispatcher is implemented only through three gravitons. Condition: Length[gravitonParameters] <= 9 || b == 0.." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+HorndeskiG5::usage = HorndeskiG5::usage <> " Supported signatures: HorndeskiG5[gravitonParameters, scalarMomenta, b]; argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; All graviton orders use the complete connection expansion. At most seven inverse-metric pairs are available: b <= 4 for one graviton, b <= 3 for two, and b <= 2 for three or more." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
+HorndeskiG5Uncontracted::usage = HorndeskiG5Uncontracted::usage <> " Supported signatures: HorndeskiG5Uncontracted[gravitonParameters, scalarMomenta, b]; argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; All graviton orders use the complete connection expansion. At most seven inverse-metric pairs are available: b <= 4 for one graviton, b <= 3 for two, and b <= 2 for three or more." <> " Invalid argument counts, malformed arrays and unsupported parameter ranges return Failure. Existing dependency failures are propagated; check FailureQ before using the result. See Rules/README.md for the argument contract.";
 
 Begin["`Private`"];
+
+(* External legs remain labelled even when their supplied values coincide. *)
+Clear[labelledPermutations];
+labelledPermutations[legs_List] := legs[[#]] & /@ Permutations[Range[Length[legs]]];
+
 
 
 Clear[MomentaWrapper];
@@ -64,6 +69,8 @@ DummyArray2[n_] :=
         DummyArray2[n],
         {{1, "Integer", 0}},
         (
+(* Both sides of each contraction must use this call's same fresh indices. *)
+If[ListQ[$scalarDummyIndices], Take[$scalarDummyIndices, 2 n],
 Flatten[RuleValidation`RuleRequire[
 		Table[
 			{
@@ -73,7 +80,8 @@ Flatten[RuleValidation`RuleRequire[
 		{i, n}
 	]
 ]]
-        ), False
+        ]
+), False
     ];
 
 
@@ -96,6 +104,7 @@ T1[gravitonParameters_, scalarMomenta_, b_] :=
         T1[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 3, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[Alpha], \[Beta], \[Lambda], \[Mu], \[Nu], \[Rho], \[Sigma]},
 RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2b]]]] FVD[scalarMomenta[[2b+1]], \[Alpha]] FVD[scalarMomenta[[2b+1]], \[Beta]] FVD[gravitonParameters[[-1]], \[Lambda]]*
 		(
 			RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Alpha],\[Nu],\[Beta],\[Rho],\[Sigma]},RuleValidation`RuleRequire[DummyArray2[b]]] , RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-3-1]]]] ]]
@@ -106,7 +115,8 @@ RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2b]]]] FVD[scalarMome
 			FVD[gravitonParameters[[-1]],\[Rho]] RuleValidation`RuleRequire[GammaTensor[\[Sigma],\[Mu],\[Nu],\[Lambda],gravitonParameters[[-3]],gravitonParameters[[-2]]]]
 			- FVD[gravitonParameters[[-1]],\[Mu]] RuleValidation`RuleRequire[GammaTensor[\[Rho],\[Sigma],\[Nu],\[Lambda],gravitonParameters[[-3]],gravitonParameters[[-2]]]]
 		)
-        ), True
+        ]
+), True
     ];
 
 
@@ -117,6 +127,7 @@ T2[gravitonParameters_, scalarMomenta_, b_] :=
         T2[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 6, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[Alpha], \[Beta], \[Lambda], \[Lambda]1, \[Lambda]2, \[Mu], \[Nu], \[Rho], \[Sigma], \[Tau]},
 (-1) RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2b]]]] FVD[scalarMomenta[[2b+1]], \[Tau]] FVD[gravitonParameters[[-1-3]], \[Lambda]1] FVD[gravitonParameters[[-1]], \[Lambda]2]*
 		(
 			RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Alpha],\[Nu],\[Beta],\[Rho],\[Sigma],\[Lambda],\[Tau]},RuleValidation`RuleRequire[DummyArray2[b]]] , RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-3 2-1]]]] ]]
@@ -127,7 +138,8 @@ T2[gravitonParameters_, scalarMomenta_, b_] :=
 			FVD[gravitonParameters[[-1-3]],\[Rho]] RuleValidation`RuleRequire[GammaTensor[\[Sigma],\[Mu],\[Nu],\[Lambda]1,gravitonParameters[[-6]],gravitonParameters[[-5]]]]
 			- FVD[gravitonParameters[[-1-3]],\[Mu]] RuleValidation`RuleRequire[GammaTensor[\[Rho],\[Sigma],\[Nu],\[Lambda]1,gravitonParameters[[-6]],gravitonParameters[[-5]]]]
 		) RuleValidation`RuleRequire[GammaTensor[\[Lambda],\[Alpha],\[Beta],\[Lambda]2,gravitonParameters[[-3]],gravitonParameters[[-2]]]]
-        ), True
+        ]
+), True
     ];
 
 
@@ -138,6 +150,7 @@ T3[gravitonParameters_, scalarMomenta_, b_] :=
         T3[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 6, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[Alpha], \[Beta], \[Lambda], \[Lambda]1, \[Lambda]2, \[Mu], \[Nu], \[Rho], \[Sigma], \[Tau]},
 RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2b]]]] FVD[gravitonParameters[[-1-3]], \[Lambda]1] FVD[gravitonParameters[[-1]], \[Lambda]2] FVD[scalarMomenta[[2b+1]], \[Alpha]] FVD[scalarMomenta[[2b+1]], \[Beta]]*
 		(
 			RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Alpha],\[Nu],\[Beta],\[Rho],\[Sigma],\[Lambda],\[Tau]},RuleValidation`RuleRequire[DummyArray2[b]]] , RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-3 2-1]]]] ]]
@@ -148,7 +161,8 @@ RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2b]]]] FVD[gravitonPa
 			RuleValidation`RuleRequire[GammaTensor[\[Rho],\[Lambda],\[Mu],\[Lambda]1,gravitonParameters[[-6]],gravitonParameters[[-5]]]] RuleValidation`RuleRequire[GammaTensor[\[Sigma],\[Tau],\[Nu],\[Lambda]2,gravitonParameters[[-3]],gravitonParameters[[-2]]]]
 			- RuleValidation`RuleRequire[GammaTensor[\[Rho],\[Lambda],\[Tau],\[Lambda]1,gravitonParameters[[-6]],gravitonParameters[[-5]]]]RuleValidation`RuleRequire[GammaTensor[\[Sigma],\[Mu],\[Nu],\[Lambda]2,gravitonParameters[[-3]],gravitonParameters[[-2]]]]
 		)
-        ), True
+        ]
+), True
     ];
 
 
@@ -159,6 +173,7 @@ T4[gravitonParameters_, scalarMomenta_, b_] :=
         T4[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 9, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[Alpha], \[Beta], \[Epsilon], \[Lambda], \[Lambda]1, \[Lambda]2, \[Lambda]3, \[Mu], \[Nu], \[Omega], \[Rho], \[Sigma], \[Tau]},
 (-1) RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2b]]]] FVD[gravitonParameters[[-1-3 2]] , \[Lambda]3] FVD[gravitonParameters[[-1-3]], \[Lambda]1] FVD[gravitonParameters[[-1]], \[Lambda]2] FVD[ scalarMomenta[[2b+1]], \[Epsilon]]*
 		(
 			RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Alpha],\[Nu],\[Beta],\[Rho],\[Sigma],\[Lambda],\[Tau],\[Omega],\[Epsilon]},RuleValidation`RuleRequire[DummyArray2[b]]] , RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-3 3-1]]]] ]]
@@ -169,7 +184,8 @@ T4[gravitonParameters_, scalarMomenta_, b_] :=
 			RuleValidation`RuleRequire[GammaTensor[\[Rho],\[Lambda],\[Mu],\[Lambda]1,gravitonParameters[[-6]],gravitonParameters[[-5]]]] RuleValidation`RuleRequire[GammaTensor[\[Sigma],\[Tau],\[Nu],\[Lambda]2,gravitonParameters[[-3]],gravitonParameters[[-2]]]]
 			- RuleValidation`RuleRequire[GammaTensor[\[Rho],\[Lambda],\[Tau],\[Lambda]1,gravitonParameters[[-6]],gravitonParameters[[-5]]]]RuleValidation`RuleRequire[GammaTensor[\[Sigma],\[Mu],\[Nu],\[Lambda]2,gravitonParameters[[-3]],gravitonParameters[[-2]]]]
 		)
-        ), True
+        ]
+), True
     ];
 
 
@@ -189,6 +205,10 @@ Switch[Length[gravitonParameters]/3,
     ];
 
 
+(* Use the symmetric polarisation of [H]^3 - 3[H][H^2] + 2[H^3].
+   The three trace-times-double-trace terms must remain distinct when a Hessian
+   slot is replaced by -Gamma.partial phi in T6--T8. Their 1:3:3:1 placement
+   multiplicities then follow from this symmetric kernel. *)
 Clear[T5];
 
 T5[gravitonParameters_, scalarMomenta_, b_] :=
@@ -196,13 +216,17 @@ T5[gravitonParameters_, scalarMomenta_, b_] :=
         T5[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 0, Infinity}, {3, "Integer", 1}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[Alpha], \[Beta], \[Mu], \[Nu], \[Rho], \[Sigma]},
 (-1/3) RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2(b-1)]]]] FVD[scalarMomenta[[2b-1]],\[Mu]]FVD[scalarMomenta[[2b-1]],\[Nu]]FVD[scalarMomenta[[2b]],\[Alpha]]FVD[scalarMomenta[[2b]],\[Beta]]FVD[scalarMomenta[[2b+1]],\[Rho]]FVD[scalarMomenta[[2b+1]],\[Sigma]]*
 		(
 			RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters]]]]
-			- 3 RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Rho],\[Beta],\[Sigma]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Rho],\[Beta],\[Sigma]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Alpha],\[Beta],\[Mu],\[Rho],\[Nu],\[Sigma]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Rho],\[Sigma],\[Mu],\[Alpha],\[Nu],\[Beta]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters]]]]
 			+ 2 RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Mu]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters]]]]
 		)
-        ), True
+        ]
+), True
     ];
 
 
@@ -213,15 +237,19 @@ T6[gravitonParameters_, scalarMomenta_, b_] :=
         T6[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 3, Infinity}, {3, "Integer", 1}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[Alpha], \[Beta], \[Lambda], \[Mu], \[Nu], \[Omega], \[Rho], \[Sigma], \[Tau]},
 RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2(b-1)]]]] FVD[scalarMomenta[[2b-1]],\[Tau]]FVD[scalarMomenta[[2b]],\[Alpha]]FVD[gravitonParameters[[-1]],\[Lambda]]FVD[scalarMomenta[[2b]],\[Beta]]*
 		FVD[scalarMomenta[[2b+1]],\[Rho]]FVD[scalarMomenta[[2b+1]],\[Sigma]]*
 		RuleValidation`RuleRequire[GammaTensor[\[Omega],\[Mu],\[Nu],\[Lambda],gravitonParameters[[-3]],gravitonParameters[[-2]]]]*
 		(
 			RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Omega],\[Tau]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3]]]]]]
-			- 3 RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Rho],\[Beta],\[Sigma],\[Omega],\[Tau]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3]]]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Rho],\[Beta],\[Sigma],\[Omega],\[Tau]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3]]]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Alpha],\[Beta],\[Mu],\[Rho],\[Nu],\[Sigma],\[Omega],\[Tau]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3]]]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Rho],\[Sigma],\[Mu],\[Alpha],\[Nu],\[Beta],\[Omega],\[Tau]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3]]]]]]
 			+ 2 RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Mu],\[Omega],\[Tau]}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3]]]]]]
 		)
-        ), True
+        ]
+), True
     ];
 
 
@@ -232,15 +260,19 @@ T7[gravitonParameters_, scalarMomenta_, b_] :=
         T7[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 6, Infinity}, {3, "Integer", 1}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[Alpha], \[Beta], \[Lambda]1, \[Lambda]2, \[Mu], \[Nu], \[Omega]1, \[Omega]2, \[Rho], \[Sigma], \[Tau]1, \[Tau]2},
 (-1) RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2(b-1)]]]] FVD[scalarMomenta[[2b-1]],\[Tau]1]FVD[scalarMomenta[[2b]],\[Tau]2]FVD[scalarMomenta[[2b+1]],\[Rho]]FVD[scalarMomenta[[2b+1]],\[Sigma]]*
 		FVD[gravitonParameters[[-1-3]],\[Lambda]1]FVD[gravitonParameters[[-1]],\[Lambda]2]*
 		RuleValidation`RuleRequire[GammaTensor[\[Omega]1,\[Mu],\[Nu],\[Lambda]1,gravitonParameters[[-6]],gravitonParameters[[-5]]]] RuleValidation`RuleRequire[GammaTensor[\[Omega]2,\[Alpha],\[Beta],\[Lambda]2,gravitonParameters[[-3]],gravitonParameters[[-2]]]]*
 		(
 			RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 2]]]]]]
-			- 3 RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Rho],\[Beta],\[Sigma],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 2]]]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Rho],\[Beta],\[Sigma],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 2]]]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Alpha],\[Beta],\[Mu],\[Rho],\[Nu],\[Sigma],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 2]]]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Rho],\[Sigma],\[Mu],\[Alpha],\[Nu],\[Beta],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 2]]]]]]
 			+ 2 RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Mu],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 2]]]]]]
 		)
-        ), True
+        ]
+), True
     ];
 
 
@@ -251,48 +283,66 @@ T8[gravitonParameters_, scalarMomenta_, b_] :=
         T8[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 9, Infinity}, {3, "Integer", 1}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[Alpha], \[Beta], \[Lambda]1, \[Lambda]2, \[Lambda]3, \[Mu], \[Nu], \[Omega]1, \[Omega]2, \[Omega]3, \[Rho], \[Sigma], \[Tau]1, \[Tau]2, \[Tau]3},
 (1/3) RuleValidation`RuleRequire[MomentaWrapper[scalarMomenta[[;;2(b-1)]]]] FVD[scalarMomenta[[2b-1]],\[Tau]1]FVD[scalarMomenta[[2b]],\[Tau]2]FVD[scalarMomenta[[2b+1]],\[Tau]3]*
-		FVD[gravitonParameters[[-1-3 2]],\[Lambda]1]FVD[gravitonParameters[[-1-3]],\[Lambda]2]FVD[gravitonParameters[[-1]],\[Lambda]2]*
+		FVD[gravitonParameters[[-1-3 2]],\[Lambda]1]FVD[gravitonParameters[[-1-3]],\[Lambda]2]FVD[gravitonParameters[[-1]],\[Lambda]3]*
 		RuleValidation`RuleRequire[GammaTensor[\[Omega]1,\[Mu],\[Nu],\[Lambda]1,gravitonParameters[[-9]],gravitonParameters[[-8]]]] RuleValidation`RuleRequire[GammaTensor[\[Omega]2,\[Alpha],\[Beta],\[Lambda]2,gravitonParameters[[-6]],gravitonParameters[[-5]]]]*
 		RuleValidation`RuleRequire[GammaTensor[\[Omega]3,\[Rho],\[Sigma],\[Lambda]3,gravitonParameters[[-3]],gravitonParameters[[-2]]]]*
 		(
 			RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2,\[Omega]3,\[Tau]3}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 3]]]]]]
-			- 3 RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Rho],\[Beta],\[Sigma],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2,\[Omega]3,\[Tau]3}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 3]]]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Mu],\[Nu],\[Alpha],\[Rho],\[Beta],\[Sigma],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2,\[Omega]3,\[Tau]3}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 3]]]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Alpha],\[Beta],\[Mu],\[Rho],\[Nu],\[Sigma],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2,\[Omega]3,\[Tau]3}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 3]]]]]]
+			- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Rho],\[Sigma],\[Mu],\[Alpha],\[Nu],\[Beta],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2,\[Omega]3,\[Tau]3}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 3]]]]]]
 			+ 2 RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[Nu],\[Alpha],\[Beta],\[Rho],\[Sigma],\[Mu],\[Omega]1,\[Tau]1,\[Omega]2,\[Tau]2,\[Omega]3,\[Tau]3}, RuleValidation`RuleRequire[DummyArray2[b-1]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-1-3 3]]]]]]
 		)
-        ), True
+        ]
+), True
     ];
 
 
+(* Each Hessian is dd phi - Gamma.d phi. Three Hessians therefore need
+   at most three explicit differentiated metric insertions, irrespective of
+   the total graviton order. T5--T8 keep the remaining gravitons in the
+   determinant/inverse-metric coefficient. For n>=3 all four terms contribute.
+   The largest coefficient uses b + 2 + Min[n,3] inverse metrics; the shared
+   C-tensor implementation supports seven. Public guards check this before
+   constructing labelled permutations. *)
 Clear[TII];
 
 TII[gravitonParameters_, scalarMomenta_, b_] :=
     RuleValidation`RuleCall[
         TII[gravitonParameters, scalarMomenta, b],
-        {{1, "Array", 3, 0, Infinity}, {3, "Integer", 1}, {2, "Array", 1, 2 b + 1, Infinity}, {0, "Supported", Length[gravitonParameters] <= 9, "The G5 TII dispatcher is implemented only through three gravitons."}},
+        {{1, "Array", 3, 0, Infinity}, {3, "Integer", 1}, {2, "Array", 1, 2 b + 1, Infinity}, {0, "Supported", b + 2 + Min[Quotient[Length[gravitonParameters], 3], 3] <= 7, "The cubic-Hessian construction requires at most seven inverse-metric pairs."}},
         (
 Switch[ Length[gravitonParameters]/3,
 			0, RuleValidation`RuleRequire[T5[gravitonParameters,scalarMomenta,b]],
 			1, RuleValidation`RuleRequire[T5[gravitonParameters,scalarMomenta,b]] + RuleValidation`RuleRequire[T6[gravitonParameters,scalarMomenta,b]],
 			2, RuleValidation`RuleRequire[T5[gravitonParameters,scalarMomenta,b]] + RuleValidation`RuleRequire[T6[gravitonParameters,scalarMomenta,b]] + RuleValidation`RuleRequire[T7[gravitonParameters,scalarMomenta,b]],
-			3, RuleValidation`RuleRequire[T5[gravitonParameters,scalarMomenta,b]] + RuleValidation`RuleRequire[T6[gravitonParameters,scalarMomenta,b]] + RuleValidation`RuleRequire[T7[gravitonParameters,scalarMomenta,b]] + RuleValidation`RuleRequire[T8[gravitonParameters,scalarMomenta,b]]
+			_, RuleValidation`RuleRequire[T5[gravitonParameters,scalarMomenta,b]] + RuleValidation`RuleRequire[T6[gravitonParameters,scalarMomenta,b]] + RuleValidation`RuleRequire[T7[gravitonParameters,scalarMomenta,b]] + RuleValidation`RuleRequire[T8[gravitonParameters,scalarMomenta,b]]
 		]
         ), True
     ];
 
 
+(* For X = (partial phi)^2 and the documented (+---) curvature convention,
+   L5 contains +b/3 phi^a X^(b-1) H3. TII includes its own -1/3 and Fourier
+   factors; relative to the common I/2 prefactor this requires -2 b. *)
 Clear[HorndeskiG5];
 
 HorndeskiG5[gravitonParameters_, scalarMomenta_, b_] :=
     RuleValidation`RuleCall[
         HorndeskiG5[gravitonParameters, scalarMomenta, b],
-        {{1, "Array", 3, 3, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}, {0, "Supported", Length[gravitonParameters] <= 9 || b == 0, "The G5 TII dispatcher is implemented only through three gravitons."}},
+        {{1, "Array", 3, 3, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}, {0, "Supported", b + 2 + Min[Quotient[Length[gravitonParameters], 3], 3] <= 7, "The G5 construction requires at most seven inverse-metric pairs (b<=4 at n=1, b<=3 at n=2, b<=2 at n>=3)."}},
         (
+(* Fresh dummy indices prevent collisions with supplied external labels.
+   Localisation ends at this call; failure/abort unwinds it normally. *)
+Block[{$scalarDummyIndices = Table[Unique["HorndeskiG5`Private`scalar$"], {2 b}]},
 Switch[b,
-			0, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[RuleValidation`RuleRequire[ TI@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ]] //Expand//Contract,
-			_, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[RuleValidation`RuleRequire[ TI@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ]] + I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] (-b) Total[RuleValidation`RuleRequire[ TII@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ]]//Expand//Contract
+			0, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[RuleValidation`RuleRequire[ TI@@@Tuples[{ Flatten/@ labelledPermutations[ Partition[gravitonParameters,3]], labelledPermutations[scalarMomenta] , {b}}] ]] //Expand//Contract,
+			_, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[RuleValidation`RuleRequire[ TI@@@Tuples[{ Flatten/@ labelledPermutations[ Partition[gravitonParameters,3]], labelledPermutations[scalarMomenta] , {b}}] ]] + I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] (-2 b) Total[RuleValidation`RuleRequire[ TII@@@Tuples[{ Flatten/@ labelledPermutations[ Partition[gravitonParameters,3]], labelledPermutations[scalarMomenta] , {b}}] ]]//Expand//Contract
 		]
-        ), True
+        ]
+), True
     ];
 
 
@@ -301,13 +351,17 @@ Clear[HorndeskiG5Uncontracted];
 HorndeskiG5Uncontracted[gravitonParameters_, scalarMomenta_, b_] :=
     RuleValidation`RuleCall[
         HorndeskiG5Uncontracted[gravitonParameters, scalarMomenta, b],
-        {{1, "Array", 3, 3, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}, {0, "Supported", Length[gravitonParameters] <= 9 || b == 0, "The G5 TII dispatcher is implemented only through three gravitons."}},
+        {{1, "Array", 3, 3, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}, {0, "Supported", b + 2 + Min[Quotient[Length[gravitonParameters], 3], 3] <= 7, "The G5 construction requires at most seven inverse-metric pairs (b<=4 at n=1, b<=3 at n=2, b<=2 at n>=3)."}},
         (
+(* Fresh dummy indices prevent collisions with supplied external labels.
+   Localisation ends at this call; failure/abort unwinds it normally. *)
+Block[{$scalarDummyIndices = Table[Unique["HorndeskiG5`Private`scalar$"], {2 b}]},
 Switch[b,
-			0, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[RuleValidation`RuleRequire[ TI@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ]],
-			_, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[RuleValidation`RuleRequire[ TI@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ]] + I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] (-b) Total[RuleValidation`RuleRequire[ TII@@@Tuples[{ Flatten/@ Permutations[ Partition[gravitonParameters,3]], Permutations[scalarMomenta] , {b}}] ]]
+			0, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[RuleValidation`RuleRequire[ TI@@@Tuples[{ Flatten/@ labelledPermutations[ Partition[gravitonParameters,3]], labelledPermutations[scalarMomenta] , {b}}] ]],
+			_, I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] Total[RuleValidation`RuleRequire[ TI@@@Tuples[{ Flatten/@ labelledPermutations[ Partition[gravitonParameters,3]], labelledPermutations[scalarMomenta] , {b}}] ]] + I/2 Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+2] (-2 b) Total[RuleValidation`RuleRequire[ TII@@@Tuples[{ Flatten/@ labelledPermutations[ Partition[gravitonParameters,3]], labelledPermutations[scalarMomenta] , {b}}] ]]
 		]
-        ), True
+        ]
+), True
     ];
 
 

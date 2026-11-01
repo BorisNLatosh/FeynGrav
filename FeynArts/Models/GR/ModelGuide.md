@@ -1,6 +1,6 @@
 # Pure GR model for FeynArts
 
-[Directory overview](README.md)
+[Directory overview](README.md) · [GR action and model reference](../../../Documentation/Models/GeneralRelativity.md)
 
 `GR` is ready for native three- and four-graviton tree construction with FeynCalc-patched FeynArts. No model build or FORM installation is needed.
 

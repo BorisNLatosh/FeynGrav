@@ -1,0 +1,399 @@
+# Horndeski scalar–tensor gravity
+
+[Model index](../Models.md) · [Common conventions](../Conventions.md) · [General relativity](GeneralRelativity.md)
+
+**Applies to the 4.2.0 development checkout; reviewed 1 November 2026.**
+FeynGrav provides four monomial interaction interfaces, `HorndeskiG2` through
+`HorndeskiG5`, and a finite set of stored vertices about flat spacetime.
+There is no general Horndeski FeynArts model or automatic compiler for arbitrary
+functions of the scalar and its kinetic invariant.
+
+**The action below fixes the convention target for the implementation audit.**
+It is not a claim that every existing source or library already implements that
+action at arbitrary order. The [G2/G3/G5 audit](../Verification/HorndeskiAudit-2026-11-01.md)
+accepts the specified stored selections and corrects four G5 libraries; the G4
+source repair is [accepted](../Verification/HorndeskiG4-2026-11-01.md). Its
+14 stored libraries and ordinary imports are now [migrated and independently checked](../Verification/HorndeskiLibraryMigration-2026-11-01.md).
+The [verification section](#verification-and-open-work)
+distinguishes established special cases from open checks.
+
+## Contents
+
+- [Fields and conventions](#fields-and-conventions)
+- [Action](#action)
+- [Translation from the literature](#translation-from-the-literature)
+- [Monomials and coupling normalisation](#monomials-and-coupling-normalisation)
+- [Free fields, gauge fixing and ghosts](#free-fields-gauge-fixing-and-ghosts)
+- [Commands and library inventory](#commands-and-library-inventory)
+- [Examples and FeynArts support](#examples-and-feynarts-support)
+- [Rule generation and higher orders](#rule-generation-and-higher-orders)
+- [Verification and open work](#verification-and-open-work)
+
+## Fields and conventions
+
+The physical theory contains a metric and one real scalar. The perturbative
+rules use
+
+$$
+g_{\mu\nu}=\eta_{\mu\nu}+\kappa h_{\mu\nu},
+\qquad \eta_{\mu\nu}=\operatorname{diag}(+1,-1,-1,-1),
+\qquad \bar\phi=0.
+$$
+
+The scalar argument of the interaction is the fluctuation about zero. A
+nonzero background requires a separate expansion and a corresponding check of
+the quadratic action. It is not selected by assigning a value to a coupling.
+
+Use the curvature and positive Fourier phase in
+[Common conventions](../Conventions.md#curvature). Define
+
+$$
+X=g^{\mu\nu}\partial_\mu\phi\,\partial_\nu\phi,
+\qquad H_{\mu\nu}=\nabla_\mu\nabla_\nu\phi
+=\partial_\mu\partial_\nu\phi-\Gamma^\rho{}_{\mu\nu}\partial_\rho\phi.
+$$
+
+There is **no factor of one-half in X**. With all contractions performed using
+the full metric, write
+
+$$
+\begin{aligned}
+[H]&=g^{\mu\nu}H_{\mu\nu}=\Box\phi,\\
+[H^2]&=H^\mu{}_{\nu}H^\nu{}_{\mu}=H_{\mu\nu}H^{\mu\nu},\\
+[H^3]&=H^\mu{}_{\nu}H^\nu{}_{\rho}H^\rho{}_{\mu},\\
+\mathcal H_2&=[H]^2-[H^2],\\
+\mathcal H_3&=[H]^3-3[H][H^2]+2[H^3].
+\end{aligned}
+$$
+
+The minus sign in the covariant Hessian follows from the connection acting on
+the covector $\partial_\nu\phi$. Changing metric signature does not change that
+definition to a plus sign.
+
+## Action
+
+In these conventions the four-dimensional Horndeski action is
+
+$$
+S_{\mathrm H}=\int d^4x\,\sqrt{-g}
+\left(\mathcal L_2+\mathcal L_3+\mathcal L_4+\mathcal L_5\right),
+$$
+
+with
+
+$$
+\begin{aligned}
+\mathcal L_2&=G_2(\phi,X),\\
+\mathcal L_3&=G_3(\phi,X)[H],\\
+\mathcal L_4&=G_4(\phi,X)R-2G_{4,X}(\phi,X)\mathcal H_2,\\
+\mathcal L_5&=G_5(\phi,X)G^{\mu\nu}H_{\mu\nu}
++\frac13G_{5,X}(\phi,X)\mathcal H_3.
+\end{aligned}
+$$
+
+Here $G_{i,X}=\partial G_i/\partial X$ and
+$G_{\mu\nu}=R_{\mu\nu}-g_{\mu\nu}R/2$. The function $G_2$ and the Einstein
+tensor $G_{\mu\nu}$ are different objects. The coefficients $-2$ and $+1/3$
+are required by this definition of X and the stated metric/curvature convention;
+the translation is given below.
+
+The standard GR and canonical massive-scalar terms are obtained with
+
+$$
+G_4=-\frac{2}{\kappa^2}+\Delta G_4,
+\qquad G_2=\frac12X-\frac12m^2\phi^2-V_{\mathrm{int}}(\phi)+\Delta G_2.
+$$
+
+When using the conventional pure-GR and minimal-scalar commands separately,
+add only the additional interactions: do not count their action terms again
+through a Horndeski monomial. Scalar tadpoles, vacuum energy, field mixing and
+kinetic normalisation must be consistent with the chosen flat background.
+
+The rules retain symbolic D as a dimensional continuation of the
+four-dimensional action. This is not a claim to implement the most general
+second-order scalar–tensor theory in every dimension, or perturbations about
+a cosmological background.
+
+## Translation from the literature
+
+[Kobayashi, Yamaguchi and Yokoyama, Eqs. (1)–(5)](https://arxiv.org/html/1105.5723v4#S2)
+use the mostly-plus metric, $\widehat X=-\widehat g^{\mu\nu}
+\partial_\mu\phi\partial_\nu\phi/2$, and
+$\widehat{\mathcal L}_3=-\widehat G_3\widehat\Box\phi$.
+Keep the mixed-index Riemann definition fixed and set
+$\widehat g_{\mu\nu}=-g_{\mu\nu}$. Then
+
+$$
+\begin{gathered}
+\widehat X=X/2,\qquad
+\widehat\Gamma^\rho{}_{\mu\nu}=\Gamma^\rho{}_{\mu\nu},\qquad
+\widehat H_{\mu\nu}=H_{\mu\nu},\\
+\widehat R=-R,\qquad
+\widehat G_{\mu\nu}=G_{\mu\nu},\qquad
+\widehat{[H]}=-[H],\qquad
+\widehat{\mathcal H}_2=\mathcal H_2,\qquad
+\widehat{\mathcal H}_3=-\mathcal H_3.
+\end{gathered}
+$$
+
+Define the functions in this page by
+
+$$
+\begin{aligned}
+G_2(\phi,X)&=\widehat K(\phi,X/2),&
+G_3(\phi,X)&=\widehat G_3(\phi,X/2),\\
+G_4(\phi,X)&=-\widehat G_4(\phi,X/2),&
+G_5(\phi,X)&=\widehat G_5(\phi,X/2).
+\end{aligned}
+$$
+
+Consequently $\widehat G_{4,\widehat X}=-2G_{4,X}$ and
+$\widehat G_{5,\widehat X}=2G_{5,X}$ at corresponding arguments. Substituting
+these relations gives the action above. This translates both the signature
+and the kinetic variable; it does not change only the sign of a Hessian term.
+
+**Difference from the original FeynGrav presentation.**
+[FeynGrav 3.0, Eq. (27)](https://arxiv.org/html/2406.14872#S3.E27)
+states $X=(\nabla\phi)^2$ but prints $+G_{4,X}\mathcal H_2$ and
+$-G_{5,X}\mathcal H_3/6$. With the conventions fixed here, those relative
+coefficients must instead be $-2G_{4,X}$ and $+G_{5,X}/3$.
+Agreement with the printed expression alone is therefore insufficient as a
+Horndeski correctness test. The [G2/G3/G5 audit](../Verification/HorndeskiAudit-2026-11-01.md)
+records the resulting source corrections and four regenerated G5 libraries.
+The [G4 source audit](../Verification/HorndeskiG4-2026-11-01.md) accepts the
+corrected construction and explains all 14 stored-library differences. The
+[subsequent migration](../Verification/HorndeskiLibraryMigration-2026-11-01.md) regenerates and verifies those files.
+
+Two useful convention checks follow by integration by parts:
+
+$$
+\begin{aligned}
+\mathcal H_2&\simeq R_{\mu\nu}\partial^\mu\phi\partial^\nu\phi,\\
+-\frac{\beta}{2}XR+\beta\mathcal H_2
+&\simeq \beta G^{\mu\nu}\partial_\mu\phi\partial_\nu\phi,\\
+-\beta\phi G^{\mu\nu}H_{\mu\nu}
+&\simeq \beta G^{\mu\nu}\partial_\mu\phi\partial_\nu\phi.
+\end{aligned}
+$$
+
+Here $\simeq$ means equality of actions up to a boundary term. Thus John can
+be represented either by $\Delta G_4=-\beta X/2$ or by $G_5=-\beta\phi$.
+These are alternative representations, not two contributions to add. The
+existing native John model uses the second route. For another check,
+$G_3=f(\phi)$ gives $G_3\Box\phi\simeq-f_{,\phi}X$; a constant G5 is a boundary
+term. The full scalar and graviton permutation sums and momentum conservation
+matter when testing such identities as vertices.
+
+## Monomials and coupling normalisation
+
+The command interfaces use coefficients of $\lambda\phi^a X^b$ in each
+function, with explicit non-negative integers a and b. For one coefficient,
+the interaction densities in the corrected convention are
+
+$$
+\begin{aligned}
+\Delta\mathcal L_2&=\lambda_2\phi^aX^b,\\
+\Delta\mathcal L_3&=\lambda_3\phi^aX^b[H],\\
+\Delta\mathcal L_4&=\lambda_4\phi^a
+\left(X^bR-2bX^{b-1}\mathcal H_2\right),\\
+\Delta\mathcal L_5&=\lambda_5\phi^a
+\left(X^bG^{\mu\nu}H_{\mu\nu}+\frac b3X^{b-1}\mathcal H_3\right).
+\end{aligned}
+$$
+
+For b = 0, omit the differentiated-function term before evaluation; do not
+construct $0X^{-1}$. The G5 stored selections have been checked against this
+action within the scope below. The G4 source is also checked against this
+action; the shipped G4 libraries and ordinary interface now return the corrected expressions.
+
+The coupling argument is the coefficient of the monomial itself. There is no
+implicit $1/a!$, $1/b!$ or $2^{-b}$ in that definition. If a model is written
+with such factors, include them in the coupling supplied to the command.
+The library convention includes the vertex phase, κ powers and field
+differentiation multiplicities; do not add another factor of i or a graviton
+factorial. The six historical G4 b=0 files omitted a!; the migration restores
+it without changing the coupling convention. Recompute affected old results. In particular, G2's
+graviton multiplicity was corrected separately
+from its scalar permutation sum.
+
+| Family | Number of scalar momenta s | Graviton data | Meaning of a |
+| --- | --- | --- | --- |
+| G2 | $a+2b$ | Flat list of n index pairs | $a=s-2b$ |
+| G3 | $a+2b+1$ | Flat list of n index–index–momentum triples | $a=s-2b-1$ |
+| G4 | $a+2b$ | Flat list of n triples | $a=s-2b$ |
+| G5 | $a+2b+1$ | Flat list of n triples | $a=s-2b-1$ |
+
+For these additional monomials n counts attached gravitons and the metric
+expansion contributes $\kappa^n$; a chosen coupling can itself contain κ.
+The separately supplied pure-GR r-graviton rule instead carries
+$\kappa^{r-2}$. All scalar and graviton momenta are incoming.
+
+## Free fields, gauge fixing and ghosts
+
+For the canonical GR plus scalar free action, use `ScalarPropagator[p, m]`,
+`GravitonPropagator[mu, nu, alpha, beta, p]` and the gravitational ghost sector
+described on the [GR page](GeneralRelativity.md#gauge-fixing-and-ghosts).
+Its linear gauge choice is
+
+$$
+F_\mu=\partial^\nu h_{\mu\nu}-\frac12\partial_\mu h,
+\qquad S_{\mathrm{gf}}=\frac{2}{\varepsilon}\int d^D x\,F_\mu F^\mu,
+\qquad \varepsilon=\texttt{GaugeFixingEpsilon}.
+$$
+
+The default is 2. With this metric-only gauge function there is no new
+independent scalar gauge symmetry or scalar FP species. The vector ghost and
+antighost retain the GR kinetic term and cubic graviton coupling, including
+the negative ordered ghost propagator.
+
+These propagators are not an automatic inversion of a general Horndeski
+quadratic action. If the chosen functions or background alter the scalar
+kinetic term, graviton normalisation or scalar–graviton mixing, first determine
+the appropriate free fields or explicitly treat the additional quadratic terms
+as perturbative insertions. Importing a Horndeski library does neither operation.
+
+## Commands and library inventory
+
+Use the ordinary FeynGrav interface in a fresh kernel, with D, κ and the
+couplings unassigned. Import only the families required for the calculation:
+
+```mathematica
+<< FeynGrav`
+FeynGravImportHorndeskiG2[];
+FeynGravImportHorndeskiG3[];
+```
+
+The four-argument public calls are:
+
+| Command | Required importer |
+| --- | --- |
+| `HorndeskiG2[pairs, momenta, b, lambda]` | `FeynGravImportHorndeskiG2[]` |
+| `HorndeskiG3[triples, momenta, b, lambda]` | `FeynGravImportHorndeskiG3[]` |
+| `HorndeskiG4[triples, momenta, b, lambda]` | `FeynGravImportHorndeskiG4[]`; all 14 shipped files independently checked |
+| `HorndeskiG5[triples, momenta, b, lambda]` | `FeynGravImportHorndeskiG5[]`; audited stored selections; John unchanged |
+
+For the stored G2 monomial with a = 1, b = 1 and one graviton:
+
+```mathematica
+v2 = HorndeskiG2[{\[Mu], \[Nu]}, {p1, p2, p3}, 1, \[Lambda]2];
+```
+
+For the stored G3 monomial with a = 0, b = 1 and one graviton:
+
+```mathematica
+v3 = HorndeskiG3[{\[Mu], \[Nu], k}, {p1, p2, p3}, 1, \[Lambda]3];
+```
+
+The graviton's momentum is unnecessary as an explicit G2 argument because
+that monomial has no metric derivatives. For G3 it is supplied in the triple;
+all-incoming conservation is $k+p_1+p_2+p_3=0$. These calls retrieve individual
+vertices, without imposing that relation or calculating a scattering amplitude.
+
+Horndeski importers accept options but **no order argument**. They import every
+available matching file. `Verbose -> False` is the default. To print an
+inventory use `FeynGravImportHorndeskiG2[Verbose -> True]`; to inspect a successful
+import and its file identities, evaluate:
+
+```mathematica
+FeynGravLibraryInformation[FeynGravImportHorndeskiG2]
+```
+
+The extensionless filenames are `HorndeskiGi_a_b_n`. This checkout contains
+the following selections; each listed pair has **both n = 1 and n = 2**:
+
+| Family | Installed (a,b) pairs | Files |
+| --- | --- | --- |
+| G2 | (0,2), (0,3), (1,1), (1,2), (2,1), (2,2), (3,1), (4,1) | 16 |
+| G3 | (0,1), (0,2), (1,1), (1,2), (2,0), (2,1), (3,0), (3,1), (4,0), (5,0) | 20 |
+| G4 | (0,1), (0,2), (1,1), (2,0), (2,1), (3,0), (4,0) | 14 |
+| G5 | (0,1), (1,0), (1,1), (2,0), (3,0) | 10 |
+
+This is a file inventory, not mathematical certification. An unmatched call
+does not mean a vertex is zero. The importer does not generate absent orders
+or compile a general G function. No zero-graviton Horndeski libraries are
+shipped: purely scalar derivative contacts can still exist and must be included
+when assembling a complete process. The inventory is not a complete amplitude
+prescription for an arbitrary choice of functions.
+
+## Examples and FeynArts support
+
+There is no native `Horndeski` model. The supplied
+[John bundle](../../FeynArts/Models/John/ModelGuide.md) implements GR, a canonical
+massive scalar and $\beta G^{\mu\nu}\partial_\mu\phi\partial_\nu\phi$ through κ²
+per vertex. It uses G5 with a = 1, b = 0 and coupling $-\beta$, so the
+G5 differentiated-function term is absent. Its independent verification does
+not validate the general G4 family or G5 cases with b > 0.
+
+Use [example 10](../../Examples/10.%20Scalar_Scattering_John_Tree_Level_FeynArts.nb)
+for scalar elastic scattering in that model. The separate
+[EsGB bundle and example](../../FeynArts/Models/Einstein-scalar-Gauss-Bonnet/ModelGuide.md)
+use explicit scalar–Gauss–Bonnet rules; that workflow does not establish support
+for a non-polynomial Horndeski representation. See the
+[example index](../../Examples/README.md) for the remaining calculations.
+
+`FeynGravSimplify` can simplify supported expressions assembled from these
+vertices. It does not choose the action, repair a rule, supply omitted contacts,
+derive a free propagator or establish gauge invariance automatically.
+
+## Rule generation and higher orders
+
+The routines in `Rules/` are distinct from the four-argument library interface:
+their public G2–G5 constructors and `Uncontracted` variants take **three**
+arguments, with unit monomial coupling. Use a separate fresh generator kernel
+to avoid collisions between identical short names. Read the
+[rule contracts](../../Rules/Contracts.md) and [generator guide](../../Libs/Generator.md).
+
+`GenerateHorndeskiG2Specific[a, b, n]` and the corresponding G3–G5 commands
+construct a selected library; n must be positive. The generator uses the
+uncontracted rule before algebraic processing. Batch commands additionally
+filter the scalar counts described in the generator guide. These selection
+filters are not the mathematical domain of every specific rule.
+
+G5's TII contribution now supports every graviton order. Its four classes contain
+zero through three connections; further gravitons enter through the determinant
+and inverse metrics. The direct source bounds are b <= 4 for n = 1, b <= 3 for
+n = 2 and b <= 2 for n >= 3, with nonnegative a and b. They reflect the shared
+seven-inverse-metric limit, not a runtime guarantee. The b = 0 route remains
+separate. G2 accepts an empty graviton list; direct G3–G5 require at least one
+triple. The [higher-order derivation and checks](../Verification/HorndeskiG5HigherOrders-2026-11-01.md)
+include the complete four-graviton a = 0, b = 1 vertex and selected T8 sectors.
+No higher-order stored library is added by this extension.
+
+For any extension, first validate the relevant source against the corrected
+action, including permutations, coupling and Fourier factors. Generate into
+a separate candidate directory, compare the candidate and public import
+against that reference, then document the supported domain. The corrected G4
+source has dependency bounds b <= 5 for one graviton and b <= 4 for two or more,
+with nonnegative a and b. Its verified cases and the optional generic b=5 timeout
+are in the [source report](../Verification/HorndeskiG4-2026-11-01.md); these bounds
+are not arbitrary-order runtime guarantees. RULE-05 has regenerated and checked
+all 14 shipped G4 libraries, including their public imports and the John identities.
+Native model files require their own rebuild and checks only if an affected rule
+feeds them; none of the shipped bundles uses general G4.
+
+## Verification and open work
+
+| Item | Current evidence and limit |
+| --- | --- |
+| Convention translation | The metric/function map above fixes the action algebraically. It does not constitute an independent expansion of the stored vertices. |
+| G2/G3 | [Independent audit](../Verification/HorndeskiAudit-2026-11-01.md): all shipped selections at n = 1,2; direct labelled-leg/index corrections, unchanged stored libraries; stated exact-reduction and higher-order limits. |
+| G4 source | [RULE-01 accepted](../Verification/HorndeskiG4-2026-11-01.md): corrected action, literal public contracted/uncontracted checks through two gravitons, complete n=3,b=2 from all source-seed permutations, higher-b/spectator checks and interface recovery. Generic b5 timed out; arbitrary orders are not certified. |
+| John | [John verification](../../FeynArts/Models/John/ModelGuide.md#verification): full cubic/quartic off-shell action checks and selected symbolic-D Ward checks. This covers the specified b = 0 interaction, not all of G5. |
+| G5 | [RULE-04 audit](../Verification/HorndeskiAudit-2026-11-01.md): all shipped selections at n = 1,2 and complete a = 0, b = 1, n = 3 source; corrected Hessian blocks/T8, unchanged John. No arbitrary-order certification. |
+| Stored libraries and downstream users | [RULE-05 completed](../Verification/HorndeskiLibraryMigration-2026-11-01.md): all 14 G4 files regenerated and independently checked; four G5 b=1 files corrected in the earlier audit; public-import/recovery and John identities pass. All 60 files have recorded provenance. Models and notebook outputs remain unchanged. |
+| Higher-order G5 | [RULE-02 completed](../Verification/HorndeskiG5HigherOrders-2026-11-01.md): all-order connection-class derivation, complete n=4,a=0,b=1 action comparison, independent T8 at n=4,b=2 and n=5,b=1, lower-order/interface regressions. No full n5 or arbitrary-order runtime certification. |
+
+The implementation work is specified in the
+[Horndeski audit plan](../Verification/HorndeskiImplementationPlan.md).
+Use exact symbolic-D off-shell comparisons, independent reference construction,
+permutation/multilinearity checks and sensitive negative controls. Keep source
+agreement, stored-library agreement and physical identities as separate tests.
+Numerical projections, old regression matches or a successful import cannot
+replace the independent action comparison.
+
+The [audit and migration report](../Verification/HorndeskiAudit-2026-11-01.md)
+records the earlier source corrections and four regenerated G5 libraries. The
+[completed library migration](../Verification/HorndeskiLibraryMigration-2026-11-01.md) adds the 14 corrected G4 files.
+Restart the kernel and recompute results using any old G4 library or the affected
+G5 b>0 files; a global rescaling is generally insufficient. No notebook or native
+scattering result was rewritten or rerun.

@@ -42,6 +42,13 @@ HorndeskiG2Uncontracted::usage = HorndeskiG2Uncontracted::usage <> " Supported s
 
 Begin["`Private`"];
 
+(* External legs stay labelled even when their values coincide. Permuting the
+   values directly would remove duplicates and lose functional derivatives. *)
+Clear[labelledPermutations];
+labelledPermutations[legs_List] := legs[[#]] & /@ Permutations[Range[Length[legs]]];
+
+
+
 (* Averaged metric-density coefficients require n! when differentiated into
    n labelled graviton legs. Do not apply it again to permutation sums. *)
 
@@ -71,6 +78,8 @@ DummyArray2[n_] :=
         DummyArray2[n],
         {{1, "Integer", 0}},
         (
+(* Both sides of each contraction must use this call's same fresh indices. *)
+If[ListQ[$scalarDummyIndices], Take[$scalarDummyIndices, 2 n],
 Flatten[RuleValidation`RuleRequire[
 		Table[
 			{
@@ -80,7 +89,8 @@ Flatten[RuleValidation`RuleRequire[
 		{i, n}
 	]
 ]]
-        ), False
+        ]
+), False
     ];
 
 
@@ -91,15 +101,19 @@ HorndeskiG2[gravitonParameters_, scalarMomenta_, b_] :=
         HorndeskiG2[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 2, 0, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b, Infinity}},
         (
+(* Fresh dummy indices prevent collisions with supplied external labels.
+   Localisation ends at this call; failure/abort unwinds it normally. *)
+Block[{$scalarDummyIndices = Table[Unique["HorndeskiG2`Private`scalar$"], {2 b}]},
 Factorial[Length[gravitonParameters]/2] (
 Total[RuleValidation`RuleRequire[
 			RuleValidation`RuleRequire[Map[
 				I (Global`\[Kappa])^(Length[gravitonParameters]/2) Power[-1,b] RuleValidation`RuleRequire[CTensorGeneral[RuleValidation`RuleRequire[DummyArray2[b]],gravitonParameters]] RuleValidation`RuleRequire[MomentaWrapper[#[[;;2b]]]] & ,
-				Permutations[scalarMomenta]
+				labelledPermutations[scalarMomenta]
 			]]
 		]] //Contract
 )
-        ), True
+        ]
+), True
     ];
 
 
@@ -110,15 +124,19 @@ HorndeskiG2Uncontracted[gravitonParameters_, scalarMomenta_, b_] :=
         HorndeskiG2Uncontracted[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 2, 0, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b, Infinity}},
         (
+(* Fresh dummy indices prevent collisions with supplied external labels.
+   Localisation ends at this call; failure/abort unwinds it normally. *)
+Block[{$scalarDummyIndices = Table[Unique["HorndeskiG2`Private`scalar$"], {2 b}]},
 Factorial[Length[gravitonParameters]/2] (
 Total[RuleValidation`RuleRequire[
 			RuleValidation`RuleRequire[Map[
 				I (Global`\[Kappa])^(Length[gravitonParameters]/2) Power[-1,b] RuleValidation`RuleRequire[CTensorGeneral[RuleValidation`RuleRequire[DummyArray2[b]],gravitonParameters]] RuleValidation`RuleRequire[MomentaWrapper[#[[;;2b]]]] & ,
-				Permutations[scalarMomenta]
+				labelledPermutations[scalarMomenta]
 			]]
 		]]
 )
-        ), True
+        ]
+), True
     ];
 
 

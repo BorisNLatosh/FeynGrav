@@ -72,6 +72,46 @@ formal scaleless terms. Singular or unsupported families may remain unreduced
 with a partial-reduction notice. This is not master-integral evaluation,
 a Laurent expansion, renormalisation or general multiloop integration.
 
+## Horndeski scientific corrections
+
+The documented (+---), X-without-a-half action requires -2 G4,X H2 and
++G5,X H3/3. Independent G2/G3/G5 checks repair labelled-leg multiplicities and
+temporary-index collisions. G5 also receives corrected cubic-Hessian
+normalisation, symmetric connection placements and its third connection index.
+In the G5 family, `HorndeskiG5_0_1_1`, `_0_1_2`, `_1_1_1` and `_1_1_2` change; G2/G3 libraries
+and the six G5 b = 0 libraries remain unchanged. Public signatures are unchanged.
+
+Restart the kernel and recompute results using the corrected b = 1 G5 vertices;
+no single global factor converts old amplitudes. Direct calculations with
+coincident momenta or colliding temporary indices also need recomputation.
+The John model's b = 0 vertices and all model/notebook files are unchanged.
+[Verification and migration details](Verification/HorndeskiAudit-2026-11-01.md)
+state the finite scope. The separate [RULE-01 repair](Verification/HorndeskiG4-2026-11-01.md)
+now gives both G4 source variants one corrected analytic construction, including
+the -2b Hessian coefficient, Fourier phase, b=0 scalar factorial, labelled
+permutations and fresh internal indices. The contracted multi-graviton b>=2
+branch is implemented within its documented dependency bounds.
+
+**G4 library migration is complete.** All 14 shipped files have been regenerated
+and independently checked; ordinary four-argument G4 calls now use the corrected
+rules. Eight files receive the relative Hessian correction. Six b=0 files gain
+the missing a! factors (2, 6 and 24). Public signatures and monomial coupling
+normalisations are unchanged. The [migration report](Verification/HorndeskiLibraryMigration-2026-11-01.md)
+records all 60 library identities, import recovery and John cross-checks.
+
+Restart the kernel and recompute results using old G4 libraries. An isolated
+b=0 vertex changes by the stated factorial; b>0 changes relative action blocks
+and cannot be repaired by a global factor. Source/library updates do not modify
+saved notebook outputs. No general Horndeski, arbitrary-order runtime or
+loop-amplitude certification is implied.
+
+The direct G5 source now supports cubic-Hessian contributions beyond three
+gravitons, with the existing inverse-metric bounds: b<=4 at n=1, b<=3 at n=2,
+b<=2 at n>=3. [RULE-02 verification](Verification/HorndeskiG5HigherOrders-2026-11-01.md)
+includes the full four-graviton a=0,b=1 action comparison at symbolic D and generic
+off-shell momenta, selected higher connection sectors and lower-order regressions.
+No additional stored library or native FeynArts model order is introduced.
+
 ## Examples and scientific scope
 
 The numbered examples use `FeynGravSimplify`. Example 07 presents the

@@ -1,6 +1,6 @@
 # Supplied FeynArts models
 
-[Directory overview](README.md)
+[Directory overview](README.md) · [All FeynGrav model sectors](../../Documentation/Models.md)
 
 Each model has the same self-contained bundle layout:
 

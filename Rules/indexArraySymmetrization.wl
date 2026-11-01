@@ -68,7 +68,8 @@ Module[{pairs, perms},
 					This accounts for the symmetry under permutations of pairs.
 				*)
 
-				perms = Permutations[pairs];
+				(* Keep all labelled block permutations, including equal-valued pairs. *)
+				perms = (pairs[[#]] & /@ Permutations[Range[Length[pairs]]]);
 
 				(*
 					For each permutation of pairs:
@@ -133,7 +134,8 @@ Module[{triplets, perms},
 					Generate all permutations of the triplet list.
 					This accounts for the symmetry under permutations of triplets.
 				*)
-				perms = Permutations[triplets];
+				(* The normalisation requires 2^n n! entries even for repeated blocks. *)
+				perms = (triplets[[#]] & /@ Permutations[Range[Length[triplets]]]);
 				(*
 					For each permutation of triplets:
 					- #[[All,{2,1,3}]] swaps the first two indices in every triplet,

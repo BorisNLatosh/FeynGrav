@@ -14,9 +14,14 @@ The [PERF-04 measurements](Verification/PERF04-2026-10-25.md) remain the histori
 
 ## Choose a route
 
+Begin with [Getting started with FeynGrav](GettingStarted.md), then read
+[Common conventions](Conventions.md) before assembling an amplitude. Find the implemented sectors in the
+[model index](Models.md), with detailed pages for [general relativity](Models/GeneralRelativity.md)
+and [Horndeski gravity](Models/Horndeski.md).
+
 | Reader | Start here | Continue with |
 | --- | --- | --- |
-| New user | [Installation and requirements](UserGuide.md#requirements) | [Function reference](Reference.md), then [example notebooks](../Examples/README.md) |
+| New user | [Getting started](GettingStarted.md) | [Common conventions](Conventions.md), [function reference](Reference.md), then [example notebooks](../Examples/README.md) |
 | FORM user | [Converter guide](../CalcFormConverter/UserGuide.md) | Supported vocabulary, conventions and troubleshooting in that guide; [benchmarks](../Benchmark/UserGuide.md) for local timings |
 | FeynArts user | [Supplied model guides](../FeynArts/Models/ModelCatalogue.md) | Ready-to-use GR trees and [Single-Scalar-Tensor-Minimal-Coupling mixed trees](../FeynArts/Models/Single-Scalar-Tensor-Minimal-Coupling/ModelGuide.md); [optional pure-GR bridge](../FeynArtsIntegration/BridgeGuide.md). Loop compatibility is deferred; the corrected GR snapshot is rejected by the unchanged bridge loop gate. |
 | Library developer | [Interaction-rule contracts](../Rules/Contracts.md) | [Library generation](../Libs/Generator.md); use a separate fresh kernel from ordinary FeynGrav calculations |
@@ -25,6 +30,12 @@ The [PERF-04 measurements](Verification/PERF04-2026-10-25.md) remain the histori
 The reference covers main-package commands, public gauge parameters and the automatically loaded Nieuwenhuizen helpers. Generator-side routines have separate signatures: do not substitute them for library-backed main-package functions simply because their short names match.
 
 ## Verification and history
+
+- [G5 higher-order source extension](Verification/HorndeskiG5HigherOrders-2026-11-01.md): RULE-02 construction, full four-graviton comparison, selected higher sectors, domain bounds and retained failed attempts.
+
+- [Horndeski implementation audit plan](Verification/HorndeskiImplementationPlan.md): corrected action conventions; separate G2/G3, G4 and G5 checks, then affected-library migration. RULE-03/RULE-04 are accepted in the [audit report](Verification/HorndeskiAudit-2026-11-01.md); the [G4 source repair](Verification/HorndeskiG4-2026-11-01.md) is accepted and [RULE-05 library migration is complete](Verification/HorndeskiLibraryMigration-2026-11-01.md).
+
+- [Horndeski G4 source acceptance](Verification/HorndeskiG4-2026-11-01.md): corrected action and independent exact checks. The [completed library migration](Verification/HorndeskiLibraryMigration-2026-11-01.md) covers all 60 stored selections, including the 14 regenerated G4 files. The [review history](Verification/HorndeskiG4ContractedBranch.md), [correction plan](Verification/HorndeskiG4CorrectionPlan.md) and [earlier plan](Verification/HorndeskiG4CompletionPlan.md) retain prior failures and decisions.
 
 - [Example syntax and interface audit](Verification/ExamplesSyntax-2026-10-25.md): all 11 notebooks, six narrow input repairs, preserved outputs and explicit execution limits.
 

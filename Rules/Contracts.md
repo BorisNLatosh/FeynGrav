@@ -116,13 +116,13 @@ Positions refer to each displayed signature. `Infinity` means no upper bound. Ev
 | ``ETensor`ETensorPlain`` — `ETensorPlain[indexArrayExternal, indexArrayInternal]` | argument 1: flat list, block size 1, length 2 to 2; argument 2: flat list, block size 2, length 0 to Infinity |
 | ``ETensor`ETensor`` — `ETensor[indexArrayExternal, indexArrayInternal]` | argument 1: flat list, block size 1, length 2 to 2; argument 2: flat list, block size 2, length 0 to Infinity |
 | ``GammaTensor`GammaTensor`` — `GammaTensor[m, a, b, l, r, s]` | argument 1: symbolic expression (not a list or association); argument 2: symbolic expression (not a list or association); argument 3: symbolic expression (not a list or association); argument 4: symbolic expression (not a list or association); argument 5: symbolic expression (not a list or association); argument 6: symbolic expression (not a list or association) |
-| ``HorndeskiG5`HorndeskiG5`` — `HorndeskiG5[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; The G5 TII dispatcher is implemented only through three gravitons. Condition: Length[gravitonParameters] <= 9 \|\| b == 0. |
-| ``HorndeskiG5`HorndeskiG5Uncontracted`` — `HorndeskiG5Uncontracted[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; The G5 TII dispatcher is implemented only through three gravitons. Condition: Length[gravitonParameters] <= 9 \|\| b == 0. |
+| ``HorndeskiG5`HorndeskiG5`` — `HorndeskiG5[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; All graviton orders use the complete connection expansion; b <= 4 at n = 1, b <= 3 at n = 2, and b <= 2 at n >= 3 (seven inverse-metric pairs). |
+| ``HorndeskiG5`HorndeskiG5Uncontracted`` — `HorndeskiG5Uncontracted[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; All graviton orders use the complete connection expansion; b <= 4 at n = 1, b <= 3 at n = 2, and b <= 2 at n >= 3 (seven inverse-metric pairs). |
 | ``ScalarGaussBonnet`ScalarGaussBonnet`` — `ScalarGaussBonnet[gravitonParameters]` | argument 1: flat list, block size 3, length 6 to Infinity |
 | ``GravitonFermionVertex`GravitonFermionVertexUncontracted`` — `GravitonFermionVertexUncontracted[indexArray, p1, p2, mass]` | argument 1: flat list, block size 3, length 0 to Infinity; argument 2: symbolic expression (not a list or association); argument 3: symbolic expression (not a list or association); argument 4: symbolic expression (not a list or association) |
 | ``GravitonFermionVertex`GravitonFermionVertex`` — `GravitonFermionVertex[indexArray, p1, p2, mass]` | argument 1: flat list, block size 3, length 0 to Infinity; argument 2: symbolic expression (not a list or association); argument 3: symbolic expression (not a list or association); argument 4: symbolic expression (not a list or association) |
-| ``HorndeskiG4`HorndeskiG4`` — `HorndeskiG4[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity; The contracted multi-graviton G4 branch for b >= 2 is not implemented. Condition: !(Length[gravitonParameters] >= 6 && b >= 2). |
-| ``HorndeskiG4`HorndeskiG4Uncontracted`` — `HorndeskiG4Uncontracted[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
+| ``HorndeskiG4`HorndeskiG4`` — `HorndeskiG4[gravitonParameters, scalarMomenta, b]` | argument 1: flat list of n triples, n >= 1; argument 3: explicit integer b >= 0; argument 2: flat scalar list of length a + 2 b, a >= 0; b <= 5 for n = 1, b <= 4 otherwise. Corrected action and bounded verification are documented below. |
+| ``HorndeskiG4`HorndeskiG4Uncontracted`` — `HorndeskiG4Uncontracted[gravitonParameters, scalarMomenta, b]` | argument 1: flat list of n triples, n >= 1; argument 3: explicit integer b >= 0; argument 2: flat scalar list of length a + 2 b, a >= 0; b <= 5 for n = 1, b <= 4 otherwise. Corrected action and bounded verification are documented below. |
 | ``GravitonVertex`GravitonVertex`` — `GravitonVertex[indexArray]` | argument 1: flat list, block size 3, length 6 to Infinity |
 | ``GravitonVertex`GravitonVertexUncontracted`` — `GravitonVertexUncontracted[indexArray]` | argument 1: flat list, block size 3, length 6 to Infinity |
 
@@ -180,7 +180,7 @@ Positions refer to each displayed signature. `Infinity` means no upper bound. Ev
 | ``HorndeskiG5`Private`T6`` — `T6[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 1; argument 2: flat list, block size 1, length 2 b + 1 to Infinity |
 | ``HorndeskiG5`Private`T7`` — `T7[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 6 to Infinity; argument 3: explicit integer >= 1; argument 2: flat list, block size 1, length 2 b + 1 to Infinity |
 | ``HorndeskiG5`Private`T8`` — `T8[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 9 to Infinity; argument 3: explicit integer >= 1; argument 2: flat list, block size 1, length 2 b + 1 to Infinity |
-| ``HorndeskiG5`Private`TII`` — `TII[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 0 to Infinity; argument 3: explicit integer >= 1; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; The G5 TII dispatcher is implemented only through three gravitons. Condition: Length[gravitonParameters] <= 9. |
+| ``HorndeskiG5`Private`TII`` — `TII[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 0 to Infinity; argument 3: explicit integer >= 1; argument 2: flat list, block size 1, length 2 b + 1 to Infinity; Complete connection expansion at every n >= 0. Condition: b + 2 + Min[n,3] <= 7; b >= 1. |
 | ``ScalarGaussBonnet`Private`MomentaWrapper`` — `MomentaWrapper[scalarMomenta]` | argument 1: flat list, block size 2, length 0 to Infinity |
 | ``ScalarGaussBonnet`Private`DummyArray2`` — `DummyArray2[n]` | argument 1: explicit integer >= 0 |
 | ``ScalarGaussBonnet`Private`takeIndices`` — `takeIndices[indexArray]` | argument 1: flat list, block size 3, length 0 to Infinity |
@@ -198,27 +198,34 @@ Positions refer to each displayed signature. `Infinity` means no upper bound. Ev
 | ``HorndeskiG4`Private`DummyArray2`` — `DummyArray2[n]` | argument 1: explicit integer >= 0 |
 | ``HorndeskiG4`Private`takeIndices`` — `takeIndices[indexArray]` | argument 1: flat list, block size 3, length 0 to Infinity |
 | ``HorndeskiG4`Private`T1`` — `T1[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
-| ``HorndeskiG4`Private`T2`` — `T2[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 0 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
-| ``HorndeskiG4`Private`T3`` — `T3[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 0 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
-| ``HorndeskiG4`Private`T4`` — `T4[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 0 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
-| ``HorndeskiG4`Private`T5`` — `T5[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 0 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
-| ``HorndeskiG4`Private`HorndeskiG4Core`` — `HorndeskiG4Core[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity; The contracted multi-graviton G4 branch for b >= 2 is not implemented. Condition: !(Length[gravitonParameters] >= 6 && b >= 2). |
-| ``HorndeskiG4`Private`HorndeskiG4Core1`` — `HorndeskiG4Core1[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity; The contracted multi-graviton G4 branch for b >= 2 is not implemented. Condition: !(Length[gravitonParameters] >= 6 && b >= 2). |
+| ``HorndeskiG4`Private`T2`` — `T2[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
+| ``HorndeskiG4`Private`T3`` — `T3[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
+| ``HorndeskiG4`Private`T4`` — `T4[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
+| ``HorndeskiG4`Private`T5`` — `T5[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
+| ``HorndeskiG4`Private`HorndeskiG4Core`` — `HorndeskiG4Core[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
+| ``HorndeskiG4`Private`HorndeskiG4Core1`` — `HorndeskiG4Core1[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
 | ``HorndeskiG4`Private`HorndeskiG4CoreUncontracted`` — `HorndeskiG4CoreUncontracted[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
 | ``HorndeskiG4`Private`HorndeskiG4Core1Uncontracted`` — `HorndeskiG4Core1Uncontracted[gravitonParameters, scalarMomenta, b]` | argument 1: flat list, block size 3, length 3 to Infinity; argument 3: explicit integer >= 0; argument 2: flat list, block size 1, length 2 b to Infinity |
 | ``GravitonVertex`Private`TakeLorenzIndices`` — `TakeLorenzIndices[indexArray]` | argument 1: flat list, block size 3, length 0 to Infinity |
+
+G4's private `T1Uncontracted` through `T5Uncontracted` have the same scalar-count
+and b contracts as their contracted partners. T1 requires at least one triple;
+the other raw kernels accept an empty graviton list and return zero when their
+connection count is unavailable. They allocate fresh indices and do not cache.
+The public constructors still require at least one graviton.
+
 ## Known limitations exposed by validation
 
 - `CTensorGeneral` and `CTensorPlainGeneral` implement zero through seven external index pairs.
-- Contracted G4 with multiple gravitons and `b >= 2` remains unimplemented and returns `UnsupportedConfiguration`.
-- G5's `TII` dispatcher supports zero through three gravitons. Its contribution for `b > 0` cannot be requested above that range. The `b = 0` path is separate.
+- RULE-01 is resolved for the G4 source. Both variants use the corrected `X^b R - 2 b X^(b-1) H2` action with labelled permutations and the b=0 scalar factorial. Public domain: n>=1, a>=0, b<=5 at n=1 and b<=4 at n>=2, set by seven inverse-metric pairs. Raw results and helpers are uncached with fresh internal indices; contracted kernels and results cache only success. Private cores inherit dependency failures; public b guards run before permutations. The [acceptance report](../Documentation/Verification/HorndeskiG4-2026-11-01.md) distinguishes full checked cases from the optional b5 timeout and arbitrary-order runtime. The separate [RULE-05 migration](../Documentation/Verification/HorndeskiLibraryMigration-2026-11-01.md) verifies all 14 regenerated stored G4 files and their ordinary public imports.
+- G5's `TII` dispatcher uses T5 through T8 at every n >= 3, and the available subset at n = 0,1,2. The public direct constructors require n >= 1 and enforce b <= 4 at n = 1, b <= 3 at n = 2 and b <= 2 at n >= 3 before permutations. These bounds reflect seven inverse-metric pairs. The b = 0 path remains separate. The [higher-order report](../Documentation/Verification/HorndeskiG5HigherOrders-2026-11-01.md) separates the all-order assembly derivation, finite exact checks and runtime limits.
 - Rule validation covers construction. Staged publication and batch failure handling are implemented separately by the migrated [generator](../Libs/Generator.md#failures-and-safe-replacement); they are not properties supplied by rule validation alone.
 
 The G5 uncontracted routine now memoises its own successful result, rather than overwriting the contracted routine's cache. This is a cache correction, not a change to either formula.
 
 ## Historical validation checks
 
-Verification scripts are kept outside the repository; no top-level `Tests` folder is required. Checks cover all listed signatures, malformed array shapes, invalid counts, injected dependency failures, parallel failure order, cancellation, cache isolation, valid baseline comparisons, loading and representative timings. These are regression checks, not a proof of every generated vertex at arbitrary order.
+Historical verification scripts are retained outside the repository; the focused [Horndeski regression](Verification/README.md) now lives under `Rules/Verification/`. No top-level `Tests` folder is required. Checks cover all listed signatures, malformed array shapes, invalid counts, injected dependency failures, parallel failure order, cancellation, cache isolation, valid baseline comparisons, loading and representative timings. These are regression checks, not a proof of every generated vertex at arbitrary order.
 
 ### Results of the original implementation checks
 
@@ -304,3 +311,26 @@ source. The axion epsilon-density/action convention also remains unresolved.
 The recent multiplicity checks do not certify every underlying action or higher
 order. See the [release notes](../Documentation/ReleaseNotes-4.1.0.md) and
 [scalar correction record](../Documentation/Verification/ScalarWardCorrection.md).
+
+## Horndeski scientific corrections — 1 November 2026
+
+G2/G3/G5 preserve labelled external-leg multiplicities for coincident values and
+localise temporary indices at the public construction boundary. The shared
+symmetrisation helper retains 2^n n! arrangements, including duplicates needed
+by its averaged-coefficient normalisation. G5 also implements the corrected
++b/3 cubic-Hessian action and symmetric connection placements, including T8's
+third derivative index. Public signatures are unchanged. The subsequent
+[RULE-02 extension](../Documentation/Verification/HorndeskiG5HigherOrders-2026-11-01.md)
+adds higher graviton orders to TII and updates the early inverse-metric guards
+in both public source variants: b <= 4 at n = 1, b <= 3 at n = 2 and b <= 2 at
+n >= 3, with a >= 0 and b >= 0. The b = 0 route remains separate. Exact checks
+include the complete n = 4, a = 0, b = 1 vertex and selected T8 sectors at
+n = 4, b = 2 and n = 5, b = 1. These bounds do not guarantee affordable
+arbitrary-order evaluation; full n = 5 vertices and loop amplitudes are not
+certified. No higher-order stored library or native-model order is added.
+See the [independent audit and migration report](../Documentation/Verification/HorndeskiAudit-2026-11-01.md)
+for supported selections, exact-reduction proofs, cache/failure checks and limits.
+The separate [G4 source acceptance](../Documentation/Verification/HorndeskiG4-2026-11-01.md)
+resolves RULE-01. The [completed RULE-05 migration](../Documentation/Verification/HorndeskiLibraryMigration-2026-11-01.md)
+separately verifies all shipped libraries and their public imports; the earlier
+G2/G3/G5 audit did not itself validate G4.

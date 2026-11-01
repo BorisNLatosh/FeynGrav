@@ -1,6 +1,6 @@
 # FeynGrav 4.2.0
 
-[Directory overview](../README.md)
+[Directory overview](../README.md) · [Getting started](GettingStarted.md) · [Common conventions](Conventions.md)
 
 **Development version; 4.2.0 is not yet released.** See the
 [4.2.0 draft release notes](ReleaseNotes-4.2.0.md). Installation from `main`

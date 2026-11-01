@@ -1,6 +1,6 @@
 # GR with a massive scalar and John interaction
 
-[Directory overview](README.md)
+[Directory overview](README.md) · [Horndeski action and conventions](../../../Documentation/Models/Horndeski.md)
 
 The base action contains GR and the canonical scalar terms $\tfrac12 g^{\mu\nu}\partial_\mu\phi\partial_\nu\phi-\tfrac12m^2\phi^2$, plus
 $$\int d^4x\sqrt{-g}\,\beta G^{\mu\nu}\partial_\mu\phi\partial_\nu\phi.$$

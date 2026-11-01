@@ -214,6 +214,18 @@ before calculation or file replacement. User definitions are left untouched;
 use unassigned placeholders or a fresh kernel. The rule's `Global` gravitational
 coupling and the public gauge parameters are explicitly localised as needed.
 
+### Horndeski library migration — 1 November 2026
+
+All 14 shipped G4 files were regenerated through `GenerateHorndeskiG4Specific`
+into candidate directories and independently checked before installation.
+Eight files need corrected Hessian blocks; six b=0 files need scalar factorials.
+Four G5 b=1 files were corrected in the preceding audit. The 36 G2/G3 and six
+G5 b=0 files remain byte-identical. The public coupling convention is unchanged;
+no importer applies a compensating rescaling. See the
+[per-file migration and verification record](../Documentation/Verification/HorndeskiLibraryMigration-2026-11-01.md).
+Restart the kernel and recompute affected historical results after updating.
+The exact shipped selection is distinct from the source's higher-order domain.
+
 ## Failures and safe replacement
 
 Construction, calculation, serialisation and publication are separate stages.
@@ -253,3 +265,14 @@ See the [generation-progress verification](../Documentation/Verification/Generat
 ## Benchmarking generation
 
 Use [Benchmark/06_Library_Generation.nb](../Benchmark/06_Library_Generation.nb) in a fresh kernel to measure public commands and isolated construction, export, FORM execution, import, writing and publication. All output goes to owned temporary directories; shipped libraries are not replaced. See the [benchmark guide](../Benchmark/UserGuide.md#library-generation-notebook-06) for profiles, caching and validation boundaries.
+
+### Higher-order G5 source
+
+RULE-02 removes the three-graviton TII restriction in the source used by
+`GenerateHorndeskiG5Specific[a, b, n]`. The allowed inverse-metric counts give
+b <= 4 at n=1, b <= 3 at n=2 and b <= 2 at n>=3. All labels remain explicit;
+the existing source normalisation and generator signatures are unchanged.
+Higher-order generation can be expensive and still needs a bounded run and
+independent output/import comparison before a new library is installed. This
+extension generates no new library and preserves all 60 shipped files.
+See the [construction and finite checks](../Documentation/Verification/HorndeskiG5HigherOrders-2026-11-01.md).

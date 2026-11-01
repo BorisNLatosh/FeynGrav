@@ -13,6 +13,8 @@ remain the record of the published 20 October 2026 release.
 
 ## Start here
 
+- [Getting started with FeynGrav](Documentation/GettingStarted.md)
+- [Common conventions](Documentation/Conventions.md)
 - [Installation, requirements and troubleshooting](Documentation/UserGuide.md#installation-and-help)
 - [Documentation index](Documentation/README.md) and [function reference](Documentation/Reference.md)
 - [Numbered examples](Examples/README.md)

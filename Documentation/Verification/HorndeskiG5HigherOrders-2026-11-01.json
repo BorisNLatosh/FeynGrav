@@ -1,0 +1,591 @@
+{
+  "task": "RULE-02",
+  "date": "2026-11-01",
+  "status": "Accepted source extension; uncommitted",
+  "branch": "FeynArts_Integration",
+  "head": "a7c2a9aae891a854028d86fbf2fa988822fccf52",
+  "accepted_assertions": 172,
+  "scope_limits": {
+    "aggregate_RAM_bytes": 1073741824,
+    "swap_bytes": 0,
+    "runtime_seconds": 120,
+    "cleanup_grace_seconds": 10,
+    "minimum_host_available_bytes": 2147483648
+  },
+  "source_installation": [
+    {
+      "path": "/home/latosh/.Wolfram/Applications/FeynGrav/Rules/HorndeskiG5.wl",
+      "before": "2f098b9ceac449376cb1d837888c0e5843ded9f6514c5c7ef03a31f0a6636311",
+      "after": "ff79800639cb2c8b0eaed8fcbe2789c2e09518ad64a75c870d5fc9164ab8e74a",
+      "candidate": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/candidate/Rules/HorndeskiG5.wl"
+    },
+    {
+      "path": "/home/latosh/.Wolfram/Applications/FeynGrav/Rules/Verification/HorndeskiReference.wl",
+      "before": "0d2a080d702d2ceb0e044e40ffdd6714b300a489713ff5343dcf60fec068cf7a",
+      "after": "7950b1d605b65344a799486e71fa7919a87ab9284aa371c30bded466ea496e57",
+      "candidate": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/candidate/Rules/Verification/HorndeskiReference.wl"
+    },
+    {
+      "path": "/home/latosh/.Wolfram/Applications/FeynGrav/Rules/Verification/HorndeskiChecks.wls",
+      "before": "158381975ef77418268baafe805abfa8c9828eb9e36db997da51c6d63974d5fb",
+      "after": "06eb3659460ca993c5c48afdbee508623caa0298404ce3f03f5f4374c6682fa7",
+      "candidate": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/candidate/Rules/Verification/HorndeskiChecks.wls"
+    },
+    {
+      "path": "/home/latosh/.Wolfram/Applications/FeynGrav/Rules/Verification/HorndeskiG5HigherOrderChecks.wls",
+      "before": null,
+      "after": "48238b3d8dff50634e8d331a7a8fd61744f4438da9d287a603fb5af9c80d86a1",
+      "candidate": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/candidate/Rules/Verification/HorndeskiG5HigherOrderChecks.wls"
+    }
+  ],
+  "unchanged_kernel_definition_hashes": {
+    "T1": "fc2061bbb1d4ad6aacdebe9ae477e7e5b51d998b51a1016af1a80e9808567e49",
+    "T2": "168c320b4cb061813f6d1be57b042e09bc27c02d00ea2201076a8bb879979edc",
+    "T3": "81c480e7a6973e7aa381659c13aac61b8f746ef12b23ad3bf96fd5855e862916",
+    "T4": "29584e478066e207ecc2e8b46bbc1670d09ed835b10cec94f371734841118fbc",
+    "T5": "fdacdd5a19dcac526ed48eb087b281f210cb4cb28d2c976fd33c02c2b00ed999",
+    "T6": "353ac17bdfc0e0ef96349719c3cad8b66a13d499fc3c7a5af04ee0a4c263b541",
+    "T7": "d37620317318787e552a738324b7f87731582c4544b2ea0c2e8f5315a5d8c452",
+    "T8": "06b9ddd1285c872d472ba7278e7db0b0f961a4822ffd1699f448a352031f7cd6",
+    "TI": "2c16848d949f272fd6e2c4789140023311e0a5d506bee341c5b7a2f57697e715"
+  },
+  "runs": [
+    {
+      "stage": "contracts",
+      "status": "Accepted",
+      "reason": null,
+      "assertions_passed": 25,
+      "assertions_recorded": 25,
+      "last_observed_elapsed_seconds": 3.6380436249892227,
+      "highest_retained_cgroup_memory_peak_bytes": 215650304,
+      "scope_exit": 0,
+      "scope": "hornaudit-regression-3954ca0675b3.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/contracts/run-REGRESSION",
+      "source_input_manifest_sha256": "af109773a3dbc603a7f09b65b5fb38fc01142ad39dd6bf7214f41854bcd9482b",
+      "script_manifest_sha256": "ceb14f7e3184175d6c66185a8db334b972af1b0ea4842c1d1ca1591a0eb1ecff",
+      "assertions_sha256": "0591b05e47fe0ed62ced56677ddeb2a5f6e82438ebdebe341d9027896fb56ee0",
+      "WXF_outputs": {}
+    },
+    {
+      "stage": "reference-compact",
+      "status": "Accepted",
+      "reason": null,
+      "assertions_passed": 5,
+      "assertions_recorded": 5,
+      "last_observed_elapsed_seconds": 95.50149461897672,
+      "highest_retained_cgroup_memory_peak_bytes": 348635136,
+      "scope_exit": 0,
+      "scope": "hornaudit-regression-b0057653879b.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/reference-compact/run-REGRESSION",
+      "source_input_manifest_sha256": "2c86ac346cedc1d2c1fa12b5e204ec46874f194922f6e49f013d718a1da2fb45",
+      "script_manifest_sha256": "3df0ac22b74dfa5e21d19fdb4ccd02c6a0958bb291fa3d29110d30b0e83dabc8",
+      "assertions_sha256": "d6ce9173616d8a510048eb2765735155c5f82c7e3ea64b43aa324f81fcd9df16",
+      "WXF_outputs": {
+        "reference-n4.wxf": {
+          "bytes": 39550496,
+          "sha256": "b8a5532508b223a026cde1f2b1b7a2fff3e8b3bb2d479ed484be451adb86378b"
+        }
+      }
+    },
+    {
+      "stage": "seeds-einstein",
+      "status": "Accepted",
+      "reason": null,
+      "assertions_passed": 8,
+      "assertions_recorded": 8,
+      "last_observed_elapsed_seconds": 6.169862286013085,
+      "highest_retained_cgroup_memory_peak_bytes": 288280576,
+      "scope_exit": 0,
+      "scope": "hornaudit-regression-c878902628f4.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/seeds-einstein/run-REGRESSION",
+      "source_input_manifest_sha256": "5d6fe2ba97ae8a3bfc408177754ba5948d9dd774df7f2eec0d30e2ebcf917304",
+      "script_manifest_sha256": "55ac249682f6eff5f6ed67eef1a9f0bd2a5f56fdbf2d225766b38225c662344c",
+      "assertions_sha256": "ae6e26159fcc61ae0ccdb3d79a9b039b3c613c02b9ab3f333dcc8b4b306ad367",
+      "WXF_outputs": {
+        "seed-n4-T3.wxf": {
+          "bytes": 326573,
+          "sha256": "09b437b915cc23c60b04746961d90ed6ce101e3009d42578eff56193d466ad52"
+        },
+        "seed-n4-T4.wxf": {
+          "bytes": 142737,
+          "sha256": "2d87cf627335a9952a38351390b93ca6edc1f161ebe31369b70f1cebd545e29b"
+        },
+        "seed-n4-T2.wxf": {
+          "bytes": 271387,
+          "sha256": "50861c2821c177fdf4d99e919d28369d1f50ff001725651c1c9d7aa0bb68225b"
+        },
+        "seed-n4-T1.wxf": {
+          "bytes": 477697,
+          "sha256": "1e13df800115da54af97d0497f88e69141564adcdbf2174bf3b5095bc3319a94"
+        }
+      }
+    },
+    {
+      "stage": "seeds-hessian-r2",
+      "status": "Accepted",
+      "reason": null,
+      "assertions_passed": 10,
+      "assertions_recorded": 10,
+      "last_observed_elapsed_seconds": 14.368848701007664,
+      "highest_retained_cgroup_memory_peak_bytes": 503296000,
+      "scope_exit": 0,
+      "scope": "hornaudit-regression-742c2fed8ee2.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/seeds-hessian-r2/run-REGRESSION",
+      "source_input_manifest_sha256": "2278b04f640b466f3d03e5c0a2b0ec4aa6551595f6e4c3b816d216321b8e2e73",
+      "script_manifest_sha256": "b181cc19e24db54e096a1427cb06e69e1f12ffbfcc28cc8022031b14120b777c",
+      "assertions_sha256": "f5be394972d33e7b6f885d7a5bf1c08a192c152aadcc5834de8f783981544dad",
+      "WXF_outputs": {
+        "seed-n4-T5.wxf": {
+          "bytes": 1601269,
+          "sha256": "f961363c0c6a68de62ff259623310d81a8dfec7dd944d883b1afc584ff76d7ad"
+        },
+        "seed-n4-T6.wxf": {
+          "bytes": 1232793,
+          "sha256": "c3aaadd98401502bf932d935c79c36792496ce5111f517f0653f665d486fb8a1"
+        },
+        "seed-n4-T7.wxf": {
+          "bytes": 693395,
+          "sha256": "fc904026e785f222b42ed225daf26ad85b232c9185e0604557d57c08aab8e975"
+        },
+        "seed-n4-T8.wxf": {
+          "bytes": 311205,
+          "sha256": "2e9f8ec7db44e7c59e294dda9c9dedceacc5fe414daa00db918c70956a017889"
+        }
+      }
+    },
+    {
+      "stage": "higher-sectors",
+      "status": "Accepted",
+      "reason": null,
+      "assertions_passed": 8,
+      "assertions_recorded": 8,
+      "last_observed_elapsed_seconds": 5.351041546004126,
+      "highest_retained_cgroup_memory_peak_bytes": 236691456,
+      "scope_exit": 0,
+      "scope": "hornaudit-regression-54bd4cb1b6ce.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/higher-sectors/run-REGRESSION",
+      "source_input_manifest_sha256": "e067040a20e3017a4480144322a2d450fe904838dac4798d680363189c627d69",
+      "script_manifest_sha256": "bcbdf1a4a428bf8529f576161054e5c602f212978516d84b378a05d78291c435",
+      "assertions_sha256": "02640f9231ab7a9a62d3d69e6562fc7f39e7576110e12c4ecd0d07cd008c9b24",
+      "WXF_outputs": {
+        "n5-b1-T8.wxf": {
+          "bytes": 5566801,
+          "sha256": "0fced3b1913e88b7735ba364bcc98a6a8bd472e72b3abb0103437d56fbc0e74e"
+        },
+        "n4-b2-T8.wxf": {
+          "bytes": 812635,
+          "sha256": "fcb4bf84aa700a30a9f424d91dd5f572f173bf173898e6b8641df1f78a0dc35d"
+        }
+      }
+    },
+    {
+      "stage": "compare-einstein-r2",
+      "status": "Accepted",
+      "reason": null,
+      "assertions_passed": 17,
+      "assertions_recorded": 17,
+      "last_observed_elapsed_seconds": 54.5509797190025,
+      "highest_retained_cgroup_memory_peak_bytes": 497430528,
+      "scope_exit": 0,
+      "scope": "hornaudit-regression-a8282f2712e6.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/compare-einstein-r2/run-REGRESSION",
+      "source_input_manifest_sha256": "257d8c40b8c15f8e8b0bed48973b2bb08cd1faec2769fa706bddbe69f8489a18",
+      "script_manifest_sha256": "8a0a0f7400d25268b22877123ef4c463f9a322aa7385908fc83fe74ead07526b",
+      "assertions_sha256": "9c7c4361999d4c90617597370f827a1a47e466414bd14baf6b37413d30507a62",
+      "WXF_outputs": {
+        "complete-n4-E.wxf": {
+          "bytes": 31149336,
+          "sha256": "adee2174c5cf1b2acad162ddf90ed3df1eaaf6ca3916b9b31a48b936f7121eeb"
+        }
+      }
+    },
+    {
+      "stage": "compare-hessian-r2",
+      "status": "Accepted",
+      "reason": null,
+      "assertions_passed": 18,
+      "assertions_recorded": 18,
+      "last_observed_elapsed_seconds": 117.04391544000828,
+      "highest_retained_cgroup_memory_peak_bytes": 679907328,
+      "scope_exit": 0,
+      "scope": "hornaudit-regression-a6f837c17df5.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/compare-hessian-r2/run-REGRESSION",
+      "source_input_manifest_sha256": "257d8c40b8c15f8e8b0bed48973b2bb08cd1faec2769fa706bddbe69f8489a18",
+      "script_manifest_sha256": "bbd26c07af4170c817a9cb194b3f2a51ec63806057362da139d504822b9604d2",
+      "assertions_sha256": "d307cf33b256ad10eab2e76b0dbc2f33ebdd73142f1e918d9da44460060a533d",
+      "WXF_outputs": {
+        "complete-n4-H.wxf": {
+          "bytes": 50668473,
+          "sha256": "125a43f6bd8c92499f7d6c7c498441dce8daf52aec381747d1359e7400059cd4"
+        }
+      }
+    },
+    {
+      "stage": "portable-regression",
+      "status": "Accepted",
+      "reason": null,
+      "assertions_passed": 48,
+      "assertions_recorded": 48,
+      "last_observed_elapsed_seconds": 23.223756264982512,
+      "highest_retained_cgroup_memory_peak_bytes": 354877440,
+      "scope_exit": 0,
+      "scope": "hornaudit-regression-1c6743c0949a.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/portable-regression/run-REGRESSION",
+      "source_input_manifest_sha256": "18d19a0f7b5f07ca795ee6552bf7a7864e8a0ce4a7a5bd7158f690939beb95ab",
+      "script_manifest_sha256": "6380b9f401290dabb513458f88707c97d0679639640b1dbed4eabfd03b630b76",
+      "assertions_sha256": "8da4fb7de47bb05b05aa8eef481f123f7269f2fc76b0da6b55aecb5ca38810d5",
+      "WXF_outputs": {}
+    },
+    {
+      "stage": "installed-higher",
+      "status": "Accepted",
+      "reason": null,
+      "assertions_passed": 33,
+      "assertions_recorded": 33,
+      "last_observed_elapsed_seconds": 5.757385113014607,
+      "highest_retained_cgroup_memory_peak_bytes": 237084672,
+      "scope_exit": 0,
+      "scope": "hornaudit-regression-2d5b5d0d468d.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/installed-higher/run-REGRESSION",
+      "source_input_manifest_sha256": "70328478fea3ca7d37058ee2304bbaa50cb1bc64260c9e9dad13ffa037925c6f",
+      "script_manifest_sha256": "65bf329cbf41d3142b4aef186b54912c934bea70802ed2ebe9c38b1a7d813abe",
+      "assertions_sha256": "c68bd508049ae1609c79cefb50fe90f004fad281db9dd6f12d6a984b3c1e7a00",
+      "WXF_outputs": {
+        "n5-b1-T8.wxf": {
+          "bytes": 5566801,
+          "sha256": "0fced3b1913e88b7735ba364bcc98a6a8bd472e72b3abb0103437d56fbc0e74e"
+        },
+        "n4-b2-T8.wxf": {
+          "bytes": 812635,
+          "sha256": "fcb4bf84aa700a30a9f424d91dd5f572f173bf173898e6b8641df1f78a0dc35d"
+        }
+      }
+    },
+    {
+      "stage": "reference-n4",
+      "status": "Retained failure",
+      "reason": "120-second reference timeout",
+      "assertions_passed": 0,
+      "assertions_recorded": 0,
+      "last_observed_elapsed_seconds": 119.94250760501018,
+      "highest_retained_cgroup_memory_peak_bytes": 309243904,
+      "scope_exit": -15,
+      "scope": "hornaudit-regression-ddfecb82a16e.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/reference-n4/run-REGRESSION",
+      "source_input_manifest_sha256": "99ea0de16c33cb768dc84b1e99a02abaceead8e7eca2e679e9462bab32f3e818",
+      "script_manifest_sha256": "65fd86aaafd681b4c73a44c16e002586ee32cabc80697f4f15a48fdf71d4f07f",
+      "assertions_sha256": null,
+      "WXF_outputs": {}
+    },
+    {
+      "stage": "seeds-hessian",
+      "status": "Retained failure",
+      "reason": "OOM during uncontracted export",
+      "assertions_passed": 0,
+      "assertions_recorded": 0,
+      "last_observed_elapsed_seconds": 13.641613135987427,
+      "highest_retained_cgroup_memory_peak_bytes": 1066184704,
+      "scope_exit": -9,
+      "scope": "hornaudit-regression-66f016498082.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/seeds-hessian/run-REGRESSION",
+      "source_input_manifest_sha256": "5d6fe2ba97ae8a3bfc408177754ba5948d9dd774df7f2eec0d30e2ebcf917304",
+      "script_manifest_sha256": "eb4c3fcdadcda4bf6a807f0b55b266ff2bac6f380ef9a828de321087e54bb174",
+      "assertions_sha256": null,
+      "WXF_outputs": {}
+    },
+    {
+      "stage": "compare-n4",
+      "status": "Retained failure",
+      "reason": "OOM during all-copy assembly",
+      "assertions_passed": 0,
+      "assertions_recorded": 0,
+      "last_observed_elapsed_seconds": 36.17271308301133,
+      "highest_retained_cgroup_memory_peak_bytes": 1073418240,
+      "scope_exit": -9,
+      "scope": "hornaudit-regression-5ef6a13328b5.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/compare-n4/run-REGRESSION",
+      "source_input_manifest_sha256": "62d7446c82a957bd89e67455c4487f1afb6b86ce7b0860689e2ea756a096156b",
+      "script_manifest_sha256": "7125205aa0572c4703b67e00960a83c61cc1cf435cbd59da18ab2c6a3d7c49ae",
+      "assertions_sha256": null,
+      "WXF_outputs": {}
+    },
+    {
+      "stage": "compare-einstein",
+      "status": "Retained failure",
+      "reason": "Homogeneity harness failure after eight passes",
+      "assertions_passed": 8,
+      "assertions_recorded": 9,
+      "last_observed_elapsed_seconds": 47.14733873298974,
+      "highest_retained_cgroup_memory_peak_bytes": 487456768,
+      "scope_exit": 2,
+      "scope": "hornaudit-regression-1577e3f83fbd.scope",
+      "final_scope_query": "ControlGroup=\nActiveState=inactive\n",
+      "raw_evidence": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension/compare-einstein/run-REGRESSION",
+      "source_input_manifest_sha256": "5fe1148a1591259df5c415d67dbe2fcccceb5720a145e2bc496fd8aacf288b79",
+      "script_manifest_sha256": "3d319f550ed75465d9aab0a2bbad8b55600a7fd3b0cff55aef3c9c941b95aa19",
+      "assertions_sha256": "5ec244674d3a98db04f997484a23b264870fcd343499feec4815b89ab4f76cb2",
+      "WXF_outputs": {}
+    }
+  ],
+  "libraries": {
+    "Libs/HorndeskiG2_0_2_1": {
+      "sha256": "654509d32676c48b5992e27235b3daae92dce35f89c069ef52789bab1c8f3995",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_0_2_2": {
+      "sha256": "36ffc68462f7842611d3f8b8787c85f6b7067f29e759445eefb7ae49d67ca0a1",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_0_3_1": {
+      "sha256": "c79454585a57a246cd88a6e9f91cb00e7ba1049de477ef9b0e42893a580f1972",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_0_3_2": {
+      "sha256": "53d5f4a19c7018646743ff2f6afe4f2211eccd606a940c275f2d279641e7abf6",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_1_1_1": {
+      "sha256": "b4c027aba86e2a4bd8b061ba418d75aa8b368b6e505ce9e021f51d9edbbc467e",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_1_1_2": {
+      "sha256": "c3db40fbecb047025c0195f12d468735b9e023046b2dd8eb65be45dee645ab96",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_1_2_1": {
+      "sha256": "c2462423fda76e19c5aa69fa99eb708f1eb2594006fef21c05f4cac14632cc28",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_1_2_2": {
+      "sha256": "d5efddbd12b1ebc94af7900c92117672de54f342b66a15e8e5e9a020d4306896",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_2_1_1": {
+      "sha256": "f7274d64cddfab9967ff82460eb6794f6a490ff962c30c9ba7e3e8445c34474f",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_2_1_2": {
+      "sha256": "0b5a0b688558b226016fd0563c0a0200ac3b511d1bb7f0e5e0a6acb3036ac762",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_2_2_1": {
+      "sha256": "958f73071f1cb8a81042e7377fb917ca4e746bd9c15be3983c3d4fd6983fbd97",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_2_2_2": {
+      "sha256": "9103e4def23b177bd36f4a56d0a65500487239b1f2e64c80a1faf745f67070c2",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_3_1_1": {
+      "sha256": "11ba345325725cb8567ea9cc914857abcf66725fbf164c3f08faa7a60afb3005",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_3_1_2": {
+      "sha256": "53f490492d84038643f57961b9134a6e745ef42329574d2a3565c02a7ff1b6e9",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_4_1_1": {
+      "sha256": "fe6bdad50464779c52fc8022d74d58ff179e794410b220849da03aba96ebd832",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG2_4_1_2": {
+      "sha256": "91ec571eae5c90a87cc89d9bbbbeef0f999c321e7508a2f46270700c98e2f3f4",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_0_1_1": {
+      "sha256": "53313021e1851a238d07fae949df17a9d2216f9853e30778e9eadf8dbe6f60a7",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_0_1_2": {
+      "sha256": "8f6eb6ace9ed4b026a12ced83e6652536c46b8275e680a43836acfb35cc4e094",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_0_2_1": {
+      "sha256": "95e0768aee22ad09a9cf7d92c6b2517707aeac0ef2018b56f9a38a19f04d0df1",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_0_2_2": {
+      "sha256": "4a4c1f8cb5da359098ce8f63d6d20b8c884bd2eaf253b727690256deee8542b4",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_1_1_1": {
+      "sha256": "15553b2d0bccef85c8e384e398933b62acf5867c5f2eb2968feb3240cd5d6779",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_1_1_2": {
+      "sha256": "0f2f73d83f4561181d41f4ed05f9b8643cf3365f0f221fa65d8ec9275bfc173b",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_1_2_1": {
+      "sha256": "875d0677ef37a33108139a134b2e954a8d585409ccb927e73449850986837432",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_1_2_2": {
+      "sha256": "9d86d0f8f23d9c90c7f270fee7726bb0034617b5d6611e8c8e6464940bbedf7a",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_2_0_1": {
+      "sha256": "3da9761d62b4ceb5f279277f98d98ecbf973c340bc34fe1a49bbe666657c15a2",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_2_0_2": {
+      "sha256": "ddcc9ba3365b2c0719b346c68ed3ea33890b904710afe8939a1fb010a63671f3",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_2_1_1": {
+      "sha256": "de313870928a8fbe949995fa8dbf00d34de07cba2eb3731903baf4a6f5651241",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_2_1_2": {
+      "sha256": "e7fa2ad7283f74ecef69e21cd88c9b13b14be1b91c71b78990a90c18718fe33e",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_3_0_1": {
+      "sha256": "a6146a71640c27be21b4614d0512e4691d2a3e7efac298a9ac083612ef1e9dd5",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_3_0_2": {
+      "sha256": "8f0d00651d2fefce7a008c13e21c4f7b11fd98c084f1d04b2c613b86974b9518",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_3_1_1": {
+      "sha256": "6d134833ec7066ec826d36e2abf5035fde1fe26418632bed0d4e8bfb9e71d7cb",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_3_1_2": {
+      "sha256": "b01f7fd824a6b7cf52577f76be6de9b77c6a098100aed60628ec89dd5d2dba90",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_4_0_1": {
+      "sha256": "b3394410f136583f06c2abbdf5c7540d90ea86a0782ca126c279d9ba617c42fa",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_4_0_2": {
+      "sha256": "4b1215ab057e8c73433f65bf84268fc50a127f8e91fd337076cc0b1a2af6b969",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_5_0_1": {
+      "sha256": "a8916c6fbfe5c3ce7040851c7408665034e5716f25ed31aa924b9c36b701c228",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG3_5_0_2": {
+      "sha256": "88155530e2b2e5629473428f52bdc873ff81bd5206fad10f344cb4f4676b7f8b",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_0_1_1": {
+      "sha256": "e91eeb0724ee69ffa6b188246cdfa7d2cd29caa828c9d7ebbb17b23ed7aa2260",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_0_1_2": {
+      "sha256": "1aa223e22da4b8b5f5a5618fca98fcdcf017e2637db5bd3da34278d094adee3e",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_0_2_1": {
+      "sha256": "c64ff6dc7bf831ea907f0ac42cc1e0fde6d27e2a664d8f42a91868c05f785c16",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_0_2_2": {
+      "sha256": "9ff4849256d80fd809237175298f0ef9b726b4edccd10f8e7e0990491b0b93c3",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_1_1_1": {
+      "sha256": "372907a22a7f4f05867fd7114469c639d0caf4233586194fdba13991d96dc419",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_1_1_2": {
+      "sha256": "897dbb00e1c229f6ba5404cb1bae9e4286224c6feab007e9465a77c8ce111b06",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_2_0_1": {
+      "sha256": "30f5e621ba3e68a4cb880657c4d0db52edb4111b462d10b6ca7671229f8799cf",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_2_0_2": {
+      "sha256": "1467e88a8eb4297177910889b973b12f3e4022455ed616504fabba44012b4a92",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_2_1_1": {
+      "sha256": "d441e64fd23ffead158208fcb105f7e4dcecac683a5f4a3cc0639083bc6d999f",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_2_1_2": {
+      "sha256": "714fb9708d40c9af22c8aa1ba4cd84f2e9e9a008df1b5f4a048c8394bbdd03eb",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_3_0_1": {
+      "sha256": "5813e96b27c6f56246bd9493b6f064b9aa3929827b7b3ff30f02a5b888b299a0",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_3_0_2": {
+      "sha256": "c0ae17cacd9cc9d6ba30dabd3aec2d986c8fe74d77d3539b16aacf0310fb3556",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_4_0_1": {
+      "sha256": "73123648f8dd9e6fe691c166e4c0b37ec68c2c063ad95c1befb397f57326f472",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG4_4_0_2": {
+      "sha256": "078c5e530e1fc8b94139b8e848f638c19a616dfd71339eaecfe7d169a21c35ea",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_0_1_1": {
+      "sha256": "eaeb02dc8d95de2b603890a452865c4b06303539ab716fb3f9645995cf79904e",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_0_1_2": {
+      "sha256": "bbe1077fd40676b8db6ac3af13c06bf26fe153a1b9273fb905d140eec518db1e",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_1_0_1": {
+      "sha256": "52b9c51bf4a87b6902e4162423dc167074ba626f5ef0243d0eb983a650c0f7e1",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_1_0_2": {
+      "sha256": "dfb23b014e49071c2552cda7ea81b1bc381c0cc13a904feea1a6147c5fdd750f",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_1_1_1": {
+      "sha256": "6cb635465f86816673f174a4974342927a24f21975bc913a4e630391301b91bb",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_1_1_2": {
+      "sha256": "539d50a641761dc27263518651b265254b33993a2f308ec4cb12b791c2eb2bc6",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_2_0_1": {
+      "sha256": "e26eeab462b49e455274fa111c3e4032269654893f49b1aeebb2193171d25151",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_2_0_2": {
+      "sha256": "d23d04b8c014cfba2e3053a61d0beff6c9281d3115ac123f4a1acdf64891da3d",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_3_0_1": {
+      "sha256": "484eac452636dd88e3f84b2089ee86ae28fef8cc4765dc682ccf041467a8495e",
+      "unchanged_since_RULE02_start": true
+    },
+    "Libs/HorndeskiG5_3_0_2": {
+      "sha256": "ebad622c92b6d6f9916ac01e52940cfa8fa7dbbb97c6f929d90b2d91af78fe9f",
+      "unchanged_since_RULE02_start": true
+    }
+  },
+  "limits": [
+    "Complete generic n4,a0,b1 equality proved blockwise using all labelled permutations; not literal large open-index wrapper timing.",
+    "n4,b2 and n5,b1 are T8-sector comparisons only.",
+    "No full n5 or all higher-b boundary equality, arbitrary-order runtime guarantee, new stored library, native amplitude or loop certification.",
+    "Retained timeout, two OOM kills and failed homogeneity harness are not accepted results."
+  ],
+  "evidence_root": "/home/latosh/Documents/Codex/FeynGrav-evidence/2026-11-01-rule02-extension"
+}

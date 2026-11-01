@@ -43,6 +43,13 @@ HorndeskiG3Uncontracted::usage = HorndeskiG3Uncontracted::usage <> " Supported s
 
 Begin["`Private`"];
 
+(* External legs stay labelled even when their values coincide. Permuting the
+   values directly would remove duplicates and lose functional derivatives. *)
+Clear[labelledPermutations];
+labelledPermutations[legs_List] := legs[[#]] & /@ Permutations[Range[Length[legs]]];
+
+
+
 
 Clear[MomentaWrapper];
 
@@ -69,6 +76,8 @@ DummyArray2[n_] :=
         DummyArray2[n],
         {{1, "Integer", 0}},
         (
+(* Both sides of each contraction must use this call's same fresh indices. *)
+If[ListQ[$scalarDummyIndices], Take[$scalarDummyIndices, 2 n],
 Flatten[RuleValidation`RuleRequire[
 		Table[
 			{
@@ -78,7 +87,8 @@ Flatten[RuleValidation`RuleRequire[
 		{i, n}
 	]
 ]]
-        ), False
+        ]
+), False
     ];
 
 
@@ -101,6 +111,7 @@ HorndeskiG3Core[gravitonParameters_, scalarMomenta_, b_] :=
         HorndeskiG3Core[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 3, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[ScriptL], \[ScriptM], \[ScriptN], \[ScriptR], \[ScriptS]},
 Total[RuleValidation`RuleRequire[
 			RuleValidation`RuleRequire[Map[
 				RuleValidation`RuleRequire[MomentaWrapper[#[[;;2b]]]]*
@@ -108,10 +119,11 @@ Total[RuleValidation`RuleRequire[
 					RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[ScriptM],\[ScriptN]},RuleValidation`RuleRequire[DummyArray2[b]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters]]]] FVD[#[[2b+1]],\[ScriptM]] FVD[#[[2b+1]],\[ScriptN]]
 					- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[ScriptM],\[ScriptN],\[ScriptR],\[ScriptS]},RuleValidation`RuleRequire[DummyArray2[b]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-3-1]]]]]]RuleValidation`RuleRequire[GammaTensor[\[ScriptR],\[ScriptM],\[ScriptN],\[ScriptL],gravitonParameters[[-3]],gravitonParameters[[-2]]]] FVD[#[[2b+1]],\[ScriptS]] FVD[gravitonParameters[[-1]],\[ScriptL]]
 				) &,
-				Permutations[scalarMomenta]
+				labelledPermutations[scalarMomenta]
 			]]
 		]]
-        ), True
+        ]
+), True
     ];
 
 
@@ -122,14 +134,18 @@ HorndeskiG3[gravitonParameters_, scalarMomenta_, b_] :=
         HorndeskiG3[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 3, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+(* Fresh dummy indices prevent collisions with supplied external labels.
+   Localisation ends at this call; failure/abort unwinds it normally. *)
+Block[{$scalarDummyIndices = Table[Unique["HorndeskiG3`Private`scalar$"], {2 b}]},
 I Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+1]*
 			Total[RuleValidation`RuleRequire[
 				RuleValidation`RuleRequire[Map[
 					RuleValidation`RuleRequire[HorndeskiG3UncontractedCore[#,scalarMomenta,b]]& ,
-					Flatten/@Permutations[Partition[gravitonParameters,3]]
+					Flatten/@labelledPermutations[Partition[gravitonParameters,3]]
 				]]
 			]] //MomentumExpand//Contract
-        ), True
+        ]
+), True
     ];
 
 
@@ -140,6 +156,7 @@ HorndeskiG3UncontractedCore[gravitonParameters_, scalarMomenta_, b_] :=
         HorndeskiG3UncontractedCore[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 3, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+Module[{\[ScriptL], \[ScriptM], \[ScriptN], \[ScriptR], \[ScriptS]},
 Total[RuleValidation`RuleRequire[
 			RuleValidation`RuleRequire[Map[
 				RuleValidation`RuleRequire[MomentaWrapper[#[[;;2b]]]]*
@@ -147,10 +164,11 @@ Total[RuleValidation`RuleRequire[
 					RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[ScriptM],\[ScriptN]},RuleValidation`RuleRequire[DummyArray2[b]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters]]]] FVD[#[[2b+1]],\[ScriptM]] FVD[#[[2b+1]],\[ScriptN]]
 					- RuleValidation`RuleRequire[CTensorGeneral[ Join[{\[ScriptM],\[ScriptN],\[ScriptR],\[ScriptS]},RuleValidation`RuleRequire[DummyArray2[b]]], RuleValidation`RuleRequire[takeIndices[gravitonParameters[[;;-3-1]]]]]]RuleValidation`RuleRequire[GammaTensor[\[ScriptR],\[ScriptM],\[ScriptN],\[ScriptL],gravitonParameters[[-3]],gravitonParameters[[-2]]]] FVD[#[[2b+1]],\[ScriptS]] FVD[gravitonParameters[[-1]],\[ScriptL]]
 				) &,
-				Permutations[scalarMomenta]
+				labelledPermutations[scalarMomenta]
 			]]
 		]]
-        ), True
+        ]
+), True
     ];
 
 
@@ -161,14 +179,18 @@ HorndeskiG3Uncontracted[gravitonParameters_, scalarMomenta_, b_] :=
         HorndeskiG3Uncontracted[gravitonParameters, scalarMomenta, b],
         {{1, "Array", 3, 3, Infinity}, {3, "Integer", 0}, {2, "Array", 1, 2 b + 1, Infinity}},
         (
+(* Fresh dummy indices prevent collisions with supplied external labels.
+   Localisation ends at this call; failure/abort unwinds it normally. *)
+Block[{$scalarDummyIndices = Table[Unique["HorndeskiG3`Private`scalar$"], {2 b}]},
 I Power[Global`\[Kappa],Length[gravitonParameters]/3] Power[-1,b+1]*
 			Total[RuleValidation`RuleRequire[
 				RuleValidation`RuleRequire[Map[
 					RuleValidation`RuleRequire[HorndeskiG3UncontractedCore[#,scalarMomenta,b]]& ,
-					Flatten/@Permutations[Partition[gravitonParameters,3]]
+					Flatten/@labelledPermutations[Partition[gravitonParameters,3]]
 				]]
 			]]
-        ), True
+        ]
+), True
     ];
 
 
