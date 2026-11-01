@@ -181,7 +181,7 @@ The following is the inventory of this checkout:
 | Three-graviton vertex | κ | `Libs/GravitonVertex_1`, loaded by default | `TTT` |
 | Four-graviton vertex | κ² | `Libs/GravitonVertex_2`, loaded by default | `TTTT` |
 | Graviton–ghost–antighost vertex | κ | Direct `GravitonGhostVertex` definition | `TUU` |
-| Five-graviton vertex | κ³ | `Libs/GravitonVertex_3`, explicit import required | Not included; independent source validation remains open |
+| Five-graviton vertex | κ³ | `Libs/GravitonVertex_3`, explicit import required | Not included; [source independently verified](../Verification/GravitonQuintic-2026-11-01.md) |
 
 The default import is `FeynGravImportGravitons[2]`. To request the currently
 stored order-three library, use `FeynGravImportGravitons[3]`; this loads an
@@ -340,7 +340,7 @@ described above.
 | Cubic/quartic native contacts and trees | [Tree-release report](../Verification/PureGRTreeRelease.md): 32 checks, including 15 exact zero rational residuals, source factors, permutations, routing and contact plus s/t/u inventory | Source-to-model fidelity and the selected checks; not a new independent proof of every physical amplitude |
 | Ghost convention | The same report records negative-propagator, arrow-orientation and wrong-sign controls | Correct ordering and native statistics must be retained; native loops were deferred |
 | Missing contact | A deliberately excluded quartic coupling was rejected by the bridge completeness check | Native FeynArts can omit unsupported topologies without this extra guard |
-| Five-graviton source | Generated `GravitonVertex_3` exists; construction and lower-order regression evidence are retained in the [higher-order guide](../../FeynArts/Models/GR/HigherOrderVertices.md) | Independent off-shell validation remains open; not part of the shipped model |
+| Five-graviton source | [Independent Einstein–Hilbert comparison](../Verification/GravitonQuintic-2026-11-01.md): full off-shell tensor, all pair/leg symmetries, symbolic-D traces and negative controls | Stored κ³ contact verified; no new five-point amplitude/Ward check, arbitrary-order claim or enlargement of the shipped model |
 | Five-graviton native development path | A separate order-three model can be built | Expensive historical loading; full five-point amplitude construction did not finish within its recorded bound |
 | CR commands | Direct definitions and documented signatures are present | No transfer of conventional-model verification or new CR mathematical validation here |
 
@@ -349,9 +349,9 @@ later [naming record](../Verification/ModelNames.md) explains its change to `GR`
 The current manifest identifies the shipped snapshot; a dated report describes
 what was checked on that snapshot, not every later source revision.
 
-This documentation update checks source definitions, library inventory, model
-metadata and cited evidence. It does not rerun the examples, regenerate rules,
-establish arbitrary-order completeness or carry out new loop calculations.
+The independent quintic check adds exact action-level source verification.
+It does not rerun the examples, regenerate rules, establish arbitrary-order
+completeness or carry out new loop calculations.
 
 ## Sources and further development
 

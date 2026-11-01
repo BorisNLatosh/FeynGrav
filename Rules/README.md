@@ -6,7 +6,7 @@ Nieuwenhuizen helpers. Ordinary calculations normally use the library-backed
 
 - [Contracts and failure handling](Contracts.md): families, signatures,
   validation, algebra backends and current limitations.
-- [Focused Horndeski source checks](Verification/README.md): independent action
+- [Focused interaction-rule checks](Verification/README.md): independent Horndeski and Einstein–Hilbert action
   comparisons, bounded execution and source/library separation.
 - [Library generator](../Libs/Generator.md): generation and publication workflow.
 

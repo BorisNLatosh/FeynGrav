@@ -27,7 +27,7 @@ before comparing actions or combining sectors.
 
 | Model or formulation | Documentation and commands | Native FeynArts support and limits |
 | --- | --- | --- |
-| General relativity in conventional metric variables | [GR model page](Models/GeneralRelativity.md): action, gauge fixing, ghosts, propagators, vertices and examples | `GR`: cubic/quartic graviton vertices and the cubic ghost coupling, through κ² per vertex. The separate stored five-graviton rule is not independently verified. |
+| General relativity in conventional metric variables | [GR model page](Models/GeneralRelativity.md): action, gauge fixing, ghosts, propagators, vertices and examples | `GR`: cubic/quartic graviton vertices and the cubic ghost coupling, through κ² per vertex. The separate stored five-graviton rule is [independently verified off shell](Verification/GravitonQuintic-2026-11-01.md), but is not included in the shipped native model. |
 | General relativity in Cheung–Remmen variables | [CR interface and scope](Models/GeneralRelativity.md#cheungremmen-interface): graviton and auxiliary-field propagators, three cubic bosonic vertex commands | No CR bundle. This is a different parametrisation of GR, not an additional physical model; conventional-model verification does not validate it. |
 | Quadratic gravity | [Propagators](Reference.md#propagators), [vertices](Reference.md#graviton-self-interactions-and-gravitational-ghosts) and [gauge parameters](Reference.md#gauge-parameters-and-coupling); conventional and higher-derivative gauge-fixing interfaces | No supplied bundle; native integration remains planned. Stored rules and generators have their own scope. |
 

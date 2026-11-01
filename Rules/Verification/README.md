@@ -1,4 +1,6 @@
-# Horndeski regression checks
+# Interaction-rule verification
+
+## Horndeski regression checks
 
 `HorndeskiChecks.wls` runs 48 focused assertions against the independent labelled
 action in `HorndeskiReference.wl`. It covers both direct variants, equal scalar
@@ -85,3 +87,29 @@ source/script/output identities. To remain within the cap, that comparison was
 split across fresh reference, source-seed and sector-comparison processes.
 The independent reference now constructs the volume at general label count;
 its previous n<=3 formula must not be extrapolated to higher orders.
+
+## Five-graviton Einstein-Hilbert checks
+
+`GravitonQuinticChecks.wls` compares stored graviton libraries with the independent
+labelled Einstein–Hilbert action in `GravitonQuinticReference.wl`. Select one suite
+with `FEYNGRAV_GR_CHECK_SUITE`: `Lower` (11 assertions), `Quintic` (23, default),
+or `Trace` (10). Run each in a separate fresh kernel and output directory.
+The [derivation and evidence](../../Documentation/Verification/GravitonQuintic-2026-11-01.md)
+explain why unrestricted auxiliary vectors plus stored index-pair symmetry test
+the complete tensor, and why the single/double traces retain symbolic D.
+
+Set `FEYNGRAV_RULE_AUDIT_OUTPUT` to an existing external directory with no prior
+scientific outputs; existing outputs are refused. `FEYNGRAV_RULE_AUDIT_ROOT`
+optionally selects a checkout (default: this script's repository). FeynCalc is
+needed; FeynGrav production tensor packages and FORM are not loaded. Only the
+Lower suite loads the test-only `HorndeskiReference.wl` for a separate direct-Ricci
+boundary-term control. The quintic reference is independent of that file.
+
+Run `WolframKernel -noinit -script Rules/Verification/GravitonQuinticChecks.wls`
+**inside a verified external resource wrapper**. The script does not establish
+memory/time bounds. All three installed suites passed with aggregate 1 GiB RAM,
+zero swap, 120+10 seconds, fresh 2 GiB available host memory and clean termination.
+It writes diagnostics, ordered assertion ledgers and exact WXF results to the
+output directory, and stops on an unexpected message, failure or abort. It does
+not edit libraries, models or notebooks. No five-point amplitude or higher-order
+FeynArts build is part of these tests.

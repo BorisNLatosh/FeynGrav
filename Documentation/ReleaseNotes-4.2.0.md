@@ -112,6 +112,14 @@ includes the full four-graviton a=0,b=1 action comparison at symbolic D and gene
 off-shell momenta, selected higher connection sectors and lower-order regressions.
 No additional stored library or native FeynArts model order is introduced.
 
+## Five-graviton source verification
+
+The unchanged stored κ³ Einstein–Hilbert vertex now has an independent complete
+off-shell comparison with symbolic D, pair/leg symmetries and trace controls.
+[VERIFY-02 evidence](Verification/GravitonQuintic-2026-11-01.md) closes the missing
+source-validation task. It adds no native FeynArts model order and does not
+certify a complete five-point amplitude or resolve its separate performance issue.
+
 ## Examples and scientific scope
 
 The numbered examples use `FeynGravSimplify`. Example 07 presents the

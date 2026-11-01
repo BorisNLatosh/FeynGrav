@@ -31,6 +31,8 @@ The reference covers main-package commands, public gauge parameters and the auto
 
 ## Verification and history
 
+- [Independent five-graviton vertex](Verification/GravitonQuintic-2026-11-01.md): complete off-shell Einstein–Hilbert comparison, pair/leg symmetries and symbolic-D traces; VERIFY-02 resolved, native five-point performance separate.
+
 - [G5 higher-order source extension](Verification/HorndeskiG5HigherOrders-2026-11-01.md): RULE-02 construction, full four-graviton comparison, selected higher sectors, domain bounds and retained failed attempts.
 
 - [Horndeski implementation audit plan](Verification/HorndeskiImplementationPlan.md): corrected action conventions; separate G2/G3, G4 and G5 checks, then affected-library migration. RULE-03/RULE-04 are accepted in the [audit report](Verification/HorndeskiAudit-2026-11-01.md); the [G4 source repair](Verification/HorndeskiG4-2026-11-01.md) is accepted and [RULE-05 library migration is complete](Verification/HorndeskiLibraryMigration-2026-11-01.md).
