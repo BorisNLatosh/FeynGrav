@@ -190,6 +190,7 @@ def main():
                 run_kernel('CoefficientWorkLimits')
                 run_kernel('MasterOutputSharing')
                 run_kernel('MasterRationalCoefficients')
+                run_kernel('ScalarCoefficientGroups')
                 run_kernel('PolarisationCoefficients')
                 run_kernel('PolarisationWorkBudget')
                 continue

@@ -99,6 +99,44 @@ id,all cfcShare(?a,cfcDGNum?,?b)=cfcRef(cfcDGNum);
 DropCoefficient;
 if (count(cfcRef,1)==0); Discard; endif;
 .sort
+#if @REGISTER_DEPENDENCIES@ == 1
+* Follow only reachable scalar references. Extra-symbol definitions reference
+* earlier definitions, so this finite closure is ordered before metadata fills.
+* The union contains identifiers only; polynomial coefficients stay shared.
+#do cfcRefPass=1,1
+#$cfcRefCount=termsin_(cfcRefs);
+Skip;
+Local cfcRefChildren=cfcRefs;
+id cfcRef(cfcDGNum?)=extrasymbol_(cfcDGNum);
+Bracket cfcShare,cfcPolyN,cfcPolyD;
+.sort
+Skip;
+NSkip cfcRefChildren;
+Collect cfcNum,cfcNumPart,50;
+id cfcNum(?a)=1;
+id cfcNumPart(?a)=1;
+id cfcPolyN(cfcDGNum?)=cfcShare(cfcDGNum);
+id cfcPolyD(cfcDGNum?)=cfcShare(cfcDGNum);
+ChainIn cfcShare;
+id,all cfcShare(?a,cfcDGNum?,?b)=cfcRef(cfcDGNum);
+if (count(cfcRef,1)==0); Discard; endif;
+.sort
+Skip;
+Local cfcRefUnion=cfcRefs+cfcRefChildren;
+DropCoefficient;
+.sort
+Drop cfcRefs,cfcRefChildren;
+Local cfcRefs=cfcRefUnion;
+.sort
+Drop cfcRefUnion;
+.sort
+#$cfcRefNewCount=termsin_(cfcRefs);
+#if `$cfcRefNewCount' > `$cfcRefCount'
+#redefine cfcRefPass "0"
+#endif
+#enddo
+NSkip;
+#endif
 Hide cfcRefs;
 #$cnt=termsin_(cfcRefs);
 #write <@RESULT@> "CFC_SHARED %$",$cnt

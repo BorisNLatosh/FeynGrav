@@ -12,7 +12,7 @@ arithmetic stage.
 `RationalCoefficients.wl` owns `coefficientRoles`, `coefficientPolynomial`,
 `coefficientInteger`, `coefficientInverseRules` and `coefficientLimits`.
 `rcPlan`, `dcfPlan`, `rcMasterPlan` and `rcPolarisationPlan` consume them.
-No new companion, installer dependency, public option or persisted format is needed.
+The PERF-05 policy introduced no new companion, installer dependency, public option or persisted format. The PERF-07 extension below adds an optional kinematic snapshot.
 
 The input is the validated encoded mapping. No decoding, `ToExpression`, user
 symbol evaluation or assumptions enter these selectors. Scalar symbols and
@@ -87,3 +87,27 @@ common optional rational/factor allowances, accepted with 495/495 combined check
 see [WorkLimits.md](WorkLimits.md). [Dependency ownership](DependencyPaths.md)
 and [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md) complete the retained QED/three-box gates.
 The full selected QED tadpole and 1,490-term equality remain outside this acceptance.
+
+## Canonical kinematics and scalar spectator groups — PERF-07
+
+`rcKinematicPlan` is a separate capture step: unlike the encoded-data selectors,
+it evaluates the caller's external momentum Pair definitions once. It accepts
+exact scalar arithmetic (integer powers −32…32, at most 2,048 RHS leaves), excludes
+loop/polarisation vectors and RHS expressions still containing Pair, and records
+the accepted identities. Their scalar symbols join the ordinary dictionary;
+`rcValidateKinematics` checks the snapshot and caller state before reconstruction.
+Unsupported assignments retain the old path, without assuming missing relations.
+
+`rcSpectators` excludes dimensions, masses, family invariants, supplied identity
+symbols, existing integral/denominator data and mixed or unsupported powers.
+Eligible remaining scalars define complete Laurent structures, using the existing
+shared-definition grouping, caches, compactness selection and work accounting.
+Before scalar grouping, the output planner registers the finite transitive set
+of reachable shared references in dependency order. It does not flatten their
+kinematic polynomials. Native polynomial denominators are inspected and processed
+on the scalar-only final-rational path as well as the polarisation path.
+
+The previous term/degree/variable, structure and job limits remain unchanged.
+The retained seven-group Horndeski coefficient still exhausts optional work and
+falls back; this follow-up is **not closed**. See the
+[verification and remaining acceptance gates](../Documentation/Verification/CouplingGroupCoefficients.md).

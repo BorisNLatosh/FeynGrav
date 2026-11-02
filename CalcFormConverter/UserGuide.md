@@ -993,6 +993,32 @@ for every expression. No new option is required. See the
 for exact checks and the additional measured cost.
 
 
+### Supplied kinematics and scalar coupling groups
+
+The final scalar-coefficient path applies supported external scalar-product
+identities that you have already assigned, before sharing and rational work.
+For example, a supplied `SPD[p,p] = s` makes FORM use `s` consistently in both
+the numerator and denominator. No mass-shell, momentum-conservation or helicity
+condition is invented. Loop products and unsupported assignments keep their
+existing treatment. The mapping records the identities actually used; changing
+them before import returns `CoefficientConventionMismatch`. Re-export under the
+new definitions and import with the current converter.
+
+Native polynomial denominators also enter scalar-only rational arithmetic.
+For eligible scalar masters without polarisation vectors, the converter groups
+complete Laurent monomials in spectator parameters and simplifies their remaining
+coefficients separately. It identifies spectators structurally, excluding masses,
+dimensions, known invariants and mixed/unsupported denominator dependence.
+Existing grouping and arithmetic limits still apply; exhaustion restores the
+original master. There is no new public option and no promise of a fully
+simplified result.
+
+The retained Horndeski example now exposes seven coupling groups, but the current
+work allowance still restores the original coefficient. Recovery of its 225-term
+reference and the complete five-master symbolic comparison remain open. See the
+[verification report](../Documentation/Verification/CouplingGroupCoefficients.md)
+for passing focused/regression checks, retained performance and limits.
+
 ### Polarisation structures in scalar-master coefficients
 
 **Accepted for the documented development scope:** the repaired hook passes

@@ -38,8 +38,10 @@ radical=(1/s+1/t)Sqrt[a+b]master;
 assert["opaque radical preserved",Together[calculate[radical]-withoutFinalRationals[calculate[radical]]]===0];
 assert["matrix spectator preserved",Together[calculate[zero master GAD[mu]]-withoutFinalRationals[calculate[zero master GAD[mu]]]]===0];
 large=(a+b)^30 zero master;
-(* Isolate the final master selector: earlier collection may already find zero. *)
-largeResult=Block[{CalcFormConverter`Private`$lrCollectCoefficients=False},calculate[large]];
+(* Isolate the monolithic master selector. Earlier collection and coupling
+   grouping can legitimately remove the high-degree spectator polynomial. *)
+largeResult=Block[{CalcFormConverter`Private`$lrCollectCoefficients=False,
+ CalcFormConverter`Private`$rcCouplingGroups=False},calculate[large]];
 assert["degree fallback retained",largeResult=!=0&&!FailureQ[largeResult]];
 assert["degree fallback exact",Together[largeResult]===0];
 smallLimit=Block[{CalcFormConverter`Private`$lrCollectCoefficients=False,CalcFormConverter`Private`$rcMasterMaximumTerms=1},calculate[zero master]];

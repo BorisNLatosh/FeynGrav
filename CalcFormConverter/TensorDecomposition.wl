@@ -208,6 +208,7 @@ tdAlgebraMapping[mapping_] := If[!MemberQ[{6,7,8},mapping["Version"]],
 ];
 tdImportSetup[mapping_, dim_] := Module[{meta, rows, q, expected, saved, reduction},
     If[!MemberQ[{6,7,8},mapping["Version"]], Return[Null]];
+    rcValidateKinematics[mapping,dim];
     meta = Lookup[mapping, "TensorDecomposition", None];
     If[!AssociationQ[meta] || Lookup[meta, "Normalisation", None] =!= "IntegralEqualsIPiSquaredTimesCoefficient" ||
         Lookup[meta, "Basis", None] =!= "DistinctSymmetricPlacements" ||

@@ -6,7 +6,7 @@
 (* ::Text:: *)
 (* Loaded in the converter's private context. This module only describes
    algebra to be performed by FORM. It does not simplify expressions in the
-   Wolfram kernel or change the mapping. Existing identifiers retain their
+   Wolfram kernel. The kinematic snapshot records supplied exact assignments. Existing identifiers retain their
    meaning, including propagators, which never enter the rational algebra. *)
 
 (* ::Section:: *)
@@ -39,6 +39,85 @@ coefficientRoles[entries_List, pairPrefix_String] := Module[
     <|"Scalars" -> scalars, "Pairs" -> pairs, "PairNames" -> pairNames,
       "PolarisationNames" -> polarisationNames,
       "Variables" -> Join[Values[scalars], pairNames]|>
+];
+
+(* Freeze only explicit, exact scalar assignments for external momentum pairs.
+   Unassigned products and unsupported RHS objects retain their old path. No
+   physical assumptions or recursive Pair substitutions are inferred. The JSON
+   record is data; its encoded RHS is validated again before import. *)
+$rcCanonicalKinematics = True;
+$rcCouplingGroups = True;
+rcExactScalarDataQ[{}] := False;
+rcExactScalarDataQ[e_List] := TrueQ[Quiet[Check[Catch[Switch[First[e],
+    "Integer" | "Rational" | "Complex", Quiet[Check[MatchQ[decode[e], _Integer | _Rational | _Complex], False]],
+    "Symbol", Length[e] === 2 && StringQ[e[[2]]],
+    "Plus" | "Times", Length[e] > 1 && AllTrue[Rest[e], rcExactScalarDataQ],
+    "Power", Length[e] === 3 && rcExactScalarDataQ[e[[2]]] &&
+        MatchQ[e[[3]], {"Integer", _String}] && Between[integerData[e[[3,2]]], {-32,32}],
+    _, False], $failureTag, (False &)], False]]];
+rcExactScalarDataQ[_] := False;
+rcScalarSymbols[e_] := DeleteDuplicates[Cases[e, {"Symbol", _String}, {0, Infinity}]];
+rcScalarText[e_, names_Association] := Switch[First[e],
+    "Symbol", Lookup[names, e[[2]]],
+    "Integer", e[[2]],
+    "Rational", "(" <> e[[2]] <> "/" <> e[[3]] <> ")",
+    "Complex", "(" <> rcScalarText[e[[2]],names] <> "+i_*" <> rcScalarText[e[[3]],names] <> ")",
+    "Plus" | "Times", "(" <> StringRiffle[rcScalarText[#,names]& /@ Rest[e], If[First[e]==="Plus","+","*"]] <> ")",
+    "Power", "(" <> rcScalarText[e[[2]],names] <> ")^(" <> e[[3,2]] <> ")"];
+
+rcKinematicPlan[initial_List, mapping_Association] := Module[
+    {entries=initial, vectors, pairs, records={}, value, encoded, symbols, next, names, rules},
+    If[!TrueQ[$rcCanonicalKinematics], Return[<|"Entries"->entries,"Records"->{},"Rules"->""|>]];
+    vectors=Select[entries, #["Kind"]==="Vector" && MatchQ[#["Expression"],{"Symbol",_String}] &&
+        !MemberQ[mapping["LoopMomenta"],#["Expression"]]&];
+    pairs=Flatten[Table[{vectors[[i]],vectors[[j]]},{i,Length[vectors]},{j,i,Length[vectors]}],1];
+    Do[
+        value=Pair[Momentum[decode[pair[[1,"Expression"]]],decode[mapping["Dimension"]]],
+            Momentum[decode[pair[[2,"Expression"]]],decode[mapping["Dimension"]]]];
+        If[!FreeQ[value,_Pair] || LeafCount[value]>2048, Continue[]];
+        encoded=Catch[encode[value],$failureTag];
+        If[FailureQ[encoded] || !rcExactScalarDataQ[encoded], Continue[]];
+        AppendTo[records,<|"Vectors"->Lookup[pair,"Name"],"Value"->encoded|>],{pair,pairs}];
+    symbols=rcScalarSymbols[Lookup[records,"Value",{}]];
+    next=1+Max[Prepend[FromDigits[StringDrop[#["Name"],3]]& /@ Select[entries,#["Kind"]==="Scalar"&],0]];
+    Do[If[!AnyTrue[entries,#["Kind"]==="Scalar" && #["Expression"]===symbol&],
+        AppendTo[entries,<|"Name"->"cfs"<>intString[next++],"Kind"->"Scalar","Expression"->symbol|>]],{symbol,symbols}];
+    names=Association[(#["Expression"][[2]]->#["Name"])& /@ Select[entries,#["Kind"]==="Scalar"&]];
+    rules=StringJoin[("id "<>StringRiffle[#["Vectors"],"."]<>"="<>rcScalarText[#["Value"],names]<>";\n")& /@ records];
+    <|"Entries"->entries,"Records"->records,"Rules"->rules|>
+];
+
+rcValidateKinematics[mapping_, dim_] := Module[{records, vectors, scalars, seen={}, pair, current},
+    If[!KeyExistsQ[mapping,"CoefficientKinematics"], Return[Null]];
+    records=mapping["CoefficientKinematics"];
+    If[!AssociationQ[records] || Sort[Keys[records]] =!= {"Identities","Version"} || records["Version"] =!= 1 ||
+        !ListQ[records["Identities"]], throwFailure["InvalidMapping","Invalid coefficient kinematic snapshot."]];
+    vectors=Association[(#["Name"]->#["Expression"])& /@ Select[mapping["Entries"],#["Kind"]==="Vector"&]];
+    scalars=Lookup[Select[mapping["Entries"],#["Kind"]==="Scalar"&],"Expression",{}];
+    Do[
+        If[!AssociationQ[row] || Sort[Keys[row]] =!= {"Value","Vectors"} ||
+            !MatchQ[row["Vectors"],{_String,_String}] || !AllTrue[row["Vectors"],KeyExistsQ[vectors,#]&] ||
+            !rcExactScalarDataQ[row["Value"]] || !AllTrue[rcScalarSymbols[row["Value"]],MemberQ[scalars,#]&], throwFailure["InvalidMapping","Invalid frozen scalar-product identity."]];
+        pair=Lookup[vectors,row["Vectors"]];
+        If[!AllTrue[pair,MatchQ[#, {"Symbol",_String}]&] || AnyTrue[pair,MemberQ[mapping["LoopMomenta"],#]&] ||
+            MemberQ[seen,Sort[row["Vectors"]]], throwFailure["InvalidMapping","Invalid or duplicate external scalar product."]];
+        AppendTo[seen,Sort[row["Vectors"]]];
+        current=encode[Pair[Momentum[decode[pair[[1]]],dim],Momentum[decode[pair[[2]]],dim]]];
+        If[current =!= row["Value"], throwFailure["CoefficientConventionMismatch",
+            "Scalar-product definitions changed since export; re-export with the current kinematics."]],{row,records["Identities"]}]
+];
+
+(* Spectators cannot occur in dimensions, mass/invariant data or nonmonomial
+   denominators. Classification uses encoded structure, never parameter names.
+   Polarisation jobs retain their existing structural partition and budgets. *)
+rcSpectators[entries_, mapping_, rows_, identities_] := Module[{excluded, unsafe},
+    If[!TrueQ[$rcCouplingGroups] || AnyTrue[entries,#["Kind"]==="Vector" && First[#["Expression"]]==="Polarization"&],Return[{}]];
+    unsafe=Cases[Lookup[entries,"Expression"], x:{"Power",base_,power_} /;
+        !(MatchQ[power,{"Integer",_String}] && (integerData[power[[2]]]>=0 || MatchQ[base,{"Symbol",_String}])) :> x,{0,Infinity}];
+    excluded=rcScalarSymbols[{mapping["Dimension"],Lookup[rows,"MassSquared",{}],
+        lrInvariantSnapshot[rows,decode[mapping["Dimension"]]],Lookup[identities,"Value",{}],unsafe,
+        Lookup[Select[entries,MemberQ[{"IntegralCoefficient","Denominator"},#["Kind"]]&],"Expression",{}]}];
+    Lookup[Select[entries,#["Kind"]==="Scalar" && !MemberQ[excluded,#["Expression"]]&],"Name",{}]
 ];
 
 (* One source for stage allowances. The private legacy controls remain usable
@@ -158,28 +237,28 @@ rcPowerRules[variables_List, head_String] := Flatten[Map[Function[s, {
 
 $rcMasterMaximumTerms = 1000;
 $rcMasterMaximumDegree = 24;
-rcMasterPlan[entries_List] := Module[{roles, variables, pairs, names, powers, inspect, polNames, polPlan,
+rcMasterPlan[entries_List, spectators_List: {}] := Module[{roles, variables, pairs, names, powers, inspect, polNames, polPlan,
     limits = coefficientLimits["Master"]},
     If[limits["Terms"] <= 0, Return[<||>]];
     roles = coefficientRoles[entries, "cfcMRX"];
     pairs = roles["Pairs"]; names = roles["PairNames"];
     polNames = roles["PolarisationNames"]; variables = roles["Variables"];
-    polPlan = rcPolarisationPlan[pairs, names, polNames, variables];
+    polPlan = rcPolarisationPlan[pairs, names, polNames, variables, spectators];
     powers = StringRiffle[rcPowerRules[Append[variables,"cfcMRImag"],"cfcMRat"],"\n"];
     inspect = StringJoin[Map[Function[s,
         "id " <> s <> "^cfcRPower?pos_=" <> s <> "*cfcMRDegree^cfcRPower;\n" <>
         "id " <> s <> "^cfcRPower?neg_=" <> s <> "*cfcMRDegree^(-cfcRPower);\n"], variables]];
     <|"Declarations" -> "\nSymbols cfcRPower,cfcMRIndex,cfcMRN,cfcMRD,cfcMRDegree,cfcMRImag" <>
             If[names === {},"",","<>StringRiffle[names,","]] <> ";\nCFunctions cfcMRat,cfcMRDenProbe;\nTable sparse cfcMRMeta(1);\n" <> Lookup[polPlan, "Declarations", ""],
-      "Polarisation" -> polPlan,
+      "Polarisation" -> polPlan, "RegisterDependencies" -> (spectators =!= {}),
       "Procedure" -> StringReplace[rcTemplate["MasterRationalCoefficients.frm.in"], {
         "@LIMIT@" -> intString[limits["Terms"]], "@DEGREE@" -> intString[limits["Degree"]],
         "@VARIABLE_LIMIT@" -> intString[limits["Variables"]], "@VARIABLES@" -> StringRiffle[variables,","],
         "@DOTS@" -> StringRiffle[MapThread["id "<>StringRiffle[#1,"."]<>"^cfcRPower?="<>#2<>"^cfcRPower;"&,{pairs,names}],"\n"],
-        "@NATIVE_DEN_INSPECT@" -> If[polPlan === <||>, "", "id denom_(?a)=cfcMRDenProbe(?a);\nArgument cfcMRDenProbe;\nDropCoefficient;\nid i_=1;\n" <>
+        "@NATIVE_DEN_INSPECT@" -> ("id denom_(?a)=cfcMRDenProbe(?a);\nArgument cfcMRDenProbe;\nDropCoefficient;\nid i_=1;\n" <>
             StringRiffle[MapThread["id "<>StringRiffle[#1,"."]<>"^cfcRPower?="<>#2<>"^cfcRPower;"&,{pairs,names}],"\n"] <>
-            "\n" <> inspect <> "EndArgument;\nid cfcMRDenProbe(cfcMRN?)=cfcMRN;\n"],
-        "@NATIVE_DEN_RATIONAL@" -> If[polPlan === <||>, "", "id denom_(?a)=cfcMRat(1,?a);\n"],
+            "\n" <> inspect <> "EndArgument;\nid cfcMRDenProbe(cfcMRN?)=cfcMRN;\n"),
+        "@NATIVE_DEN_RATIONAL@" -> "id denom_(?a)=cfcMRat(1,?a);\n",
         "@INSPECT@" -> inspect, "@POWERS@" -> powers,
         "@RESTORE@" -> StringRiffle[MapThread["id "<>#1<>"="<>StringRiffle[#2,"."]<>";"&,{names,pairs}],"\n"],
         "@FACTOR@" -> If[polPlan === <||>, "", "#call cfcPGFactor\n"]}]|>
@@ -196,14 +275,15 @@ $rcPolarisationMaximumRationalPasses = 1024;
 $rcPolarisationFactorMaximumTerms = 250;
 $rcPolarisationFactorMaximumVariables = 8;
 $rcPolarisationFactorMaximumDegree = 12;
-rcPolarisationPlan[pairs_List, names_List, polNames_List, variables_List] := Module[
-    {polPairs, plain, substitutions, limits = coefficientLimits["Polarisation"],
+rcPolarisationPlan[pairs_List, names_List, polNames_List, variables_List, spectators_List: {}] := Module[
+    {polPairs, plain, structures=Join[polNames,spectators], substitutions, limits = coefficientLimits["Polarisation"],
      factorLimits = coefficientLimits["Factor"]},
-    If[polNames === {} || limits["Structures"] <= 0, Return[<||>]];
+    If[structures === {} || limits["Structures"] <= 0, Return[<||>]];
     polPairs = Pick[pairs, MemberQ[polNames, #] & /@ names];
-    plain = Complement[variables, polNames];
+    plain = Complement[variables, structures];
     substitutions = {
-        "@POL@" -> StringRiffle[polNames, ","],
+        "@POL@" -> StringRiffle[structures, ","],
+        "@STRUCTURE_INSPECT@" -> StringJoin[("id "<>#<>"^cfcRPower?neg_="<>If[MemberQ[spectators,#],"cfcPGHas","cfcPGBad"]<>";\nid "<>#<>"^cfcRPower?pos_=cfcPGHas;\n")& /@ structures],
         "@STRUCTURES@" -> intString[limits["Structures"]],
         "@WORK_LIMIT@" -> intString[limits["RationalPasses"]],
         "@TERMS@" -> intString[limits["Terms"]],
@@ -221,12 +301,13 @@ rcPolarisationPlan[pairs_List, names_List, polNames_List, variables_List] := Mod
             {polNames, polPairs}], "\n"],
         "@PLAIN@" -> StringRiffle[plain, ","],
         "@DENOMINATOR_KEYS@" -> StringJoin[("id " <> # <> "^cfcRPower?neg_=cfcPGInverse(" <> # <> ")^(-cfcRPower);\n" &) /@
-            Join[Complement[variables, names], ("(" <> StringRiffle[#, "."] <> ")" &) /@
+            Join[Complement[variables, Join[names,spectators]], ("(" <> StringRiffle[#, "."] <> ")" &) /@
                 Pick[pairs, !MemberQ[polNames, #] & /@ names]]],
         "@ATOM_COUNT@" -> StringRiffle[("theta_(abs_(count_(" <> # <> ",1))-1)+theta_(abs_(count_(" <> # <> ",1))-2)" &) /@
             variables, "+"] <> "+count_(cfcShare,1,cfcPolyN,1,cfcPolyD,1)"};
     <|"Declarations" -> "\nSymbols cfcPGHas,cfcPGFraction,cfcPGBad,cfcPGIndex;\n" <>
         "CFunctions cfcPGTag,cfcPGRef,cfcPGCollect,cfcPGCollectPart,cfcPGInverse,cfcPGDenProbe,cfcPGReject,cfcPGRejectPart;\n" <>
         "Table sparse cfcPGSize(1);\nTable sparse cfcPGDenOK(1);\nTable sparse cfcPGParts(1);\nTable sparse cfcPGReach(1);\nTable sparse cfcPGTerms(1);\nTable sparse cfcPGAtoms(1);\nTable sparse cfcPGRejectCost(1);\nTable sparse cfcPGRejectDegree(1);\nTable sparse cfcPGRejectVariables(1);\nTable sparse cfcPGResult(1);\nTable sparse cfcPGResultReady(1);\nTable sparse cfcPGInspectOK(1);\nTable sparse cfcPGInspectMeta(1);\nTable sparse cfcPGAlgebra(2);\nTable sparse cfcPGAlgebraReady(2);\nTable sparse cfcPGDenValue(1);\nTable sparse cfcPGDenReady(1);\n",
-      "Procedure" -> StringReplace[rcTemplate["PolarisationCoefficients.frm.in"], substitutions]|>
+      "Procedure" -> StringReplace[StringReplace[rcTemplate["PolarisationCoefficients.frm.in"], substitutions],
+        If[spectators === {}, {}, {"CFC polarisation groups:" -> "CFC coupling groups:", "CFC_PG_" -> "CFC_CG_", "CFC polarisation rational eligible:" -> "CFC coupling rational eligible:", "unsupported_or_no_polarisation" -> "unsupported_or_no_coupling"}]]|>
 ];

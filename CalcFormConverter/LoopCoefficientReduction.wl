@@ -428,7 +428,7 @@ lrReconstruct[x_] := x /. tdToken[a___] :> tdReconstruct[{a}];
 (* ::Section:: *)
 (* Export orchestration *)
 lrPrepare[data_Association, enabled_, drop_] := Module[
-    {result=data,mapping=data["Mapping"],entries,rows,plan,denominatorPlan,collection,meta,supports,saved=False},
+    {result=data,mapping=data["Mapping"],entries,rows,plan,denominatorPlan,collection,meta,supports,saved=False,kinematics,kinematicRules,spectators},
     If[!MemberQ[{True,False},enabled],throwFailure["InvalidOption","ReduceLoopCoefficients must be True or False."]];
     If[!enabled,Return[data]];
     entries=mapping["Entries"];
@@ -458,9 +458,21 @@ lrPrepare[data_Association, enabled_, drop_] := Module[
     supports=If[saved,lrSavedSupports[entries,rows],Lookup[data,"LoopFamilySupports",Automatic]];
     plan=lrPlan[rows,entries,decode[mapping["Dimension"]],TrueQ[$smEnabled],supports];
     denominatorPlan=ldgPlan[plan["Entries"]];
-    plan["Entries"]=denominatorPlan["Entries"];
+    kinematics=If[tdAlgebraMapping[mapping]["Version"]===1,
+        rcKinematicPlan[denominatorPlan["Entries"],mapping],
+        <|"Entries"->denominatorPlan["Entries"],"Records"->{},"Rules"->""|>];
+    plan["Entries"]=kinematics["Entries"];
+    denominatorPlan=ldgPlan[plan["Entries"]];
+    kinematicRules=kinematics["Rules"];
+    If[kinematicRules =!= "",
+        mapping=Join[mapping,<|"CoefficientKinematics"-><|"Version"->1,"Identities"->kinematics["Records"]|>|>];
+        kinematicRules="Argument;\n"<>kinematicRules<>"EndArgument;\n"<>kinematicRules;
+        denominatorPlan["Preparation"]=StringReplace[denominatorPlan["Preparation"],
+            "FactArg cfcLRDen;"->(kinematicRules<>"FactArg cfcLRDen;")];
+        denominatorPlan["Rules"]=denominatorPlan["Rules"]<>kinematicRules];
+    spectators=rcSpectators[plan["Entries"],mapping,rows,kinematics["Records"]];
     collection=<|"Dimension"->dcfPlan[<|"Mapping"->Join[mapping,<|"Entries"->plan["Entries"]|>]|>,False],"CanonicalRules"->(lrCanonicalRules[rows,decode[mapping["Dimension"]],drop,supports]<>If[TrueQ[$smEnabled],smCanonicalRules[rows,decode[mapping["Dimension"]],supports],""]),"MonomialRules"->lrMonomialRules[plan["Entries"]],"Denominators"->denominatorPlan,"SharedBlocks"->(tdAlgebraMapping[mapping]["Version"]===1)|>;
-    collection["Rational"] = If[TrueQ[collection["SharedBlocks"]], rcMasterPlan[plan["Entries"]], <||>];
+    collection["Rational"] = If[TrueQ[collection["SharedBlocks"]], rcMasterPlan[plan["Entries"],spectators], <||>];
     collection["CoefficientCollection"] = lrCoefficientCollectionPlan[Join[mapping,<|"Entries"->plan["Entries"]|>]];
     plan["Processing"]=Block[{$lrCollectionPlan=collection},lrIsolatedProcessing[]];
     mapping=Join[mapping,<|"Entries"->plan["Entries"],"LoopCoefficientReduction"->
@@ -471,7 +483,7 @@ lrPrepare[data_Association, enabled_, drop_] := Module[
         "TensorDeclarations"->result["TensorDeclarations"]<>plan["Declarations"]<>collection["Denominators"]["Declarations"]<>Lookup[collection["Dimension"],"Declarations",""]<>Lookup[collection["Rational"],"Declarations",""]<>Lookup[collection["CoefficientCollection"],"Declarations",""]<>
             If[collection["SharedBlocks"],"\nCFunctions cfcShared,cfcSharedPart,cfcShare;\n", ""],
         "LoopCollectionPlan"->collection,"ScalarMasterPlan"->Lookup[plan,"MasterPlan",<||>],
-        "LoopReductionProcessing"->plan["Processing"]|>]
+        "LoopReductionProcessing"->kinematicRules<>If[kinematicRules==="","",".sort\n"]<>plan["Processing"]|>]
 ];
 
 (* ::Section:: *)

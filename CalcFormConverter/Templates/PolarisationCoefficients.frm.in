@@ -27,10 +27,7 @@ EndArgument;
 id cfcPGDenProbe(cfcMRN?number_)=cfcPGFraction;
 id i_=1;
 @ALL_DOTS@
-#do v={@POL@}
-id `v'^cfcRPower?neg_=cfcPGBad;
-id `v'^cfcRPower?pos_=cfcPGHas;
-#enddo
+@STRUCTURE_INSPECT@
 #do v={@PLAIN@}
 id `v'^cfcRPower?neg_=cfcPGFraction;
 id `v'^cfcRPower?pos_=1;

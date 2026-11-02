@@ -40,7 +40,7 @@ and [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md
 | `PropagatorGroups.wl` | Propagator layout, streaming input and grouped reconstruction |
 | `PropagatorCancellation.wl` | Exact routing-matrix bases and FORM numerator cancellation before grouping |
 | `DimensionCoefficients.wl` | Univariate dimension simplification and ordinary-arithmetic output for remaining version-one coefficients |
-| `RationalCoefficients.wl` | Bounded scalar coefficient eligibility and embedded FORM rational/factor procedures |
+| `RationalCoefficients.wl` | Shared scalar policy, supplied-kinematics snapshot, spectator classification and embedded FORM rational/factor procedures |
 | `CoefficientParser.wl` | Restricted syntax validation and held reconstruction of commuting coefficients |
 | `StageSymmetry.wl` | Verified pair symmetries and canonical intermediate tensors in prepared version-one jobs |
 | `Templates/` | Main program, grouped coefficient output, rational/dimension processing and embedded Dirac/colour procedures |
@@ -1061,3 +1061,21 @@ batch passes 495/495 assertions under unchanged bounded resources; [the report](
 retains earlier failures and the final evidence. The [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md)
 completes dependency, retained QED and three-box checks with default named output.
 This is not a general performance guarantee.
+
+## Scalar coupling-group follow-up
+
+PERF-07 connects `rcKinematicPlan` in `lrPrepare`, before denominator sharing and
+final coefficient inspection. Rendering only consumes the captured identities;
+`tdImportSetup` validates them before reconstruction. `rcMasterPlan` admits native
+polynomial denominators in both inspection and computation. For scalar spectator
+groups, `rcPolarisationPlan` reuses the structural engine with a Laurent-capable
+classification; polarisation jobs keep their original partition. The shared-output
+template registers reachable dependencies before filling coefficient metadata.
+
+Keep scalar-role classification independent of parameter spelling, restore the
+complete original on work exhaustion, and do not infer mathematical success
+from a completed FORM process. `Tests/ScalarCoefficientGroups.wls` is included
+in the runtime suite. See the [verification report](../Documentation/Verification/CouplingGroupCoefficients.md):
+small/regression checks pass, while the retained Horndeski compact coefficient
+and exact all-five-master comparison remain acceptance gates. Do not mark PERF-07
+resolved or silently raise resource/algebraic limits.

@@ -46,7 +46,7 @@ The table describes common fields, using version one as the baseline. Later sect
 | `Dimension` | Encoded symbolic or integer Lorentz dimension | Required; a symbol other than `I`, or integer at least 2 |
 | `Entries` | Array of mapping entries | Required and validated |
 | `ExpressionDigest` | `Hash[FCI[input], "SHA256", "HexString"]` | Always exported; participates in mapping digest, not otherwise interpreted |
-| `LoopMomenta` | Array of encoded momentum symbols supplied by the user | Always exported; informational to the current importer |
+| `LoopMomenta` | Array of encoded momentum symbols supplied by the user | Always exported; also excludes loop vectors from the optional coefficient-kinematics snapshot |
 | `ResultLayout` | Optional `"PropagatorGroups"` for grouped results; absent in legacy files and denominator-free exports | Checked when present; selects incremental input and requires denominator entries |
 | `Processing` | `"TensorAlgebraOnly"` for version one; later versions record the enabled algebra mode | Always exported; informational to the current importer |
 
@@ -487,3 +487,28 @@ CRLF), optional horizontal whitespace and further digits. These fragments form
 one integer token. Identifiers and arbitrary expressions cannot be joined by
 this syntax. Continuations may cross reader chunks; only the completed group
 or shared definition is normalised.
+
+## Optional coefficient-kinematics snapshot
+
+Current version 6–8 coefficient mappings may include `CoefficientKinematics`:
+
+```json
+{"Version":1,"Identities":[{"Vectors":["cfv2","cfv3"],"Value":["Symbol","Global`s"]}]}
+```
+
+This additive field records supplied identities used during scalar coefficient
+normalisation. It changes neither existing fields nor result framing. Historical
+mappings without it retain their existing interpretation. Import such new jobs
+with the current converter: earlier readers do not enforce this extra guard.
+
+The snapshot requires exactly `Version` and `Identities`; each identity requires
+exactly `Vectors` and `Value`. Vectors name two existing ordinary momentum-symbol
+entries, excluding loop vectors. Unordered pairs must be unique. Values use the
+restricted exact scalar encoding described by `rcExactScalarDataQ`, with every
+symbol registered as a scalar entry. Malformed data fails as `InvalidMapping`.
+The current Pair value must encode identically to the frozen value; otherwise
+import returns `CoefficientConventionMismatch`. Algebraically equivalent but
+structurally different redefinitions can therefore require re-export. No generic
+simplifier or evaluation of an arbitrary encoded function is introduced.
+
+Coupling-group caches, metadata and eligibility decisions are not persisted.
