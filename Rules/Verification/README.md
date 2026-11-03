@@ -6,7 +6,7 @@
 action in `HorndeskiReference.wl`. It covers both direct variants, equal scalar
 momenta, temporary-index collisions, one-/two-graviton G2/G3/G5 action checks,
 negative controls and the G5 inverse-metric bound. The larger inventory and three-graviton
-checks are recorded in the [audit report](../../Documentation/Verification/HorndeskiAudit-2026-11-01.md).
+checks are recorded in the audit report (historical record; [current user guidance](../../Documentation/ScientificScope.md#horndeski)).
 
 Use a fresh kernel with FeynCalc/FeynGrav and FORM available. Set
 `FEYNGRAV_RULE_AUDIT_OUTPUT` to an existing external evidence directory.
@@ -29,7 +29,7 @@ reference and `HorndeskiG4Reference.wl`. It checks actual public contracted and
 uncontracted source calls through n=2 and the complete n=3,b=2 vertex by exact
 source-seed contraction followed by every labelled permutation. It includes
 symmetries, degrees and sensitive wrong-sign/omitted-block controls. The
-[G4 report](../../Documentation/Verification/HorndeskiG4-2026-11-01.md) records
+G4 report (historical record; [current user guidance](../../Documentation/ScientificScope.md#horndeski)) records
 additional interface, higher-b and all-library classification checks and limits.
 
 Use the same three `FEYNGRAV_RULE_AUDIT_*` variables above, a fresh external
@@ -41,7 +41,7 @@ sequential serial FORM simplification calls, each with a 120-second internal
 limit; the external wrapper enforces the aggregate limit. It does not load
 the main package, regenerate libraries or validate the four-argument importer.
 Old output files cause an early refusal rather than overwriting evidence.
-The separate [RULE-05 migration](../../Documentation/Verification/HorndeskiLibraryMigration-2026-11-01.md) now verifies all 14 shipped G4 libraries and ordinary imports.
+The separate RULE-05 migration (historical record; [current user guidance](../../Documentation/ScientificScope.md#horndeski)) now verifies all 14 shipped G4 libraries and ordinary imports.
 
 ## G4 stored-library and import regression
 
@@ -81,7 +81,7 @@ Existing scientific output files are refused. The installed run used whole-tree
 1 GiB, zero swap, 120+10 seconds and fresh 2 GiB headroom, with two sequential
 serial FORM calls. The script does not enforce those external limits itself.
 
-The [RULE-02 report](../../Documentation/Verification/HorndeskiG5HigherOrders-2026-11-01.md)
+The RULE-02 report (historical record; [current user guidance](../../Documentation/ScientificScope.md#horndeski))
 retains the full n=4,a=0,b=1 comparison, all labelled permutations and its
 source/script/output identities. To remain within the cap, that comparison was
 split across fresh reference, source-seed and sector-comparison processes.
@@ -94,7 +94,7 @@ its previous n<=3 formula must not be extrapolated to higher orders.
 labelled Einstein–Hilbert action in `GravitonQuinticReference.wl`. Select one suite
 with `FEYNGRAV_GR_CHECK_SUITE`: `Lower` (11 assertions), `Quintic` (23, default),
 or `Trace` (10). Run each in a separate fresh kernel and output directory.
-The [derivation and evidence](../../Documentation/Verification/GravitonQuintic-2026-11-01.md)
+The derivation and evidence (historical record; [current user guidance](../../Documentation/ScientificScope.md#general-relativity))
 explain why unrestricted auxiliary vectors plus stored index-pair symmetry test
 the complete tensor, and why the single/double traces retain symbolic D.
 

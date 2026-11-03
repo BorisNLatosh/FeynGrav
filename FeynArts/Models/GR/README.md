@@ -1,21 +1,17 @@
 # Pure GR model for FeynArts
 
-Native FeynArts bundle `GR`, with vertices through κ² per vertex.
+This guide has moved into the self-contained user manual.
 
-- [General relativity](../../../Documentation/Models/GeneralRelativity.md): action,
-  gauge fixing, fields, commands and verification scope.
-- [Native model guide](ModelGuide.md): inventory, loading, calculations and provenance.
-- [Higher-order vertices](HigherOrderVertices.md): source verification, builder
-  changes, candidate checks and installation beyond the supplied cutoff.
-- [All models](../README.md)
+Read [Pure GR model for FeynArts](../../../Documentation/Models/GeneralRelativity/NativeModel.md). Open `Documentation/` as an Obsidian vault to browse the complete manual.
 
-Use a fresh kernel and the exact quoted name for both `Model` and `GenericModel`.
-Loop validation is deferred. Higher-order instructions describe development work,
-not additional verified vertices already supplied in this model.
+<!-- Historical section anchors retained for existing links. -->
+<a id="adding-higher-order-graviton-vertices"></a>
+<a id="construct-and-convert-a-four-graviton-tree"></a>
+<a id="five-gravitons-the-existing-order-three-builder"></a>
+<a id="load-the-supplied-model"></a>
+<a id="pure-gr-model-for-feynarts"></a>
+<a id="scope-and-conventions"></a>
+<a id="six-or-more-gravitons-extend-the-builder-first"></a>
+<a id="verification-and-provenance"></a>
 
-<!-- Compatibility anchors for links to the former detailed README. -->
-<a id="scope-and-conventions"></a><a id="load-the-supplied-model"></a><a id="construct-and-convert-a-four-graviton-tree"></a><a id="verification-and-provenance"></a>
-Detailed sections: [ModelGuide](ModelGuide.md).
-
-<a id="adding-higher-order-graviton-vertices"></a><a id="five-gravitons-the-existing-order-three-builder"></a><a id="six-or-more-gravitons-extend-the-builder-first"></a>
-Detailed sections: [HigherOrderVertices](HigherOrderVertices.md).
+[Continue to the current guide](../../../Documentation/Models/GeneralRelativity/NativeModel.md).

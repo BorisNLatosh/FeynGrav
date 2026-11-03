@@ -1,21 +1,14 @@
 # Native FeynArts models
 
-Each bundle contains matching `.gen` and `.mod` files, a provenance manifest
-and a model guide. The vertex cutoff is κ², not a total diagram-order cutoff.
-Loop validation is deferred.
+This guide has moved into the self-contained user manual.
 
-| Model | Contents |
-| --- | --- |
-| [GR](GR/README.md) | General relativity and gravitational ghosts |
-| [Single-Scalar-Tensor-Minimal-Coupling](Single-Scalar-Tensor-Minimal-Coupling/README.md) | Massive scalar with cubic/quartic potential |
-| [John](John/README.md) | Massive scalar with non-minimal kinetic coupling |
-| [Einstein-scalar-Gauss-Bonnet](Einstein-scalar-Gauss-Bonnet/README.md) | Massive scalar with linear/quadratic Gauss–Bonnet couplings |
-| [GR-SU-N-Yang-Mills](GR-SU-N-Yang-Mills/README.md) | Pure SU(N) gauge field, mixed gravity contacts and both ghost sectors |
+Read [Native FeynArts models](../../Documentation/Models/FeynArts.md). Open `Documentation/` as an Obsidian vault to browse the complete manual.
 
-See the [catalogue and common loading guide](ModelCatalogue.md) for registration,
-standalone use, naming migration and verification. Use a fresh kernel and
-matching `Model` and `GenericModel` strings with FeynCalc-patched FeynArts.
+<!-- Historical section anchors retained for existing links. -->
+<a id="common-loading-workflow"></a>
+<a id="naming-migration--19-october-2026"></a>
+<a id="native-feynarts-models"></a>
+<a id="scalar-extension-verification"></a>
+<a id="supplied-feynarts-models"></a>
 
-<!-- Compatibility anchors for links to the former detailed README. -->
-<a id="supplied-feynarts-models"></a><a id="common-loading-workflow"></a><a id="naming-migration--19-october-2026"></a><a id="scalar-extension-verification"></a>
-Detailed sections: [ModelCatalogue](ModelCatalogue.md).
+[Continue to the current guide](../../Documentation/Models/FeynArts.md).

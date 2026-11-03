@@ -120,12 +120,12 @@ Reuse at these collection boundaries is implemented and focused-tested. Work-all
 assertions. Remaining changed-dependency paths and complete strategy acceptance
 still need review and whole-call measurements. Full three-box
 and retained QED gates have not been renewed by these small checks. See the
-[increment 3 report](../Documentation/Verification/PERF05Collection-2026-10-30.md)
-and [increment 4 report](../Documentation/Verification/PERF05Reuse-2026-10-30.md).
+increment 3 report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
+and increment 4 report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)).
 
 ## Final dependency and workload review
 
 [DependencyPaths.md](DependencyPaths.md) documents immutable context and readiness
-ownership. The [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md) completes retained regression, QED
+ownership. The final verification (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)) completes retained regression, QED
 and whole-call checks. Isolated final-guard fixtures disable earlier collection
 locally; separate default-path assertions verify its legitimate earlier zeros.

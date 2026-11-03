@@ -2,7 +2,7 @@
 
 Status: **accepted within focused scope, 495/495 combined assertions**.
 The shared work allowances preserve exact results in the verified fixtures.
-See [the verification record](../Documentation/Verification/PERF05WorkLimits-2026-10-30.md).
+See the verification record (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)).
 
 ## One owner per FORM job
 
@@ -57,6 +57,6 @@ capacity, factor-pair and zero-cache boundary tests (53 added assertions). The
 checks all passed in one bounded combined batch. This does not certify the
 complete converter suite or full-workload performance.
 
-[Dependency review](DependencyPaths.md) and [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md) now
+[Dependency review](DependencyPaths.md) and final verification (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)) now
 complete the retained three-box/QED gates. No resource limits were raised;
 large-case QED limitations remain explicit.

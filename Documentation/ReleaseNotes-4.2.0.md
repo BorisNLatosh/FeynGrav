@@ -1,9 +1,8 @@
 # FeynGrav 4.2.0 — draft release notes
 
-**Status: unreleased development version.** Version 4.2.0 was selected on
-25 October 2026 for the `FORM_Simplification` branch. No release date is assigned;
-`v4.2.0` is the intended future tag, not a tag created by this preparation.
-The [published 4.1.0 record](ReleaseNotes-4.1.0.md) remains unchanged.
+**Status: unreleased development version.** No release date or `v4.2.0` tag
+is available yet. The [4.1.0 release notes](./ReleaseNotes-4.1.0.md) describe the
+published baseline.
 
 ## Version and compatibility
 
@@ -26,7 +25,7 @@ release-validation run.
 - `FeynGravSimplify` now defaults to `PaVeToABCD -> True`, converting supported
   final coefficients to named integral functions. `False` preserves the existing
   output. Raw converter/import/export behaviour is unchanged; unsupported
-  coefficients remain. See the [API-03 report](Verification/API03PaVeOutput-2026-10-30.md).
+  coefficients remain. See the [Scientific scope](./ScientificScope.md#Calculation%20and%20performance).
 - `FeynGravFORMExport`, `FeynGravFORMImport`, `FeynGravFORMCheck` and
   `FeynGravFORMInstall` wrap the existing converter commands with independent
   option stores. `CalcFormCalculate` and the other `CalcForm*` names remain
@@ -36,9 +35,9 @@ release-validation run.
   received focused maintenance and verification. The installer recognises the
   companion modules and retains its staged verification and backup policy.
 
-See the [detailed interface contract](ReleaseNotes-API01-Development.md),
-[function reference](Reference.md#simplified-calculation-front-end-development-unreleased)
-and [converter guide](../CalcFormConverter/UserGuide.md).
+See the [Calculation interface](./Services/Calculation/FeynGravSimplify.md),
+[function reference](./Reference.md#Simplified%20calculation%20front%20end%20%28development%2C%20unreleased%29)
+and [converter guide](./Services/Calculation/Guide.md).
 
 ## One-loop reduction and coefficient handling
 
@@ -58,19 +57,18 @@ exhausted. This preserves a valid result without claiming maximal simplification
 No transversality, on-shell condition, helicity relation or Wolfram `$Assumptions`
 is introduced by that grouping.
 
-The coefficient strategy now distinguishes undeclared algebra, declared integrands
-and represented integrals. Eligible complete coefficients are collected before
-and after reduction, with bounded job-local reuse and coordinated optional
-rational/factor work. [PERF-05 verification](Verification/PERF05Final-2026-10-30.md)
-records exact agreement for all 17 retained three-box masters, preserved small
-QED checks and full calls of 30.03–30.55 seconds including default named output.
-Output size is unchanged; this is not a general speedup or large-QED certification.
+Eligible coefficients are simplified before and after reduction. Symbolic
+comparisons cover selected three-box, QED and scalar/gravitation examples;
+see [Scientific scope](./ScientificScope.md#Calculation%20and%20performance).
+These cases do not guarantee a speedup or completion for every larger integral.
 
 Symbolic `D`, incoming-momentum conventions and the documented FeynCalc
 `I Pi^2` conversion normalisation are retained. `DropScaleless -> False` preserves
 formal scaleless terms. Singular or unsupported families may remain unreduced
 with a partial-reduction notice. This is not master-integral evaluation,
 a Laurent expansion, renormalisation or general multiloop integration.
+
+<a name="Horndeski scientific corrections"></a>
 
 ## Horndeski scientific corrections
 
@@ -85,9 +83,8 @@ Restart the kernel and recompute results using the corrected b = 1 G5 vertices;
 no single global factor converts old amplitudes. Direct calculations with
 coincident momenta or colliding temporary indices also need recomputation.
 The John model's b = 0 vertices and all model/notebook files are unchanged.
-[Verification and migration details](Verification/HorndeskiAudit-2026-11-01.md)
-state the finite scope. The separate [RULE-01 repair](Verification/HorndeskiG4-2026-11-01.md)
-now gives both G4 source variants one corrected analytic construction, including
+[Scientific scope](./ScientificScope.md#Horndeski)
+states the finite coverage. Both G4 source variants now use one corrected analytic construction, including
 the -2b Hessian coefficient, Fourier phase, b=0 scalar factorial, labelled
 permutations and fresh internal indices. The contracted multi-graviton b>=2
 branch is implemented within its documented dependency bounds.
@@ -96,8 +93,7 @@ branch is implemented within its documented dependency bounds.
 and independently checked; ordinary four-argument G4 calls now use the corrected
 rules. Eight files receive the relative Hessian correction. Six b=0 files gain
 the missing a! factors (2, 6 and 24). Public signatures and monomial coupling
-normalisations are unchanged. The [migration report](Verification/HorndeskiLibraryMigration-2026-11-01.md)
-records all 60 library identities, import recovery and John cross-checks.
+normalisations are unchanged. See [Scientific scope](./ScientificScope.md#Horndeski) for the checked cases, and `FeynGravLibraryInformation` for the file identities in your installation.
 
 Restart the kernel and recompute results using old G4 libraries. An isolated
 b=0 vertex changes by the stated factorial; b>0 changes relative action blocks
@@ -107,7 +103,7 @@ loop-amplitude certification is implied.
 
 The direct G5 source now supports cubic-Hessian contributions beyond three
 gravitons, with the existing inverse-metric bounds: b<=4 at n=1, b<=3 at n=2,
-b<=2 at n>=3. [RULE-02 verification](Verification/HorndeskiG5HigherOrders-2026-11-01.md)
+b<=2 at n>=3. [Scientific scope](./ScientificScope.md#Horndeski)
 includes the full four-graviton a=0,b=1 action comparison at symbolic D and generic
 off-shell momenta, selected higher connection sectors and lower-order regressions.
 No additional stored library or native FeynArts model order is introduced.
@@ -116,8 +112,7 @@ No additional stored library or native FeynArts model order is introduced.
 
 The unchanged stored κ³ Einstein–Hilbert vertex now has an independent complete
 off-shell comparison with symbolic D, pair/leg symmetries and trace controls.
-[VERIFY-02 evidence](Verification/GravitonQuintic-2026-11-01.md) closes the missing
-source-validation task. It adds no native FeynArts model order and does not
+The independent comparison establishes the complete local tensor for the checked action. It adds no native FeynArts model order and does not
 certify a complete five-point amplitude or resolve its separate performance issue.
 
 ## Examples and scientific scope
@@ -128,18 +123,16 @@ scalar-model diagrams with potential couplings set to zero, the corrected
 identical-graviton bubble weight, and an explanation of the omitted scaleless
 higher-order contact.
 
-The [all-example syntax/interface audit](Verification/ExamplesSyntax-2026-10-25.md)
-covers 11 notebooks, 274 executable cells and 133 option calls. Six input cells
-were repaired: four `B0` collection patterns in 07, the gravity-only contribution
-in 09 and the relation checks in 11 that previously assigned definitions to
-`Contract`. Ten focused assertions passed. All 123 saved Output cells were
-preserved; they are historical results, not newly recomputed results.
+Input repairs in examples 07, 09 and 11 correct B0 collection patterns,
+the gravity-only contribution and relation checks that previously assigned
+definitions to `Contract`. Saved outputs were preserved and must not be treated
+as newly recomputed results.
 
 Restart the kernel after updating. In particular, restart if the old assignment
 cell in 11 was evaluated, and recompute affected presentation/check cells. Example
 08's downstream reduction, UV poles and infrared analysis still require
 recomputation with its corrected bubble weight. See the
-[examples guide](../Examples/README.md#syntax-and-interface-audit).
+[examples guide](./Examples/README.md#Syntax%20and%20interface%20audit).
 
 ## Native GR + SU(N) Yang–Mills
 
@@ -160,8 +153,7 @@ The four corrected stored libraries are tracked repository files. The new
 model is self-contained and does not read them at runtime.
 
 Independent off-shell action comparisons, all native contacts and selected
-AA → AA, AA → Ah and AA → hh Ward checks passed; see the [verification
-report](Verification/GRSUNYM-2026-10-26.md). Native loop validation remains deferred.
+AA → AA, AA → Ah and AA → hh Ward checks passed; see the [Scientific scope](./ScientificScope.md#Yang%E2%80%93Mills%20and%20fermions). Native loop validation remains deferred.
 
 ## Quark–gluon rule correction
 
@@ -173,38 +165,20 @@ unchanged; the flat vertex is unchanged. Restart the kernel, reload with
 `FeynGravImportSUNYM[2]`, and recompute affected results. At that correction checkpoint the native pure-YM
 model had no quarks and was unchanged. The subsequent quark extension now
 uses these corrected libraries; no further source/library change was needed. See the
-[verification report](Verification/QuarkGluonKappa-2026-10-26.md).
+[Scientific scope](./ScientificScope.md#Yang%E2%80%93Mills%20and%20fermions).
 
 ## Verification and performance
 
-[PERF-04](Verification/PERF04-2026-10-25.md) records the retained three-box
-workload: one warmup followed by complete measured calls of **25.332, 28.473 and
-28.621 seconds**, each below its 60-second target. All 17 masters agree exactly
-with the retained reference, and an altered-result negative control is rejected.
-Each output is **4,355,957 bytes**. These are workload- and host-specific
-observations, not general runtime guarantees.
+Read [Scientific scope](./ScientificScope.md) for the independently checked
+interaction orders and selected calculation examples. Native loop validation,
+higher-order EsGB and the axion convention remain outside that scope. Larger
+QED full-tadpole and 1,490-term symbolic comparisons remain unverified.
+Supported reduction does not promise maximal compactness or fixed runtimes.
+Use the [benchmarks](./Benchmarks/README.md) to measure your own workload.
 
-Peak memory during those calls was 337.89–338.80 MB; the complete evidence scopes
-peaked at 462.66–464.86 MB after result retention and inspection. The difference
-and the comparison with the older approximately 392 MB reference were investigated
-and are documented. The final small QED fixtures retain both exact cancellations
-and the verified sample reduction. The linked report records focused regressions,
-source identities, expected diagnostics and historical failed attempts.
-
-Retained checks used fresh task-owned processes with a whole-tree 1 GiB cap,
-zero swap, 120 seconds plus 10 seconds termination grace and at least 2 GiB
-available host memory. This version-label update reruns no calculations.
-The latest notebook audit used Wolfram 15.0.1/FeynCalc 10.2.1, and PERF-04 used
-FORM 5.0.2. Full compatibility across all older advertised dependency versions
-and operating systems has not been established by these checks.
-
-Remaining limits include the complete selected QED tadpole, its 232-group
-reconstruction target and the 1,490-term group's full symbolic comparison.
-There is no new Full-suite, arbitrary-amplitude or loop-physics certification.
-The notebook audit's front-end previews have a documented shutdown qualification;
-its core parsing/interface/focused checks have clean lifecycle records.
-Real Contractor execution is not newly certified by the facade's process-double
-tests. Earlier dated verification reports retain their own scope and diagnostics.
+Compatibility across all older supported dependency versions and operating
+systems has not been established. Real Contractor execution is not established
+by checks using a process substitute; follow its separate method restrictions.
 
 ## Installation and publication
 
@@ -212,19 +186,17 @@ Installation still defaults to GitHub `main`; it does not automatically select
 the newest release or this local development branch. A future `v4.2.0` tag can
 be used only after publication. Keep the current published-version example for
 `v4.1.0` and use a full local checkout when testing this development version.
-See the [installation guide](UserGuide.md#installation-and-help).
+See the [installation guide](./UserGuide.md#Installation%20and%20help).
 
-The version selection and draft notes do not merge branches, commit, push, tag,
-publish or establish that the eventual release archive has passed installation
-checks. Those operations and the final release review remain separate.
+Restart the kernel after upgrading and recompute affected expressions.
+Previously saved notebook results do not change when package files are updated.
 
 ## Native quark extension
 
 Independent Dirac-action comparisons establish the kinetic, mass and spin terms
 through κ². The native adapter reverses every source momentum to match FeynArts
 spinor/Fourier conventions, including graviton momenta. All five new contacts
-and selected massive quark trees pass; FORM-backed comparisons and genuine
-direct Ward regressions are recorded in the [quark delivery report](Verification/GRSUNYMQuarks-2026-10-26.md).
-[Example 13](../Examples/13.%20Quark_Graviton_Emission_Tree_Level_FeynArts.nb)
+and selected massive quark trees pass; See [Scientific scope](./ScientificScope.md#Yang%E2%80%93Mills%20and%20fermions) for the action and selected tree checks.
+Example 13 (`Examples/13. Quark_Graviton_Emission_Tree_Level_FeynArts.nb`)
 computes quark annihilation with graviton emission using `FeynGravSimplify`.
 Existing notebooks and the four other model bundles are preserved.

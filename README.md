@@ -17,11 +17,11 @@ remain the record of the published 20 October 2026 release.
 - [Common conventions](Documentation/Conventions.md)
 - [Installation, requirements and troubleshooting](Documentation/UserGuide.md#installation-and-help)
 - [Documentation index](Documentation/README.md) and [function reference](Documentation/Reference.md)
-- [Numbered examples](Examples/README.md)
-- [FeynArts models](FeynArts/Models/README.md)
-- [FORM converter](CalcFormConverter/README.md)
-- [Library generation](Libs/Generator.md) and [rule contracts](Rules/README.md)
-- [Benchmarks](Benchmark/README.md)
+- [Numbered examples](Documentation/Examples/README.md)
+- [FeynArts models](Documentation/Models/FeynArts.md)
+- [FORM converter](Documentation/Services/Calculation/Guide.md)
+- [Library generation](Documentation/Services/LibraryGeneration/Guide.md) and [rule contracts](Documentation/Services/RuleConstruction/Contracts.md)
+- [Benchmarks](Documentation/Benchmarks/README.md)
 
 Requires FeynCalc 10.2.1 or newer and Wolfram Language 12.2 or newer, subject to
 FeynCalc's requirements. FORM is optional for ordinary package loading. After

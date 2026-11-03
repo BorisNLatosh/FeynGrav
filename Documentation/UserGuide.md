@@ -1,9 +1,9 @@
 # FeynGrav 4.2.0
 
-[Directory overview](../README.md) · [Getting started](GettingStarted.md) · [Common conventions](Conventions.md)
+[Directory overview](./README.md) · [Getting started](./GettingStarted.md) · [Common conventions](./Conventions.md)
 
 **Development version; 4.2.0 is not yet released.** See the
-[4.2.0 draft release notes](ReleaseNotes-4.2.0.md). Installation from `main`
+[4.2.0 draft release notes](./ReleaseNotes-4.2.0.md). Installation from `main`
 continues to select that branch, not this local development checkout.
 
 FeynGrav is a Wolfram Mathematica package that implements gravitational Feynman rules in the FeynCalc framework. It provides propagators, interaction vertices, polarisation tensors, and tools for working with the Nieuwenhuizen operators.
@@ -12,23 +12,30 @@ Supported models include general relativity, minimally coupled scalar, fermion a
 
 ## Contents
 
-- [Documentation index](README.md) and [function reference](Reference.md)
-- [Requirements](#requirements)
-- [Installation and help](#installation-and-help)
-- [Interaction libraries](#interaction-libraries)
-- [CalcFormConverter](#calcformconverter)
-- [Examples](#examples)
-- [Benchmarks](#benchmarks)
-- [Package structure](#package-structure)
-- [Troubleshooting and support](#troubleshooting-and-support)
-- [Version history](#version-history)
-- [Citations and licence](#citations-and-licence)
+- [Documentation index](./README.md) and [function reference](./Reference.md)
+- [Requirements](#Requirements)
+- [Installation and help](#Installation%20and%20help)
+- [Optional dependency setup](./OptionalDependencies.md)
+- [Interaction libraries](#Interaction%20libraries)
+- [CalcFormConverter](#CalcFormConverter)
+- [Examples](#Examples)
+- [Benchmarks](#Benchmarks)
+- [Package structure](#Package%20structure)
+- [Troubleshooting and support](#Troubleshooting%20and%20support)
+- [Version history](#Version%20history)
+- [Citations and licence](#Citations%20and%20licence)
+
+<a name="Requirements"></a>
 
 ## Requirements
 
 - **FeynCalc 10.2.1 or newer.** Version 10.2.1 moved legacy functions, including the native `Calc`, out of the core package. FeynGrav does not require `Calc` or FeynCalcLegacy. See the [FeynCalc 10.2.1 release](https://github.com/FeynCalc/feyncalc/releases/tag/Release-10_2_1) and [installation instructions](https://feyncalc.github.io/).
 - **Wolfram Mathematica / Wolfram Language 12.2 or newer.** The current branch uses language features introduced in 12.2, including [WithCleanup](https://reference.wolfram.com/language/ref/WithCleanup.html). Use a Wolfram version also supported by your chosen FeynCalc release. Development verification was performed with Wolfram 15.0.1 and FeynCalc 10.2.1; the full range of older Wolfram versions has not been tested.
 - **FORM is optional for ordinary FeynGrav use.** Loading the package and exporting or importing FORM files do not require a FORM installation. Executing those files requires FORM; parallel execution with `FORMThreads > 1` requires TFORM. The converter has been tested with FORM/TFORM 4.3. The library generator uses the same converter runtime; compatibility with earlier FORM versions has not been established by the current verification. Obtain executables from the [FORM project](https://github.com/form-dev/form) or your distribution's packages.
+
+For workflows using FeynArts, FeynHelpers/Package-X, FORM/TFORM or Contractor, follow [optional dependency setup and checks](./OptionalDependencies.md). Install only the tools required by your chosen workflow.
+
+<a name="Installation and help"></a>
 
 ## Installation and help
 
@@ -99,7 +106,9 @@ The installer accepts ordinary ZIP archives; encrypted, split, ZIP64 and link-co
 
 FeynGrav loads FeynCalc if necessary, along with its own rules, default interaction libraries, and CalcFormConverter. Loading does not probe or install FORM or launch a FORM process. Restart the kernel after updating package files.
 
-Use `FeynGravCommands[]` to list available commands. Mathematica's `?FunctionName` syntax displays usage information, including `?GravitonVertex`, `?FeynGravImportGravitons`, and `?CalcFormCalculate`. Calculation workflows are provided in the [examples](#examples).
+Use `FeynGravCommands[]` to list available commands. Mathematica's `?FunctionName` syntax displays usage information, including `?GravitonVertex`, `?FeynGravImportGravitons`, and `?CalcFormCalculate`. Calculation workflows are provided in the [examples](#Examples).
+
+<a name="Interaction libraries"></a>
 
 ## Interaction libraries
 
@@ -115,13 +124,21 @@ At initialisation, FeynGrav calls `FeynGravImportGravitons[2]`, `FeynGravImportS
 
 The order-limited import commands load up to the available order when the requested maximum is higher than the installed libraries. They read local files; they do not download missing libraries. Imports are silent by default (`Verbose -> False`). Use `Verbose -> True` to report available and imported orders. Consult each command's usage message for its interface.
 
-Use `FeynGravConventions[]` for a readable report of geometry, Fourier, dimension, gauge, polarisation, algebra and diagram conventions. It distinguishes fixed definitions from current settings and shows loaded orders and settings changed since import. The command prints static mathematical output (plain text in a kernel without a front end), returns `Null`, and changes no settings. See the [conventions report](Reference.md#conventions-report).
+Use `FeynGravConventions[]` for a readable report of geometry, Fourier, dimension, gauge, polarisation, algebra and diagram conventions. It distinguishes fixed definitions from current settings and shows loaded orders and settings changed since import. The command prints static mathematical output (plain text in a kernel without a front end), returns `Null`, and changes no settings. See the [conventions report](./Reference.md#Conventions%20report).
 
-Use `FeynGravLibraryInformation[]` to inspect the last successful imports: source paths and hashes, actual orders, import times and relevant settings. `FeynGravLibraryInformation[FeynGravImportVectors]` selects one importer and identifies settings changed since that import. See [library import records](Reference.md#library-import-records) for the scope and limitations.
+Use `FeynGravLibraryInformation[]` to inspect the last successful imports: source paths and hashes, actual orders, import times and relevant settings. `FeynGravLibraryInformation[FeynGravImportVectors]` selects one importer and identifies settings changed since that import. See [library import records](./Reference.md#Library%20import%20records) for the scope and limitations.
 
-Additional precomputed libraries are distributed in the [FeynGrav Libraries dataset](https://data.mendeley.com/datasets/9xrw2jjrbr/2). Download the required files and place them directly in `FeynGrav/Libs`, preserving names such as `GravitonVertex_3`, then invoke the appropriate import command. The dataset predates version 4: use compatible interaction libraries and retain the current package's ghost rules, which were revised in version 4. Availability varies by sector; the dataset is not a guarantee that every requested order exists.
+Older precomputed rules are available in the [FeynGrav Libraries dataset, version 2, published 14 May 2024](https://data.mendeley.com/datasets/9xrw2jjrbr/2). This dataset predates version 4 and is historical material, not a compatibility-certified extension of this checkout. **Keep the libraries shipped with your package version; do not overwrite them with files from the dataset or an older installation.** A matching filename or successful import does not establish correct action conventions, coupling powers or normalisation.
 
-The [library generator](../Libs/Generator.wl) is a separate developer tool for producing vertex libraries. Most users can work with the supplied or downloaded libraries.
+Later releases corrected matter-vertex multiplicities and mixed Yang–Mills coupling powers, among other scientific changes. Older package installations may also contain superseded Horndeski and Gauss–Bonnet rules. Retaining the current ghost rules alone is therefore insufficient. Consult the [4.1.0 scientific corrections](./ReleaseNotes-4.1.0.md), [4.2.0 draft release notes](./ReleaseNotes-4.2.0.md) and [current scientific scope](./ScientificScope.md) before reusing older files. A universal rescaling cannot repair all affected rules or saved amplitudes.
+
+If an additional order is needed:
+
+1. Extract candidate files into a separate directory and retain their dataset/package version and file identities. Do not copy an entire older library collection into `Libs`.
+2. Establish compatibility for the exact candidate against the current action, conventions and documented corrections, using an existing independent verification for that file or a new mathematical comparison. This manual supplies no per-file compatibility approval list for the historical dataset. A file without that evidence remains unverified. Alternatively, use the [current library generator](./Services/LibraryGeneration/Guide.md) with a separate `OutputDirectory`; successful generation alone does not independently validate a rule, and the documented source bounds and unresolved sectors still apply.
+3. Test validated additions in a separate package copy and a fresh kernel before adopting them. Add only the required missing files to that copy's `Libs`, preserving canonical filenames and the shipped baseline. Use the relevant importer with `Verbose -> True`, then inspect `FeynGravLibraryInformation[]` for the actual loaded orders, source paths and hashes. These records identify what was loaded; they do not certify its physics.
+
+Most users can start with the shipped libraries. Additional stored orders are not guaranteed to exist for every sector. Restart the kernel and recompute affected expressions after changing a library set; previously saved results do not update themselves.
 
 ## FeynArts models
 
@@ -134,16 +151,18 @@ $LoadAddOns = {"FeynArts"};
 InitializeModel["GR", GenericModel -> "GR"];
 ```
 
-`GenericModel` is required because the classes file does not name its generic model and the FeynArts default is the stock `"Lorentz"` file. The snapshot covers the cubic and quartic graviton interactions and the oriented ghost coupling at gauge parameter 2 with symbolic `D`. The ordinary ghost line is `-I MTD[mu,nu] FAD[p]`. This release is ready for three-/four-graviton trees; loop compatibility checks are deferred and the optional bridge deliberately rejects the new snapshot's loop requests. Start a fresh kernel after updating the model. See the [GR guide](../FeynArts/Models/GR/ModelGuide.md) for details and hashes, and [Examples/04. Graviton_Scattering_Tree_Level_FeynArts.nb](../Examples/04.%20Graviton_Scattering_Tree_Level_FeynArts.nb) for a worked off-shell four-graviton tree calculation.
+`GenericModel` is required because the classes file does not name its generic model and the FeynArts default is the stock `"Lorentz"` file. The snapshot covers the cubic and quartic graviton interactions and the oriented ghost coupling at gauge parameter 2 with symbolic `D`. The ordinary ghost line is `-I MTD[mu,nu] FAD[p]`. This release is ready for three-/four-graviton trees; loop compatibility checks are deferred and the optional bridge deliberately rejects the new snapshot's loop requests. Start a fresh kernel after updating the model. See the [GR guide](./Models/GeneralRelativity/NativeModel.md) for details and hashes, and `Examples/04. Graviton_Scattering_Tree_Level_FeynArts.nb` for a worked off-shell four-graviton tree calculation.
 
-A separate [Single-Scalar-Tensor-Minimal-Coupling model](../FeynArts/Models/Single-Scalar-Tensor-Minimal-Coupling/ModelGuide.md) adds one real minimally coupled scalar of arbitrary symbolic mass, including `TSS` and `TTSS` through $\kappa^2$. It is supplied ready for the tested native tree workflows; no rebuild is needed. Use `InitializeModel["Single-Scalar-Tensor-Minimal-Coupling", GenericModel -> "Single-Scalar-Tensor-Minimal-Coupling"]` with the same loading workflow; its guide also shows explicit path registration without loading FeynGrav. The optional pure-GR bridge is unchanged; independent positive cubic and quartic scalar self-interactions are included. Setting both couplings to zero gives the minimal massive scalar sector. Non-minimal couplings and loop validation are outside this model.
+A separate [Single-Scalar-Tensor-Minimal-Coupling model](./Models/Scalar/NativeModel.md) adds one real minimally coupled scalar of arbitrary symbolic mass, including `TSS` and `TTSS` through $\kappa^2$. It is supplied ready for the tested native tree workflows; no rebuild is needed. Use `InitializeModel["Single-Scalar-Tensor-Minimal-Coupling", GenericModel -> "Single-Scalar-Tensor-Minimal-Coupling"]` with the same loading workflow; its guide also shows explicit path registration without loading FeynGrav. The optional pure-GR bridge is unchanged; independent positive cubic and quartic scalar self-interactions are included. Setting both couplings to zero gives the minimal massive scalar sector. Non-minimal couplings and loop validation are outside this model.
 
-The [GR + SU(N) Yang–Mills model](../FeynArts/Models/GR-SU-N-Yang-Mills/ModelGuide.md)
+The [GR + SU(N) Yang–Mills model](./Models/YangMills/NativeModel.md)
 uses `"GR-SU-N-Yang-Mills"` for both model names. It includes all 21 families
 through κ² per vertex, with symbolic D/N, `YangMillsCoupling`, both ghost species
 and five/six-leg contacts. It includes one massive fundamental quark flavour (`QuarkMass`), with `F[1]`
 for quarks, `S[1]` for vector GR ghosts and `U[1]` for YM ghosts. Selected native
 tree Ward checks passed; native loop validation remains deferred.
+
+<a name="CalcFormConverter"></a>
 
 ## CalcFormConverter
 
@@ -161,13 +180,13 @@ CalcFormConverter loads automatically with FeynGrav and can also be loaded indep
 
 The converter performs algebra and Lorentz contractions. It automatically groups complete propagator products, applies guarded numerator cancellation, and simplifies eligible scalar coefficients in FORM. Prepared tensor stages and incremental, factor-preserving import reduce intermediate work; these are automatic implementation choices, not new public options. With `LoopMomenta -> {q}`, default `TensorDecomposition -> True` expresses one-loop integrals through tensor coefficient functions using FeynCalc's `I Pi^2` conversion normalisation. Empty loop metadata or `TensorDecomposition -> False` retains integrand algebra. `DropScaleless -> False` preserves formal scaleless terms. Optional `ReduceLoopCoefficients -> True` lowers repeated propagator powers in FORM and can also process previously computed coefficients without declaring a new integration variable. Singular and unsupported families remain formal. The default `ReduceToScalarMasters -> True` further reduces supported coefficients through boxes to scalar PaVe masters, including necessary repeated-power reduction. Set it to False to stop at coefficient functions. Exceptional and preserved scaleless cases may remain formal, with a partial-reduction diagnostic. The converter does not analytically evaluate masters or add diagram symmetry factors, integration-measure factors or renormalisation prescriptions. Checking and calculating never install software implicitly.
 
-See the [user guide](../CalcFormConverter/UserGuide.md) for workflows, supported expressions, options, installation details, and performance guidance; the [format specification](../CalcFormConverter/FORMAT.md) for saved-file compatibility; and the [developer guide](../CalcFormConverter/DEVELOPER.md) for architecture, tests, and measurements.
+See the [user guide](./Services/Calculation/Guide.md) for workflows, supported expressions, options, installation details, and performance guidance; the [format specification](./Services/Calculation/SavedFiles.md) for saved-file compatibility.
 
 ### Simplified front end (development, unreleased)
 
 The five-command facade planned for 4.2.0 is described in the converter guide,
-[4.2.0 draft release notes](ReleaseNotes-4.2.0.md) and
-[detailed interface note](ReleaseNotes-API01-Development.md): ``CalcFormConverter`FeynGravSimplify[expr, opts]``
+[4.2.0 draft release notes](./ReleaseNotes-4.2.0.md) and
+[Calculation interface](./Services/Calculation/FeynGravSimplify.md): ``CalcFormConverter`FeynGravSimplify[expr, opts]``
 selects the full pipeline (`Method -> Automatic` or `"FORM"`) or the restricted
 external adapter (`"Contractor"`, `"FORMBenchmark"`) without fallback, and
 `FeynGravFORMExport`, `FeynGravFORMImport`, `FeynGravFORMCheck` and
@@ -180,60 +199,57 @@ interface and are unchanged.
 become named integral functions such as `A0`, `B0`, `C0` and `D0`. Use `False`
 to preserve the prior PaVe output. Unsupported coefficients remain. This option
 is independent of tensor/master reduction and is a Boolean no-op on restricted
-methods. See the [full contract](../CalcFormConverter/UserGuide.md#final-pave-conversion-feyngravsimplify-only).
+methods. See the [full contract](./Services/Calculation/Guide.md#Final%20PaVe%20conversion%20%28%60FeynGravSimplify%60%20only%29).
+
+<a name="Examples"></a>
 
 ## Examples
 
-The [examples guide](../Examples/README.md) lists the numbered notebooks in their suggested reading order, with requirements and scope. Run each notebook in a fresh kernel and evaluate its setup cells before its calculation cells.
+The [examples guide](./Examples/README.md) lists the numbered notebooks in their suggested reading order, with requirements and scope. Run each notebook in a fresh kernel and evaluate its setup cells before its calculation cells.
 
-The then-existing 11 notebooks passed the [25 October syntax and interface audit](Verification/ExamplesSyntax-2026-10-25.md). Saved outputs were preserved; follow the [rerunning guidance](../Examples/README.md#syntax-and-interface-audit) for repaired cells in examples 07, 09 and 11. This audit did not rerun the complete loop calculations.
+Examples 07, 09 and 11 have repaired input cells. Follow the [rerunning guidance](./Examples/README.md#Syntax%20and%20interface%20audit) and [saved-output limitations](./ScientificScope.md#Examples%20and%20saved%20outputs). Saved results do not establish a fresh complete loop calculation.
 
-| No. | Notebook | Topic |
-| --- | --- | --- |
-| 01 | [01. Nieuwenhuizen_Operators.nb](../Examples/01.%20Nieuwenhuizen_Operators.nb) | Spin projectors and operator algebra. |
-| 02 | [02. Scalars_Gravitational_Scattering_Tree_Level.nb](../Examples/02.%20Scalars_Gravitational_Scattering_Tree_Level.nb) | Tree-level gravitational scattering of scalars. |
-| 03 | [03. Graviton_Scattering_Tree_Level.nb](../Examples/03.%20Graviton_Scattering_Tree_Level.nb) | Tree-level graviton scattering. |
-| 04 | [04. Graviton_Scattering_Tree_Level_FeynArts.nb](../Examples/04.%20Graviton_Scattering_Tree_Level_FeynArts.nb) | Tree-level graviton scattering with FeynArts. |
-| 05 | [05. Graviton_Self_Energy.nb](../Examples/05.%20Graviton_Self_Energy.nb) | One-loop graviton self-energy. |
-| 06 | [06. Matter_Self_Energy_Graviton_Contribution.nb](../Examples/06.%20Matter_Self_Energy_Graviton_Contribution.nb) | Gravitational corrections to matter propagators. |
-| 07 | [07. Graviton_Self_Energy_Matter_Contribution.nb](../Examples/07.%20Graviton_Self_Energy_Matter_Contribution.nb) | Matter contributions to the graviton self-energy. |
-| 08 | [08. Graviton_Scalar_Vertex_One_Loop.nb](../Examples/08.%20Graviton_Scalar_Vertex_One_Loop.nb) | One-loop scalar–graviton vertex. |
-| 09 | [09. Scalar_Scattering_Tree_Level_FeynArts.nb](../Examples/09.%20Scalar_Scattering_Tree_Level_FeynArts.nb) | Massive scalar scattering with gravity and cubic/quartic self-interactions, using FeynArts. |
-| 10 | [10. Scalar_Scattering_John_Tree_Level_FeynArts.nb](../Examples/10.%20Scalar_Scattering_John_Tree_Level_FeynArts.nb) | On-shell scalar scattering with the John interaction, using FeynArts. |
-| 11 | [11. Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb](../Examples/11.%20Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb) | EsGB scalar annihilation into gravitons, helicity amplitudes and generic graviton Ward checks; see the [scalar-contact correction record](Verification/ScalarWardCorrection.md). |
-| 12 | [12. Yang_Mills_Graviton_Emission_Tree_Level_FeynArts.nb](../Examples/12.%20Yang_Mills_Graviton_Emission_Tree_Level_FeynArts.nb) | SU(N) gauge-field scattering with graviton emission, fixed-colour amplitude and all four external-leg Ward checks at symbolic D. |
+Use the [complete notebook catalogue](./Examples/README.md) for all thirteen examples, including example 13 on massive quark graviton emission. That page maintains the reading order, dependency list and [per-notebook verification and saved-output status](./Examples/README.md#Verification%20and%20saved-output%20status).
 
-Example 12 was added and [evaluated separately on 26 October](Verification/Example12YangMills-2026-10-26.md), preserving the preceding notebooks. It uses the native Yang–Mills model and FeynCalc without FORM.
+The selected scalar-model checks are described in [Scientific scope](./ScientificScope.md#Scalar%20models). For examples 12 and 13, see the [Yang–Mills and fermion scope](./ScientificScope.md#Yang%E2%80%93Mills%20and%20fermions). These model checks and saved notebook results have distinct verification limits.
 
-The converter's [ScalarBubble.wl](../CalcFormConverter/Examples/ScalarBubble.wl) demonstrates manual and automated FORM workflows for a scalar-projected quadratic-gravity bubble. It requires the cubic quadratic-gravity library, loaded with `FeynGravImportQuadraticGravity[1]`, and FORM/TFORM for execution.
+The converter's `CalcFormConverter/Examples/ScalarBubble.wl` demonstrates manual and automated FORM workflows for a scalar-projected quadratic-gravity bubble. It requires the cubic quadratic-gravity library, loaded with `FeynGravImportQuadraticGravity[1]`, and FORM/TFORM for execution.
+
+<a name="Benchmarks"></a>
 
 ## Benchmarks
 
-The [Benchmark notebooks](../Benchmark/UserGuide.md) measure export, FORM execution, import, complete CalcFormConverter calls and library generation. Select **Quick** or **Full** before running. Inputs and import fixtures are generated locally; no extra tools beyond Mathematica, the package dependencies, and FORM/TFORM are required. Reports include raw timings, validation status and source hashes.
+The [Benchmark notebooks](./Benchmarks/README.md) measure export, FORM execution, import, complete CalcFormConverter calls and library generation. Select **Quick** or **Full** before running. Inputs and import fixtures are generated locally; no extra tools beyond Mathematica, the package dependencies, and FORM/TFORM are required. Reports include raw timings, validation status and source hashes.
+
+<a name="Package structure"></a>
 
 ## Package structure
 
 | Location | Contents |
 | --- | --- |
-| [FeynGrav.wl](../FeynGrav.wl) | Main package, public commands, and library loading. |
-| [Conventions.wl](../Conventions.wl) | Read-only conventions report and static formatting. |
-| [Rules](../Rules) | Interaction-rule construction, structural validation and projector utilities. |
-| [Libs](../Libs) | Precomputed vertex libraries and the [library generator](../Libs/Generator.md), which uses CalcFormConverter. |
-| [Examples](../Examples) | Calculation notebooks. |
-| [FeynArts/Models](../FeynArts/Models/ModelCatalogue.md) | Five native gravity, scalar and Yang–Mills model bundles and tree-use guides. |
-| [Documentation](README.md) | Main-package reference, documentation routes and verification records. |
-| [Benchmark](../Benchmark/UserGuide.md) | Reproducible converter and library-generation measurements. |
-| [CalcFormConverter](../CalcFormConverter) | Converter, FORM runtime, templates, documentation, examples, and tests. |
+| `FeynGrav.wl` | Main package, public commands, and library loading. |
+| `Conventions.wl` | Read-only conventions report and static formatting. |
+| `Rules` | Interaction-rule construction, structural validation and projector utilities. |
+| `Libs` | Precomputed vertex libraries and the [library generator](./Services/LibraryGeneration/Guide.md), which uses CalcFormConverter. |
+| `Examples` | Calculation notebooks. |
+| [FeynArts/Models](./Models/FeynArts.md) | Five native gravity, scalar and Yang–Mills model bundles and tree-use guides. |
+| [Documentation](./README.md) | Model descriptions, command reference and usage guides. |
+| [Benchmark](./Benchmarks/README.md) | Reproducible converter and library-generation measurements. |
+| `CalcFormConverter` | Converter, FORM runtime, templates, documentation, examples, and tests. |
+
+<a name="Troubleshooting and support"></a>
 
 ## Troubleshooting and support
 
 - **The package cannot be found:** check that `FeynGrav.wl` is directly inside `$UserBaseDirectory/Applications/FeynGrav`, and that FeynCalc loads in the same kernel.
 - **A vertex remains unevaluated or a library cannot be loaded:** check the argument syntax, required sector, and installed library order. Use `Verbose -> True` on the relevant import command to inspect what is available.
 - **FORM works in a terminal but cannot be found in Mathematica:** the kernel may have a different `PATH`. Supply the absolute executable path using `FORMExecutable` when checking or calculating. Multiple workers require a working TFORM executable.
-- **A FORM calculation returns `Failure`:** inspect the complete failure, including its nested cause, stage, job directory, and log paths. Failed jobs retain diagnostic files. See the [converter troubleshooting guide](../CalcFormConverter/UserGuide.md#troubleshooting).
+- **A FORM calculation returns `Failure`:** inspect the complete failure, including its nested cause, stage, job directory, and log paths. Failed jobs retain diagnostic files. See the [converter troubleshooting guide](./Services/Calculation/Guide.md#Troubleshooting).
 - **Definitions appear inconsistent after an update:** restart the kernel and rerun the notebook's setup cells.
 
 Report problems through [GitHub issues](https://github.com/BorisNLatosh/FeynGrav/issues) or contact Dr Boris Latosh at [latosh.boris@gmail.com](mailto:latosh.boris@gmail.com). Include your operating system, Wolfram and FeynCalc versions, FeynGrav revision, and a minimal reproducible expression. For converter issues, include the FORM/TFORM version, options, full failure details, and relevant logs.
+
+<a name="Version history"></a>
 
 ## Version history
 
@@ -244,20 +260,20 @@ and calculation capabilities. It introduces `FeynGravSimplify` and four
 `FeynGravFORM*` wrappers, one-loop coefficient/master reduction, shared output
 and bounded coefficient simplification, plus reliability and example repairs.
 The existing `CalcForm*` commands remain available. See the
-[4.2.0 draft release notes](ReleaseNotes-4.2.0.md) for verification and migration
-limits. No release date or tag has been assigned by this preparation.
+[4.2.0 draft release notes](./ReleaseNotes-4.2.0.md) for verification and migration
+limits. No release date or tag is available yet.
 
 <a id="version-410--unreleased"></a>
 
 ### Version 4.1.0 — 20 October 2026
 
-Release tag: `v4.1.0`. See the [4.1.0 release notes](ReleaseNotes-4.1.0.md) for migration instructions, scientific corrections and known limitations.
+Release tag: `v4.1.0`. See the [4.1.0 release notes](./ReleaseNotes-4.1.0.md) for migration instructions, scientific corrections and known limitations.
 
 From this release onward, versions follow MAJOR.MINOR.PATCH: incompatible public-interface changes increment MAJOR, compatible additions MINOR, and compatible corrections PATCH. Version 4.1.0 is the explicitly chosen transition release and includes the incompatible changes listed below.
 
 - Added a two-command installer with dependency checks, package verification, and backups when replacing an existing installation.
 - Added CalcFormConverter for exchanging supported FeynCalc expressions with FORM, including Lorentz contractions, rank-four epsilon tensors, ordinary Dirac algebra, and fundamental SU(N) colour algebra. Automated FORM/TFORM execution includes timing and progress reporting.
-- Added automatic propagator grouping, guarded numerator cancellation, coefficient simplification, verified tensor-stage symmetries and incremental result import. See the [current converter guide](../CalcFormConverter/UserGuide.md) for scope and memory limits.
+- Added automatic propagator grouping, guarded numerator cancellation, coefficient simplification, verified tensor-stage symmetries and incremental result import. See the [current converter guide](./Services/Calculation/Guide.md) for scope and memory limits.
 - Added D-dimensional polarisation vectors and factorised polarisation tensors in four and D dimensions.
 - Migrated interaction-library generation to CalcFormConverter and added reproducible benchmarks for conversion and library generation.
 - Improved rule-input validation and library loading, preserving existing definitions when an import fails.
@@ -296,6 +312,8 @@ From this release onward, versions follow MAJOR.MINOR.PATCH: incompatible public
 - Supported general relativity and minimally coupled massless fields of spin 0, 1/2, and 1.
 - Provided examples of tree-level graviton scattering, one-loop self-energies, and scalar–gravity interactions. See [the original FeynGrav publication](https://arxiv.org/abs/2201.06812).
 
+<a name="Citations and licence"></a>
+
 ## Citations and licence
 
 Evaluate `FeynGravHowToCite[]` to print the reference list and links in your session. Like `FeynCalcHowToCite[]`, it prints guidance and returns `Null`; it does not fetch information online.
@@ -309,8 +327,8 @@ When using FeynGrav in published work, cite the publications relevant to the ver
 
 Follow the citation guidance of FeynCalc and FORM when using those packages as well.
 
-FeynGrav is distributed under the GNU General Public Licence version 3; see [Licence](../LICENSE). Separately downloaded datasets carry the licence stated on their distribution page.
+FeynGrav is distributed under the GNU General Public Licence version 3; see Licence (`LICENSE`). Separately downloaded datasets carry the licence stated on their distribution page.
 
 ## Native scalar extensions — 18 October 2026
 
-`Single-Scalar-Tensor-Minimal-Coupling`, `John` and `Einstein-scalar-Gauss-Bonnet` are supplied alongside `GR`, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](../FeynArts/Models/ModelCatalogue.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.
+`Single-Scalar-Tensor-Minimal-Coupling`, `John` and `Einstein-scalar-Gauss-Bonnet` are supplied alongside `GR`, with matching generic/classes files in individual model folders. Use a fresh kernel and the same name for `Model` and `GenericModel`. The optional pure-GR bridge remains restricted to its existing processes. See [model index](./Models/FeynArts.md) for actions, native examples and verification limits. The two-graviton EsGB source and library have been corrected against an independent curvature derivation; higher-order EsGB sources require a separate audit. Vertex order is limited to kappa squared; potential contacts still require up to six legs. Loops are not validated.

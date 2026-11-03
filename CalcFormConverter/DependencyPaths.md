@@ -26,6 +26,6 @@ unresolved-to-resolved metadata, successful/rejected inspections, both algebra
 modes and reference-first registration. The earlier 495-check batch exercises
 collection aliases/capacity and aggregate work/rollback boundaries. The 91-master
 and 48-sharing regressions cover invariant validation and exact reconstruction.
-See [the final report](../Documentation/Verification/PERF05Final-2026-10-30.md)
+See the final report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
 for exact retained-workload checks and limitations. A mutable dependency-graph
 framework is neither required by these paths nor certified by this review.

@@ -18,18 +18,20 @@ formal release. Release candidates may use `4.1.0-rc.1` and subsequent suffixes.
   reconstruction, including Lorentz, epsilon, ordinary Dirac and fundamental
   SU(N) colour processing. Propagator grouping, guarded numerator cancellation,
   coefficient simplification and incremental import reduce intermediate work.
-  See the [converter guide](../CalcFormConverter/UserGuide.md) for exact exclusions.
+  See the [converter guide](./Services/Calculation/Guide.md) for exact exclusions.
 - Four standalone native FeynArts models: `GR`,
   `Single-Scalar-Tensor-Minimal-Coupling`, `John` and
   `Einstein-scalar-Gauss-Bonnet`. They retain vertices through κ² per vertex;
   products of vertices can contribute at higher total order. See the
-  [model index](../FeynArts/Models/ModelCatalogue.md).
+  [model index](./Models/FeynArts.md).
 - D-dimensional polarisation helpers, a FORM-based library generator,
   reproducible benchmark tools and expanded numbered examples.
 - `FeynGravConventions[]`, `FeynGravLibraryInformation[]` and
   `FeynGravHowToCite[]` provide conventions, import provenance and citation guidance.
 - The installer checks dependencies, verifies a staged package in a fresh kernel
   and retains a backup when replacing an existing installation.
+
+<a name="Migration and incompatible changes"></a>
 
 ## Migration and incompatible changes
 
@@ -42,7 +44,7 @@ formal release. Release candidates may use `4.1.0-rc.1` and subsequent suffixes.
 | `GRJohn` | `John` |
 | `GREsGB` | `Einstein-scalar-Gauss-Bonnet` |
 | `Libs/FeynGravLibrariesGenerator.wl` | `Libs/Generator.wl` |
-| Unnumbered example filenames | Numbered files listed in [Examples/README.md](../Examples/README.md) |
+| Unnumbered example filenames | Numbered files listed in [Examples/README.md](./Examples/README.md) |
 
 Old importer/option and model names are not compatibility aliases. For the
 unified scalar model, set both potential couplings to zero after conversion to
@@ -56,7 +58,7 @@ computed expressions do not change when new libraries are installed.
 
 - The ordinary gravitational ghost propagator is
   `-I MTD[mu,nu] FAD[p]`, with the existing cubic ghost interaction and native
-  Grassmann signs. See the [GR verification record](Verification/PureGRTreeRelease.md).
+  Grassmann signs. See the [Scientific scope](./ScientificScope.md#General%20relativity).
 - Restore missing graviton differentiation multiplicities in scalar kinetic/mass
   and potential sources and affected vector, Yang–Mills, G2 and axion-vector
   routines. Terms already constructed through explicit permutations are not
@@ -72,9 +74,9 @@ computed expressions do not change when new libraries are installed.
 
 These corrections can change amplitudes obtained with older versions. Rerun
 relevant calculations rather than comparing only textual forms. See the
-[multiplicity record](Verification/RuleMultiplicityCorrection.md),
-[scalar-model record](Verification/ScalarModelExtensions.md) and
-[scalar Ward verification](Verification/ScalarWardCorrection.md).
+[Scientific scope](./ScientificScope.md#Scalar%20models),
+[Scientific scope](./ScientificScope.md#Scalar%20models) and
+[Scientific scope](./ScientificScope.md#Scalar%20models).
 
 ## Verification and known limitations
 
@@ -106,7 +108,7 @@ and FeynCalc 10.2.1; the full older-version range is not tested. FORM is optiona
 for package loading and required for FORM calculations and library generation.
 Native diagram workflows require FeynCalc-patched FeynArts.
 
-The [release-preparation record](Verification/ReleasePreparation-4.1.0.md)
+The [Scientific scope](./ScientificScope.md#Installation%20and%20compatibility)
 distinguishes new packaging checks from retained mathematical evidence. No Full
 benchmark or complete algebra-regression rerun is implied. Publication, tagging
 and any final archive verification remain separate release actions.

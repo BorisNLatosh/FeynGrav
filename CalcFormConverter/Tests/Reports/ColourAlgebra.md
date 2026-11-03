@@ -1,6 +1,6 @@
 # SU(N) colour algebra verification — 6 October 2026
 
-> Follow-up: the [generator migration](../../../Documentation/Verification/GeneratorVerification.md)
+> Follow-up: the generator migration (historical record; [current user guidance](../../../Documentation/ScientificScope.md#installation-and-compatibility))
 > changes the public default to `ColourAlgebra -> True`, retaining `Automatic`
 > compatibility, and corrects the dimensional quark and axion rule inputs.
 > The results below record the preceding colour-layer implementation.

@@ -85,7 +85,7 @@ Increment 3 supplies bounded collection before and after reduction on the
 eligible linear one-loop path. Collection-boundary reuse is delivered in increment 4. Increment 5 implements
 common optional rational/factor allowances, accepted with 495/495 combined checks;
 see [WorkLimits.md](WorkLimits.md). [Dependency ownership](DependencyPaths.md)
-and [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md) complete the retained QED/three-box gates.
+and final verification (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)) complete the retained QED/three-box gates.
 The full selected QED tadpole and 1,490-term equality remain outside this acceptance.
 
 ## Canonical kinematics and scalar spectator groups — PERF-07
@@ -130,4 +130,4 @@ the identifier union before dropping its multiplicities, without rescaling the
 stored definitions. Fresh focused/regression checks pass 263 assertions, while
 the unchanged dependency template retains its earlier 10. The retained three-box
 size, memory and timing gates pass. Larger-QED limitations remain unchanged.
-See the [verification report](../Documentation/Verification/CouplingGroupCoefficients.md).
+See the verification report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)).

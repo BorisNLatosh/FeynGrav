@@ -1,6 +1,6 @@
 # Developer guide
 
-This guide describes implementation and maintenance of CalcFormConverter. Start with [README.md](UserGuide.md) for commands and workflows; use [FORMAT.md](FORMAT.md) for the compatibility contract. Private helper names and associations may change without changing the public interface or saved format.
+This guide describes implementation and maintenance of CalcFormConverter. Start with [README.md](UserGuide.md) for commands and workflows; use the original `CalcFormConverter/FORMAT.md` archived in `AGENTS.md` for the compatibility contract. Private helper names and associations may change without changing the public interface or saved format.
 
 ## Contents
 
@@ -23,7 +23,7 @@ The private processing plan and first PERF-05 increment are documented in
 [ProcessingContracts.md](ProcessingContracts.md). The existing preparers and renderer
 remain authoritative. The common policy, pre/post collection, job-local reuse
 and coordinated work limits are implemented; see [DependencyPaths.md](DependencyPaths.md)
-and [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md).
+and final verification (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)).
 
 | Module | Responsibility |
 | --- | --- |
@@ -195,7 +195,7 @@ The complete example bubble was constructed and exported on the development mach
 
 Use the [benchmark notebooks](../Benchmark/UserGuide.md) for current user-facing measurements. Compare identical workloads in sequential fresh kernels, record preparation separately, validate outside timing and retain failed/inconclusive observations. More workers are not a guarantee of better performance. Avoid inferring total-call performance from an isolated stage.
 
-Historical optimisation measurements have moved to the [dated performance report](../Documentation/Verification/ConverterPerformance.md). Its measurements use different revisions and workloads and must not be combined into a single claimed speedup.
+Historical optimisation measurements have moved to the dated performance report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)). Its measurements use different revisions and workloads and must not be combined into a single claimed speedup.
 
 <a id="earlier-recorded-performance-checks"></a>
 <a id="subsequent-targeted-measurements"></a>
@@ -869,7 +869,7 @@ families can change abbreviation numbering and remove unused generic restriction
 from newly generated mappings, while their interpretation remains unchanged.
 
 `Tests/ExportPlanning.wls` is part of the `runtime` suite. See
-[export-planning verification](../Documentation/Verification/ExportPlanning-2026-10-23.md)
+export-planning verification (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
 for exact comparisons, timing boundaries and the incomplete full-box import.
 
 
@@ -878,7 +878,7 @@ for exact comparisons, timing boundaries and the incomplete full-box import.
 **Accepted within the recorded development scope, 25 October 2026.** The
 complete retained three-box target and affected focused regressions pass. This
 is not a claim of complete simplification or validation of the larger QED cases.
-See [PERF-04 acceptance](../Documentation/Verification/PERF04-2026-10-25.md).
+See PERF-04 acceptance (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)).
 
 `rcMasterPlan` recognises encoded `Polarization` entries by role. It assigns one
 temporary commuting symbol to each unordered vector pair containing a
@@ -988,7 +988,7 @@ boundaries, manual export/import, tiny read chunks and serial/TFORM agreement.
 output-reference checks and is registered in the integration suite.
 The retained workload report distinguishes these fixtures from unresolved large
 coefficient checks. Production performs no Wolfram `Simplify`, `Together` or
-`Factor` calls. See the [verification report](../Documentation/Verification/PolarisationCoefficients-2026-10-23.md)
+`Factor` calls. See the verification report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
 and the [FORM manual](https://form-dev.github.io/form-docs/stable/manual/),
 sections 7.56, 8.11 and 11, for factorisation and native denominator conventions.
 
@@ -1007,7 +1007,7 @@ clear its private context before retrying. See the
 phase in `Tests/run.py`. It combines explicit named-function expectations,
 controlled converter outcomes and small real serial FORM jobs. Existing facade,
 loading and standalone test expectations include the intentional nineteenth
-option. The [verification report](../Documentation/Verification/API03PaVeOutput-2026-10-30.md)
+option. The verification report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
 records which tests actually ran; registration is not full-suite certification.
 
 ## Shared coefficient policy — PERF-05 increment 2
@@ -1018,7 +1018,7 @@ an explicit one-variable dictionary. FORM execution, semantic normalisation,
 shared-definition inspection, cache/score/rollback ownership are retained.
 See [CoefficientPolicy.md](CoefficientPolicy.md) for the actual domains, selection
 profiles and conservative exclusions. `CoefficientPolicy` and
-`CoefficientArithmetic` are registered runtime suites; the [dated report](../Documentation/Verification/PERF05Coefficients-2026-10-30.md)
+`CoefficientArithmetic` are registered runtime suites; the dated report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
 records two bounded focused runs (72/72 and 52/52), not complete-suite or
 whole-call performance acceptance. API-03 conversion still follows processing.
 
@@ -1031,7 +1031,7 @@ they are not inverse polynomials. A disposable native FORM procedure collects
 pre-reduction weights, removes exact-zero keys, and processes direct-output
 multipliers after reduction. Existing shared-output final processing stays in
 charge for large jobs. See [IntegralCollection.md](IntegralCollection.md) for
-key/scope/fallback and counter ownership, and the [verification report](../Documentation/Verification/PERF05Collection-2026-10-30.md)
+key/scope/fallback and counter ownership, and the verification report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
 for the final 69/69 checks and both retained failures. `IntegralCollection` is
 registered in the runtime suite. No new public option or mapping grammar.
 
@@ -1048,7 +1048,7 @@ unchanged. See [IntegralCollection.md](IntegralCollection.md#changed-coefficient
 `Tests/CoefficientReuse.wls` exercises the actual FORM template with controlled
 literal rules; `IntegralCollection` checks actual planner/export/import paths.
 The final combined check passed 130/130 after two documented harness corrections.
-See [the report](../Documentation/Verification/PERF05Reuse-2026-10-30.md) for exact
+See the report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance)) for exact
 scope, source pins and the omitted performance/large-case gates. Registration
 in the runtime suite does not mean the complete suite was executed.
 
@@ -1057,8 +1057,8 @@ in the runtime suite does not mean the complete suite was executed.
 Optional rational processing and full factorisation share job-wide allowances
 while retaining local guards and complete-original fallback. See
 [WorkLimits.md](WorkLimits.md) for ownership and exclusions. The corrected combined
-batch passes 495/495 assertions under unchanged bounded resources; [the report](../Documentation/Verification/PERF05WorkLimits-2026-10-30.md)
-retains earlier failures and the final evidence. The [final verification](../Documentation/Verification/PERF05Final-2026-10-30.md)
+batch passes 495/495 assertions under unchanged bounded resources; the report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
+retains earlier failures and the final evidence. The final verification (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
 completes dependency, retained QED and three-box checks with default named output.
 This is not a general performance guarantee.
 
@@ -1103,6 +1103,6 @@ multilevel closure, serial/TFORM agreement and a broken-code negative control.
 All seven groups and all five triangle masters agree exactly. Fresh regression
 checks pass 263 assertions; the unchanged dependency template retains its earlier
 10 passing assertions. QED/three-box gates pass; see the
-[verification report](../Documentation/Verification/CouplingGroupCoefficients.md)
+verification report (historical record; [current user guidance](../Documentation/ScientificScope.md#calculation-and-performance))
 for timing, memory and remaining larger-case limitations. Resource and legacy
 algebraic limits are unchanged.

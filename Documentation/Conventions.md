@@ -1,6 +1,6 @@
 # Common conventions
 
-[Getting started](GettingStarted.md) · [Documentation index](README.md) · [Command reference](Reference.md)
+[Getting started](./GettingStarted.md) · [Documentation index](./README.md) · [Command reference](./Reference.md)
 
 **Applies to the 4.2.0 development checkout.** This page states the shared
 mathematical conventions and distinguishes them from adjustable session
@@ -21,16 +21,18 @@ nor transforms expressions already calculated.
 
 ## Contents
 
-- [Metric and Lorentz indices](#metric-and-lorentz-indices)
-- [Curvature](#curvature)
-- [Fourier transform and external momenta](#fourier-transform-and-external-momenta)
-- [Metric expansion and gravitational coupling](#metric-expansion-and-gravitational-coupling)
-- [Dimensions and FeynCalc notation](#dimensions-and-feyncalc-notation)
-- [Gauge parameters and library imports](#gauge-parameters-and-library-imports)
-- [Polarisation and helicity](#polarisation-and-helicity)
-- [Dirac, colour and epsilon conventions](#dirac-colour-and-epsilon-conventions)
-- [Diagrams and loop integrals](#diagrams-and-loop-integrals)
-- [Model conventions and verification](#model-conventions-and-verification)
+- [Metric and Lorentz indices](#Metric%20and%20Lorentz%20indices)
+- [Curvature](#Curvature)
+- [Fourier transform and external momenta](#Fourier%20transform%20and%20external%20momenta)
+- [Metric expansion and gravitational coupling](#Metric%20expansion%20and%20gravitational%20coupling)
+- [Dimensions and FeynCalc notation](#Dimensions%20and%20FeynCalc%20notation)
+- [Gauge parameters and library imports](#Gauge%20parameters%20and%20library%20imports)
+- [Polarisation and helicity](#Polarisation%20and%20helicity)
+- [Dirac, colour and epsilon conventions](#Dirac%2C%20colour%20and%20epsilon%20conventions)
+- [Diagrams and loop integrals](#Diagrams%20and%20loop%20integrals)
+- [Model conventions and verification](#Model%20conventions%20and%20verification)
+
+<a name="Metric and Lorentz indices"></a>
 
 ## Metric and Lorentz indices
 
@@ -48,6 +50,8 @@ with $\eta_{\mu\nu}$. Repeated contracted Lorentz indices are summed.
 The dimensional continuation uses $\eta^\mu{}_{\mu}=D$.
 Changing FeynCalc's Cartesian metric setting does not convert the stored
 FeynGrav interactions to a different spacetime signature.
+
+<a name="Curvature"></a>
 
 ## Curvature
 
@@ -102,6 +106,8 @@ $X$: a sign or a factor of $1/2$ in $X$ changes derivatives of functions of
 $X$. The coefficient of a model's Hessian interaction must be determined
 from that model's consistently translated action.
 
+<a name="Fourier transform and external momenta"></a>
+
 ## Fourier transform and external momenta
 
 The Fourier phase is positive:
@@ -125,6 +131,8 @@ State these explicitly when needed. FeynArts conversion has its own momentum
 assignments; follow the selected model's example rather than reversing
 converted momenta a second time.
 
+<a name="Metric expansion and gravitational coupling"></a>
+
 ## Metric expansion and gravitational coupling
 
 The conventional field parametrisation is
@@ -144,9 +152,11 @@ with the conventional rules without the corresponding field transformation.
 Library order has a sector-dependent meaning. In pure GR, order $n$ supplies
 the interaction of $n+2$ gravitons, proportional to $\kappa^n$. For matter
 libraries, $n$ counts attached gravitons. Consult the
-[importer reference](Reference.md#library-importers) for other sectors.
+[importer reference](./Reference.md#Library%20importers) for other sectors.
 A cutoff in the order of each vertex is not a cutoff in the total order of
 a diagram containing several vertices.
+
+<a name="Dimensions and FeynCalc notation"></a>
 
 ## Dimensions and FeynCalc notation
 
@@ -168,6 +178,8 @@ The full FORM pipeline requires one consistent Lorentz space in each expression.
 It does not set $D=4-2\epsilon$, carry out a Laurent expansion or perform
 renormalisation. A four-dimensional helicity calculation and a sum over
 D-dimensional polarisations are different operations.
+
+<a name="Gauge parameters and library imports"></a>
 
 ## Gauge parameters and library imports
 
@@ -197,6 +209,8 @@ settings. It does not certify manually redefined vertices or old expressions.
 Supplied FeynArts models contain their own stored rules; changing a main-package
 gauge parameter does not rebuild those files. Their gauge-fixing actions and
 ghost conventions belong to their model guides.
+
+<a name="Polarisation and helicity"></a>
 
 ## Polarisation and helicity
 
@@ -233,8 +247,10 @@ default is `False`. Mass-shell and null-polarisation conditions remain separate.
 
 `PolarizationTensor` uses four-dimensional indices; `PolarizationTensorD`
 retains `D`. The FeynGrav shortcuts require symbolic momentum and index labels.
-See [polarisation commands](Reference.md#polarisation-objects) for their full
+See [polarisation commands](./Reference.md#Polarisation%20objects) for their full
 interfaces.
+
+<a name="Dirac, colour and epsilon conventions"></a>
 
 ## Dirac, colour and epsilon conventions
 
@@ -249,7 +265,7 @@ The effective `TraceOfOne` setting determines the trace of the identity.
 The full FORM pipeline supports ordinary chains and explicit traces within
 its documented vocabulary; displaying a FeynCalc Dirac scheme does not
 establish support for all operations in that scheme. See the
-[Dirac and colour guide](../CalcFormConverter/UserGuide.md#dirac-and-colour-translation).
+[Dirac and colour guide](./Services/Calculation/Guide.md#Dirac%20and%20colour%20translation).
 
 For fundamental SU(N) generators,
 
@@ -267,7 +283,9 @@ in D-dimensional Lorentz space, not a tensor with $D$ slots. The relevant
 epsilon convention is controlled by FeynCalc's `$LeviCivitaSign`, which is
 recorded at export and must agree at import. Do not infer a convention for
 an axion action merely from this algebra setting. See the
-[epsilon guide](../CalcFormConverter/UserGuide.md#lorentz-levi-civita-tensors).
+[epsilon guide](./Services/Calculation/Guide.md#Lorentz%20Levi-Civita%20tensors).
+
+<a name="Diagrams and loop integrals"></a>
 
 ## Diagrams and loop integrals
 
@@ -312,8 +330,10 @@ Routing shifts assume a translation-invariant regularisation.
 `DropScaleless -> True` discards demonstrably scaleless integrals within the
 supported decomposition; the default `False` retains formal scaleless terms.
 This operation does not separate ultraviolet and infrared divergences.
-See [one-loop decomposition](../CalcFormConverter/UserGuide.md#one-loop-tensor-decomposition)
+See [one-loop decomposition](./Services/Calculation/Guide.md#One-loop%20tensor%20decomposition)
 for the exact scope and options.
+
+<a name="Model conventions and verification"></a>
 
 ## Model conventions and verification
 
@@ -322,32 +342,16 @@ couplings and definitions such as $X$. An overall action sign, a curvature-sign
 choice and a redefinition of $X$ cannot be interchanged without translating all
 affected terms and couplings.
 
-The [model index](Models.md) covers the implemented sectors, including those
-without native bundles. The [GR page](Models/GeneralRelativity.md) gives its
-action and gauge fixing; the [native-model catalogue](../FeynArts/Models/ModelCatalogue.md)
+The [model index](./Models.md) covers the implemented sectors, including those
+without native bundles. The [GR page](./Models/GeneralRelativity.md) gives its
+action and gauge fixing; the [native-model catalogue](./Models/FeynArts.md)
 links to the remaining supplied model guides. Shared conventions do not
 establish that every rule in those sectors has been verified.
 
-**Horndeski G4 source and shipped libraries are accepted within their recorded
-verification scopes.** The [Horndeski page](Models/Horndeski.md#translation-from-the-literature)
-fixes the translated action for (+---) and X without a half: the G4 and G5
-Hessian coefficients are $-2G_{4,X}$ and $+G_{5,X}/3$. The
-[RULE-01 source checks](Verification/HorndeskiG4-2026-11-01.md) compare the corrected
-construction with an independent action reference; the
-[RULE-05 migration](Verification/HorndeskiLibraryMigration-2026-11-01.md) separately
-verifies all 14 shipped G4 libraries and their public imports. Generic G4 b=5
-verification remains incomplete after a timeout; arbitrary orders and loop
-amplitudes are not certified. Earlier printed-action matches alone do not
-validate the corrected target. The
-[implementation audits](Verification/HorndeskiImplementationPlan.md) record the
-accepted cases and limits, while the [G4 review record](Verification/HorndeskiG4ContractedBranch.md)
-retains the historical findings.
-The axion epsilon-density/action convention also remains unresolved.
-
-This page was checked against the package's
-[conventions report implementation](../Conventions.wl), main-package
-definitions and linked guides on 1 November 2026. The existing
-[conventions verification report](Verification/Conventions.md) records
-representative linear-order and display checks; it does not prove all
-nonlinear interactions. No new mathematical validation is implied by this
-documentation update.
+The [Horndeski page](./Models/Horndeski/README.md#Translation%20from%20the%20literature)
+translates the action to (+---) and X without a half: the G4 and G5 Hessian
+coefficients are $-2G_{4,X}$ and $+G_{5,X}/3$. All 14 shipped G4 libraries and
+their public imports have independent checks. Generic G4 b=5 verification is
+incomplete, and arbitrary-order or loop predictions are not certified. See
+[Scientific scope](./ScientificScope.md) for the checked cases and limitations,
+including the unresolved axion epsilon-density/action convention.

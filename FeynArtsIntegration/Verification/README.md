@@ -36,7 +36,7 @@ termination grace, and fresh available host memory of at least 2 GiB. Stop and
 review failures/warnings/resource events; never affect existing user kernels.
 A command timeout or per-process RSS monitor alone does not enforce this policy.
 
-The [delivery report](../../Documentation/Verification/GRSUNYM-2026-10-26.md)
+The delivery report (historical record; [current user guidance](../../Documentation/ScientificScope.md#yangmills-and-fermions))
 records independent source, ghost-sign, all-contact and tree evidence, including
 historical harness failures. The portable tree checks are a subset, not the full
 source-action audit. The existing bridge's loop gates remain unchanged.
@@ -45,7 +45,7 @@ The quark extension adds a private ordered-Dirac companion,
 `../FermionModelBasis.wl`, and five families to the same builder. Its finite
 one/three-gamma basis preserves chain order and rejects unsupported objects.
 The gravitational vector ghost now uses `S`, leaving `F` for quarks. See the
-[quark verification report](../../Documentation/Verification/GRSUNYMQuarks-2026-10-26.md)
+quark verification report (historical record; [current user guidance](../../Documentation/ScientificScope.md#yangmills-and-fermions))
 for independent action checks, all five native contacts, selected massive trees,
 identical-quark signs and the evaluated FORM example.
 
