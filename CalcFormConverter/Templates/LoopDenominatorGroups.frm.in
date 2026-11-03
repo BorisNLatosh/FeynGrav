@@ -123,6 +123,11 @@ if (count(cfcRef,1)==0); Discard; endif;
 .sort
 Skip;
 Local cfcRefUnion=cfcRefs+cfcRefChildren;
+.sort
+* Deduplicate the sorted union, not its incoming terms: a root may also be
+* another root's dependency. Its multiplicity must never scale its definition.
+Skip;
+NSkip cfcRefUnion;
 DropCoefficient;
 .sort
 Drop cfcRefs,cfcRefChildren;

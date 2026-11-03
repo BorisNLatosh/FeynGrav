@@ -219,8 +219,8 @@ reset configured options.
 
 ### Method selection
 
-`FeynGravSimplify` has a new option symbol `Method` owned by the
-``CalcFormConverter` `` context, default `Automatic`:
+`FeynGravSimplify` uses the Wolfram System option symbol `Method`,
+with default `Automatic`:
 
 - `Automatic` and `"FORM"` dispatch to the full converter pipeline with
   `CalcFormCalculate` semantics. Resolved converter options are forwarded as
@@ -1013,11 +1013,24 @@ Existing grouping and arithmetic limits still apply; exhaustion restores the
 original master. There is no new public option and no promise of a fully
 simplified result.
 
-The retained Horndeski example now exposes seven coupling groups, but the current
-work allowance still restores the original coefficient. Recovery of its 225-term
-reference and the complete five-master symbolic comparison remain open. See the
-[verification report](../Documentation/Verification/CouplingGroupCoefficients.md)
-for passing focused/regression checks, retained performance and limits.
+**Complete-call repair verified:** the unmodified retained triangle completes in
+serial FORM and eight-worker TFORM, with exact agreement for all five masters and
+the 225-term tadpole coefficient. The complete-group path uses native named-expression
+GCD and exact division instead of packing oversized rational arguments. Additional
+finite expansion/denominator guards preserve the original on predictable rejection;
+actual execution errors remain failures. See the verification report for measured
+resources, regression evidence and the unchanged larger-QED limitations.
+
+Rejected complete scalar coupling groups receive a separate bounded retry with
+a 1,000-named-term, degree-48, 12-variable profile before denominator fallback.
+The legacy selector remains unchanged. The retained Horndeski coefficient is
+recovered exactly in 225 expanded terms, and all five triangle masters and the
+QED/three-box regressions agree with their references. A repaired dependency-list
+bug prevents duplicate references from multiplying shared definitions. Recompute
+affected scalar-group results produced by the earlier development checkpoint
+`02444ff`; previously saved amplitudes cannot be corrected by a universal factor.
+See the [verification report](../Documentation/Verification/CouplingGroupCoefficients.md)
+for the bounded scope and larger-case limitations.
 
 ### Polarisation structures in scalar-master coefficients
 

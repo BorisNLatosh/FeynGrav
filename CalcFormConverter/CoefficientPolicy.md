@@ -107,7 +107,27 @@ of reachable shared references in dependency order. It does not flatten their
 kinematic polynomials. Native polynomial denominators are inspected and processed
 on the scalar-only final-rational path as well as the polarisation path.
 
-The previous term/degree/variable, structure and job limits remain unchanged.
-The retained seven-group Horndeski coefficient still exhausts optional work and
-falls back; this follow-up is **not closed**. See the
-[verification and remaining acceptance gates](../Documentation/Verification/CouplingGroupCoefficients.md).
+The PERF-07 implementation adds a scalar-coupling-only retry after legacy
+rejection and before denominator fallback. It admits at most 1,000 actual named
+input terms, degree 48 and 12 variables through `coefficientLimits["CouplingGroup"]`.
+The legacy 1,000-estimated-term/degree-24 selector remains unchanged. Inspection
+rejection caches are profile-specific; completed results and work allowances stay
+job-local and allowances are not replenished. This is a separate profile, not a
+global guard increase or a memory guarantee.
+
+**Complete-call repair verified:** the unmodified retained triangle completes in
+serial FORM and eight-worker TFORM, with exact agreement for all five masters and
+the 225-term tadpole coefficient. The complete-group path uses native named-expression
+GCD and exact division instead of packing oversized rational arguments. Additional
+finite expansion/denominator guards preserve the original on predictable rejection;
+actual execution errors remain failures. See the verification report for measured
+resources, regression evidence and the unchanged larger-QED limitations.
+
+Earlier selected-master checks passed within their recorded scope.
+All seven Horndeski groups recover the exact compact coefficient; all five
+triangle masters agree. A dependency-registration defect was repaired by sorting
+the identifier union before dropping its multiplicities, without rescaling the
+stored definitions. Fresh focused/regression checks pass 263 assertions, while
+the unchanged dependency template retains its earlier 10. The retained three-box
+size, memory and timing gates pass. Larger-QED limitations remain unchanged.
+See the [verification report](../Documentation/Verification/CouplingGroupCoefficients.md).

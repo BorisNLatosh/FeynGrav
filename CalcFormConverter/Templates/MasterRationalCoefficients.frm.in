@@ -3,12 +3,18 @@
 * one marker for each scalar variable. Child entries overestimate unions and
 * degrees deliberately. Unknown objects/forward references reject the candidate.
 #procedure cfcMRInspect(source)
+#$cfcMRLimit=@LIMIT@;
+#$cfcMRDegreeLimit=@DEGREE@;
+#ifdef `cfcCGComplete'
+#$cfcMRLimit=@CG_TERMS@;
+#$cfcMRDegreeLimit=@CG_DEGREE@;
+#endif
 #$cfcMROK=0;
-#$cfcMRCost=@LIMIT@+1;
-#$cfcMRMax=@DEGREE@+1;
+#$cfcMRCost=$cfcMRLimit+1;
+#$cfcMRMax=$cfcMRDegreeLimit+1;
 #$cfcMRCount=0;
 #$cfcMRMeta=(@LIMIT@+1)*cfcMRDegree^(@DEGREE@+1);
-#if termsin(`source') <= @LIMIT@
+#if termsin(`source') <= `$cfcMRLimit'
 Skip;
 Local cfcMREstimate=`source';
 DropCoefficient;
@@ -43,9 +49,15 @@ ModuleOption noparallel;
 #$cfcMRVars=$cfcMRVars*`v';
 #endif
 #enddo
+#ifdef `cfcCGComplete'
+* Coupling-only admission measures the immutable named input. The estimate is
+* still evaluated above for degree, variables and unsupported-object rejection.
+#$cfcMRCost=termsin_(`source');
+#else
 #$cfcMRCost=cfcMREstimate;
+#endif
 #if isnumerical($cfcMRCost)
-#if ( `$cfcMRCost' <= @LIMIT@ ) && ( `$cfcMRMax' <= @DEGREE@ ) && ( `$cfcMRCount' <= @VARIABLE_LIMIT@ )
+#if ( `$cfcMRCost' <= `$cfcMRLimit' ) && ( `$cfcMRMax' <= `$cfcMRDegreeLimit' ) && ( `$cfcMRCount' <= @VARIABLE_LIMIT@ )
 #$cfcMROK=1;
 #$cfcMRMeta=$cfcMRCost*cfcMRDegree^$cfcMRMax*$cfcMRVars;
 #endif
@@ -54,6 +66,205 @@ Drop cfcMREstimate;
 .sort
 NSkip;
 .sort
+#endif
+#endprocedure
+
+* Complete coupling coefficients may exceed a PolyRatFun argument while still
+* having a small final answer. Keep numerator/denominator as named expressions.
+* Expose and sort one shared factor per layer; a single recursive substitution
+* expands enormous products before cancellations can be collected.
+#procedure cfcCGCombine(source)
+#$cfcCGOK=1;
+* The caller reserved one pass. Charge the four additional native operations
+* (two exact quotients and two remainder checks); no refund after rejection.
+#if {`$cfcPGWorkUsed'+4} > `$cfcPGWorkLimit'
+#$cfcCGOK=0;
+#$cfcPGWorkExhausted=1;
+#else
+#$cfcPGWorkUsed=$cfcPGWorkUsed+4;
+#do cfcCGCharge=1,4
+#call cfcReserveRational
+#if `$cfcCWGranted' == 0
+#$cfcCGOK=0;
+#$cfcPGWorkExhausted=1;
+#endif
+#enddo
+#endif
+Skip;
+Local cfcCGWork=`source';
+.sort
+#if `$cfcCGOK' == 1
+* Expand definitions individually before multiplying them in the coefficient.
+* The registered transitive reference set is ordered by immutable definition id.
+#call cfcPGMeasure(cfcCGWork)
+#do cfcCGKey=cfcPGLinks
+#$cfcCGIndex=0;
+Skip;
+Local cfcCGKeyWork=`cfcCGKey';
+id cfcPGRef(cfcMRIndex?$cfcCGIndex)=1;
+ModuleOption noparallel;
+.sort
+Drop cfcCGKeyWork;
+.sort
+#$cfcCGKnown=cfcCGExpandedReady(`$cfcCGIndex');
+#if isnumerical($cfcCGKnown) == 0
+Skip;
+Local cfcCGDefinition=extrasymbol_(`$cfcCGIndex');
+id cfcShare(cfcMRIndex?)=cfcCGExpanded(cfcMRIndex);
+id cfcPolyN(cfcMRIndex?)=cfcCGExpanded(cfcMRIndex);
+.sort
+* An unavailable dependency keeps the candidate ineligible. Never interpret a
+* missing table entry as zero or leave it in an output expression.
+#$cfcCGMissing=0;
+Skip;
+NSkip cfcCGDefinition;
+if (occurs(cfcCGExpanded)); $cfcCGMissing=1; endif;
+ModuleOption noparallel;
+.sort
+#if (`$cfcCGMissing' == 0) && (termsin(cfcCGDefinition) <= @CG_TERMS@)
+#$cfcCGValue=cfcCGDefinition;
+Fill cfcCGExpanded(`$cfcCGIndex')=`$cfcCGValue';
+Fill cfcCGExpandedReady(`$cfcCGIndex')=1;
+#else
+#$cfcCGOK=0;
+#endif
+Drop cfcCGDefinition;
+.sort
+#endif
+#enddo
+Drop cfcPGLinks;
+.sort
+#endif
+#if `$cfcCGOK' == 1
+* Polynomial denominator definitions are already small argument-sized blocks.
+Skip;
+NSkip cfcCGWork;
+id cfcPolyD(cfcMRIndex?)=cfcMRDenProbe(cfcCGExpanded(cfcMRIndex));
+.sort
+#do cfcCGLayer=1,48
+#$cfcCGMore=0;
+Skip;
+NSkip cfcCGWork;
+id once cfcShare(cfcMRIndex?)=cfcCGExpanded(cfcMRIndex);
+id once cfcPolyN(cfcMRIndex?)=cfcCGExpanded(cfcMRIndex);
+if (occurs(cfcShare,cfcPolyN)); $cfcCGMore=1; endif;
+ModuleOption noparallel;
+.sort
+#if (termsin(cfcCGWork) > 100000)
+#$cfcCGOK=0;
+#breakdo
+#endif
+#if `$cfcCGMore' == 0
+#breakdo
+#endif
+#enddo
+#if `$cfcCGMore' != 0
+#$cfcCGOK=0;
+#endif
+#endif
+#if `$cfcCGOK' == 1
+Skip;
+NSkip cfcCGWork;
+@DOTS@
+id i_=cfcMRImag;
+id denom_(?a)=cfcMRDenProbe(?a);
+Argument cfcMRDenProbe;
+id i_=cfcMRImag;
+@DOTS@
+EndArgument;
+* Intern inverse factors first. Do NOT use ToPolynomial here: it would hide
+* negative powers, which content_ needs to construct the common denominator.
+ArgToExtraSymbol cfcMRDenProbe;
+id cfcMRDenProbe(cfcMRN?symbol_)=1/cfcMRN;
+.sort
+#if termsin(cfcCGWork) == 0
+Skip;
+Local cfcMRWork=0;
+.sort
+#else
+#$cfcCGContent=content_(cfcCGWork);
+Skip;
+Local cfcCGInverse=$cfcCGContent;
+DropCoefficient;
+repeat id cfcMRN?symbol_^cfcRPower?pos_=1;
+.sort
+#$cfcCGInverse=cfcCGInverse;
+Drop cfcCGInverse;
+.sort
+Skip;
+Local cfcCGNumerator=cfcCGWork/$cfcCGInverse;
+Local cfcCGDenominator=1/$cfcCGInverse;
+.sort
+Skip;
+NSkip cfcCGNumerator,cfcCGDenominator;
+FromPolynomial;
+.sort
+* Only polynomials enter the native GCD. Reject nested inverse definitions and
+* unresolved references rather than treating them as independent scalar atoms.
+#$cfcCGBad=0;
+Skip;
+NSkip cfcCGNumerator,cfcCGDenominator;
+if (occurs(denom_,cfcPolyD,cfcShare,cfcPolyN,cfcCGExpanded,cfcMRDenProbe)); $cfcCGBad=1; endif;
+#do v={@VARIABLES@,cfcMRImag}
+if (count(`v',1)<0); $cfcCGBad=1; endif;
+#enddo
+ModuleOption noparallel;
+.sort
+#if (`$cfcCGBad' == 0) && (termsin(cfcCGDenominator) != 0)
+Skip;
+Local cfcCGCommon=gcd_(cfcCGNumerator,cfcCGDenominator);
+.sort
+Skip;
+Local cfcCGN=div_(cfcCGNumerator,cfcCGCommon);
+Local cfcCGD=div_(cfcCGDenominator,cfcCGCommon);
+Local cfcCGRemN=rem_(cfcCGNumerator,cfcCGCommon);
+Local cfcCGRemD=rem_(cfcCGDenominator,cfcCGCommon);
+.sort
+#if (termsin(cfcCGRemN) != 0) || (termsin(cfcCGRemD) != 0)
+#message CFC complete-group exact division failed
+#terminate 1
+#endif
+Skip;
+NSkip cfcCGN,cfcCGD;
+id cfcMRImag=i_;
+@RESTORE@
+.sort
+* A large numerator may be a sum of shared chunks. The denominator stays one
+* complete polynomial argument; reject it predictably before wrapping if large.
+#$cfcCGDenWords=sizeof_(cfcCGD);
+#if (`$cfcCGDenWords' < 4096)
+Skip;
+NSkip cfcCGN;
+* Collect requires an explicit bracket, even for the complete expression.
+Bracket cfcCGPart;
+.sort
+Skip;
+NSkip cfcCGN;
+Collect cfcLRNum,cfcCGPart,50;
+id cfcCGPart(?a)=cfcLRNum(?a);
+ArgToExtraSymbol tonumber,cfcLRNum;
+id cfcLRNum(cfcMRIndex?)=cfcPolyN(cfcMRIndex);
+.sort
+Skip;
+Local cfcMRWork=cfcCGN*cfcLRDen(cfcCGD);
+.sort
+#else
+#$cfcCGOK=0;
+#endif
+Drop cfcCGCommon,cfcCGN,cfcCGD,cfcCGRemN,cfcCGRemD;
+.sort
+#else
+#$cfcCGOK=0;
+#endif
+Drop cfcCGNumerator,cfcCGDenominator;
+.sort
+#endif
+#endif
+Drop cfcCGWork;
+.sort
+#if `$cfcCGOK' == 0
+* The caller retains the complete immutable source and may use its old fallback.
+#$cfcMROK=0;
 #endif
 #endprocedure
 
@@ -92,7 +303,11 @@ NSkip;
 #$cfcPGFactorBefore=$cfcPGFactorMS;
 #endif
 #ifdef `cfcPGActive'
+#ifdef `cfcCGComplete'
+#call cfcCGInspect(`source')
+#else
 #call cfcPGInspectRational(`source')
+#endif
 #else
 #call cfcMRInspect(`source')
 #endif
@@ -117,6 +332,9 @@ Local `source'=cfcPGAlgebra(`$cfcPGAlgebraIndex',`cfcPGAlgebraMode');
 #endif
 #endif
 #if `cfcMRCompute' == 1
+#ifdef `cfcCGComplete'
+#call cfcCGCombine(`source')
+#else
 Skip;
 Local cfcMRWork=`source';
 repeat;
@@ -142,6 +360,11 @@ PolyRatFun;
 Skip;
 NSkip cfcMRWork;
 id cfcMRat(cfcMRN?,cfcMRD?)=cfcLRNum(cfcMRN)*cfcLRDen(cfcMRD);
+.sort
+#endif
+#if `$cfcMROK' == 1
+Skip;
+NSkip cfcMRWork;
 Argument cfcLRNum,cfcLRDen;
 id cfcMRImag=i_;
 @RESTORE@
@@ -170,6 +393,7 @@ Local `source'=cfcMRWork;
 .sort
 NSkip;
 .sort
+#endif
 #endif
 #ifdef `cfcPGActive'
 #undefine cfcPGAlgebraMode

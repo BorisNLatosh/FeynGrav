@@ -1075,7 +1075,34 @@ template registers reachable dependencies before filling coefficient metadata.
 Keep scalar-role classification independent of parameter spelling, restore the
 complete original on work exhaustion, and do not infer mathematical success
 from a completed FORM process. `Tests/ScalarCoefficientGroups.wls` is included
-in the runtime suite. See the [verification report](../Documentation/Verification/CouplingGroupCoefficients.md):
-small/regression checks pass, while the retained Horndeski compact coefficient
-and exact all-five-master comparison remain acceptance gates. Do not mark PERF-07
-resolved or silently raise resource/algebraic limits.
+in the runtime suite and passes 57/57 assertions on the current candidate.
+`cfcCGInspect` separates legacy and complete-group rejection caches; the retry
+charges the existing job and local allowances and precedes denominator fallback.
+`cfcCGCombine` expands immutable shared definitions once per job, exposes and sorts
+one factor per layer, includes literal inverse polynomials, and builds named
+numerator/denominator expressions without hiding negative powers. Native `gcd_`,
+two `div_` calls and two checked `rem_` calls charge five work units. Zero is handled
+before content extraction. Numerator output is bracketed before `Collect`; the
+complete reduced denominator is wrapped once after a 4,096-word admission check.
+The source remains intact until success. Legacy PolyRatFun handling is unchanged
+apart from an explicit module boundary before renewing expression selection.
+
+**Complete-call repair verified:** the unmodified retained triangle completes in
+serial FORM and eight-worker TFORM, with exact agreement for all five masters and
+the 225-term tadpole coefficient. The complete-group path uses native named-expression
+GCD and exact division instead of packing oversized rational arguments. Additional
+finite expansion/denominator guards preserve the original on predictable rejection;
+actual execution errors remain failures. See the verification report for measured
+resources, regression evidence and the unchanged larger-QED limitations.
+
+Earlier selected-master checks passed within their recorded scope. Reference closure must sort `cfcRefs+cfcRefChildren` before removing its
+coefficients; otherwise overlapping identifiers multiply the emitted polynomial.
+Keep this normalisation scoped to the reference list. The live-template regression
+`Tests/SharedDependencyRegistration.wls` covers overlapping roots/children,
+multilevel closure, serial/TFORM agreement and a broken-code negative control.
+All seven groups and all five triangle masters agree exactly. Fresh regression
+checks pass 263 assertions; the unchanged dependency template retains its earlier
+10 passing assertions. QED/three-box gates pass; see the
+[verification report](../Documentation/Verification/CouplingGroupCoefficients.md)
+for timing, memory and remaining larger-case limitations. Resource and legacy
+algebraic limits are unchanged.

@@ -336,6 +336,29 @@ Fill cfcPGRejectVariables(`$cfcPGRejectIndex')=`$cfcMRCount';
 #endif
 #endprocedure
 
+* Complete coupling groups have a separate admission cache. A legacy rejection
+* cannot suppress this profile, and a profile rejection cannot alter legacy work.
+#procedure cfcCGInspect(source)
+#call cfcPGCoefficientKey(`source')
+#$cfcCGRejectedCost=cfcCGRejectCost(`$cfcPGRejectIndex');
+#if (`$cfcPGRejectIndex' > 0) && (isnumerical($cfcCGRejectedCost))
+#$cfcMROK=cfcCGInspectOK(`$cfcPGRejectIndex');
+#$cfcMRMeta=cfcCGInspectMeta(`$cfcPGRejectIndex');
+#$cfcMRCost=$cfcCGRejectedCost;
+#$cfcMRMax=cfcCGRejectDegree(`$cfcPGRejectIndex');
+#$cfcMRCount=cfcCGRejectVariables(`$cfcPGRejectIndex');
+#else
+#call cfcMRInspect(`source')
+#if (`$cfcPGRejectIndex' > 0) && (isnumerical($cfcMRCost))
+Fill cfcCGInspectOK(`$cfcPGRejectIndex')=`$cfcMROK';
+Fill cfcCGInspectMeta(`$cfcPGRejectIndex')=`$cfcMRMeta';
+Fill cfcCGRejectCost(`$cfcPGRejectIndex')=`$cfcMRCost';
+Fill cfcCGRejectDegree(`$cfcPGRejectIndex')=`$cfcMRMax';
+Fill cfcCGRejectVariables(`$cfcPGRejectIndex')=`$cfcMRCount';
+#endif
+#endif
+#endprocedure
+
 * Full factorisation is confined to small, prevalidated rational arguments.
 * This hook is reached with OldFactArg OFF in the shared-output pipeline.
 #procedure cfcPGFactor
@@ -928,6 +951,7 @@ Local cfcPGCoefficient=cfcPGResult(`$cfcPGResultIndex');
 #else
 #call cfcMRFinal(cfcPGCoefficient)
 #write "CFC polarisation rational eligible: %$, cost %$, degree %$, variables %$",$cfcMROK,$cfcMRCost,$cfcMRMax,$cfcMRCount
+@COMPLETE_GROUP_RETRY@
 #if (`$cfcMROK' == 0) && (`$cfcPGWorkExhausted' == 0)
 #$cfcPGPartial=$cfcPGPartial+1;
 #call cfcPGExposeDenominators(cfcPGCoefficient)

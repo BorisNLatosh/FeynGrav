@@ -136,6 +136,12 @@ coefficientLimits["Propagator"] := <|"Terms" -> $rcMaximumTerms,
     "Variables" -> $rcMaximumVariables|>;
 coefficientLimits["Master"] := <|"Terms" -> $rcMasterMaximumTerms,
     "Variables" -> $rcMaximumVariables, "Degree" -> $rcMasterMaximumDegree|>;
+(* Complete coupling groups use their named representation for admission. The
+   legacy expansion estimate remains authoritative everywhere else. *)
+$rcCouplingGroupMaximumTerms = 1000;
+$rcCouplingGroupMaximumDegree = 48;
+coefficientLimits["CouplingGroup"] := <|"Terms" -> Max[0, $rcCouplingGroupMaximumTerms],
+    "Variables" -> $rcMaximumVariables, "Degree" -> Max[0, $rcCouplingGroupMaximumDegree]|>;
 coefficientLimits["Polarisation"] := <|"Structures" -> $rcPolarisationMaximumStructures,
     "Terms" -> $rcPolarisationMaximumTerms,
     "RationalPasses" -> Max[0, $rcPolarisationMaximumRationalPasses]|>;
@@ -238,7 +244,7 @@ rcPowerRules[variables_List, head_String] := Flatten[Map[Function[s, {
 $rcMasterMaximumTerms = 1000;
 $rcMasterMaximumDegree = 24;
 rcMasterPlan[entries_List, spectators_List: {}] := Module[{roles, variables, pairs, names, powers, inspect, polNames, polPlan,
-    limits = coefficientLimits["Master"]},
+    limits = coefficientLimits["Master"], couplingLimits = coefficientLimits["CouplingGroup"]},
     If[limits["Terms"] <= 0, Return[<||>]];
     roles = coefficientRoles[entries, "cfcMRX"];
     pairs = roles["Pairs"]; names = roles["PairNames"];
@@ -249,10 +255,11 @@ rcMasterPlan[entries_List, spectators_List: {}] := Module[{roles, variables, pai
         "id " <> s <> "^cfcRPower?pos_=" <> s <> "*cfcMRDegree^cfcRPower;\n" <>
         "id " <> s <> "^cfcRPower?neg_=" <> s <> "*cfcMRDegree^(-cfcRPower);\n"], variables]];
     <|"Declarations" -> "\nSymbols cfcRPower,cfcMRIndex,cfcMRN,cfcMRD,cfcMRDegree,cfcMRImag" <>
-            If[names === {},"",","<>StringRiffle[names,","]] <> ";\nCFunctions cfcMRat,cfcMRDenProbe;\nTable sparse cfcMRMeta(1);\n" <> Lookup[polPlan, "Declarations", ""],
+            If[names === {},"",","<>StringRiffle[names,","]] <> ";\nCFunctions cfcMRat,cfcMRDenProbe,cfcCGPart;\nTable sparse cfcCGExpanded(1);\nTable sparse cfcCGExpandedReady(1);\nTable sparse cfcMRMeta(1);\n" <> Lookup[polPlan, "Declarations", ""],
       "Polarisation" -> polPlan, "RegisterDependencies" -> (spectators =!= {}),
       "Procedure" -> StringReplace[rcTemplate["MasterRationalCoefficients.frm.in"], {
         "@LIMIT@" -> intString[limits["Terms"]], "@DEGREE@" -> intString[limits["Degree"]],
+        "@CG_TERMS@" -> intString[couplingLimits["Terms"]], "@CG_DEGREE@" -> intString[couplingLimits["Degree"]],
         "@VARIABLE_LIMIT@" -> intString[limits["Variables"]], "@VARIABLES@" -> StringRiffle[variables,","],
         "@DOTS@" -> StringRiffle[MapThread["id "<>StringRiffle[#1,"."]<>"^cfcRPower?="<>#2<>"^cfcRPower;"&,{pairs,names}],"\n"],
         "@NATIVE_DEN_INSPECT@" -> ("id denom_(?a)=cfcMRDenProbe(?a);\nArgument cfcMRDenProbe;\nDropCoefficient;\nid i_=1;\n" <>
@@ -304,10 +311,15 @@ rcPolarisationPlan[pairs_List, names_List, polNames_List, variables_List, specta
             Join[Complement[variables, Join[names,spectators]], ("(" <> StringRiffle[#, "."] <> ")" &) /@
                 Pick[pairs, !MemberQ[polNames, #] & /@ names]]],
         "@ATOM_COUNT@" -> StringRiffle[("theta_(abs_(count_(" <> # <> ",1))-1)+theta_(abs_(count_(" <> # <> ",1))-2)" &) /@
-            variables, "+"] <> "+count_(cfcShare,1,cfcPolyN,1,cfcPolyD,1)"};
+            variables, "+"] <> "+count_(cfcShare,1,cfcPolyN,1,cfcPolyD,1)",
+        "@COMPLETE_GROUP_RETRY@" -> If[spectators === {}, "",
+            "#if (`$cfcMROK' == 0) && (`$cfcPGWorkExhausted' == 0)\n" <>
+            "#define cfcCGComplete \"1\"\n#call cfcMRFinal(cfcPGCoefficient)\n#undefine cfcCGComplete\n" <>
+            "#write \"CFC_CG_DIRECT ok=%$, cost %$, degree %$, variables %$\",$cfcMROK,$cfcMRCost,$cfcMRMax,$cfcMRCount\n#endif\n"]};
     <|"Declarations" -> "\nSymbols cfcPGHas,cfcPGFraction,cfcPGBad,cfcPGIndex;\n" <>
         "CFunctions cfcPGTag,cfcPGRef,cfcPGCollect,cfcPGCollectPart,cfcPGInverse,cfcPGDenProbe,cfcPGReject,cfcPGRejectPart;\n" <>
-        "Table sparse cfcPGSize(1);\nTable sparse cfcPGDenOK(1);\nTable sparse cfcPGParts(1);\nTable sparse cfcPGReach(1);\nTable sparse cfcPGTerms(1);\nTable sparse cfcPGAtoms(1);\nTable sparse cfcPGRejectCost(1);\nTable sparse cfcPGRejectDegree(1);\nTable sparse cfcPGRejectVariables(1);\nTable sparse cfcPGResult(1);\nTable sparse cfcPGResultReady(1);\nTable sparse cfcPGInspectOK(1);\nTable sparse cfcPGInspectMeta(1);\nTable sparse cfcPGAlgebra(2);\nTable sparse cfcPGAlgebraReady(2);\nTable sparse cfcPGDenValue(1);\nTable sparse cfcPGDenReady(1);\n",
+        "Table sparse cfcPGSize(1);\nTable sparse cfcPGDenOK(1);\nTable sparse cfcPGParts(1);\nTable sparse cfcPGReach(1);\nTable sparse cfcPGTerms(1);\nTable sparse cfcPGAtoms(1);\nTable sparse cfcPGRejectCost(1);\nTable sparse cfcPGRejectDegree(1);\nTable sparse cfcPGRejectVariables(1);\nTable sparse cfcPGResult(1);\nTable sparse cfcPGResultReady(1);\nTable sparse cfcPGInspectOK(1);\nTable sparse cfcPGInspectMeta(1);\nTable sparse cfcPGAlgebra(2);\nTable sparse cfcPGAlgebraReady(2);\nTable sparse cfcPGDenValue(1);\nTable sparse cfcPGDenReady(1);\n" <>
+        "Table sparse cfcCGInspectOK(1);\nTable sparse cfcCGInspectMeta(1);\nTable sparse cfcCGRejectCost(1);\nTable sparse cfcCGRejectDegree(1);\nTable sparse cfcCGRejectVariables(1);\n",
       "Procedure" -> StringReplace[StringReplace[rcTemplate["PolarisationCoefficients.frm.in"], substitutions],
         If[spectators === {}, {}, {"CFC polarisation groups:" -> "CFC coupling groups:", "CFC_PG_" -> "CFC_CG_", "CFC polarisation rational eligible:" -> "CFC coupling rational eligible:", "unsupported_or_no_polarisation" -> "unsupported_or_no_coupling"}]]|>
 ];

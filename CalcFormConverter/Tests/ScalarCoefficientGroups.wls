@@ -63,4 +63,28 @@ assert["zero assigned product",calculate[FVD[p,mu]FVD[q,mu]FAD[{l,m}],LoopMoment
 FClearScalarProducts[];
 assert["unassigned products unchanged",Together[calculate[FVD[p,mu]FVD[q,mu]FAD[{l,m}],LoopMomenta->{l}]-I Pi^2 SPD[p,q]master]===0];
 assert["no private heads",FreeQ[manual,_Symbol?(StringStartsQ[SymbolName[#],"cfc"]&)]];
+profileRun[label_,terms_]:=Module[{dir,result,log},
+ dir=FileNameJoin[{testDirectory,"profile-"<>label}];CreateDirectory[dir];
+ result=Block[{CalcFormConverter`Private`$rcMasterMaximumDegree=0,
+  CalcFormConverter`Private`$rcCouplingGroupMaximumTerms=terms},
+  Quiet[calculate[fixtures[[1,2]],KeepFiles->True,WorkingDirectory->dir],
+   {CalcFormCalculate::files}]];
+ log=Import[First[FileNames["stdout.log",dir,Infinity]],"Text"];{result,log}];
+{profileResult,profileLog}=profileRun["at",3];
+assert["complete profile at boundary exact",Together[profileResult-fixtures[[1,3]]]===0];
+assert["complete profile at boundary admits both",StringCount[profileLog,"CFC_CG_DIRECT ok=1"]===2&&StringCount[profileLog,"CFC_CG_DIRECT ok=0"]===0];
+assert["complete profile no private heads",FreeQ[profileResult,_Symbol?(StringStartsQ[SymbolName[#],"cfc"]&)]];
+{profileResult,profileLog}=profileRun["below",2];
+assert["complete profile below boundary exact",Together[profileResult-fixtures[[1,3]]]===0];
+assert["complete profile below boundary admits smaller",StringCount[profileLog,"CFC_CG_DIRECT ok=1"]===1&&StringCount[profileLog,"CFC_CG_DIRECT ok=0"]===1];
+{profileResult,profileLog}=profileRun["above",1];
+assert["complete profile above boundary exact",Together[profileResult-fixtures[[1,3]]]===0];
+assert["complete profile above boundary rejects both",StringCount[profileLog,"CFC_CG_DIRECT ok=1"]===0&&StringCount[profileLog,"CFC_CG_DIRECT ok=0"]===2];
+cacheDir=FileNameJoin[{testDirectory,"profile-cache"}];CreateDirectory[cacheDir];
+cacheResult=Block[{CalcFormConverter`Private`$rcMasterMaximumDegree=0},
+ Quiet[calculate[(g^2+h^2)zero master,KeepFiles->True,WorkingDirectory->cacheDir],
+  {CalcFormCalculate::files}]];
+cacheLog=Import[First[FileNames["stdout.log",cacheDir,Infinity]],"Text"];
+assert["complete profile cache exact zero",cacheResult===0];
+assert["complete profile completed-result reuse",StringCount[cacheLog,"CFC_CG_DIRECT ok=1"]===1&&StringContainsQ[cacheLog,"result_cache_hits=1"]];
 finish["Canonical kinematics and coupling groups"];
