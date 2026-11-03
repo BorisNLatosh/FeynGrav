@@ -1,3 +1,6 @@
+(* Private matched-reference switch; batching changes only source-local metadata. *)
+$pgBatchMetadata = True;
+
 (* ::Package:: *)
 
 (* ::Title:: *)
@@ -318,7 +321,7 @@ rcPolarisationPlan[pairs_List, names_List, polNames_List, variables_List, specta
             "#write \"CFC_CG_DIRECT ok=%$, cost %$, degree %$, variables %$\",$cfcMROK,$cfcMRCost,$cfcMRMax,$cfcMRCount\n#endif\n"]};
     <|"Declarations" -> "\nSymbols cfcPGHas,cfcPGFraction,cfcPGBad,cfcPGIndex;\n" <>
         "CFunctions cfcPGTag,cfcPGRef,cfcPGCollect,cfcPGCollectPart,cfcPGInverse,cfcPGDenProbe,cfcPGReject,cfcPGRejectPart;\n" <>
-        "Table sparse cfcPGSize(1);\nTable sparse cfcPGDenOK(1);\nTable sparse cfcPGParts(1);\nTable sparse cfcPGReach(1);\nTable sparse cfcPGTerms(1);\nTable sparse cfcPGAtoms(1);\nTable sparse cfcPGRejectCost(1);\nTable sparse cfcPGRejectDegree(1);\nTable sparse cfcPGRejectVariables(1);\nTable sparse cfcPGResult(1);\nTable sparse cfcPGResultReady(1);\nTable sparse cfcPGInspectOK(1);\nTable sparse cfcPGInspectMeta(1);\nTable sparse cfcPGAlgebra(2);\nTable sparse cfcPGAlgebraReady(2);\nTable sparse cfcPGDenValue(1);\nTable sparse cfcPGDenReady(1);\n" <>
+        "Table sparse cfcPGSize(1);\nTable sparse cfcPGDenOK(1);\nTable sparse cfcPGParts(1);\nTable sparse cfcPGReach(1);\nTable sparse cfcPGTerms(1);\nTable sparse cfcMBTerms(1);\nTable sparse cfcMBAtoms(1);\nTable sparse cfcMBLinks(1);\nTable sparse cfcPGAtoms(1);\nTable sparse cfcPGRejectCost(1);\nTable sparse cfcPGRejectDegree(1);\nTable sparse cfcPGRejectVariables(1);\nTable sparse cfcPGResult(1);\nTable sparse cfcPGResultReady(1);\nTable sparse cfcPGInspectOK(1);\nTable sparse cfcPGInspectMeta(1);\nTable sparse cfcPGAlgebra(2);\nTable sparse cfcPGAlgebraReady(2);\nTable sparse cfcPGDenValue(1);\nTable sparse cfcPGDenReady(1);\n" <>
         "Table sparse cfcCGInspectOK(1);\nTable sparse cfcCGInspectMeta(1);\nTable sparse cfcCGRejectCost(1);\nTable sparse cfcCGRejectDegree(1);\nTable sparse cfcCGRejectVariables(1);\n",
       "Procedure" -> StringReplace[StringReplace[rcTemplate["PolarisationCoefficients.frm.in"], substitutions],
         If[spectators === {}, {}, {"CFC polarisation groups:" -> "CFC coupling groups:", "CFC_PG_" -> "CFC_CG_", "CFC polarisation rational eligible:" -> "CFC coupling rational eligible:", "unsupported_or_no_polarisation" -> "unsupported_or_no_coupling"}]]|>

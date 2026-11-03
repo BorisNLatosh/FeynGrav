@@ -161,6 +161,10 @@ lrIsolatedProcessing[] := StringJoin[
     "#if `$cfcLRNonlinear' == 0\n",
     Lookup[Lookup[$lrCollectionPlan,"CoefficientCollection",<||>],"Before",""],
     lrSharedPreparation[$lrCollectionPlan],
+    (* A direct-output selection has no shared dictionary reader. Undo input
+       sharing before that path; powers-only jobs do not introduce it. *)
+    If[TrueQ[Lookup[$lrCollectionPlan,"InputPolynomialSharing",False]],
+        "#ifndef `cfcSharedActive'\nrepeat;\nid cfcShare(cfcDimNum?)=extrasymbol_(cfcDimNum);\nendrepeat;\n.sort\n#endif\n", ""],
     "Hide cfcResult;\n.sort\nLocal cfcLRWork=$cfcLRKeys;\n.sort\n",
     If[TrueQ[$smEnabled], "Skip cfcLRWork;\nLocal cfcMSKeys=cfcLRWork;\nif (count(cfcTC,1)==0); Discard; endif;\n.sort\n#$cfcMSRequested=termsin_(cfcMSKeys);\n#write \"CFC_MASTER_REQUESTED %$\",$cfcMSRequested\nDrop cfcMSKeys;\n.sort\nNSkip;\n", ""],
     "if (count(cfcTC,1)==0); Multiply cfcLRKey(); endif;\n",
@@ -171,7 +175,11 @@ lrIsolatedProcessing[] := StringJoin[
     "#$cfcLRKeys=0;\nKeep Brackets;\n$cfcLRKeys=$cfcLRKeys+term_;\n",
     "ModuleOption noparallel;\n.sort\nDrop cfcLRFinalKeys;\n.sort\n",
     "Local cfcLRFinalKeys=$cfcLRKeys;\n.sort\nHide cfcLRFinalKeys;\nUnhide cfcResult;\n.sort\n",
-    "#else\n#call cfcLRReduce\n#endif\n#$cfcLRKeys=0;\n"
+    (* Nonlinear saved-integral products use the original general path. Restore
+       input polynomial sharing before that path, which has no shared reader. *)
+    "#else\n", If[TrueQ[Lookup[$lrCollectionPlan,"InputPolynomialSharing",False]],
+        "repeat;\nid cfcShare(cfcDimNum?)=extrasymbol_(cfcDimNum);\nendrepeat;\n.sort\n", ""],
+    "#call cfcLRReduce\n#endif\n#$cfcLRKeys=0;\n"
 ];
 
 (* The lookup is indexed by the final integral, not the old coefficient.
@@ -471,7 +479,7 @@ lrPrepare[data_Association, enabled_, drop_] := Module[
             "FactArg cfcLRDen;"->(kinematicRules<>"FactArg cfcLRDen;")];
         denominatorPlan["Rules"]=denominatorPlan["Rules"]<>kinematicRules];
     spectators=rcSpectators[plan["Entries"],mapping,rows,kinematics["Records"]];
-    collection=<|"Dimension"->dcfPlan[<|"Mapping"->Join[mapping,<|"Entries"->plan["Entries"]|>]|>,False],"CanonicalRules"->(lrCanonicalRules[rows,decode[mapping["Dimension"]],drop,supports]<>If[TrueQ[$smEnabled],smCanonicalRules[rows,decode[mapping["Dimension"]],supports],""]),"MonomialRules"->lrMonomialRules[plan["Entries"]],"Denominators"->denominatorPlan,"SharedBlocks"->(tdAlgebraMapping[mapping]["Version"]===1)|>;
+    collection=<|"Dimension"->dcfPlan[<|"Mapping"->Join[mapping,<|"Entries"->plan["Entries"]|>]|>,False],"CanonicalRules"->(lrCanonicalRules[rows,decode[mapping["Dimension"]],drop,supports]<>If[TrueQ[$smEnabled],smCanonicalRules[rows,decode[mapping["Dimension"]],supports],""]),"MonomialRules"->lrMonomialRules[plan["Entries"]],"Denominators"->denominatorPlan,"SharedBlocks"->(tdAlgebraMapping[mapping]["Version"]===1),"InputPolynomialSharing"->(saved && TrueQ[$smEnabled] && tdAlgebraMapping[mapping]["Version"]===1)|>;
     collection["Rational"] = If[TrueQ[collection["SharedBlocks"]], rcMasterPlan[plan["Entries"],spectators], <||>];
     collection["CoefficientCollection"] = lrCoefficientCollectionPlan[Join[mapping,<|"Entries"->plan["Entries"]|>]];
     plan["Processing"]=Block[{$lrCollectionPlan=collection},lrIsolatedProcessing[]];

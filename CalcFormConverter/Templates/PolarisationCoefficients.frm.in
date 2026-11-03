@@ -92,12 +92,121 @@ NSkip;
 .sort
 #endprocedure
 
+* Batch only source-local metadata. No child metadata is read here: direct
+* reference sets are closed later, in the original registration order.
+* Separate expressions preserve term counts and prevent tags entering the
+* arithmetic. At most 32 definitions are simultaneously materialised.
+#procedure cfcPGFlushMeasures(count)
+.sort
+#do cfcMBSlot=1,`count'
+#$cfcMBTerms`cfcMBSlot'=termsin_(cfcMBDef`cfcMBSlot');
+#$cfcMBAtoms`cfcMBSlot'=0;
+Local cfcMBLink`cfcMBSlot'=cfcMBDef`cfcMBSlot';
+#enddo
+.sort
+Skip;
+#do cfcMBSlot=1,`count'
+NSkip cfcMBDef`cfcMBSlot';
+#enddo
+@ALL_DOTS@
+#do cfcMBSlot=1,`count'
+if (expression(cfcMBDef`cfcMBSlot'));
+$cfcMBAtoms`cfcMBSlot'=$cfcMBAtoms`cfcMBSlot'+1+@ATOM_COUNT@;
+endif;
+#enddo
+ModuleOption noparallel;
+.sort
+Skip;
+#do cfcMBSlot=1,`count'
+Drop cfcMBDef`cfcMBSlot';
+NSkip cfcMBLink`cfcMBSlot';
+#enddo
+Bracket cfcShare,cfcPolyN,cfcPolyD;
+.sort
+Skip;
+#do cfcMBSlot=1,`count'
+NSkip cfcMBLink`cfcMBSlot';
+#enddo
+Collect cfcPGCollect,cfcPGCollectPart,50;
+id cfcPGCollect(?a)=1;
+id cfcPGCollectPart(?a)=1;
+id cfcPolyN(cfcPGIndex?)=cfcShare(cfcPGIndex);
+id cfcPolyD(cfcPGIndex?)=cfcShare(cfcPGIndex);
+ChainIn cfcShare;
+id,all cfcShare(?a,cfcPGIndex?,?b)=cfcPGRef(cfcPGIndex);
+if (count(cfcPGRef,1)==0); Discard; endif;
+.sort
+Skip;
+#do cfcMBSlot=1,`count'
+NSkip cfcMBLink`cfcMBSlot';
+#enddo
+DropCoefficient;
+.sort
+#do cfcMBSlot=1,`count'
+Fill cfcMBTerms(`cfcMBId`cfcMBSlot'')=`$cfcMBTerms`cfcMBSlot'';
+Fill cfcMBAtoms(`cfcMBId`cfcMBSlot'')=`$cfcMBAtoms`cfcMBSlot'';
+#$cfcMBLinkValue=cfcMBLink`cfcMBSlot';
+Fill cfcMBLinks(`cfcMBId`cfcMBSlot'')=`$cfcMBLinkValue';
+#enddo
+#do cfcMBSlot=1,`count'
+Drop cfcMBLink`cfcMBSlot';
+#enddo
+.sort
+#endprocedure
+
+#procedure cfcPGBatchMeasures(refs)
+#define cfcMBCount "0"
+Skip;
+#do cfcMBKey=`refs'
+* Extract the immutable reference index without an execution module.
+#$cfcMBIndex=`cfcMBKey';
+#inside $cfcMBIndex
+id cfcRef(cfcPGIndex?)=cfcPGIndex;
+#endinside
+#redefine cfcMBCount "{`cfcMBCount'+1}"
+#define cfcMBId`cfcMBCount' "`$cfcMBIndex'"
+Local cfcMBDef`cfcMBCount'=extrasymbol_(`$cfcMBIndex');
+#if `cfcMBCount' == 32
+#call cfcPGFlushMeasures(`cfcMBCount')
+#redefine cfcMBCount "0"
+Skip;
+#endif
+#enddo
+#if `cfcMBCount' > 0
+#call cfcPGFlushMeasures(`cfcMBCount')
+#endif
+NSkip;
+.sort
+#endprocedure
+
+* Keep dependency resolution sequential. These tables deliberately do not
+* populate cfcPGTerms: that table marks COMPLETE registration, not batching.
+#procedure cfcPGRegisteredMeasure(source,index)
+#$cfcMBKnown=cfcMBTerms(`index');
+#if isnumerical($cfcMBKnown)
+#$cfcPGOwnTerms=cfcMBTerms(`index');
+#$cfcPGOwnAtoms=cfcMBAtoms(`index');
+Skip;
+Local cfcPGLinks=cfcMBLinks(`index');
+id cfcPGRef(cfcPGIndex?)=cfcPGReach(cfcPGIndex);
+.sort
+Skip;
+NSkip cfcPGLinks;
+DropCoefficient;
+.sort
+NSkip;
+.sort
+#else
+#call cfcPGMeasure(`source')
+#endif
+#endprocedure
+
 * Called in shared-definition dependency order. Keep a transitive reference set
 * and local storage costs, so repeated blocks count once in candidate selection.
 #procedure cfcPGRegister(source,index)
 #$cfcPGRegistered=cfcPGTerms(`index');
 #if isnumerical($cfcPGRegistered) == 0
-#call cfcPGMeasure(`source')
+#call cfcPGRegisteredMeasure(`source',`index')
 Fill cfcPGTerms(`index')=`$cfcPGOwnTerms';
 Fill cfcPGAtoms(`index')=`$cfcPGOwnAtoms';
 Skip;

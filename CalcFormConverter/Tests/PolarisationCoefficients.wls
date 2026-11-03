@@ -1,4 +1,6 @@
 Get[FileNameJoin[{DirectoryName[$InputFileName],"Common.wl"}]];
+(* These comparisons retain explicit PaVe coefficients; presentation is tested separately. *)
+SetOptions[FeynGravSimplify,PaVeToABCD->False];
 Clear[p,q,r,s,t,u,m,a,b,mu];
 master=PaVe[0,{}, {m^2},PaVeAutoOrder->False,PaVeAutoReduce->False];
 bubble=PaVe[0,{s},{m^2,m^2},PaVeAutoOrder->False,PaVeAutoReduce->False];

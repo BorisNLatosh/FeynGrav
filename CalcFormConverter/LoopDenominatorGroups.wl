@@ -167,10 +167,14 @@ ldgSharedOutput[plan_Association,path_String] := Module[{den=plan["Denominators"
     rational = Lookup[plan, "Rational", <||>];
     polarisation = Lookup[rational, "Polarisation", <||>];
     substitutions={"@RESULT@"->path,
+        "@BATCH_METADATA@" -> If[polarisation === <||> || !TrueQ[$pgBatchMetadata], "", "#call cfcPGBatchMeasures(cfcRefs)\n"],
         "@REGISTER_FINAL_SHARES@" -> If[polarisation === <||>, "", "#call cfcPGRegisterResult(piece)\n"],
         "@PENDING_DEPENDENCIES@" -> If[polarisation === <||>, "", "id cfcRef(cfcDGNum?)=cfcPGReach(cfcDGNum);\nid cfcPGRef(cfcDGNum?)=cfcRef(cfcDGNum);\n.sort\nDropCoefficient;\n"],
         "@RATIONAL_PROCEDURE@" -> Lookup[rational,"Procedure", ""] <> "\n" <> Lookup[polarisation,"Procedure", ""],
-        "@REGISTER_DEPENDENCIES@" -> If[TrueQ[Lookup[rational,"RegisterDependencies",False]], "1", "0"],
+        (* Input polynomial sharing can introduce dependencies even without
+           spectator couplings. Include their reachable children before filling metadata. *)
+        "@REGISTER_DEPENDENCIES@" -> If[TrueQ[Lookup[rational,"RegisterDependencies",False]] ||
+            TrueQ[Lookup[plan,"InputPolynomialSharing",False]], "1", "0"],
         "@RATIONAL_METADATA@" -> If[Lookup[plan,"Rational",<||>]===<||>,"","#call cfcMRInspect(def)\nFill cfcMRMeta(`$index')=`$cfcMRMeta';\n" <> If[polarisation === <||>, "", "#call cfcPGRegister(def,`$index')\n"]],
         "@RATIONAL_FINAL@" -> If[Lookup[plan,"Rational",<||>]===<||>,"",If[polarisation === <||>, "#call cfcMRFinal(piece)\n", "#call cfcPGFinal(piece)\n"]],"@NORMALISE@"->den["Rules"],
         "@WEIGHT_PREPARATION@"->preparation,

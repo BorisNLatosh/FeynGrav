@@ -31,6 +31,9 @@ tdCoefficientQ[x_PaVe] := Module[{a = List @@ x, plain, opts},
     DuplicateFreeQ[First /@ opts] &&
     AllTrue[opts, MemberQ[{PaVeAutoOrder, PaVeAutoReduce}, First[#]] && MemberQ[{True, False}, Last[#]] &]
 ];
+(*The existing reversible A0--D0 codec also serves represented-integral
+   inputs. Validation remains strict about their scalar arguments and arity.*)
+tdCoefficientQ[x : (_A0 | _B0 | _C0 | _D0)] := scalarQ[x];
 tdCoefficientQ[_] := False;
 AssociateTo[$kindSpecs, "IntegralCoefficient" -> <|"Prefix" -> "cfic", "Declaration" -> "Symbols", "ValidExpression" -> tdCoefficientQ|>];
 encode[x_CalcFormConverter`LoopTensorCoefficient] := If[tdCoefficientQ[x],

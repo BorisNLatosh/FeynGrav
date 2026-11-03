@@ -143,6 +143,7 @@ Drop cfcRefUnion;
 NSkip;
 #endif
 Hide cfcRefs;
+@BATCH_METADATA@
 #$cnt=termsin_(cfcRefs);
 #write <@RESULT@> "CFC_SHARED %$",$cnt
 #do key=cfcRefs

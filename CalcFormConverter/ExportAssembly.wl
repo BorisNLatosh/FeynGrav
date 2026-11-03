@@ -141,10 +141,11 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
 	{expr, originalDigest, hasDiracColour, hasDiracProcessing, hasColour, hasColourFormat, hasMatrixWords = False, dim, hasEpsilon, epsilonSign, epsilon, epsilonSlot, entries = {}, registry = <||>, counters = <||>,
 	macros = {},
 	register, scalar, vector, index, pair, denominator, emit, 
-	abbreviation, makeMacro,body, dimensionName, payload, factorExpressions, factorTexts, 
+	abbreviation, sum, makeMacro,body, dimensionName, payload, factorExpressions, factorTexts,
 	stageEnds, stageRanges, stageGroups,
 	stageTexts, stageExpressions, stageSignatures, stageOrder,
 	preparations = {}, multiplications = {}, symmetryLinks = {}, cancellationData},
+    Internal`WithLocalSettings[Null,
 	(*Validate LoopMomenta: must be a list, every element a symbol, and no duplicates. Anything else aborts before any work is done.*)
 	If[! ListQ[loops] || ! AllTrue[loops, MatchQ[#, _Symbol] &] || ! DuplicateFreeQ[loops],
 		throwFailure["InvalidLoopMomenta", 
@@ -185,10 +186,17 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
 			]
 		]
 	];
-	(*makeMacro wraps an emitted sum in a FORM #define and returns its reference. Each sum, including a nested sum, allocates its own macro. Do not memoize this operation: numbering must follow serialization order.*)
+	(*Allocate each distinct sum on its first traversal. The local sum cache also
+      avoids revisiting its children; registration and numbering remain ordered
+      by first occurrence. No cache survives this export.*)
 	makeMacro[s_] := Module[{name = "CFCF" <> intString[Length[macros] + 1]},
 		AppendTo[macros, "#define " <> name <> " \"(" <> s <> ")\""];
 		"`" <> name <> "'"];
+	(*Matrix/colour emitters can allocate occurrence-specific line identities.
+      Keep their traversal unchanged; share only the commuting emitter path.*)
+	sum[x_] := If[hasDiracColour || hasColourFormat,
+        makeMacro[StringRiffle[emit /@ (List @@ x), "+"]],
+        sum[x] = makeMacro[StringRiffle[emit /@ (List @@ x), "+"]]];
 	(*scalar[s]: emit a scalar symbol. The imaginary unit is special- cased to FORM's predefined i_ rather than becoming an exported identifier.*)
 	scalar[s_Symbol] := If[s === I, "i_", register["Scalar", s]];
 	(*index: a LorentzIndex must have a symbol as its first argument; anything else is refused rather than silently named.*)
@@ -285,7 +293,7 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
 		Head[x] === Symbol && scalarQ[x], scalar[x],
 		Head[x] === CalcFormConverter`LoopTensorCoefficient || Head[x] === PaVe, register["IntegralCoefficient", x],
 		(*A sum becomes a #define macro, so the (possibly long) expression is named once and referenced thereafter. This is why emission order determines macro numbering.*)
-		Head[x] === Plus, makeMacro[StringRiffle[emit /@ (List @@ x), "+"]],
+		Head[x] === Plus, sum[x],
 		(*Products are parenthesized with explicit *.*)
 		Head[x] === Times, "(" <> StringRiffle[emit /@ (List @@ x), "*"] <> ")",
 		(*Lorentz contractions.*)
@@ -298,8 +306,10 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
 			"(" <> emit[x[[1]]] <> ")^(" <> intString[x[[2]]] <> ")",
 		(*Any other power must be a supported scalar to be abbreviated into a named identifier.*)
 		Head[x] === Power, abbreviation[x],
-		(*Master integrals (A0..D0) with valid scalar arguments emit as the FORM function recorded in the spec table.*)
-		KeyExistsQ[$masterSpecByHead, Head[x]] && scalarQ[x],$masterSpecByHead[Head[x]]["FORMName"] <> "(" <> StringRiffle[emit /@ (List @@ x), ","] <> ")",
+		(*Named scalar integrals are coefficients too. Retain their exact input
+          representation in the mapping; the reduction planner supplies invariant
+          coordinates without introducing a new integration measure.*)
+		KeyExistsQ[$masterSpecByHead, Head[x]] && scalarQ[x], register["IntegralCoefficient", x],
 		(*Anything else is a hard failure carrying the offending expression unevaluated.*)
 		True, throwFailure["UnsupportedExpression", "The expression contains an unsupported structure.", <|"Expression" -> HoldForm[x], "Head" -> Head[x]|>]
 	];
@@ -357,7 +367,8 @@ buildExportData[expression_, requestedDimension_, loops_, algebra_:False, colour
         (*Single return value consumed by rendering and file writing: the dimension's FORM name, the body expression text, the remaining multiplication stages, the #define macros, the hoisted stage preparations, and the mapping payload.*)
         <|"DimensionName" -> dimensionName, "Body" -> body, "Multiplications" -> multiplications,"Factors" -> macros, "Preparations" -> preparations, "SymmetryLinks" -> symmetryLinks, "Mapping" -> payload, "CancellationData" -> cancellationData,
           "DenominatorSupports" -> If[Length[loops] === 1, tdDenominatorSupports[expr, denominator], Automatic],
-          "HasNamedIntegralFunctions" -> !FreeQ[expr, _A0 | _B0 | _C0 | _D0]|>
+          "HasNamedIntegralFunctions" -> !FreeQ[expr, _A0 | _B0 | _C0 | _D0]|>,
+        Clear[sum]]
    ]];
 
 
@@ -401,6 +412,40 @@ prepareProcessing[input_, tensor_, tensorDrop_, masters_, powers_, reductionDrop
         "ReduceToScalarMasters" -> reduction[[1]], "ReduceLoopCoefficients" -> reduction[[2]],
         "ReductionDropScaleless" -> reduction[[3]], "Dimension" -> reduction[[4]]|>;
     Join[prepared, <|"ProcessingPlan" -> processingPlan[data, requested, prepared]|>]
+];
+
+(* Preserve small scalar polynomials before the initial FORM expansion of a
+   saved-integral sum. Only the emitter's closed polynomial grammar is eligible:
+   scalar symbols, exact numbers and previously accepted polynomial sums.
+   Inverse polynomials, integral factors and tensor/matrix objects stay visible.
+   Native extra-symbol definitions are job-local and are reconstructed by the
+   existing dependency-ordered shared writer; no new mapping object is needed. *)
+sharedInputFactors[data_Association] := Module[
+    {known = <||>, pieces = {}, fields, name, body, refs, plain},
+    If[data["Mapping"]["LoopMomenta"] =!= {} ||
+        !TrueQ[Lookup[Lookup[data,"LoopCollectionPlan",<||>],"InputPolynomialSharing",False]] ||
+        !TrueQ[Lookup[Lookup[data,"LoopCollectionPlan",<||>],"SharedBlocks",False]],
+        Return[StringRiffle[data["Factors"],"\n"]]];
+    Do[
+        AppendTo[pieces,line];
+        fields = StringCases[line, RegularExpression["^#define (CFCF[0-9]+) \\\"(.*)\\\"$"] -> {"$1","$2"}];
+        If[Length[fields] =!= 1, Continue[]];
+        {name,body} = First[fields];
+        refs = StringCases[body, RegularExpression["`(CFCF[0-9]+)'"] -> "$1"];
+        If[!AllTrue[refs,KeyExistsQ[known,#]&], Continue[]];
+        plain = StringReplace[body,RegularExpression["`CFCF[0-9]+'|cfs[0-9]+|i_"] -> "1"];
+        If[!StringMatchQ[plain,RegularExpression["[0-9+*/()^ -]+"]] ||
+            StringContainsQ[body,"^(-"] || StringCount[body,"+"] > 250, Continue[]];
+        AssociateTo[known,name -> True];
+        AppendTo[pieces, StringJoin[
+            "Local cfcInputPolynomial=cfcShared(`",name,"');\n",
+            "ArgToExtraSymbol tonumber,cfcShared;\n",
+            "id cfcShared(cfcDimNum?)=cfcDimNum;\n",
+            "$cfcInputPolynomial=term_;\nModuleOption noparallel;\n.sort\n",
+            "#redefine ",name," \"cfcShare(`$cfcInputPolynomial')\"\n",
+            "Drop cfcInputPolynomial;\n.sort\n"]],
+        {line,data["Factors"]}];
+    StringRiffle[pieces,"\n"]
 ];
 
 (* ::Subsection:: *)
@@ -471,7 +516,7 @@ renderExport[data_Association, result_String, template_String] :=
           "@VECTORS@" -> declaration["Vectors"], 
       "@INDICES@" -> declaration["Indices"],
           (*The #define macros, one per line.*)
-          "@FACTORS@" -> StringRiffle[data["Factors"], "\n"], 
+          "@FACTORS@" -> sharedInputFactors[data],
       "@EXPRESSION@" -> data["Body"],
           (*Pre-prepared large tensor stages. When empty, the whole substitution is the empty string so no stray directives appear. Otherwise: one "Local cfcStageN = <stage>;" per preparation (MapIndexed supplies the 1-based counter), then normalisation (including eligible dimension compaction) and "Hide cfcStage1,cfcStage2,...;" so FORM can reuse the normalized stages later.*)
           "@PREPARATIONS@" -> If[data["Preparations"] === {}, "",

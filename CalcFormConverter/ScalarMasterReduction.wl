@@ -95,6 +95,14 @@ smSquare[x_] := Module[{c=DeleteDuplicates[Cases[x,_smChord,{0,Infinity}]],ij,in
 ];
 smCoefficient[x_PaVe] := Module[{a=DeleteCases[List@@x,_Rule],n,inv},n=Length[a[[-1]]];inv=a[[-2]];
  CalcFormConverter`LoopTensorCoefficient[Drop[a,-2],Prepend[Table[smChord[n,j,inv],{j,n-1}],0],a[[-1]],ConstantArray[1,n],D]];
+(*Named scalar integrals use the same ordered invariants and squared masses
+   as scalar PaVe. Convert only the planner view; the original mapping value
+   remains available when reduction is disabled or inapplicable.*)
+smCoefficient[x : (_A0 | _B0 | _C0 | _D0)] := Module[{a = List @@ x, n},
+ n = Switch[Head[x], A0, 1, B0, 2, C0, 3, D0, 4];
+ smCoefficient[PaVe[0, Take[a, n (n-1)/2], Take[a, -n],
+   PaVeAutoOrder -> False, PaVeAutoReduce -> False]]
+];
 smCoefficient[x_] := x;
 smSavedEligible[x_PaVe] := Module[{a=DeleteCases[List@@x,_Rule],key,value},
  If[Drop[a,-2]==={0},Return[Length[a[[-1]]]<=4]];
@@ -147,7 +155,7 @@ smPrepare[data_, enabled_, powers_, drop_, dimensionOption_] := Block[{$smDropSc
  (* A stand-alone PaVe has conventional symbolic D, although it carries no
     Lorentz object from which the general exporter could infer a dimension. *)
  If[dimensionOption===Automatic && data["Mapping"]["Version"]<6 &&
-    AnyTrue[data["Mapping"]["Entries"],#["Kind"]==="IntegralCoefficient" && Head[decode[#["Expression"]]]===PaVe&] &&
+    AnyTrue[data["Mapping"]["Entries"],#["Kind"]==="IntegralCoefficient" && MemberQ[{PaVe,A0,B0,C0,D0},Head[decode[#["Expression"]]]]&] &&
     !AnyTrue[data["Mapping"]["Entries"],MemberQ[{"Vector","Index","Denominator"},#["Kind"]]&],
   input["Mapping"]=Join[input["Mapping"],<|"Dimension"->encode[D]|>]];
  If[decode[input["Mapping"]["Dimension"]]=!=D && AnyTrue[input["Mapping"]["Entries"],#["Kind"]==="IntegralCoefficient"&],
