@@ -4,7 +4,7 @@
 
 Returns a stored conventional Einstein–Hilbert graviton self-interaction vertex.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

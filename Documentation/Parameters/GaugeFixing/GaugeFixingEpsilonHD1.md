@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`GaugeFixingEpsilonHD1``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`GaugeFixingEpsilonHD1``. **Baseline:** 4.2.0.
 
 Surviving longitudinal HD gauge combination in the package convention. Used by the HD graviton and ghost propagators and cubic HD ghost vertex.
 

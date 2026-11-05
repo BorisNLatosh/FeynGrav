@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonVertex`GravitonVertexUncontracted``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonVertex`GravitonVertexUncontracted``. **Baseline:** 4.2.0.
 
 Constructs the conventional Einstein–Hilbert graviton interaction from one flat list of index–index–momentum triples, including quadratic order as allowed by the source contract.
 

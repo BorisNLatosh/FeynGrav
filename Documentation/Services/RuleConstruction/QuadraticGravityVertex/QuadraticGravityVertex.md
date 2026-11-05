@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``QuadraticGravityVertex`QuadraticGravityVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``QuadraticGravityVertex`QuadraticGravityVertex``. **Baseline:** 4.2.0.
 
 Constructs the Einstein–Hilbert plus curvature-squared graviton rule with explicit mass parameters m0 and m2. Its generator-side interface accepts a flat graviton list, including the quadratic order allowed by the contract.
 

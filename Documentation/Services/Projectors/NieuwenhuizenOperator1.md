@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperator1``. **Baseline:** 4.2.0 development.
+**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperator1``. **Baseline:** 4.2.0.
 
 Half the sum of the four mixed `theta omega` terms.
 

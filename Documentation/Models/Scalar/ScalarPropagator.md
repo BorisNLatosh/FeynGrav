@@ -4,7 +4,7 @@
 
 Scalar propagator `I FAD[{p,m}]`; `m = 0` is supported.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

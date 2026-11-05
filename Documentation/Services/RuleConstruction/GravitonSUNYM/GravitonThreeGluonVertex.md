@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonSUNYM`GravitonThreeGluonVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonSUNYM`GravitonThreeGluonVertex``. **Baseline:** 4.2.0.
 
 Constructs the three-gluon coupling to gravitons. Each gluon is given as momentum–Lorentz-index–adjoint-colour-index.
 

@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``System`TimeConstraint``. **Baseline:** 4.2.0 development.
+**Symbol:** ``System`TimeConstraint``. **Baseline:** 4.2.0.
 
 This page describes only FeynGrav’s use of this dependency-owned option.
 

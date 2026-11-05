@@ -4,7 +4,7 @@
 
 Massive-vector propagator, with numerator `-I (MTD[mu,nu] - FVD[p,mu] FVD[p,nu]/m^2)`. Its massless limit cannot be obtained by substituting `m = 0`.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

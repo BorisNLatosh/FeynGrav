@@ -215,10 +215,10 @@ The examples above explicitly retain integrand algebra. Declaring one loop momen
 
 <a name="Simplified front end (development)"></a>
 
-## Simplified front end (development)
+## Simplified front end
 
-**Status: development, unreleased.** The commands in this section are supplied
-by `FeynGravSimplify/` on the development branch and are documented in the
+The commands in this section are supplied
+by `FeynGravSimplify/` and are documented in the
 [command reference](./FeynGravSimplify.md).
 They are additions to the converter; `CalcFormCalculate`, `CalcFormExport`,
 `CalcFormImport`, `CalcFormCheck` and `CalcFormInstall` remain the published

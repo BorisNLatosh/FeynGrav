@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGravInstaller`InstallFeynGrav``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGravInstaller`InstallFeynGrav``. **Baseline:** 4.2.0.
 
 Downloads, validates and installs a FeynGrav archive. Load the repository's `install.m` to define the installer; loading it alone does not install the package.
 
@@ -12,7 +12,7 @@ Downloads, validates and installs a FeynGrav archive. Load the repository's `ins
 InstallFeynGrav[opts]
 ```
 
-No positional arguments are accepted. The default reference is the current GitHub `main` branch, not the latest release. `FeynGravReference -> "v4.1.0"` selects the published baseline; the development version label does not create a downloadable release tag.
+No positional arguments are accepted. The default reference is the current GitHub `main` branch, not the latest release. `FeynGravReference -> "v4.2.0"` selects version 4.2.0 once its tag is published.
 
 ## Options
 

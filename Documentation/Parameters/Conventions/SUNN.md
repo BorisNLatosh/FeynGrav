@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynCalc`SUNN``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynCalc`SUNN``. **Baseline:** 4.2.0.
 
 Number of colours N in FeynCalc SU(N) notation. The adjoint dimension is N² - 1 and `tr(T^a T^b) = delta^(ab)/2`. This is FeynCalc-owned, not a new FeynGrav constant.
 

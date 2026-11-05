@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravImportSUNYM``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravImportSUNYM``. **Baseline:** 4.2.0.
 
 Six Yang–Mills file families: two-, three- and four-gluon, quark–gluon, ghost and gluon–ghost.
 

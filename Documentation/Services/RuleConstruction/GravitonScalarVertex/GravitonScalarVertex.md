@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonScalarVertex`GravitonScalarVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonScalarVertex`GravitonScalarVertex``. **Baseline:** 4.2.0.
 
 Constructs the minimal two-scalar coupling, including the explicit scalar mass. The scalar momenta are incoming.
 

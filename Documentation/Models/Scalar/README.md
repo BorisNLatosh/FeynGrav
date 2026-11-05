@@ -2,7 +2,7 @@
 
 [Model index](../../Models.md) · [Common conventions](../../Conventions.md) · [Documentation index](../../README.md)
 
-**Baseline:** 4.2.0 development. These pages describe the installed interfaces and their supported limits.
+**Baseline:** 4.2.0. These pages describe the installed interfaces and their supported limits.
 
 ## Fields, action and parameters
 

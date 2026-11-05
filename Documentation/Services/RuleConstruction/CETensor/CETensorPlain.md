@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``CETensor`CETensorPlain``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CETensor`CETensorPlain``. **Baseline:** 4.2.0.
 
 Ordered perturbative coefficient of `Sqrt[-g]` times one or two inverse vierbeins. No perturbation-pair symmetrisation; external indices remain fixed.
 

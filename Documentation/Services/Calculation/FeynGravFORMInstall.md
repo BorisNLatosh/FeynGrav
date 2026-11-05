@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``CalcFormConverter`FeynGravFORMInstall``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CalcFormConverter`FeynGravFORMInstall``. **Baseline:** 4.2.0.
 
 Preferred facade wrapper of [CalcFormInstall](./CalcFormInstall.md). Explicitly attempts to install missing FORM or TFORM on supported Debian/Ubuntu systems, with system authorisation, then checks the requested configuration.
 

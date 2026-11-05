@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonScalarVertex`GravitonScalarPotentialVertexUncontracted``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonScalarVertex`GravitonScalarPotentialVertexUncontracted``. **Baseline:** 4.2.0.
 
 Constructs the scalar-potential coupling with the explicit signed action coefficient. The scalar differentiation factorial is already accounted for in the potential convention.
 

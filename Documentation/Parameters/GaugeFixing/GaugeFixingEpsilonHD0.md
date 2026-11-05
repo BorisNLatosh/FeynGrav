@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`GaugeFixingEpsilonHD0``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`GaugeFixingEpsilonHD0``. **Baseline:** 4.2.0.
 
 Used by the HD graviton and ghost propagators and the cubic HD ghost vertex. Inverse combinations can be singular.
 

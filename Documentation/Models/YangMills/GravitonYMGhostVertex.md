@@ -4,7 +4,7 @@
 
 Two Yang–Mills ghost momenta and colour labels.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

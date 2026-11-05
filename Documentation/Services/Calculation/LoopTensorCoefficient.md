@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``CalcFormConverter`LoopTensorCoefficient``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CalcFormConverter`LoopTensorCoefficient``. **Baseline:** 4.2.0.
 
 An **inert output head** for a normalised one-loop tensor coefficient. It is not an evaluator.
 

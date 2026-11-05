@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGravLibrariesGenerator`CheckGravitonVectors``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGravLibrariesGenerator`CheckGravitonVectors``. **Baseline:** 4.2.0.
 
 ## Purpose and arguments
 

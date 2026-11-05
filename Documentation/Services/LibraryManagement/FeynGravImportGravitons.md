@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravImportGravitons``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravImportGravitons``. **Baseline:** 4.2.0.
 
 `GravitonVertex_j`, `1 <= j <= n`; `j + 2` graviton legs. Loaded initially with 2.
 

@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`GaugeFixingEpsilon``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`GaugeFixingEpsilon``. **Baseline:** 4.2.0.
 
 Conventional GR and quadratic-gravity propagators use its value when called.
 

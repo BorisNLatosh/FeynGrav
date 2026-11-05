@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperatorExpansion``. **Baseline:** 4.2.0 development.
+**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperatorExpansion``. **Baseline:** 4.2.0.
 
 Returns `{z1,z2,z0,zb,zbb}` only after symmetry checks, coefficient extraction and complete reconstruction verification; requires usable FORM.
 

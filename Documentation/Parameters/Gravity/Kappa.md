@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`\[Kappa]``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`\[Kappa]``. **Baseline:** 4.2.0.
 
 Gravitational expansion coupling κ, with $g_{\mu\nu}=\eta_{\mu\nu}+\kappa h_{\mu\nu}$ and $\kappa^2=32\pi G_N$. Ordinary GR r-graviton rules carry $\kappa^{r-2}$; minimally coupled matter rules with n gravitons carry $\kappa^n$. Couplings in non-minimal actions may themselves contain κ.
 

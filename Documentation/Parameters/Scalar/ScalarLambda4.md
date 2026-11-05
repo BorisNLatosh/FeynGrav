@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`ScalarLambda4``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`ScalarLambda4``. **Baseline:** 4.2.0.
 
 Native scalar action coefficient of $+\lambda_4\phi^4/4!$. The sign is positive in the action. Set it to zero by replacement after conversion for the minimal-scalar limit.
 

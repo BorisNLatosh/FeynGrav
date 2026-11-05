@@ -4,7 +4,7 @@
 
 Two incoming momenta of the massless-vector Faddeev–Popov ghosts.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

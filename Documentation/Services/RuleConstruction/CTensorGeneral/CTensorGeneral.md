@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``CTensorGeneral`CTensorGeneral``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CTensorGeneral`CTensorGeneral``. **Baseline:** 4.2.0.
 
 Averaged perturbative coefficient of `Sqrt[-g]` times a product of inverse metrics. Supports zero through seven inverse metrics.
 

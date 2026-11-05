@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``ITensor`ITensor``. **Baseline:** 4.2.0 development.
+**Symbol:** ``ITensor`ITensor``. **Baseline:** 4.2.0.
 
 Cyclic metric product `eta(sigma1,rho2) ... eta(sigman,rho1)`, symmetrised within the perturbation index pairs.
 

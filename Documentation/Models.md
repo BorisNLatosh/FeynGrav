@@ -2,7 +2,7 @@
 
 [Getting started](./GettingStarted.md) · [Common conventions](./Conventions.md) · [Documentation index](./README.md)
 
-**Inventory of the 4.2.0 development checkout, checked 1 November 2026.**
+**Inventory of the 4.2.0 checkout, checked 1 November 2026.**
 Use this page to find the physics description, commands and available FeynArts
 bundle for a model. Each sector below has a model overview and links to its individual command pages.
 The detailed native-model guides retain their existing locations.

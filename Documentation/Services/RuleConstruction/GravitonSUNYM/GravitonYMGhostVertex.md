@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonSUNYM`GravitonYMGhostVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonSUNYM`GravitonYMGhostVertex``. **Baseline:** 4.2.0.
 
 Constructs the Yang–Mills ghost coupling to gravity; each ghost is specified by incoming momentum and adjoint colour.
 

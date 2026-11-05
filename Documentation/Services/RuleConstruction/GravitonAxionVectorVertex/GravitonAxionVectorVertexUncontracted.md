@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonAxionVectorVertex`GravitonAxionVectorVertexUncontracted``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonAxionVectorVertex`GravitonAxionVectorVertexUncontracted``. **Baseline:** 4.2.0.
 
 Constructs the implemented axion-like scalar–vector–vector interaction with an explicit coupling. The epsilon-density/action convention is unresolved; successful construction does not certify it.
 

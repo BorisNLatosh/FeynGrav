@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperator``. **Baseline:** 4.2.0 development.
+**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperator``. **Baseline:** 4.2.0.
 
 Linear combination in exactly this coefficient order: `1, 2, 0, 0Bar, 0BarBar`.
 

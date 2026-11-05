@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``ETensor`ETensorPlain``. **Baseline:** 4.2.0 development.
+**Symbol:** ``ETensor`ETensorPlain``. **Baseline:** 4.2.0.
 
 Ordered perturbative coefficient of the lowered vierbein. At order n it uses `Binomial[1/2,n]` and the ordered I tensor; no perturbation-index symmetrisation is performed.
 

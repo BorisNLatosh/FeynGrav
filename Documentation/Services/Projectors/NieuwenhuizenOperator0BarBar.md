@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperator0BarBar``. **Baseline:** 4.2.0 development.
+**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperator0BarBar``. **Baseline:** 4.2.0.
 
 `theta(mu,nu) omega(alpha,beta) + omega(mu,nu) theta(alpha,beta)`, without an extra square-root normalisation.
 

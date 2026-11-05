@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``System`D``. **Baseline:** 4.2.0 development.
+**Symbol:** ``System`D``. **Baseline:** 4.2.0.
 
 Spacetime dimension in FeynCalc Lorentz tensors and the dimensional continuation of the four-dimensional physical actions. This is the Wolfram System symbol, not a new FeynGrav constant. It is independent of the number of colours.
 

@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravImportHorndeskiG3``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravImportHorndeskiG3``. **Baseline:** 4.2.0.
 
 All available G3 files; no order argument.
 

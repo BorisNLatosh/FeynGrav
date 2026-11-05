@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`GaugeFixingEpsilonHD``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`GaugeFixingEpsilonHD``. **Baseline:** 4.2.0.
 
 Overall higher-derivative graviton gauge contribution. Its value is used by the HD quadratic-gravity propagator when called.
 

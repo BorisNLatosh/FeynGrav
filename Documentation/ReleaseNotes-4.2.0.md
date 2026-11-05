@@ -1,8 +1,6 @@
-# FeynGrav 4.2.0 — draft release notes
+# FeynGrav 4.2.0 — release notes
 
-**Status: unreleased development version.** No release date or `v4.2.0` tag
-is available yet. The [4.1.0 release notes](./ReleaseNotes-4.1.0.md) describe the
-published baseline.
+Changes since [FeynGrav 4.1.0](./ReleaseNotes-4.1.0.md).
 
 ## Version and compatibility
 
@@ -12,9 +10,9 @@ patch would describe compatible corrections alone. No intermediate 4.1.1 release
 is required. The older unpublished Contractor interface has its own migration
 notes; its changes are not changes to the published 4.1.0 interface.
 
-The package startup label identifies this checkout as `FeynGrav 4.2.0
-(development)`. That label does not imply publication or a new complete
-release-validation run.
+When upgrading, restart the kernel and recompute saved amplitudes that used
+the corrected Horndeski or quark–gluon rules. Existing notebook outputs
+retain the values computed by the previous version.
 
 ## New calculation interface
 
@@ -161,6 +159,16 @@ model is self-contained and does not read them at runtime.
 Independent off-shell action comparisons, all native contacts and selected
 AA → AA, AA → Ah and AA → hh Ward checks passed; see the [Scientific scope](./ScientificScope.md#Yang%E2%80%93Mills%20and%20fermions). Native loop validation remains deferred.
 
+## Native quark extension
+
+Independent Dirac-action comparisons establish the kinetic, mass and spin terms
+through κ². The native adapter reverses every source momentum to match FeynArts
+spinor/Fourier conventions, including graviton momenta. All five new contacts
+and selected massive quark trees pass. See [Scientific scope](./ScientificScope.md#Yang%E2%80%93Mills%20and%20fermions) for the action and selected tree checks.
+Example 13 (`Examples/13. Quark_Graviton_Emission_Tree_Level_FeynArts.nb`)
+computes quark annihilation with graviton emission using `FeynGravSimplify`.
+Existing notebooks and the four other model bundles are preserved.
+
 ## Quark–gluon rule correction
 
 The same missing κⁿ factor was confirmed and corrected in both quark–gluon
@@ -188,21 +196,9 @@ by checks using a process substitute; follow its separate method restrictions.
 
 ## Installation and publication
 
-Installation still defaults to GitHub `main`; it does not automatically select
-the newest release or this local development branch. A future `v4.2.0` tag can
-be used only after publication. Keep the current published-version example for
-`v4.1.0` and use a full local checkout when testing this development version.
+The installer defaults to GitHub `main`. To reproduce this version once
+the tag is published, select `FeynGravReference -> "v4.2.0"`.
 See the [installation guide](./UserGuide.md#Installation%20and%20help).
 
 Restart the kernel after upgrading and recompute affected expressions.
 Previously saved notebook results do not change when package files are updated.
-
-## Native quark extension
-
-Independent Dirac-action comparisons establish the kinetic, mass and spin terms
-through κ². The native adapter reverses every source momentum to match FeynArts
-spinor/Fourier conventions, including graviton momenta. All five new contacts
-and selected massive quark trees pass; See [Scientific scope](./ScientificScope.md#Yang%E2%80%93Mills%20and%20fermions) for the action and selected tree checks.
-Example 13 (`Examples/13. Quark_Graviton_Emission_Tree_Level_FeynArts.nb`)
-computes quark annihilation with graviton emission using `FeynGravSimplify`.
-Existing notebooks and the four other model bundles are preserved.

@@ -4,7 +4,7 @@
 
 Returns the cubic interaction of two auxiliary fields B and one CR graviton.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

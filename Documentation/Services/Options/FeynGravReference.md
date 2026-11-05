@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGravInstaller`FeynGravReference``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGravInstaller`FeynGravReference``. **Baseline:** 4.2.0.
 
 This is an option symbol; it is supplied as a rule to an owning command, not called as a function.
 

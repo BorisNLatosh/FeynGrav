@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``CalcFormConverter`FeynGravSimplify``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CalcFormConverter`FeynGravSimplify``. **Baseline:** 4.2.0.
 
 Unified calculation front end: full converter pipeline by default, or an explicitly selected restricted external method.
 

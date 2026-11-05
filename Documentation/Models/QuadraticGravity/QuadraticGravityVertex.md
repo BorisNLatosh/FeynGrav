@@ -4,7 +4,7 @@
 
 `r >= 3` graviton legs in one flat list, followed by the two quadratic-gravity mass parameters.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

@@ -1,8 +1,7 @@
 # Calculation methods and restricted backends
 
 ``CalcFormConverter`FeynGravSimplify[expr]`` is the unified front end of this
-directory, planned for [FeynGrav 4.2.0](../../ReleaseNotes-4.2.0.md)
-(currently unreleased). `Method -> Automatic` (the default) and
+directory, introduced in [FeynGrav 4.2.0](../../ReleaseNotes-4.2.0.md). `Method -> Automatic` (the default) and
 `Method -> "FORM"` resolve the call through the full `CalcFormConverter`
 pipeline with `CalcFormCalculate` semantics followed by optional final PaVe
 conversion: resolved converter options are

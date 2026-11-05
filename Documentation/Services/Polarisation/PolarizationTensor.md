@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`PolarizationTensor``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`PolarizationTensor``. **Baseline:** 4.2.0.
 
 Four-dimensional product of two polarisation vectors with the same momentum and phase.
 

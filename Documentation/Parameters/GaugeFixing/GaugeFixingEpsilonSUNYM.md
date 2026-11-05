@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`GaugeFixingEpsilonSUNYM``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`GaugeFixingEpsilonSUNYM``. **Baseline:** 4.2.0.
 
 Substituted into Yang–Mills libraries during `FeynGravImportSUNYM`. Assign the intended value before importing. The native model is a separate fixed-gauge snapshot.
 

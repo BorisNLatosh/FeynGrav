@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonSUNYM`GravitonFourGluonVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonSUNYM`GravitonFourGluonVertex``. **Baseline:** 4.2.0.
 
 Constructs the four-gluon coupling to gravitons. Each gluon is given as momentum–Lorentz-index–adjoint-colour-index.
 

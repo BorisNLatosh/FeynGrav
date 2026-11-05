@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonVectorVertex`GravitonVectorGhostVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonVectorVertex`GravitonVectorGhostVertex``. **Baseline:** 4.2.0.
 
 Constructs the coupling of gravity to the Abelian-vector Faddeev–Popov ghosts.
 

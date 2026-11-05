@@ -4,7 +4,7 @@
 
 Gluon–ghost interaction in the existing library interface, with three index–colour–momentum groups. Retain all nine leg arguments, including the ghost-position Lorentz placeholders.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

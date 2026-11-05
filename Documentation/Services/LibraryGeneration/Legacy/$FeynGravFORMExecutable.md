@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``FeynGravLibrariesGenerator`$FeynGravFORMExecutable``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGravLibrariesGenerator`$FeynGravFORMExecutable``. **Baseline:** 4.2.0.
 
 Legacy executable selection looked up by name in the generator context or as ``Global`$FeynGravFORMExecutable``. It is a compatibility setting, not a function and not necessarily newly declared by loading the generator.
 

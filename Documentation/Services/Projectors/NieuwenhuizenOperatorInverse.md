@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperatorInverse``. **Baseline:** 4.2.0 development.
+**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperatorInverse``. **Baseline:** 4.2.0.
 
 The implemented D-dependent inverse in the same basis, assuming its scalar denominators are nonzero. Singular cases are not diagnosed automatically.
 

@@ -2,7 +2,7 @@
 
 [General relativity](../README.md) · [Common conventions](../../../Conventions.md) · [Documentation home](../../../README.md)
 
-**4.2.0 development interface.**
+**4.2.0 interface.**
 
 FeynGrav also exposes a separate GR parametrisation using a densitised inverse
 metric and an auxiliary field. The original action and field redefinitions

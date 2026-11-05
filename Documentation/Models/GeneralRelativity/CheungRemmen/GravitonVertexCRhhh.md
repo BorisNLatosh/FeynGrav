@@ -4,7 +4,7 @@
 
 Returns the cubic interaction of three CR graviton fields.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

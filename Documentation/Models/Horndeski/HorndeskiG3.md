@@ -4,7 +4,7 @@
 
 `s = a + 2 b + 1`; graviton triples.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

@@ -2,7 +2,7 @@
 
 [Documentation index](./README.md) · [Models](./Models.md) · [Conventions](./Conventions.md)
 
-This page describes the scope of the 4.2.0 development checkout. Checks of
+This page describes the scope of the 4.2.0 checkout. Checks of
 specified interactions do not establish every higher-order vertex, complete
 amplitude or loop calculation. Library availability, source construction and
 mathematical validation are distinct. Read the action and library inventory

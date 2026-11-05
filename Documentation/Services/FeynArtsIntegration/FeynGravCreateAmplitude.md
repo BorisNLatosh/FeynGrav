@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynArtsIntegration`FeynGravCreateAmplitude``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynArtsIntegration`FeynGravCreateAmplitude``. **Baseline:** 4.2.0.
 
 Optional pure-GR companion interface. It is narrower than ordinary native FeynArts use with the supplied models.
 

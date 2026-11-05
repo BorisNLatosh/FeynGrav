@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`PolarizationVectorD``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`PolarizationVectorD``. **Baseline:** 4.2.0.
 
 D-dimensional `Pair[LorentzIndex[mu,D], Momentum[Polarization[p,phase,...],D]]`.
 

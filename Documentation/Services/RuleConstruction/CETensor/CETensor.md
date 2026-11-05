@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``CETensor`CETensor``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CETensor`CETensor``. **Baseline:** 4.2.0.
 
 Averaged perturbative coefficient of `Sqrt[-g]` times one or two inverse vierbeins. Symmetrises only the perturbation pairs, including pair flips and permutations; external vierbein indices remain fixed.
 

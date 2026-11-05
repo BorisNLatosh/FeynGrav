@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`GaugeFixingEpsilonCR``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`GaugeFixingEpsilonCR``. **Baseline:** 4.2.0.
 
 The Cheung–Remmen graviton propagator uses its value when called. This is a distinct field parametrisation of GR.
 

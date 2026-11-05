@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``HorndeskiG5`HorndeskiG5Uncontracted``. **Baseline:** 4.2.0 development.
+**Symbol:** ``HorndeskiG5`HorndeskiG5Uncontracted``. **Baseline:** 4.2.0.
 
 Constructs the G5 monomial interaction with unit monomial coupling. Infer the scalar power a from the scalar momentum count and b using the Horndeski overview. This three-argument rule differs from the four-argument main-package retrieval command.
 

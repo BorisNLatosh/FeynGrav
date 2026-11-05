@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``Nieuwenhuizen`GaugeProjectorBar``. **Baseline:** 4.2.0 development.
+**Symbol:** ``Nieuwenhuizen`GaugeProjectorBar``. **Baseline:** 4.2.0.
 
 `omega(mu,nu)`.
 

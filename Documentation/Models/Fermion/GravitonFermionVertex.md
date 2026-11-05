@@ -4,7 +4,7 @@
 
 Incoming fermion and antifermion momenta, then mass; returns a Dirac-matrix expression.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

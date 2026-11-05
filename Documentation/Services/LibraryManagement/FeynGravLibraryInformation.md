@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravLibraryInformation``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravLibraryInformation``. **Baseline:** 4.2.0.
 
 ## Syntax
 

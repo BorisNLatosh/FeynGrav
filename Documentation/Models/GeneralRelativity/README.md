@@ -2,7 +2,7 @@
 
 [Model index](../../Models.md) · [Common conventions](../../Conventions.md) · [Getting started](../../GettingStarted.md)
 
-**Applies to the 4.2.0 development checkout.** FeynGrav supplies conventional
+**Applies to the 4.2.0 checkout.** FeynGrav supplies conventional
 pure-GR propagators and vertices about flat spacetime, together with the
 gravitational Faddeev–Popov ghosts. The supplied native FeynArts model is named
 `GR` and contains vertices through κ² per vertex.

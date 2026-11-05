@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravImportScalarGaussBonnet``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravImportScalarGaussBonnet``. **Baseline:** 4.2.0.
 
 Files for 2 through `n` graviton triples; requires `n >= 2`.
 

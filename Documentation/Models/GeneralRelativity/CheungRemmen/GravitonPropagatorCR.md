@@ -4,7 +4,7 @@
 
 Returns the graviton propagator in Cheung–Remmen variables.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

@@ -2,7 +2,7 @@
 
 [Documentation index](./README.md) · [Models](./Models.md) · [Service functions](./Services/README.md) · [Constants and parameters](./Parameters/README.md)
 
-**Baseline:** 4.2.0 development, source inventory reviewed 3 November 2026.
+**Baseline:** 4.2.0, source inventory reviewed 3 November 2026.
 
 This index lists the user-facing commands, rule constructors, physical parameters, convention symbols and options covered by this manual. Optional interfaces require their own loading workflow; they are not all loaded by the main package.
 

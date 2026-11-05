@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonSUNYM`GravitonQuarkGluonVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonSUNYM`GravitonQuarkGluonVertex``. **Baseline:** 4.2.0.
 
 Constructs the quark–antiquark–gluon coupling. The second array contains the gluon Lorentz and adjoint colour indices; the ordered Dirac and colour structure is retained.
 

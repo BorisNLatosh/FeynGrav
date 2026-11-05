@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonVectorVertex`GravitonVectorVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonVectorVertex`GravitonVectorVertex``. **Baseline:** 4.2.0.
 
 Constructs the massless Abelian-vector coupling, including an explicit gauge parameter after the vector legs. This extra argument differs from the library-backed main-package command.
 

@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GammaTensor`GammaTensor``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GammaTensor`GammaTensor``. **Baseline:** 4.2.0.
 
 Six-index coefficient tensor used to construct the first-order connection. It contains only metrics and I tensors; momentum and gravitational coupling factors are supplied by the surrounding construction.
 

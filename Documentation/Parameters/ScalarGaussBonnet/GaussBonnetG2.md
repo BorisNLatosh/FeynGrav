@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`GaussBonnetG2``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`GaussBonnetG2``. **Baseline:** 4.2.0.
 
 Coefficient of $+g_2\phi^2\mathcal G/2!$ in the native Einstein–scalar–Gauss–Bonnet action. Differentiating the two scalar fields cancels the factorial.
 

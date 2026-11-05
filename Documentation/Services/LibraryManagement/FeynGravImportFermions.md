@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravImportFermions``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravImportFermions``. **Baseline:** 4.2.0.
 
 Fermion files for 1 through `n` graviton triples. Loaded initially with 2.
 

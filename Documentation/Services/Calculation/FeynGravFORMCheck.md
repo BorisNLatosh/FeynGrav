@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``CalcFormConverter`FeynGravFORMCheck``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CalcFormConverter`FeynGravFORMCheck``. **Baseline:** 4.2.0.
 
 Preferred facade wrapper of [CalcFormCheck](./CalcFormCheck.md). Probes FORM/TFORM on demand and reports availability, version and diagnostics.
 

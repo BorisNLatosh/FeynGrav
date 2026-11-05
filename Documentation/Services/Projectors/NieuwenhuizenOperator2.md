@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperator2``. **Baseline:** 4.2.0 development.
+**Symbol:** ``Nieuwenhuizen`NieuwenhuizenOperator2``. **Baseline:** 4.2.0.
 
 Symmetrised transverse identity minus `theta(mu,nu) theta(alpha,beta)/3`.
 

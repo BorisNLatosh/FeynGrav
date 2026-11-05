@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravCommands``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravCommands``. **Baseline:** 4.2.0.
 
 `FeynGravCommands[]` prints the main command list and returns `Null`. It is a discovery aid, not an exhaustive namespace inventory. Load FeynGrav first.
 

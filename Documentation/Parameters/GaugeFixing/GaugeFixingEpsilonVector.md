@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`GaugeFixingEpsilonVector``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`GaugeFixingEpsilonVector``. **Baseline:** 4.2.0.
 
 Substituted into massless-vector libraries during `FeynGravImportVectors`. Assign the intended value before reimporting the required order.
 

@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``FeynGrav`JohnBeta``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`JohnBeta``. **Baseline:** 4.2.0.
 
 Coefficient of $+\beta G^{\mu\nu}\partial_\mu\phi\partial_\nu\phi$ in the native John action, with no extra one-half. Equivalent to G5 = -beta phi up to a boundary term.
 

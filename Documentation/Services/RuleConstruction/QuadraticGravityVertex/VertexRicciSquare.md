@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``QuadraticGravityVertex`VertexRicciSquare``. **Baseline:** 4.2.0 development.
+**Symbol:** ``QuadraticGravityVertex`VertexRicciSquare``. **Baseline:** 4.2.0.
 
 Constructs the Ricci-tensor-squared contribution used by the quadratic-gravity rule; it does not by itself add the full quadratic-gravity mass coefficients.
 

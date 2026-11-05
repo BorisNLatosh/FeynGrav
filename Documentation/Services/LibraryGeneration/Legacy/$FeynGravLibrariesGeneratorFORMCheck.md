@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``FeynGravLibrariesGenerator`$FeynGravLibrariesGeneratorFORMCheck``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGravLibrariesGenerator`$FeynGravLibrariesGeneratorFORMCheck``. **Baseline:** 4.2.0.
 
 Deprecated startup-check setting. Its value is ignored: loading the generator neither checks nor launches FORM.
 

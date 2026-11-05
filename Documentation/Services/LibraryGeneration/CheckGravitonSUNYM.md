@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGravLibrariesGenerator`CheckGravitonSUNYM``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGravLibrariesGenerator`CheckGravitonSUNYM``. **Baseline:** 4.2.0.
 
 ## Purpose and arguments
 

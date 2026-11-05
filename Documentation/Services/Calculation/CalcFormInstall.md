@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``CalcFormConverter`CalcFormInstall``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CalcFormConverter`CalcFormInstall``. **Baseline:** 4.2.0.
 
 Explicitly attempts to install missing FORM or TFORM on supported Debian/Ubuntu systems, with system authorisation, then checks the requested configuration.
 

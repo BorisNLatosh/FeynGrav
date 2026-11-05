@@ -4,7 +4,7 @@
 
 Quark–antiquark–gluon coupling; the gluon is specified by its Lorentz and colour indices. No momentum arguments.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

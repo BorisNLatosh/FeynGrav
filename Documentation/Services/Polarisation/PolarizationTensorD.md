@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`PolarizationTensorD``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`PolarizationTensorD``. **Baseline:** 4.2.0.
 
 The corresponding D-dimensional factorised product.
 

@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``CalcFormConverter`FeynGravFORMImport``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CalcFormConverter`FeynGravFORMImport``. **Baseline:** 4.2.0.
 
 Preferred facade wrapper of [CalcFormImport](./CalcFormImport.md). Reconstructs FeynCalc internal notation from a dedicated FORM result and its matching JSON mapping.
 

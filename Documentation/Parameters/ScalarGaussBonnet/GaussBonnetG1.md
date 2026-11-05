@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`GaussBonnetG1``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`GaussBonnetG1``. **Baseline:** 4.2.0.
 
 Coefficient of $+g_1\phi\mathcal G$ in the native Einstein–scalar–Gauss–Bonnet action.
 

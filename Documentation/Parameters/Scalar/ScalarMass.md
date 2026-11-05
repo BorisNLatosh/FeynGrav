@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`ScalarMass``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`ScalarMass``. **Baseline:** 4.2.0.
 
 Arbitrary scalar mass in the native minimal-scalar, John and Einstein–scalar–Gauss–Bonnet models. The direct scalar commands take an explicit mass argument instead.
 

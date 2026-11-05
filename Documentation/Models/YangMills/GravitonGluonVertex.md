@@ -4,7 +4,7 @@
 
 `l = 2, 3, 4` gluons, each supplied as momentum–Lorentz-index–colour-index. Selects the two-, three- or four-gluon library by argument count.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

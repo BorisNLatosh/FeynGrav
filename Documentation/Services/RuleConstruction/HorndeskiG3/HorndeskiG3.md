@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``HorndeskiG3`HorndeskiG3``. **Baseline:** 4.2.0 development.
+**Symbol:** ``HorndeskiG3`HorndeskiG3``. **Baseline:** 4.2.0.
 
 Constructs the G3 monomial interaction with unit monomial coupling. Infer the scalar power a from the scalar momentum count and b using the Horndeski overview. This three-argument rule differs from the four-argument main-package retrieval command.
 

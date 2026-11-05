@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``ITensor`ITensorPlain``. **Baseline:** 4.2.0 development.
+**Symbol:** ``ITensor`ITensorPlain``. **Baseline:** 4.2.0.
 
 Ordered cyclic metric product `eta(sigma1,rho2) ... eta(sigman,rho1)`.
 

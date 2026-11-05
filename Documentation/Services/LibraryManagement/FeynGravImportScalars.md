@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravImportScalars``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravImportScalars``. **Baseline:** 4.2.0.
 
 Scalar kinetic and potential files for 1 through `n` graviton pairs. Loaded initially with 2.
 

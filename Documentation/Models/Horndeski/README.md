@@ -2,7 +2,7 @@
 
 [Model index](../../Models.md) · [Common conventions](../../Conventions.md) · [General relativity](../GeneralRelativity.md)
 
-**Applies to the 4.2.0 development checkout; reviewed 1 November 2026.**
+**Applies to the 4.2.0 checkout; reviewed 1 November 2026.**
 FeynGrav provides four monomial interaction interfaces, [`HorndeskiG2`](./HorndeskiG2.md) through
 [`HorndeskiG5`](./HorndeskiG5.md), and a finite set of stored vertices about flat spacetime.
 There is no general Horndeski FeynArts model or automatic compiler for arbitrary

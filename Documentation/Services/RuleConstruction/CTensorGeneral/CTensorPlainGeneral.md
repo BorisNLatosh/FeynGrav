@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``CTensorGeneral`CTensorPlainGeneral``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CTensorGeneral`CTensorPlainGeneral``. **Baseline:** 4.2.0.
 
 Ordered coefficient of `Sqrt[-g]` times a product of zero through seven inverse metrics, without symmetrisation.
 

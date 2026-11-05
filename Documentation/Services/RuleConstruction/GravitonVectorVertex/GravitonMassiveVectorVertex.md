@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonVectorVertex`GravitonMassiveVectorVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonVectorVertex`GravitonMassiveVectorVertex``. **Baseline:** 4.2.0.
 
 Constructs the Proca coupling with two vector index–momentum groups and explicit mass.
 

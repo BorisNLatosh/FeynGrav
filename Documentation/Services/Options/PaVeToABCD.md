@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynCalc`PaVeToABCD``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynCalc`PaVeToABCD``. **Baseline:** 4.2.0.
 
 This page describes only FeynGrav’s use of this dependency-owned option.
 

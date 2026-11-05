@@ -2,7 +2,7 @@
 
 [Getting started](./GettingStarted.md) · [Documentation index](./README.md) · [Command reference](./Reference.md)
 
-**Applies to the 4.2.0 development checkout.** This page states the shared
+**Applies to the 4.2.0 checkout.** This page states the shared
 mathematical conventions and distinguishes them from adjustable session
 settings. Model actions and their coupling definitions belong in the
 corresponding model guides. The main-package rules, rule generators and

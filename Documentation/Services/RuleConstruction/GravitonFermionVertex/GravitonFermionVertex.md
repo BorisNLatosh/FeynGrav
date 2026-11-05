@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonFermionVertex`GravitonFermionVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonFermionVertex`GravitonFermionVertex``. **Baseline:** 4.2.0.
 
 Constructs the torsion-free Dirac coupling using the vierbein and spin connection. The incoming fermion momentum precedes the incoming antifermion momentum; preserve gamma order.
 

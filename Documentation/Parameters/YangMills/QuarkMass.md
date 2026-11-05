@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`QuarkMass``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`QuarkMass``. **Baseline:** 4.2.0.
 
 Mass of the one fundamental Dirac flavour in the native `GR-SU-N-Yang-Mills` model; zero is a supported specialisation.
 

@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravConventions``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravConventions``. **Baseline:** 4.2.0.
 
 ```mathematica
 FeynGravConventions[]

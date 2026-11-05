@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravImportVectors``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravImportVectors``. **Baseline:** 4.2.0.
 
 Massive vector, massless vector and vector ghost files through `n`. Loaded initially with 2.
 

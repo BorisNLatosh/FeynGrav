@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``ScalarGaussBonnet`ScalarGaussBonnet``. **Baseline:** 4.2.0 development.
+**Symbol:** ``ScalarGaussBonnet`ScalarGaussBonnet``. **Baseline:** 4.2.0.
 
 Constructs the scalar–Gauss–Bonnet curvature contribution with at least two graviton legs. This generator-side command takes no explicit scalar coupling argument.
 

@@ -2,10 +2,10 @@
 
 [Documentation index](./README.md) · [Common conventions](./Conventions.md)
 
-**This manual describes the 4.2.0 development checkout.** It includes features
+**This manual describes the 4.2.0 checkout.** It includes features
 beyond the published 4.1.0 interface. Use the documentation supplied with your
 checkout; a release tag preserves the manual for that version. See the
-[draft release notes](./ReleaseNotes-4.2.0.md) for the current development scope.
+[release notes](./ReleaseNotes-4.2.0.md) for changes since 4.1.0.
 
 FeynGrav supplies gravitational Feynman rules as symbolic FeynCalc expressions
 in Mathematica. You can use its propagators and vertices to construct diagrams,

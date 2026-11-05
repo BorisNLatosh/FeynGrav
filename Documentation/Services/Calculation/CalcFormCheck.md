@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``CalcFormConverter`CalcFormCheck``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CalcFormConverter`CalcFormCheck``. **Baseline:** 4.2.0.
 
 Probes FORM/TFORM on demand and reports availability, version and diagnostics.
 

@@ -4,7 +4,7 @@
 
 Massless-vector vertex; depends on the vector gauge value used during import.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

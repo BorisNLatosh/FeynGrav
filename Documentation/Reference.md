@@ -1,6 +1,6 @@
 # FeynGrav function reference
 
-Reference for the unreleased 4.2.0 development checkout. The original reference review was on 6 October 2026; later interface additions are documented below. Version labelling does not constitute a fresh check of every entry or a guarantee about older releases. Start with [installation](./UserGuide.md#Installation%20and%20help); complete calculations are in the [example notebooks](./Examples/README.md). For generator-side functions, use the [Rules contracts](./Services/RuleConstruction/Contracts.md) and [generator guide](./Services/LibraryGeneration/Guide.md).
+Reference for the 4.2.0 checkout. The original reference review was on 6 October 2026; later interface additions are documented below. Version labelling does not constitute a fresh check of every entry or a guarantee about older releases. Start with [installation](./UserGuide.md#Installation%20and%20help); complete calculations are in the [example notebooks](./Examples/README.md). For generator-side functions, use the [Rules contracts](./Services/RuleConstruction/Contracts.md) and [generator guide](./Services/LibraryGeneration/Guide.md).
 
 ## Contents
 
@@ -328,14 +328,13 @@ The default worker setting is `FORMThreads -> Automatic`. Supported Dirac algebr
 
 <a name="Simplified calculation front end (development, unreleased)"></a>
 
-### Simplified calculation front end (development, unreleased)
+### Simplified calculation front end
 
 Five short facade commands are supplied as a convenient public front end to the
 converter pipeline and, without any fallback, to a restricted benchmarking
 adapter. They are implemented in `FeynGravSimplify/` and described in
 [Calculation interface](./Services/Calculation/FeynGravSimplify.md). They are
-planned for [4.2.0](./ReleaseNotes-4.2.0.md), which remains unreleased, and are
-not part of the published 4.1.0 interface.
+introduced in [4.2.0](./ReleaseNotes-4.2.0.md).
 
 - [`FeynGravSimplify[expr, opts]`](Services/Calculation/FeynGravSimplify.md) — one-call simplified calculation. [`Method`](./Services/Options/Method.md) is
   the Wolfram System option symbol: `Automatic` (default) and `"FORM"` dispatch to the full

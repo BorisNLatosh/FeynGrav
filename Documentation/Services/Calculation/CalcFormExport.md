@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``CalcFormConverter`CalcFormExport``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CalcFormConverter`CalcFormExport``. **Baseline:** 4.2.0.
 
 Exports a supported exact FeynCalc expression to a complete FORM program and a reversible JSON mapping. It does not execute FORM.
 

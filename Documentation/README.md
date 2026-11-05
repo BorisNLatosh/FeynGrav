@@ -1,8 +1,8 @@
 # FeynGrav documentation
 
-**Version: 4.2.0 development, unreleased.** Use the documentation supplied with your
+**Version: 4.2.0.** Use the documentation supplied with your
 checkout. The [4.1.0 release notes](./ReleaseNotes-4.1.0.md) describe the published
-baseline; the [4.2.0 draft notes](./ReleaseNotes-4.2.0.md) describe additions and corrections.
+baseline; the [4.2.0 release notes](./ReleaseNotes-4.2.0.md) describe additions and corrections.
 
 ## Choose a route
 

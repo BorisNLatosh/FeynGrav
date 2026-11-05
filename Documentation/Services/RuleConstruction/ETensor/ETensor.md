@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``ETensor`ETensor``. **Baseline:** 4.2.0 development.
+**Symbol:** ``ETensor`ETensor``. **Baseline:** 4.2.0.
 
 Perturbative coefficient of the lowered vierbein, averaged over perturbation-pair permutations and flips. The two external vierbein indices remain fixed.
 

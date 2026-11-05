@@ -4,7 +4,7 @@
 
 Two incoming scalar momenta and their mass; minimal scalar coupling to `n` gravitons.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

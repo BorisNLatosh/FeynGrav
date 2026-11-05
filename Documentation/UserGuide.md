@@ -2,9 +2,9 @@
 
 [Directory overview](./README.md) · [Getting started](./GettingStarted.md) · [Common conventions](./Conventions.md)
 
-**Development version; 4.2.0 is not yet released.** See the
-[4.2.0 draft release notes](./ReleaseNotes-4.2.0.md). Installation from `main`
-continues to select that branch, not this local development checkout.
+**Version 4.2.0.** See the
+[4.2.0 release notes](./ReleaseNotes-4.2.0.md). Installation from `main`
+selects the current contents of that branch.
 
 FeynGrav is a Wolfram Mathematica package that implements gravitational Feynman rules in the FeynCalc framework. It provides propagators, interaction vertices, polarisation tensors, and tools for working with the Nieuwenhuizen operators.
 
@@ -55,13 +55,13 @@ Importing the script only defines the installer and prints instructions. `Instal
 
 The default remains installation from `main`; ordinary installation does not require choosing a tag.
 
-To select a particular published release, supply its tag; for example:
+After the 4.2.0 tag is published, select it explicitly:
 
 ```mathematica
-InstallFeynGrav[FeynGravReference -> "v4.1.0"]
+InstallFeynGrav[FeynGravReference -> "v4.2.0"]
 ```
 
-This selects the package archive at that tag; the preceding `Import` still loads the installer from `main`. For a fully pinned workflow, load `install.m` from the same tag by replacing `main` in its URL with `v4.1.0`. The planned `v4.2.0` tag is not available from this version update; use it only after publication. A commit hash may also be supplied through `FeynGravReference`.
+This selects the package archive at that tag; the preceding `Import` still loads the installer from `main`. For a fully pinned workflow, load `install.m` from the same tag by replacing `main` in its URL with `v4.2.0`. A commit hash may also be supplied through `FeynGravReference`.
 
 </details>
 
@@ -130,7 +130,7 @@ Use `FeynGravLibraryInformation[]` to inspect the last successful imports: sourc
 
 Older precomputed rules are available in the [FeynGrav Libraries dataset, version 2, published 14 May 2024](https://data.mendeley.com/datasets/9xrw2jjrbr/2). This dataset predates version 4 and is historical material, not a compatibility-certified extension of this checkout. **Keep the libraries shipped with your package version; do not overwrite them with files from the dataset or an older installation.** A matching filename or successful import does not establish correct action conventions, coupling powers or normalisation.
 
-Later releases corrected matter-vertex multiplicities and mixed Yang–Mills coupling powers, among other scientific changes. Older package installations may also contain superseded Horndeski and Gauss–Bonnet rules. Retaining the current ghost rules alone is therefore insufficient. Consult the [4.1.0 scientific corrections](./ReleaseNotes-4.1.0.md), [4.2.0 draft release notes](./ReleaseNotes-4.2.0.md) and [current scientific scope](./ScientificScope.md) before reusing older files. A universal rescaling cannot repair all affected rules or saved amplitudes.
+Later releases corrected matter-vertex multiplicities and mixed Yang–Mills coupling powers, among other scientific changes. Older package installations may also contain superseded Horndeski and Gauss–Bonnet rules. Retaining the current ghost rules alone is therefore insufficient. Consult the [4.1.0 scientific corrections](./ReleaseNotes-4.1.0.md), [4.2.0 release notes](./ReleaseNotes-4.2.0.md) and [current scientific scope](./ScientificScope.md) before reusing older files. A universal rescaling cannot repair all affected rules or saved amplitudes.
 
 If an additional order is needed:
 
@@ -182,10 +182,10 @@ The converter performs algebra and Lorentz contractions. It automatically groups
 
 See the [user guide](./Services/Calculation/Guide.md) for workflows, supported expressions, options, installation details, and performance guidance; the [format specification](./Services/Calculation/SavedFiles.md) for saved-file compatibility.
 
-### Simplified front end (development, unreleased)
+### Simplified front end
 
-The five-command facade planned for 4.2.0 is described in the converter guide,
-[4.2.0 draft release notes](./ReleaseNotes-4.2.0.md) and
+The five-command facade introduced in 4.2.0 is described in the converter guide,
+[4.2.0 release notes](./ReleaseNotes-4.2.0.md) and
 [Calculation interface](./Services/Calculation/FeynGravSimplify.md): ``CalcFormConverter`FeynGravSimplify[expr, opts]``
 selects the full pipeline (`Method -> Automatic` or `"FORM"`) or the restricted
 external adapter (`"Contractor"`, `"FORMBenchmark"`) without fallback, and
@@ -253,15 +253,15 @@ Report problems through [GitHub issues](https://github.com/BorisNLatosh/FeynGrav
 
 ## Version history
 
-### Version 4.2.0 — unreleased
+### Version 4.2.0
 
-The next release is a minor version because it adds compatible public commands
+Version 4.2.0 is a minor release because it adds compatible public commands
 and calculation capabilities. It introduces `FeynGravSimplify` and four
 `FeynGravFORM*` wrappers, one-loop coefficient/master reduction, shared output
 and bounded coefficient simplification, plus reliability and example repairs.
 The existing `CalcForm*` commands remain available. See the
-[4.2.0 draft release notes](./ReleaseNotes-4.2.0.md) for verification and migration
-limits. No release date or tag is available yet.
+[4.2.0 release notes](./ReleaseNotes-4.2.0.md) for verification and migration
+limits.
 
 <a id="version-410--unreleased"></a>
 

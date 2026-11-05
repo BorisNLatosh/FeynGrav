@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravInitialized``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravInitialized``. **Baseline:** 4.2.0.
 
 This is an inspect-only state flag, not a command or configuration switch. Successful required startup imports set it to `True`; initialisation failures leave it false and report `InitializationFailed`.
 

@@ -4,7 +4,7 @@
 
 Two vector index–momentum groups and axion coupling `theta`; no axion momentum argument.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

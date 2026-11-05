@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravImportQuadraticGravity``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravImportQuadraticGravity``. **Baseline:** 4.2.0.
 
 `QuadraticGravityVertex_j`, where `j + 2` is the number of graviton legs.
 

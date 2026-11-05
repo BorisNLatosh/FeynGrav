@@ -4,7 +4,7 @@
 
 Quadratic-gravity propagator with conventional gauge fixing, using the current `GaugeFixingEpsilon`.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

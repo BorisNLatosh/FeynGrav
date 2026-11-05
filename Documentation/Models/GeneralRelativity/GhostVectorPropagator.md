@@ -4,7 +4,7 @@
 
 Returns the ordered ghost–antighost propagator for the gravitational Faddeev–Popov vector ghosts in conventional GR.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

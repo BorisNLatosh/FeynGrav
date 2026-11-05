@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonSUNYM`GravitonGluonGhostVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonSUNYM`GravitonGluonGhostVertex``. **Baseline:** 4.2.0.
 
 Constructs the gluon–Yang–Mills-ghost coupling. Preserve the exact array/leg order in the signature and source contract.
 

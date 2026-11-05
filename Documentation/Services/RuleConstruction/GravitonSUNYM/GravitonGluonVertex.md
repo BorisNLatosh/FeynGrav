@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../../README.md)
 
-**Symbol:** ``GravitonSUNYM`GravitonGluonVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``GravitonSUNYM`GravitonGluonVertex``. **Baseline:** 4.2.0.
 
 Constructs the two-gluon coupling, including the explicit Yang–Mills gauge parameter. Gluon arguments have momentum–Lorentz-index–adjoint-colour-index order.
 

@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`YangMillsCoupling``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`YangMillsCoupling``. **Baseline:** 4.2.0.
 
 Native SU(N) gauge coupling g_s. The covariant derivative convention is `D_mu = nabla_mu - i g_s T^a A^a_mu`; the flat quark interaction has positive g_s. This symbol is distinct from `SUNN`.
 

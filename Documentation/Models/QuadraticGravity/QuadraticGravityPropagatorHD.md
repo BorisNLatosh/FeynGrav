@@ -4,7 +4,7 @@
 
 Quadratic-gravity propagator with higher-derivative gauge fixing, using all three HD gauge parameters.
 
-**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0 development.
+**Context:** ``FeynGrav` ``. **Documentation baseline:** 4.2.0.
 
 ## Syntax
 

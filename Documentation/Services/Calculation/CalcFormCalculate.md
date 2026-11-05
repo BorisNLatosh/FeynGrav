@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``CalcFormConverter`CalcFormCalculate``. **Baseline:** 4.2.0 development.
+**Symbol:** ``CalcFormConverter`CalcFormCalculate``. **Baseline:** 4.2.0.
 
 Exports, executes FORM and imports the resulting expression in one call.
 

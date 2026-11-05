@@ -4,7 +4,7 @@ Notebook names below are paths within the complete FeynGrav package, outside thi
 
 Start with a fresh Mathematica kernel and use **Shift+Enter** to evaluate input cells. Evaluate the sections of each example in order. Opening a notebook does not run calculations. The package and its dependencies must already be installed; see the [installation guide](../UserGuide.md#Installation%20and%20help).
 
-These examples target the [unreleased FeynGrav 4.2.0](../ReleaseNotes-4.2.0.md) and use `FeynGravSimplify`, whose default `Method -> Automatic` selects the full FORM pipeline. The command is not available in published FeynGrav 4.1.0.
+These examples target the [FeynGrav 4.2.0](../ReleaseNotes-4.2.0.md) and use `FeynGravSimplify`, whose default `Method -> Automatic` selects the full FORM pipeline. The command is not available in published FeynGrav 4.1.0.
 
 ## Numbered examples and suggested reading order
 

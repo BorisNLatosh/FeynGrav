@@ -2,7 +2,7 @@
 
 [Group overview](./README.md) · [Documentation index](../../README.md)
 
-**Symbol:** ``FeynGrav`FeynGravImportAxionVectorVertex``. **Baseline:** 4.2.0 development.
+**Symbol:** ``FeynGrav`FeynGravImportAxionVectorVertex``. **Baseline:** 4.2.0.
 
 Axion–vector files through `n` graviton pairs.
 
