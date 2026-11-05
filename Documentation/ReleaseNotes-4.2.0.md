@@ -108,12 +108,14 @@ includes the full four-graviton a=0,b=1 action comparison at symbolic D and gene
 off-shell momenta, selected higher connection sectors and lower-order regressions.
 No additional stored library or native FeynArts model order is introduced.
 
-## Five-graviton source verification
+## Five-graviton vertex and scattering
 
 The unchanged stored κ³ Einstein–Hilbert vertex now has an independent complete
 off-shell comparison with symbolic D, pair/leg symmetries and trace controls.
-The independent comparison establishes the complete local tensor for the checked action. It adds no native FeynArts model order and does not
-certify a complete five-point amplitude or resolve its separate performance issue.
+An opt-in order-three FeynArts model uses a compact symmetric quintic coupling.
+Its complete five-graviton tree has exact physical Ward and leading soft checks in
+four dimensions. The default model supplies vertices through order two.
+[Scope and construction](./Models/GeneralRelativity/HigherOrders.md)
 
 ## Examples and scientific scope
 

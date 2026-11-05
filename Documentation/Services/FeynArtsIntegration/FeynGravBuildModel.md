@@ -12,7 +12,7 @@ Optional pure-GR companion interface. It is narrower than ordinary native FeynAr
 FeynGravBuildModel[absoluteNewDirectory, opts]
 ```
 
-`absoluteNewDirectory` must be a fresh absolute destination; an existing directory is never overwritten. `GravitonOrder -> 2` is the default, building cubic and quartic graviton vertices and the ghost sector. `3` adds the five-graviton contact and can be very expensive. Other orders fail before rule construction. A missing requested library fails instead of silently reducing the snapshot.
+`absoluteNewDirectory` must be a fresh absolute destination; an existing directory is never overwritten. `GravitonOrder -> 2` is the default, building cubic and quartic graviton vertices and the ghost sector. `3` adds the five-graviton contact. The verified library uses a compact symmetric component. Other libraries may incur the cost of a fully expanded basis. See [order limits and checks](../../Models/GeneralRelativity/HigherOrders.md). Other orders fail before rule construction. A missing requested library fails instead of silently reducing the snapshot.
 
 ## Loading
 
@@ -24,7 +24,7 @@ The sole option is [GravitonOrder](../Options/GravitonOrder.md), initially 2.
 
 ## Result and limits
 
-Writes the matched finite native model bundle and manifest. Use the supplied bundle for ordinary tree calculations; rebuilding requires a separately validated model snapshot. A new snapshot does not inherit historical loop-verification fingerprints.
+Writes the matched finite native model bundle and manifest. For the verified quintic, the manifest records `QuinticRepresentation -> "SymmetricSeed-v1"`. Its snapshot fingerprint uses the quintic rule's digest with the lower rules and propagators. Rebuilding an older expanded snapshot can therefore give a different fingerprint for the same contact. Use the supplied bundle for ordinary tree calculations; rebuilding requires a separately validated model snapshot. A new snapshot does not inherit historical loop-verification fingerprints.
 
 The corrected GR release supports the stated trees; loop compatibility remains deferred. General matter processes, higher-multiplicity trees and automatic model extension are outside this companion's scope. Use native model workflows for their separately documented supported sectors.
 

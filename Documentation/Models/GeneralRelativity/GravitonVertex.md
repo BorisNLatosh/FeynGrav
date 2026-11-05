@@ -52,7 +52,7 @@ A call at an unavailable order or with an unmatched signature can remain unevalu
 
 ## Verification scope
 
-The cubic/quartic native interactions and stored quintic contact have the checks described in [Scientific scope](../../ScientificScope.md#General%20relativity). The complete off-shell quintic comparison does not establish a five-point amplitude, general Ward identity or arbitrary-order result.
+The cubic/quartic native interactions and stored quintic contact have the checks described in [Scientific scope](../../ScientificScope.md#General%20relativity). The contact has a complete off-shell tensor comparison. The [order-three native tree](./HigherOrders.md) has separate four-dimensional amplitude, Ward and leading soft checks.
 
 ## See also
 

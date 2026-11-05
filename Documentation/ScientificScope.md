@@ -25,8 +25,13 @@ checks establish their stated scope; native loops remain unvalidated.
 
 The stored five-graviton Einstein–Hilbert vertex has an independent complete
 off-shell comparison at symbolic D, including pair/leg symmetries and traces.
-It is not part of the shipped native GR bundle. Its source check does not
-establish a complete five-point amplitude or a practical runtime for such a process.
+The opt-in order-three native model reproduces all 76,230 terms of this isolated
+contact and admits all 26 tree insertions for two incoming and three outgoing
+gravitons. For the complete tree in four dimensions, all 25 exchanges matched
+independent sewing at a conserved massless point. All five external-leg Ward
+replacements vanished, and the leading soft residue matched the independently
+calculated four-graviton tree. See [native-model order limits](./Models/GeneralRelativity/HigherOrders.md)
+for the projection and scope. The shipped default bundle is order two.
 The Cheung–Remmen interface has separate conventions and does not inherit these checks.
 
 <a name="Vertex multiplicities"></a>

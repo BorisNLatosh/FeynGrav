@@ -362,8 +362,8 @@ described above.
 | Cubic/quartic native contacts and trees | [Scientific scope](../../ScientificScope.md#General%20relativity): source factors, permutations, routing and the complete contact plus s/t/u inventory | Source-to-model fidelity and the selected checks; not a new independent proof of every physical amplitude |
 | Ghost convention | The same report records negative-propagator, arrow-orientation and wrong-sign controls | Correct ordering and native statistics must be retained; native loops were deferred |
 | Missing contact | A deliberately excluded quartic coupling was rejected by the bridge completeness check | Native FeynArts can omit unsupported topologies without this extra guard |
-| Five-graviton source | [Scientific scope](../../ScientificScope.md#General%20relativity): full off-shell tensor, all pair/leg symmetries, symbolic-D traces and negative controls | Stored κ³ contact verified; no new five-point amplitude/Ward check, arbitrary-order claim or enlargement of the shipped model |
-| Five-graviton native development path | A separate order-three model can be built | Expensive historical loading; full five-point amplitude construction did not finish within its recorded bound |
+| Five-graviton source | [Scientific scope](../../ScientificScope.md#General%20relativity): full off-shell tensor, all pair/leg symmetries, symbolic-D traces and negative controls | Stored κ³ contact, with five independent off-shell momenta |
+| Five-graviton native tree | [Opt-in order-three model](./HigherOrders.md) with all 26 diagrams, physical Ward checks and leading soft factorisation | Exact four-dimensional fixtures; the shipped bundle is order two |
 | CR commands | Direct definitions and documented signatures are present | No transfer of conventional-model verification or new CR mathematical validation here |
 
 The former model name `PureGR` was replaced by `GR`; see the [4.1.0 migration instructions](../../ReleaseNotes-4.1.0.md#Migration%20and%20incompatible%20changes). Use the matching shipped model and generic files. The model manifest identifies their snapshot.

@@ -1,7 +1,8 @@
 (* Finite pure-GR model snapshot builder; called explicitly by the optional companion. *)
 Begin["FeynGrav`FeynArtsIntegration`Private`"];
 $faSourceRoot = DirectoryName[DirectoryName[$InputFileName]];
-ClearAll[faModelFailure, faEncode, faPropagator, faBasisRecord, faModelCore,
+$faQuinticTemplate = FileNameJoin[{DirectoryName[$InputFileName], "GRQuinticTensor.gen.in"}];
+ClearAll[faBarePairQ, faGenericQuinticSlotsQ, faVerifiedQuinticQ, faQuinticRecord, faModelFailure, faEncode, faPropagator, faBasisRecord, faModelCore,
   faBuildModel, faDependencyCheck, faRoleFreeQ, faGravitonOrderValues,
   faValidGravitonOrderQ, faOrderSpecification, faImportedOrderFailure];
 faModelFailure[tag_, text_, data_: <||>] := Failure[tag,
@@ -55,6 +56,45 @@ faBasisRecord[e_, family_String] := Module[{b, translated},
     "TermCount" -> b["TermCount"],
     "RuleSHA256" -> Hash[e, "SHA256", "HexString"]|>
 ];
+
+(* The verified quintic contains 722 whole-leg permutation orbits. Use the
+   prepared seed only for its exact imported source. Changed libraries use the
+   general basis extractor, just as before. *)
+faBarePairQ[a_, b_] := With[{value = FeynCalc`Pair[a, b]},
+  HoldComplete[value] === HoldComplete[FeynCalc`Pair[a, b]] ||
+  HoldComplete[value] === HoldComplete[FeynCalc`Pair[b, a]]];
+faGenericQuinticSlotsQ[legs_] := Module[{indices, vectors, roles},
+  If[!MatchQ[legs, {{_Symbol,_Symbol,_Symbol}..}] || Length[legs] =!= 5 ||
+      !DuplicateFreeQ[Flatten[legs]], Return[False]];
+  indices = FeynCalc`LorentzIndex[#, D] & /@ Flatten[legs[[All,1;;2]]];
+  vectors = FeynCalc`Momentum[#, D] & /@ legs[[All,3]];
+  roles = Join[indices,vectors];
+  AllTrue[Subsets[roles,{2}], faBarePairQ @@ # &] && AllTrue[vectors, faBarePairQ[#,#] &]
+];
+faVerifiedQuinticQ[info_Association, indices_, momenta_] := Module[{sources, slots},
+  sources = Select[info["Files"], #["Family"] === "GravitonVertex" && #["Order"] === 3 &];
+  If[Lookup[sources, "SHA256", None] =!= {"c9deb4b247b58d2c7b5b6ddf9ad7f286c450df073517fc1d06956095f1ccce42"},
+    Return[False]];
+  (* Literal scalar products set on the source or destination names would
+     distinguish the live rule from the generic, off-shell template. *)
+  slots = Cases[FeynGrav`Private`DummyArrayMomentaVariables[5], Verbatim[Pattern][x_Symbol,_Blank] :> x];
+  faGenericQuinticSlotsQ[Partition[slots,3]] &&
+    faGenericQuinticSlotsQ[MapThread[Append,{Partition[indices,2],momenta}]]
+];
+faQuinticRecord[indices_, momenta_] := Module[{legs, definition, digest},
+  digest = "a9d88900d86e791275de54770550e43a08813ba00e835dbc6a20bdffbc49aa43";
+  If[!FileExistsQ[$faQuinticTemplate] || FileHash[$faQuinticTemplate, "SHA256", "HexString"] =!= digest,
+    Return[faModelFailure["InvalidQuinticTemplate", "The verified quintic kinematic template is missing or has changed."]]];
+  definition = Quiet[Check[Import[$faQuinticTemplate, "Text", CharacterEncoding -> "UTF-8"], $Failed]];
+  If[!StringQ[definition] || FileHash[$faQuinticTemplate, "SHA256", "HexString"] =!= digest,
+    Return[faModelFailure["InvalidQuinticTemplate", "The quintic template could not be read consistently."]]];
+  legs = MapThread[Prepend, {Partition[indices, 2], momenta}];
+  <|"Vector" -> {FeynGravGR5`Private`tensor[FeynGravGR5`Private`legs @@ legs]},
+    "Coefficients" -> {I FeynGrav`\[Kappa]^3}, "TermCount" -> 1,
+    "Definition" -> definition,
+    "RuleSHA256" -> "af42b95afbade489813f27051a69eba39bbec9f16a6e4af845d762b32ffc29d9"|>
+];
+
 faModelCore[name_, gravitonBases_List, gh_, hp_, up_] := Module[
   {tensor, ghost, gravitonGeneric, gravitonClasses, generic, classes, classrows},
   tensor[n_Integer] := "AnalyticalCoupling[" <> StringRiffle[Table[
@@ -78,6 +118,7 @@ faModelCore[name_, gravitonBases_List, gh_, hp_, up_] := Module[
     "AnalyticalPropagator[Internal][s1 T[j1,mom,{li1,li2}->{li3,li4}]]==" <> faEncode[hp] <> "," <>
     "AnalyticalPropagator[External][s1 U[j1,mom,{li1}]]==1," <>
     "AnalyticalPropagator[Internal][s1 U[j1,mom,{li1}->{li2}]]==" <> faEncode[up] <> "};\n" <>
+    StringJoin[Lookup[gravitonBases,"Definition",""]] <>
     "M$GenericCouplings={" <>
       StringRiffle[Join[gravitonGeneric, {ghost <> faEncode[gh["Vector"]]}], ","] <> "};\n" <>
     "M$GenericCouplings=CloseKinematicVector/@M$GenericCouplings;\n" <>
@@ -120,7 +161,7 @@ faImportedOrderFailure[info_, spec_] := Module[{recorded},
   True
 ];
 faBuildModel[target_String, order_] := Module[
-  {dep, parent, stage, imp, info, libFail, spec, gravitonBases, indices, momenta,
+  {dep, parent, stage, imp, info, libFail, spec, gravitonBases, indices, momenta, quintic,
     rules, basis, props, hash, name, contents, gen, mod, manifest, success},
   (* Validate the requested order before any dependency, import or rule work. *)
   If[! faValidGravitonOrderQ[order],
@@ -145,14 +186,20 @@ faBuildModel[target_String, order_] := Module[
      five-graviton rule. *)
   indices = Table[Symbol["FeynArts`li" <> ToString[i]], {i, 2 (order + 2)}];
   momenta = Table[Symbol["FeynArts`mom" <> ToString[i]], {i, order + 2}];
+  quintic = If[order === 3 && faVerifiedQuinticQ[imp, indices, momenta], faQuinticRecord[indices, momenta], None];
+  If[FailureQ[quintic], Return[quintic]];
+  (* A source-digest marker avoids evaluating or hashing a second copy of
+     the expanded quintic after the requested libraries have been imported. *)
   rules = Join[
-    Table[FeynGrav`GravitonVertex @@ Flatten[Transpose[
-        {Partition[indices[[1 ;; 2 legs]], 2], momenta[[1 ;; legs]]}]], {legs, spec["LegCounts"]}],
+    Table[If[legs === 5 && AssociationQ[quintic], {"VerifiedQuintic", quintic["RuleSHA256"]},
+      FeynGrav`GravitonVertex @@ Flatten[Transpose[
+        {Partition[indices[[1 ;; 2 legs]], 2], momenta[[1 ;; legs]]}]]], {legs, spec["LegCounts"]}],
     {FeynGrav`GravitonGhostVertex[indices[[1]], indices[[2]], momenta[[1]],
       indices[[4]], momenta[[3]], indices[[3]], momenta[[2]]]}];
   If[AnyTrue[rules, FailureQ],
     Return[faModelFailure["MissingRule", "One or more source vertices were not available."]]];
-  basis = MapThread[faBasisRecord, {rules, spec["BasisLabels"]}];
+  basis = MapThread[If[#2 === "FiveGraviton" && AssociationQ[quintic], quintic,
+    faBasisRecord[#1, #2]] &, {rules, spec["BasisLabels"]}];
   If[AnyTrue[basis, FailureQ], Return[First[Select[basis, FailureQ]]]];
   props = {faPropagator[FeynCalc`FCI[FeynGrav`GravitonPropagator[indices[[1]],indices[[2]],indices[[3]],indices[[4]],FeynArts`mom]],FeynArts`mom],
     faPropagator[FeynCalc`FCI[FeynGrav`GhostVectorPropagator[indices[[1]],indices[[2]],FeynArts`mom]],FeynArts`mom]};
@@ -170,6 +217,7 @@ faBuildModel[target_String, order_] := Module[
     "InteractionFamilies" -> spec["Families"], "GravitonOrders" -> spec["GravitonOrders"],
     "RuleSHA256" -> (Lookup[#, "RuleSHA256"] & /@ basis), "SnapshotSHA256" -> hash,
     "LibrarySources" -> imp["Files"], "FeynArtsVersion" -> ToString[FeynArts`$FeynArtsVersionNumber]|>;
+  If[AssociationQ[quintic], manifest = Append[manifest, "QuinticRepresentation" -> "SymmetricSeed-v1"]];
   success = Quiet[Check[
     Export[gen, contents[[1]], "Text"]; Export[mod, contents[[2]], "Text"];
     manifest = Join[manifest, <|"ModelFileSHA256" -> <|
