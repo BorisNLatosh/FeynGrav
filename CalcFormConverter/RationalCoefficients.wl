@@ -1,5 +1,9 @@
 (* Private matched-reference switch; batching changes only source-local metadata. *)
 $pgBatchMetadata = True;
+(* Private reference switch for late batches and empty dependency closures. *)
+$pgRegistrationMetadata = True;
+(* Matched-reference switch for dependency-ready rational metadata only. *)
+$rcBatchRationalMetadata = True;
 
 (* ::Package:: *)
 
@@ -246,21 +250,23 @@ rcPowerRules[variables_List, head_String] := Flatten[Map[Function[s, {
 
 $rcMasterMaximumTerms = 1000;
 $rcMasterMaximumDegree = 24;
-rcMasterPlan[entries_List, spectators_List: {}] := Module[{roles, variables, pairs, names, powers, inspect, polNames, polPlan,
+rcMasterPlan[entries_List, spectators_List: {}] := Module[{roles, variables, pairs, names, powers, inspect, polNames, polPlan, batchMetadata,
     limits = coefficientLimits["Master"], couplingLimits = coefficientLimits["CouplingGroup"]},
     If[limits["Terms"] <= 0, Return[<||>]];
     roles = coefficientRoles[entries, "cfcMRX"];
     pairs = roles["Pairs"]; names = roles["PairNames"];
     polNames = roles["PolarisationNames"]; variables = roles["Variables"];
     polPlan = rcPolarisationPlan[pairs, names, polNames, variables, spectators];
+    batchMetadata = polPlan =!= <||> && TrueQ[$pgBatchMetadata] && TrueQ[$rcBatchRationalMetadata];
     powers = StringRiffle[rcPowerRules[Append[variables,"cfcMRImag"],"cfcMRat"],"\n"];
     inspect = StringJoin[Map[Function[s,
         "id " <> s <> "^cfcRPower?pos_=" <> s <> "*cfcMRDegree^cfcRPower;\n" <>
         "id " <> s <> "^cfcRPower?neg_=" <> s <> "*cfcMRDegree^(-cfcRPower);\n"], variables]];
     <|"Declarations" -> "\nSymbols cfcRPower,cfcMRIndex,cfcMRN,cfcMRD,cfcMRDegree,cfcMRImag" <>
             If[names === {},"",","<>StringRiffle[names,","]] <> ";\nCFunctions cfcMRat,cfcMRDenProbe,cfcCGPart;\nTable sparse cfcCGExpanded(1);\nTable sparse cfcCGExpandedReady(1);\nTable sparse cfcMRMeta(1);\n" <> Lookup[polPlan, "Declarations", ""],
-      "Polarisation" -> polPlan, "RegisterDependencies" -> (spectators =!= {}),
-      "Procedure" -> StringReplace[rcTemplate["MasterRationalCoefficients.frm.in"], {
+      "Polarisation" -> polPlan, "BatchMetadata" -> batchMetadata, "RegisterDependencies" -> (spectators =!= {}),
+      "Procedure" -> StringReplace[rcTemplate["MasterRationalCoefficients.frm.in"] <>
+        If[batchMetadata, rcTemplate["RationalMetadataBatch.frm.in"], ""], {
         "@LIMIT@" -> intString[limits["Terms"]], "@DEGREE@" -> intString[limits["Degree"]],
         "@CG_TERMS@" -> intString[couplingLimits["Terms"]], "@CG_DEGREE@" -> intString[couplingLimits["Degree"]],
         "@VARIABLE_LIMIT@" -> intString[limits["Variables"]], "@VARIABLES@" -> StringRiffle[variables,","],
@@ -293,6 +299,7 @@ rcPolarisationPlan[pairs_List, names_List, polNames_List, variables_List, specta
     plain = Complement[variables, structures];
     substitutions = {
         "@POL@" -> StringRiffle[structures, ","],
+        "@REGISTRATION_METADATA@" -> If[TrueQ[$pgBatchMetadata] && TrueQ[$pgRegistrationMetadata], "1", "0"],
         "@STRUCTURE_INSPECT@" -> StringJoin[("id "<>#<>"^cfcRPower?neg_="<>If[MemberQ[spectators,#],"cfcPGHas","cfcPGBad"]<>";\nid "<>#<>"^cfcRPower?pos_=cfcPGHas;\n")& /@ structures],
         "@STRUCTURES@" -> intString[limits["Structures"]],
         "@WORK_LIMIT@" -> intString[limits["RationalPasses"]],

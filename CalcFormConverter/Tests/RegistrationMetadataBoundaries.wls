@@ -1,0 +1,33 @@
+Get[FileNameJoin[{DirectoryName[$InputFileName],"Common.wl"}]];
+r=testDirectory;diag=OpenWrite[FileNameJoin[{r,"diagnostics.log"}]];$Messages={diag};
+fail[x_]:=(Print["STOP ",InputForm[x]];Quit[1]);
+assert[label_,v_]:=(checks++;If[!TrueQ[v],fail[label]]);
+ledgers={};
+Do[
+ path=FileNameJoin[{r,If[enabled,"batch","reference"]<>".frm"}];
+ job=Block[{CalcFormConverter`Private`$pgRegistrationMetadata=enabled},CalcFormExport[A0[m^2](x+y+z+u+v+w)^2/(1+x),path]];
+ assert["export",AssociationQ[job]];
+ program=Import[path,"Text"];cut="* Collect complete denominator products while retaining shared numerators.";
+ assert["unique cut",StringCount[program,cut]===1];
+ program=First[StringSplit[program,cut]]<>Import[FileNameJoin[{DirectoryName[$InputFileName],"RegistrationMetadataBoundaries.frm"}],"Text"];
+ program=StringReplace[program,{"#procedure cfcPGFlushMeasures(count)\n"->"#procedure cfcPGFlushMeasures(count)\n#$cfcLateFlushes=$cfcLateFlushes+1;\n#write \"LATEWINDOW `count'\"\n"}];
+ program="#$cfcLateFlushes=0;\n"<>program;
+ Export[path,program,"Text"];run=RunProcess[{"/usr/local/bin/form","-q",path}];
+ Export[path<>".stdout",run["StandardOutput"],"Text"];Export[path<>".stderr",run["StandardError"],"Text"];
+ assert["exit",run["ExitCode"]===0&&run["StandardError"]===""];
+ text=run["StandardOutput"];
+ assert["diagnostics",!StringContainsQ[ToLowerCase[text],{"fail","warning","error","illegal","fatal"}]];
+ assert["late scenarios",StringCount[text,RegularExpression["(?m)^LATECASE .* PASS$"]]===12];
+ assert["leaf scenarios",StringCount[text,RegularExpression["(?m)^LEAFCASE .* PASS$"]]===7];
+ (* Retain wrapped values through the next diagnostic header. *)
+ records=StringCases[text,RegularExpression["(?ms)^(?:LATE |LEAF ).*?(?=^LATE |^LEAF |^LATECASE |^LEAFCASE |^LATEFLUSHES |^LATEWINDOW |\\z)"]];
+ AppendTo[ledgers,records];
+ flushes=ToExpression[Last[StringCases[text,RegularExpression["LATEFLUSHES ([0-9]+)"]->"$1"]]];
+ assert["expected full windows",StringCount[text,"LATEWINDOW 32\n"]===If[enabled,8,0]];
+ assert["late batches exercised",If[enabled,flushes>=16,flushes===0]];
+,{enabled,{False,True}}];
+assert["all registration metadata",ledgers[[1]]===ledgers[[2]]];
+assert["metadata coverage",Length[ledgers[[1]]]===2(1+31+32+33+65)*7+7*6];
+Close[diag];assert["no messages",FileByteCount[FileNameJoin[{r,"diagnostics.log"}]]===0];
+Export[FileNameJoin[{r,"metadata.json"}],<|"Records"->Length[First[ledgers]],"Assertions"->checks|>,"RawJSON"];
+finish["Registration metadata boundaries"];

@@ -1,0 +1,138 @@
+* Inspect at most 32 immutable definitions against ALREADY registered children.
+* Pending results are bounded scratch slots, not published metadata or a cache.
+* A dependent/oversized/unavailable definition keeps the original scalar path.
+#procedure cfcMRInspectBatch(count)
+#define cfcRBActive "0"
+Skip;
+#do cfcRBSlot=1,`count'
+#$cfcRBReady`cfcRBSlot'=0;
+#ifndef `cfcCGComplete'
+#$cfcRBDependencies=cfcMBLinks(`cfcRBId`cfcRBSlot'');
+#if isnumerical($cfcRBDependencies) == 0
+#inside $cfcRBDependencies
+id cfcPGRef(cfcMRIndex?)=cfcPGTerms(cfcMRIndex);
+#endinside
+#endif
+#$cfcRBTerms=cfcMBTerms(`cfcRBId`cfcRBSlot'');
+#if (isnumerical($cfcRBDependencies)) && (isnumerical($cfcRBTerms))
+#if `$cfcRBTerms' <= @LIMIT@
+#$cfcRBReady`cfcRBSlot'=1;
+#redefine cfcRBActive "1"
+Local cfcRBEstimate`cfcRBSlot'=extrasymbol_(`cfcRBId`cfcRBSlot'');
+#endif
+#endif
+#endif
+#enddo
+#if `cfcRBActive' == 1
+.sort
+Skip;
+#do cfcRBSlot=1,`count'
+#if `$cfcRBReady`cfcRBSlot'' == 1
+NSkip cfcRBEstimate`cfcRBSlot';
+#endif
+#enddo
+DropCoefficient;
+@NATIVE_DEN_INSPECT@
+id i_=1;
+@DOTS@
+@INSPECT@
+id cfcShare(cfcMRIndex?)=cfcMRMeta(cfcMRIndex);
+id cfcPolyN(cfcMRIndex?)=cfcMRMeta(cfcMRIndex);
+id cfcPolyD(cfcMRIndex?)=cfcMRMeta(cfcMRIndex);
+.sort
+Skip;
+#do cfcRBSlot=1,`count'
+#if `$cfcRBReady`cfcRBSlot'' == 1
+NSkip cfcRBEstimate`cfcRBSlot';
+#$cfcRBMax`cfcRBSlot'=0;
+#$cfcRBVars`cfcRBSlot'=1;
+#$cfcRBCount`cfcRBSlot'=0;
+#do v={@VARIABLES@}
+#$cfcRBUsed`cfcRBSlot'`v'=0;
+#enddo
+#endif
+#enddo
+#do cfcRBSlot=1,`count'
+#if `$cfcRBReady`cfcRBSlot'' == 1
+if (expression(cfcRBEstimate`cfcRBSlot'));
+$cfcRBMax`cfcRBSlot'=max_($cfcRBMax`cfcRBSlot',count_(cfcMRDegree,1));
+#do v={@VARIABLES@}
+if (occurs(`v')); $cfcRBUsed`cfcRBSlot'`v'=1; endif;
+id `v'=1;
+#enddo
+id cfcMRDegree=1;
+endif;
+#endif
+#enddo
+ModuleOption noparallel;
+.sort
+#do cfcRBSlot=1,`count'
+#if `$cfcRBReady`cfcRBSlot'' == 1
+#do v={@VARIABLES@}
+#if `$cfcRBUsed`cfcRBSlot'`v'' != 0
+#$cfcRBCount`cfcRBSlot'=$cfcRBCount`cfcRBSlot'+1;
+#$cfcRBVars`cfcRBSlot'=$cfcRBVars`cfcRBSlot'*`v';
+#endif
+#enddo
+#$cfcRBCost`cfcRBSlot'=cfcRBEstimate`cfcRBSlot';
+#$cfcRBOK`cfcRBSlot'=0;
+#$cfcRBMeta`cfcRBSlot'=(@LIMIT@+1)*cfcMRDegree^(@DEGREE@+1);
+#if isnumerical($cfcRBCost`cfcRBSlot')
+#if (`$cfcRBCost`cfcRBSlot'' <= @LIMIT@) && (`$cfcRBMax`cfcRBSlot'' <= @DEGREE@) && (`$cfcRBCount`cfcRBSlot'' <= @VARIABLE_LIMIT@)
+#$cfcRBOK`cfcRBSlot'=1;
+#$cfcRBMeta`cfcRBSlot'=$cfcRBCost`cfcRBSlot'*cfcMRDegree^$cfcRBMax`cfcRBSlot'*$cfcRBVars`cfcRBSlot';
+#endif
+#endif
+Drop cfcRBEstimate`cfcRBSlot';
+#endif
+#enddo
+.sort
+#endif
+NSkip;
+.sort
+#undefine cfcRBActive
+#endprocedure
+
+* Install one result only when the original loop reaches that definition.
+* Complete-coupling inspection and every non-ready slot use the scalar code.
+#procedure cfcMRUseBatch(source,slot)
+#if `$cfcRBReady`slot'' == 1
+* The writer consumes only Meta; do not restore unrelated inspector scratch.
+#$cfcMRMeta=$cfcRBMeta`slot';
+#else
+#call cfcMRInspect(`source')
+#endif
+#endprocedure
+
+#procedure cfcMRWriteBatch(count)
+#call cfcMRInspectBatch(`count')
+#do cfcRBSlot=1,`count'
+#call cfcWriteSharedDefinition(cfcRef(`cfcRBId`cfcRBSlot''),`cfcRBSlot')
+#enddo
+* #define pushes a macro instance. Remove each window's IDs instead of
+* accumulating thousands of shadowed names and slowing later lookups.
+#do cfcRBSlot=1,`count'
+#undefine cfcRBId`cfcRBSlot'
+#enddo
+#endprocedure
+
+* Batching changes scheduling of independent inspections, never dictionary order.
+#procedure cfcMRWriteBatches(refs)
+#define cfcRBSize "0"
+#do cfcRBKey=`refs'
+#$cfcRBIndex=`cfcRBKey';
+#inside $cfcRBIndex
+id cfcRef(cfcMRIndex?)=cfcMRIndex;
+#endinside
+#redefine cfcRBSize "{`cfcRBSize'+1}"
+#define cfcRBId`cfcRBSize' "`$cfcRBIndex'"
+#if `cfcRBSize' == 32
+#call cfcMRWriteBatch(`cfcRBSize')
+#redefine cfcRBSize "0"
+#endif
+#enddo
+#if `cfcRBSize' > 0
+#call cfcMRWriteBatch(`cfcRBSize')
+#endif
+#undefine cfcRBSize
+#endprocedure

@@ -161,12 +161,15 @@ ldgCommonFactors[first_String, second_String, indices_List: {}] := Module[{guard
         "Argument ", first, ",", second, ";\nFromPolynomial;\nEndArgument;\n", end, restore]
 ];
 
-ldgSharedOutput[plan_Association,path_String] := Module[{den=plan["Denominators"], substitutions, preparation, rational, polarisation},
+ldgSharedOutput[plan_Association,path_String] := Module[{den=plan["Denominators"], substitutions, preparation, rational, polarisation, batchMetadata},
     preparation=plan["MonomialRules"]<>".sort\n"<>
         If[plan["Dimension"]===<||>,"","PolyRatFun cfcDimRat;\n"<>plan["Dimension"]["Rules"]<>"\n.sort\nPolyRatFun;\n"];
     rational = Lookup[plan, "Rational", <||>];
     polarisation = Lookup[rational, "Polarisation", <||>];
+    batchMetadata = TrueQ[Lookup[rational, "BatchMetadata", False]];
     substitutions={"@RESULT@"->path,
+        "@INITIAL_SHARED_OUTPUT@" -> If[batchMetadata, "#call cfcMRWriteBatches(cfcRefs)\n",
+            "#do key=cfcRefs\n#call cfcWriteSharedDefinition(`key',0)\n#enddo\n"],
         "@BATCH_METADATA@" -> If[polarisation === <||> || !TrueQ[$pgBatchMetadata], "", "#call cfcPGBatchMeasures(cfcRefs)\n"],
         "@REGISTER_FINAL_SHARES@" -> If[polarisation === <||>, "", "#call cfcPGRegisterResult(piece)\n"],
         "@PENDING_DEPENDENCIES@" -> If[polarisation === <||>, "", "id cfcRef(cfcDGNum?)=cfcPGReach(cfcDGNum);\nid cfcPGRef(cfcDGNum?)=cfcRef(cfcDGNum);\n.sort\nDropCoefficient;\n"],
@@ -175,7 +178,7 @@ ldgSharedOutput[plan_Association,path_String] := Module[{den=plan["Denominators"
            spectator couplings. Include their reachable children before filling metadata. *)
         "@REGISTER_DEPENDENCIES@" -> If[TrueQ[Lookup[rational,"RegisterDependencies",False]] ||
             TrueQ[Lookup[plan,"InputPolynomialSharing",False]], "1", "0"],
-        "@RATIONAL_METADATA@" -> If[Lookup[plan,"Rational",<||>]===<||>,"","#call cfcMRInspect(def)\nFill cfcMRMeta(`$index')=`$cfcMRMeta';\n" <> If[polarisation === <||>, "", "#call cfcPGRegister(def,`$index')\n"]],
+        "@RATIONAL_METADATA@" -> If[Lookup[plan,"Rational",<||>]===<||>,"",If[batchMetadata, "#call cfcMRUseBatch(def,`slot')\n", "#call cfcMRInspect(def)\n"] <> "Fill cfcMRMeta(`$index')=`$cfcMRMeta';\n" <> If[polarisation === <||>, "", "#call cfcPGRegister(def,`$index')\n"]],
         "@RATIONAL_FINAL@" -> If[Lookup[plan,"Rational",<||>]===<||>,"",If[polarisation === <||>, "#call cfcMRFinal(piece)\n", "#call cfcPGFinal(piece)\n"]],"@NORMALISE@"->den["Rules"],
         "@WEIGHT_PREPARATION@"->preparation,
         "@PROPAGATORS@"->StringRiffle[den["Denominators"],","],

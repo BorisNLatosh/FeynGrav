@@ -150,6 +150,8 @@ Fill cfcMBLinks(`cfcMBId`cfcMBSlot'')=`$cfcMBLinkValue';
 #enddo
 #do cfcMBSlot=1,`count'
 Drop cfcMBLink`cfcMBSlot';
+* Release this window's IDs before the same slot names are reused.
+#undefine cfcMBId`cfcMBSlot'
 #enddo
 .sort
 #endprocedure
@@ -162,7 +164,12 @@ Skip;
 #$cfcMBIndex=`cfcMBKey';
 #inside $cfcMBIndex
 id cfcRef(cfcPGIndex?)=cfcPGIndex;
+id cfcShare(cfcPGIndex?)=cfcPGIndex;
+id cfcPGRef(cfcPGIndex?)=cfcPGIndex;
 #endinside
+* Definitions are immutable; already measured ids need no second materialisation.
+#$cfcMBKnown=cfcMBTerms(`$cfcMBIndex');
+#if isnumerical($cfcMBKnown) == 0
 #redefine cfcMBCount "{`cfcMBCount'+1}"
 #define cfcMBId`cfcMBCount' "`$cfcMBIndex'"
 Local cfcMBDef`cfcMBCount'=extrasymbol_(`$cfcMBIndex');
@@ -171,10 +178,12 @@ Local cfcMBDef`cfcMBCount'=extrasymbol_(`$cfcMBIndex');
 #redefine cfcMBCount "0"
 Skip;
 #endif
+#endif
 #enddo
 #if `cfcMBCount' > 0
 #call cfcPGFlushMeasures(`cfcMBCount')
 #endif
+#undefine cfcMBCount
 NSkip;
 .sort
 #endprocedure
@@ -182,10 +191,21 @@ NSkip;
 * Keep dependency resolution sequential. These tables deliberately do not
 * populate cfcPGTerms: that table marks COMPLETE registration, not batching.
 #procedure cfcPGRegisteredMeasure(source,index)
+#$cfcPGLeaf=0;
 #$cfcMBKnown=cfcMBTerms(`index');
 #if isnumerical($cfcMBKnown)
 #$cfcPGOwnTerms=cfcMBTerms(`index');
 #$cfcPGOwnAtoms=cfcMBAtoms(`index');
+* A zero direct-reference set needs no transitive closure or sorting modules.
+#if @REGISTRATION_METADATA@ == 1
+#$cfcMBLeafLinks=cfcMBLinks(`index');
+#if isnumerical($cfcMBLeafLinks)
+#if `$cfcMBLeafLinks' == 0
+#$cfcPGLeaf=1;
+#endif
+#endif
+#endif
+#if `$cfcPGLeaf' == 0
 Skip;
 Local cfcPGLinks=cfcMBLinks(`index');
 id cfcPGRef(cfcPGIndex?)=cfcPGReach(cfcPGIndex);
@@ -196,8 +216,26 @@ DropCoefficient;
 .sort
 NSkip;
 .sort
+#endif
 #else
 #call cfcPGMeasure(`source')
+#endif
+#endprocedure
+
+* Publish in the original registration order. A leaf's reachable set is itself.
+#procedure cfcPGPublishMeasure(index)
+Fill cfcPGTerms(`index')=`$cfcPGOwnTerms';
+Fill cfcPGAtoms(`index')=`$cfcPGOwnAtoms';
+#if `$cfcPGLeaf' == 1
+Fill cfcPGReach(`index')=cfcPGRef(`index');
+#else
+Skip;
+Local cfcPGClosure=cfcPGTag(`index')*(cfcPGLinks+cfcPGRef(`index'));
+Bracket cfcPGTag;
+.sort
+FillExpression cfcPGReach=cfcPGClosure(cfcPGTag);
+Drop cfcPGClosure,cfcPGLinks;
+.sort
 #endif
 #endprocedure
 
@@ -207,15 +245,7 @@ NSkip;
 #$cfcPGRegistered=cfcPGTerms(`index');
 #if isnumerical($cfcPGRegistered) == 0
 #call cfcPGRegisteredMeasure(`source',`index')
-Fill cfcPGTerms(`index')=`$cfcPGOwnTerms';
-Fill cfcPGAtoms(`index')=`$cfcPGOwnAtoms';
-Skip;
-Local cfcPGClosure=cfcPGTag(`index')*(cfcPGLinks+cfcPGRef(`index'));
-Bracket cfcPGTag;
-.sort
-FillExpression cfcPGReach=cfcPGClosure(cfcPGTag);
-Drop cfcPGClosure,cfcPGLinks;
-.sort
+#call cfcPGPublishMeasure(`index')
 #call cfcPGInspect(`source')
 #if (`$cfcPGOK' == 1) && (`$cfcPGDependent' == 0)
 #if `$cfcPGFractional' == 0
@@ -284,6 +314,9 @@ id cfcPGInverse(cfcPGIndex?,?a)=cfcShare(cfcPGIndex);
 DropCoefficient;
 .sort
 Hide cfcPGScalarRefs;
+#if @REGISTRATION_METADATA@ == 1
+#call cfcPGBatchMeasures(cfcPGScalarRefs)
+#endif
 #do pgScalar=cfcPGScalarRefs
 Skip;
 Local cfcPGScalarDef=`pgScalar';
@@ -294,16 +327,8 @@ ModuleOption noparallel;
 #if isnumerical($cfcPGScalarKnown) == 0
 #call cfcMRInspect(cfcPGScalarDef)
 Fill cfcMRMeta(`$cfcPGScalarIndex')=`$cfcMRMeta';
-#call cfcPGMeasure(cfcPGScalarDef)
-Fill cfcPGTerms(`$cfcPGScalarIndex')=`$cfcPGOwnTerms';
-Fill cfcPGAtoms(`$cfcPGScalarIndex')=`$cfcPGOwnAtoms';
-Skip;
-Local cfcPGScalarClosure=cfcPGTag(`$cfcPGScalarIndex')*(cfcPGLinks+cfcPGRef(`$cfcPGScalarIndex'));
-Bracket cfcPGTag;
-.sort
-FillExpression cfcPGReach=cfcPGScalarClosure(cfcPGTag);
-Drop cfcPGScalarClosure,cfcPGLinks;
-.sort
+#call cfcPGRegisteredMeasure(cfcPGScalarDef,`$cfcPGScalarIndex')
+#call cfcPGPublishMeasure(`$cfcPGScalarIndex')
 #call cfcPGInspect(cfcPGScalarDef)
 #if (`$cfcPGOK' == 1) && (`$cfcPGFractional' == 0) && (`$cfcPGDependent' == 0)
 Fill cfcPGSize(`$cfcPGScalarIndex')=1;
@@ -376,6 +401,9 @@ id cfcPGInverse(cfcPGIndex?,?a)=cfcPGRef(cfcPGIndex);
 DropCoefficient;
 .sort
 Hide cfcPGNewRefs;
+#if @REGISTRATION_METADATA@ == 1
+#call cfcPGBatchMeasures(cfcPGNewRefs)
+#endif
 #do pgRef=cfcPGNewRefs
 Skip;
 Local cfcPGNewDef=`pgRef';

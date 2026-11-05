@@ -6,6 +6,24 @@ Argument cfcLRNum,cfcLRDen;
 id cfcShare(cfcDGNum?)=cfcShare(cfcKnown(cfcDGNum));
 EndArgument;
 #endprocedure
+#procedure cfcWriteSharedDefinition(key,slot)
+Local def=`key';
+id cfcRef(cfcDGNum?$index)=extrasymbol_(cfcDGNum);
+ModuleOption noparallel;
+.sort
+@RATIONAL_METADATA@
+id cfcPolyN(cfcDGNum?)=cfcLRNum(extrasymbol_(cfcDGNum));
+id cfcPolyD(cfcDGNum?)=cfcLRDen(extrasymbol_(cfcDGNum));
+ModuleOption noparallel;
+.sort
+#call cfcOutputReferences
+.sort
+#$cfcWrittenShares=$cfcWrittenShares+1;
+#write <@RESULT@> "cfcShare(`$cfcWrittenShares')=%E;",def
+Fill cfcKnown(`$index')=`$cfcWrittenShares';
+Drop def;
+.sort
+#endprocedure
 #$cfcWrittenShares=0;
 @RATIONAL_PROCEDURE@
 * Collect complete denominator products while retaining shared numerators.
@@ -146,24 +164,7 @@ Hide cfcRefs;
 @BATCH_METADATA@
 #$cnt=termsin_(cfcRefs);
 #write <@RESULT@> "CFC_SHARED %$",$cnt
-#do key=cfcRefs
-Local def=`key';
-id cfcRef(cfcDGNum?$index)=extrasymbol_(cfcDGNum);
-ModuleOption noparallel;
-.sort
-@RATIONAL_METADATA@
-id cfcPolyN(cfcDGNum?)=cfcLRNum(extrasymbol_(cfcDGNum));
-id cfcPolyD(cfcDGNum?)=cfcLRDen(extrasymbol_(cfcDGNum));
-ModuleOption noparallel;
-.sort
-#call cfcOutputReferences
-.sort
-#$cfcWrittenShares=$cfcWrittenShares+1;
-#write <@RESULT@> "cfcShare(`$cfcWrittenShares')=%E;",def
-Fill cfcKnown(`$index')=`$cfcWrittenShares';
-Drop def;
-.sort
-#enddo
+@INITIAL_SHARED_OUTPUT@
 #write <@RESULT@> "CFC_GROUP_BODY"
 #do key=cfcLRFinalKeys
 Local kval=`key';

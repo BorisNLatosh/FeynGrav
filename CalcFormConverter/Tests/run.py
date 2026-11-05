@@ -194,6 +194,9 @@ def main():
                 run_kernel('ScalarCoefficientGroups')
                 run_kernel('SharedDependencyRegistration')
                 run_kernel('SharedMetadataBatching')
+                run_kernel('RationalMetadataBatching')
+                run_kernel('RegistrationMetadata')
+                run_kernel('RegistrationMetadataBoundaries')
                 run_kernel('PolarisationCoefficients')
                 run_kernel('PolarisationWorkBudget')
                 continue

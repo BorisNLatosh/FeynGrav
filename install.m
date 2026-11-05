@@ -234,6 +234,7 @@ runtimeDependencies = {
     {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/CoefficientWorkLimits.frm.in"},
     {"CalcFormConverter/LoopCoefficientReduction.wl", "CalcFormConverter/Templates/CoefficientCollection.frm.in"},
     { "CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/MasterRationalCoefficients.frm.in"},
+    {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/RationalMetadataBatch.frm.in"},
     {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/PolarisationCoefficients.frm.in"},
     {"CalcFormConverter/RationalCoefficients.wl", "CalcFormConverter/Templates/RationalCoefficientOutput.frm.in"},
     {"CalcFormConverter/DimensionCoefficients.wl", "CalcFormConverter/Templates/DimensionCoefficients.frm.in"},
