@@ -4,7 +4,7 @@
 
 **Symbol:** ``FeynGrav`FeynArtsIntegration`FeynGravCalculateAmplitude``. **Baseline:** 4.2.0 development.
 
-Optional pure-GR companion interface. It is narrower than ordinary native FeynArts use with the five supplied models.
+Optional pure-GR companion interface. It is narrower than ordinary native FeynArts use with the supplied models.
 
 ## Syntax and arguments
 

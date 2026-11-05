@@ -1,0 +1,20 @@
+(* Internal-line compatibility fixture. V fields are index probes. *)
+KinematicIndices[T]={Lorentz,Lorentz}; KinematicIndices[V]={Lorentz};
+Attributes[FAMetricTensor]={Orderless};
+$FermionLines=False; P$NonCommuting=Alternatives[]; P$ChainBuildOrder={};
+M$GenericPropagators=With[{
+ w=Function[{a,b},FAFourVector[mom,a] FAFourVector[mom,b] FAPropagatorDenominator[mom,0]],
+ t=Function[{a,b},FAMetricTensor[a,b]-FAFourVector[mom,a] FAFourVector[mom,b] FAPropagatorDenominator[mom,0]],
+ z=FAPropagatorDenominator[mom,0], v=FAPropagatorDenominator[mom,Global`qgM2],
+ s=FAPropagatorDenominator[mom,Sqrt[3(D-2)Global`qgM0^2 Global`qgM2^2/((D-4)Global`qgM0^2+2(D-1)Global`qgM2^2)]]},
+ {AnalyticalPropagator[External][s1 T[j1,mom,{li1,li2}]]==1,
+ AnalyticalPropagator[Internal][s1 T[j1,mom,{li1,li2}->{li3,li4}]]==I(
+ (z-v)((t[li1,li3]t[li2,li4]+t[li1,li4]t[li2,li3])/2-t[li1,li2]t[li3,li4]/(D-1))
+ +z Global`qgEpsilon (t[li1,li3]w[li2,li4]+t[li1,li4]w[li2,li3]+t[li2,li3]w[li1,li4]+t[li2,li4]w[li1,li3])/4
+ +(s-z)/(D-2) (t[li1,li2]+(D-1)w[li1,li2])(t[li3,li4]+(D-1)w[li3,li4])/(D-1)
+ +z Global`qgEpsilon w[li1,li2]w[li3,li4]),
+ AnalyticalPropagator[External][s1 V[j1,mom,{li1}]]==FAPolarizationVector[V[j1],mom,li1],
+ AnalyticalPropagator[Internal][s1 V[j1,mom,{li1}->{li2}]]==-I FAMetricTensor[li1,li2] FAPropagatorDenominator[mom,0]}];
+M$GenericCouplings={AnalyticalCoupling[s1 T[j1,mom1,{li1,li2}],s2 V[j2,mom2,{li3}],s3 V[j3,mom3,{li4}]]==G[1][s1 T[j1],s2 V[j2],s3 V[j3]].{(FAMetricTensor[li1,li3]FAMetricTensor[li2,li4]+FAMetricTensor[li1,li4]FAMetricTensor[li2,li3])/2}};
+M$GenericCouplings=CloseKinematicVector/@M$GenericCouplings;
+M$TruncationRules={_FAPolarizationVector->1}; M$LastGenericRules={};

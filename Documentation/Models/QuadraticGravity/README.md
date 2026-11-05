@@ -24,7 +24,7 @@ $$
 
 The conventional propagator uses `GaugeFixingEpsilon`, initially 2. The higher-derivative propagator uses `GaugeFixingEpsilonHD`, `GaugeFixingEpsilonHD0` and `GaugeFixingEpsilonHD1`, initially unassigned. The HD ghost propagator and cubic ghost vertex use the last two. These direct definitions read current settings; parameter and projector denominators require nonsingular limits.
 
-For an r-graviton stored self-interaction use `FeynGravImportQuadraticGravity[r-2]`. These libraries are optional and not loaded initially. The cubic HD ghost command is a fixed interface, not a generator of arbitrary ghost contacts. There is no supplied quadratic-gravity native FeynArts bundle.
+For an r-graviton stored self-interaction use `FeynGravImportQuadraticGravity[r-2]`. These libraries are optional and not loaded initially. The cubic HD ghost command is a fixed interface, not a generator of arbitrary ghost contacts. The [native QuadraticGravity model](./NativeModel.md) supplies the conventional-gauge propagator, graviton vertices and Faddeev–Popov sector.
 
 ## Commands
 

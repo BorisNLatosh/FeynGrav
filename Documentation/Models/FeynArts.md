@@ -11,7 +11,8 @@ FeynArts/Models/
 ├── Single-Scalar-Tensor-Minimal-Coupling/
 ├── John/
 ├── Einstein-scalar-Gauss-Bonnet/
-└── GR-SU-N-Yang-Mills/
+├── GR-SU-N-Yang-Mills/
+└── QuadraticGravity/
 ```
 
 Each model directory contains `<Model>.gen`, `<Model>.mod`, `manifest.json` and `README.md`.
@@ -23,6 +24,7 @@ Each model directory contains `<Model>.gen`, `<Model>.mod`, `manifest.json` and 
 | `John` | Massive scalar with the John derivative interaction | [John](./Horndeski/John/NativeModel.md) |
 | `Einstein-scalar-Gauss-Bonnet` | Massive scalar with independent linear and quadratic scalar–Gauss–Bonnet couplings | [Einstein-scalar-Gauss-Bonnet](./ScalarGaussBonnet/NativeModel.md) |
 | `GR-SU-N-Yang-Mills` | SU(N) gauge field, one massive Dirac quark flavour and both ghost species; includes five/six-leg mixed contacts | [GR-SU-N-Yang-Mills](./YangMills/NativeModel.md) |
+| `QuadraticGravity` | Full quadratic-gravity tensor propagator, cubic and quartic graviton contacts, conventional FP ghosts | [QuadraticGravity](./QuadraticGravity/NativeModel.md) |
 
 For every supplied model, `<Model>.gen` contains its kinematic structures and propagators; `<Model>.mod` contains fields and coupling coefficients; `manifest.json` records provenance and hashes; `README.md` documents use and verification limits. The directory name and the `.gen`/`.mod` basenames must agree.
 

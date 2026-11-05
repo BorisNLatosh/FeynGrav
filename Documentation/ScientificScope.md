@@ -116,8 +116,9 @@ of that interaction. The [axion page](./Models/AxionVector/README.md) states thi
 The [quadratic-gravity](./Models/QuadraticGravity/README.md),
 [vector](./Models/Vector/README.md) and higher-order matter interfaces describe
 the implemented rules. Structural validation and regression agreement do not
-establish every action or amplitude independently. No complete native
-quadratic-gravity model is supplied. The massive spin-2 command is a propagator
+establish every action or amplitude independently. The [native quadratic-gravity model](./Models/QuadraticGravity/NativeModel.md)
+reproduces the conventional-gauge propagator and verified off-shell cubic, quartic
+and ghost rules. The complete massless four-graviton tree passed all-leg Ward and Einstein-limit checks at two exact four-dimensional kinematic points. The massive spin-2 command is a propagator
 utility, not a complete interacting massive-gravity theory.
 
 <a name="Calculation and performance"></a>
@@ -143,7 +144,7 @@ your system; those measurements do not validate a physical model.
 
 ## Examples and saved outputs
 
-The [per-notebook status table](./Examples/README.md#Verification%20and%20saved-output%20status) separates syntax/interface auditing, selected model or diagram checks, complete recorded kernel evaluations and saved-output provenance. Examples 01–11 retain historical outputs that were not refreshed during the calculation-interface migration. Examples 12 and 13 have recorded full kernel evaluations and saved results, but these do not certify a rerun against later package changes.
+The [per-notebook status table](./Examples/README.md#Verification%20and%20saved-output%20status) separates syntax/interface auditing, selected model or diagram checks, complete recorded kernel evaluations and saved-output provenance. Examples 01–11 retain historical outputs that were not refreshed during the calculation-interface migration. Examples 12 and 13 have recorded full kernel evaluations and saved results, but these do not certify a rerun against later package changes. Example 14 checks the three GR helicity expressions of example 04 for the complete massless quadratic-gravity tree. These symbolic checks passed after applying the physical scalar products during each FORM contraction. The separate [model-level Ward and GR checks](./Models/QuadraticGravity/NativeModel.md#Einstein%20limit%20and%20complete%20tree%20checks) cover the kinematic points specified there.
 
 In particular, example 08 requires downstream recomputation with its corrected identical-graviton bubble weight. Examples 07, 09 and 11 retain outputs predating their input repairs. Restart the kernel and rerun affected calculations rather than treating a saved display or a model-level check as a fresh notebook result. The [benchmark guide](./Benchmarks/README.md#Verification%20and%20saved-output%20status) separately describes its notebooks’ saved timing output and run-specific validation.
 

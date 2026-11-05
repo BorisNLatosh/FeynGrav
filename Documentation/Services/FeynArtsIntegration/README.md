@@ -4,7 +4,7 @@
 
 [Documentation index](../../README.md) · [Complete symbol index](../../Symbols.md)
 
-This optional companion is restricted to the documented pure-GR processes. Ordinary use of the five supplied native models is a separate workflow. The corrected GR snapshot supports the stated trees; its loop construction gate remains closed. Start with the [bridge guide](./Guide.md).
+This optional companion is restricted to the documented pure-GR processes. Ordinary use of the supplied native models is a separate workflow. The corrected GR snapshot supports the stated trees; its loop construction gate remains closed. Start with the [bridge guide](./Guide.md).
 
 ## Individual pages
 

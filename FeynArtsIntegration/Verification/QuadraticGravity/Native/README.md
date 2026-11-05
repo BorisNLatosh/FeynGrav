@@ -1,0 +1,7 @@
+# Native quadratic-gravity checks
+
+Use fresh, bounded kernels and the FeynCalc-patched FeynArts installation. Set `QG_RULE_ROOT` to the checkout and `QG_MODEL_DIR` to its `FeynArts/Models/QuadraticGravity` directory.
+
+For each valence, create a fresh `QG_OUTPUT` directory. Run `ExpectedNative.py PACKAGE_ROOT N QG_OUTPUT/expected.wl` with Python 3 for N = 3 or 4. Set `QG_SUITE` to `Cubic` or `Quartic`, respectively, and `QG_CONVERT=yes`. Run `NativeChecks.wls` in a fresh Wolfram kernel. It constructs one amputated contact with independent incoming momenta, compares the native and converted expressions against every free-index monomial of the verified library, and checks the coupling power. `LineGhost.wls` takes a fresh `FA_QG_OUTPUT` directory and the same model and source paths. It checks the internal tensor and vector-ghost lines, action inverse, pole residues, and ordered converted ghost contact against the public rule.
+
+The symmetric graviton basis carries one component per coefficient sector. At generic initialisation those components are compact permutation-symmetric labels. For a concrete line momentum they evaluate to polynomials in native metrics, four-vectors and scalar products. The builder verifies Bose and index-pair symmetry before encoding them. It reuses the verified GR ghost basis with its class coefficients. Use `python3 FeynArtsIntegration/BuildQuadraticGravity.py PACKAGE_ROOT FRESH_DESTINATION` to reproduce the generic/classes files and manifest.

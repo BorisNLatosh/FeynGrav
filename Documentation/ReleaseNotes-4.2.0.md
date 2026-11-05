@@ -134,6 +134,10 @@ cell in 11 was evaluated, and recompute affected presentation/check cells. Examp
 recomputation with its corrected bubble weight. See the
 [examples guide](./Examples/README.md#Syntax%20and%20interface%20audit).
 
+## Native quadratic gravity
+
+The `QuadraticGravity` FeynArts model provides the full three-pole tensor propagator, cubic and quartic graviton vertices and conventional vector ghosts. The generated local rules agree with the action-based FeynGrav comparisons at symbolic D and generic off-shell momenta. The complete massless four-graviton tree passes selected four-dimensional Ward and Einstein-limit checks. See the [native model guide](./Models/QuadraticGravity/NativeModel.md) for the mass conventions and checked scope.
+
 ## Native GR + SU(N) Yang–Mills
 
 The new `GR-SU-N-Yang-Mills` bundle contains all 21 interaction families through

@@ -5,7 +5,7 @@
 reduction to the published 4.1.0 baseline.
 
 Wolfram Language Feynman rules for gravity and matter, using FeynCalc notation,
-with FORM calculation support and five native FeynArts models.
+with FORM calculation support and six native FeynArts models.
 
 See the [4.2.0 draft release notes](Documentation/ReleaseNotes-4.2.0.md) for changes,
 compatibility and verification limits. The [4.1.0 release notes](Documentation/ReleaseNotes-4.1.0.md)
@@ -28,7 +28,7 @@ FeynCalc's requirements. FORM is optional for ordinary package loading. After
 installation, restart the kernel and load with `` << FeynGrav` ``.
 
 The native models cover GR, a massive scalar with cubic/quartic potential,
-John, Einstein–scalar–Gauss–Bonnet and GR + SU(N) Yang–Mills with one massive quark flavour through κ² per vertex. Selected tree
+John, Einstein–scalar–Gauss–Bonnet, quadratic gravity and GR + SU(N) Yang–Mills with one massive quark flavour through κ² per vertex. Selected tree
 checks are documented; loop validation remains deferred.
 
 Evaluate `FeynGravHowToCite[]` for citation guidance. See the

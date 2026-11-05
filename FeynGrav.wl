@@ -46,7 +46,8 @@ DisplayInitializationMessages[] := Module[{},
         "Scalar field with a potential minimally coupled to gravity",
         "Scalar field with a non-minimal kinetic coupling",
         "Einstein-scalar-Gauss-Bonnet model",
-        "SU(N) Yang-Mills field and one massive quark flavour coupled to gravity"
+        "SU(N) Yang-Mills field and one massive quark flavour coupled to gravity",
+        "Quadratic gravity in the conventional gauge"
     }];
     Print[Style["The supplied models retain interactions through order \!\(\*SuperscriptBox[\(\[Kappa]\), \(2\)]\) per vertex. Use matching Model and GenericModel names with FeynCalc-patched FeynArts in a fresh kernel. Models are not initialised automatically.", "Text"]];
     If[$FrontEnd === Null,

@@ -28,7 +28,7 @@ before comparing actions or combining sectors.
 | --- | --- | --- |
 | General relativity in conventional metric variables | [GR model page](./Models/GeneralRelativity/README.md): action, gauge fixing, ghosts, propagators, vertices and examples | `GR`: cubic/quartic graviton vertices and the cubic ghost coupling, through κ² per vertex. The separate stored five-graviton rule is [Scientific scope](./ScientificScope.md#General%20relativity), but is not included in the shipped native model. |
 | General relativity in Cheung–Remmen variables | [CR interface and scope](./Models/GeneralRelativity/README.md#Cheung%E2%80%93Remmen%20interface): graviton and auxiliary-field propagators, three cubic bosonic vertex commands | No CR bundle. This is a different parametrisation of GR, not an additional physical model; conventional-model verification does not validate it. |
-| Quadratic gravity | [Quadratic-gravity overview and commands](./Models/QuadraticGravity/README.md); conventional and higher-derivative gauge-fixing interfaces | No supplied bundle; native integration remains planned. Stored rules and generators have their own scope. |
+| Quadratic gravity | [Quadratic-gravity overview and commands](./Models/QuadraticGravity/README.md); conventional and higher-derivative gauge-fixing interfaces | [QuadraticGravity](./Models/QuadraticGravity/NativeModel.md), conventional gauge through κ² per vertex. |
 
 `GravitonPropagatorMassive` additionally supplies a massive spin-2 propagator.
 It is a [propagator utility](./Models/MassiveSpin2/README.md), not a complete
@@ -61,7 +61,7 @@ For direct rules, start with the model's commands and required
 An unmatched vertex call is not evidence that an interaction vanishes.
 
 For native diagrams, use the exact name from the
-[five supplied FeynArts bundles](./Models/FeynArts.md), in both
+[six supplied FeynArts bundles](./Models/FeynArts.md), in both
 `Model` and `GenericModel`, with a fresh kernel. The cutoff applies to each
 vertex; products of allowed vertices can have higher total powers of κ.
 Selected tree checks do not establish general native loop support.

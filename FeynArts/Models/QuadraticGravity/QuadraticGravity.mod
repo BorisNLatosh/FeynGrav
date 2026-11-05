@@ -1,0 +1,5 @@
+M$ClassesDescription={T[1]=={SelfConjugate->True,Mass->0,PropagatorLabel->"h",PropagatorType->Sine},U[1]=={SelfConjugate->False,Mass->0,PropagatorLabel->"c",PropagatorType->GhostDash,PropagatorArrow->Forward}};
+M$CouplingMatrices={C[T[1],T[1],T[1]]=={{I*FeynGrav`\[Kappa]^1},{I*FeynGrav`\[Kappa]^1/QuadraticGravityModel`M0^2},{I*FeynGrav`\[Kappa]^1/QuadraticGravityModel`M2^2}},
+C[T[1],T[1],T[1],T[1]]=={{I*FeynGrav`\[Kappa]^2},{I*FeynGrav`\[Kappa]^2/QuadraticGravityModel`M0^2},{I*FeynGrav`\[Kappa]^2/QuadraticGravityModel`M2^2}},
+C[T[1],-U[1],U[1]]=={{(-1/2*I)*FeynGrav`\[Kappa]}, {(-1/2*I)*FeynGrav`\[Kappa]}, {(I/2)*FeynGrav`\[Kappa]}, {(I/2)*FeynGrav`\[Kappa]}, {(I/2)*FeynGrav`\[Kappa]}, {(I/2)*FeynGrav`\[Kappa]}, {(-1/2*I)*FeynGrav`\[Kappa]}, {(I/2)*FeynGrav`\[Kappa]}, {(I/2)*FeynGrav`\[Kappa]}}};
+M$CouplingMatrices=CloseCouplingVector/@M$CouplingMatrices; M$LastModelRules={};

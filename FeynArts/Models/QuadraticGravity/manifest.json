@@ -1,0 +1,51 @@
+{
+  "Schema": 1,
+  "ModelName": "QuadraticGravity",
+  "Gauge": "linear de Donder; epsilon = 2 FAGaugeXi[T[1]]",
+  "FieldClasses": [
+    "T[1]",
+    "U[1]",
+    "-U[1]"
+  ],
+  "InteractionFamilies": [
+    "TTT",
+    "TTTT",
+    "TUU"
+  ],
+  "GravitonOrders": [
+    1,
+    2
+  ],
+  "LorentzDimension": "Symbolic D",
+  "Inventory": {
+    "3": {
+      "SourceTerms": 1818,
+      "SectorMonomials": [
+        231,
+        186,
+        1401
+      ]
+    },
+    "4": {
+      "SourceTerms": 60054,
+      "SectorMonomials": [
+        4158,
+        6411,
+        49485
+      ]
+    }
+  },
+  "SourceSHA256": {
+    "FeynArtsIntegration/Verification/QuadraticGravity/Fixtures/QGProbe.gen": "d66dcaa1953d030dd80d8d99337411f9dceaa89829a9d06187332e1f5440e499",
+    "FeynArts/Models/GR/GR.gen": "f5f86c7242ea1fcbcee7d8cb5a85a8cf7b386e24e7662783b684dcf11ceee76d",
+    "FeynArts/Models/GR/GR.mod": "536144daf0106bf49c9d7c56e6858a447ba68c8287edb704272836606e5828a0",
+    "FeynArtsIntegration/BuildQuadraticGravity.py": "ef12a231370735a5fb92c6623bb006dfc861fd1c258d7cf89ae2f232024d0b37",
+    "FeynArtsIntegration/Verification/QuadraticGravity/Interactions/check_vertices.py": "14d6be6b4672823a18d6175480ba77af8ad4f06aa6f75ebecfa7ce0296d95bc4",
+    "Libs/QuadraticGravityVertex_1": "a40b56b1fd07860553e0dd5a247cc3883eb06de79a3ef4c3d831721f107c74dd",
+    "Libs/QuadraticGravityVertex_2": "15d945fbf358bf7e4c68dd27926d0df88cd709d8c1822b21e3c243564922f100"
+  },
+  "ModelFileSHA256": {
+    "QuadraticGravity.gen": "4db8473b2b0129507c5f89110c3654da0330979078912f7da3dba4c57dd935b9",
+    "QuadraticGravity.mod": "3566a0fa0ecfcb3877ee660570da7f8c00476953d379e847ebef1d4f78dfcee0"
+  }
+}

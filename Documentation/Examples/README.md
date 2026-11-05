@@ -2,13 +2,13 @@
 
 Notebook names below are paths within the complete FeynGrav package, outside this Markdown vault. See [Opening notebooks](../PackageFiles.md#Open%20a%20notebook).
 
-Start with a fresh Mathematica kernel for each notebook and evaluate its input cells from top to bottom with **Shift+Enter**. Opening a notebook does not run calculations. The package and its dependencies must already be installed; see the [installation guide](../UserGuide.md#Installation%20and%20help).
+Start with a fresh Mathematica kernel and use **Shift+Enter** to evaluate input cells. Evaluate the sections of each example in order. Opening a notebook does not run calculations. The package and its dependencies must already be installed; see the [installation guide](../UserGuide.md#Installation%20and%20help).
 
 These examples target the [unreleased FeynGrav 4.2.0](../ReleaseNotes-4.2.0.md) and use `FeynGravSimplify`, whose default `Method -> Automatic` selects the full FORM pipeline. The command is not available in published FeynGrav 4.1.0.
 
 ## Numbered examples and suggested reading order
 
-The numbers define the suggested reading order, from operator algebra and tree-level scattering to loop calculations. All notebooks require FeynGrav and FeynCalc. Examples 01–08 and 13 also use FORM; TFORM is optional. Examples 09–12 evaluate their tree tensors directly with FeynCalc. Additional tools are listed below; see [optional dependency setup and checks](../OptionalDependencies.md) before running a notebook that needs them.
+The numbers define the suggested reading order, from operator algebra and tree-level scattering to loop calculations. All notebooks require FeynGrav and FeynCalc. Examples 01–08, 13 and 14 also use FORM. TFORM is optional. Examples 09–12 evaluate their tree tensors directly with FeynCalc. Additional tools are listed below; see [optional dependency setup and checks](../OptionalDependencies.md) before running a notebook that needs them.
 
 | No. | Notebook | What you learn | Additional requirements |
 | --- | --- | --- | --- |
@@ -25,6 +25,7 @@ The numbers define the suggested reading order, from operator algebra and tree-l
 | 11 | `Examples/11. Scalar_Annihilation_EsGB_Tree_Level_FeynArts.nb` | Six scalar–scalar to graviton–graviton diagrams and on-shell polarisation-dependent amplitude; helicity amplitude and two generic graviton Ward checks using the corrected model | FeynCalc-patched FeynArts |
 | 12 | `Examples/12. Yang_Mills_Graviton_Emission_Tree_Level_FeynArts.nb` | SU(N) gauge-field scattering with graviton emission, four diagrams, symbolic-D on-shell amplitude, gauge/graviton Ward checks and a four-dimensional helicity expression | FeynCalc-patched FeynArts |
 | 13 | `Examples/13. Quark_Graviton_Emission_Tree_Level_FeynArts.nb` | Massive quark annihilation into a gluon and graviton, FORM Dirac algebra and both Ward identities | FeynCalc-patched FeynArts and FORM |
+| 14 | `Examples/14. Graviton_Scattering_Quadratic_Gravity_FeynArts.nb` | Four-graviton scattering in quadratic gravity, with the on-shell helicity amplitudes compared to example 04 | FeynCalc-patched FeynArts |
 
 Example 09 can be read immediately after example 04: it gives the scalar counterpart of the native FeynArts workflow, with incoming momenta `p1`, `p2` and outgoing momenta `p3`, `p4`. It displays the contact, scalar-exchange and graviton-exchange contributions to `M` after removing the overall `I` from the diagram result.
 
@@ -38,7 +39,7 @@ The two larger matter notebooks contain separate field sectors. Example 06 begin
 
 The table distinguishes recorded checks from the results currently saved in each file. A syntax/interface audit checks whether input can be parsed and uses the intended interfaces; it does **not** evaluate the complete notebook. A model or diagram check validates only the stated calculation. A recorded full kernel evaluation is not a fresh run against every subsequent package change or a Mathematica front-end certification.
 
-All thirteen example notebooks currently contain saved output. Examples 01–11 retained their outputs when their calculation calls were migrated to `FeynGravSimplify`; those outputs were not refreshed by that migration. For a result obtained with your installed package, start a fresh kernel and evaluate the required calculation and all its dependencies.
+All fourteen example notebooks currently contain saved output. Examples 01–11 retained their outputs when their calculation calls were migrated to `FeynGravSimplify`; those outputs were not refreshed by that migration. For a result obtained with your installed package, start a fresh kernel and evaluate the required calculation and all its dependencies.
 
 | Example | Recorded verification scope | Saved-output status and action |
 | --- | --- | --- |
@@ -55,6 +56,7 @@ All thirteen example notebooks currently contain saved output. Examples 01–11 
 | 11 — EsGB annihilation | Repaired setup relations checked; corrected-model graviton Ward tests checked separately. No complete reevaluation of the current notebook recorded by the syntax audit. | Historical output retained; rerun in a fresh kernel, especially if an old cell assigning to `Contract` was evaluated. |
 | 12 — Yang–Mills graviton emission | Complete kernel evaluation recorded, including gauge/graviton Ward tests and helicity comparisons. | Saved results retained from the checked workflow and subsequent front-end save; not a rerun against later package changes. |
 | 13 — Quark graviton emission | All fourteen input cells evaluated; both Ward tests and coupling-limit checks passed. | Computed results and diagram graphics saved with the checked notebook; not a rerun against later package changes or front-end certification. |
+| 14 — Quadratic gravity | The four diagram contractions and all three GR helicity comparisons passed in a fresh kernel with symbolic mass parameters. | Existing diagram graphics retained. The availability, diagram count and three helicity checks have saved Boolean outputs. |
 
 The loop limitations of example 08 remain in force even though its native diagram construction passes. See its detailed scope below and the [scientific limitations](../ScientificScope.md#Examples%20and%20saved%20outputs).
 
@@ -81,7 +83,7 @@ The updated loop examples extract the pure-gravity and massive-fermion coefficie
 
 All algebra previously performed through the legacy Calc chain now uses `FeynGravSimplify`. FeynCalc propagator shorthand is expanded with `Explicit`. In examples 01–11, fermion and colour expressions first use FeynCalc’s dedicated algebra functions (including `DiracOrder -> True` for open chains); `Collect` passes their bosonic coefficients to FORM. Examples 05–06 and 08 use explicit FeynCalc `TID` steps for their bubble/vertex reductions. The tadpole calls in 05–06 and the loop reductions in 07 instead declare `LoopMomenta -> {k}` to `FeynGravSimplify`; its enabled tensor decomposition then returns integral coefficients. Calls on those already-reduced coefficients leave `LoopMomenta` empty.
 
-This preprocessing describes the notebooks as currently written. It is not a requirement to remove all Dirac or colour structures before using the converter: supported chains, traces and colour tensors can now be processed directly. See the [converter vocabulary](../Services/Calculation/Guide.md#Supported%20vocabulary). For examples 01–11, the command migration preserved saved outputs without recalculating them with the new entry point; the table above gives each notebook’s status. Examples 12 and 13 have separately recorded kernel evaluations.
+This preprocessing describes the notebooks as currently written. It is not a requirement to remove all Dirac or colour structures before using the converter: supported chains, traces and colour tensors can now be processed directly. See the [converter vocabulary](../Services/Calculation/Guide.md#Supported%20vocabulary). For examples 01–11, the command migration preserved saved outputs without recalculating them with the new entry point; the table above gives each notebook’s status. Examples 12–14 have separately recorded kernel evaluations.
 
 ### Example 08: scope of the native one-loop construction
 
@@ -106,3 +108,7 @@ cells were evaluated; both Ward checks and the coupling limits return `True`.
 D/N/m remain symbolic. The notebook retains generated diagram graphics and
 outputs; kernel/box validation does not certify a Mathematica front-end session.
 These are recorded checks of the delivered notebook, not a fresh run against subsequent package changes. See [scientific scope](../ScientificScope.md#Yang%E2%80%93Mills%20and%20fermions).
+
+### Example 14: four gravitons in quadratic gravity
+
+Evaluate the five sections in order in a fresh kernel. Evaluate section 1 as a group, including its collapsed FORM helper subsection. All helper definitions are inside the notebook. FeynArts generates the contact and three exchanges with the routing of example 04. Section 4 sets the external massless momentum and polarisation products. Section 5 applies them inside each FORM contraction to reduce peak RAM before the result is imported. It prints the bytes written for each diagram. The final cells explain why the complete massless four-graviton tree equals GR at finite masses and link to the published calculation. They set $D=4$ and compare three helicity amplitudes with example 04, keeping both mass parameters symbolic. See the [quadratic-gravity model guide](../Models/QuadraticGravity/NativeModel.md) for the internal poles and the Einstein limit.

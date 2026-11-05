@@ -209,7 +209,7 @@ The [examples guide](./Examples/README.md) lists the numbered notebooks in their
 
 Examples 07, 09 and 11 have repaired input cells. Follow the [rerunning guidance](./Examples/README.md#Syntax%20and%20interface%20audit) and [saved-output limitations](./ScientificScope.md#Examples%20and%20saved%20outputs). Saved results do not establish a fresh complete loop calculation.
 
-Use the [complete notebook catalogue](./Examples/README.md) for all thirteen examples, including example 13 on massive quark graviton emission. That page maintains the reading order, dependency list and [per-notebook verification and saved-output status](./Examples/README.md#Verification%20and%20saved-output%20status).
+Use the [complete notebook catalogue](./Examples/README.md) for all fourteen examples, including massive quark graviton emission in example 13 and four-graviton scattering in quadratic gravity in example 14. That page maintains the reading order, dependency list and [per-notebook verification and saved-output status](./Examples/README.md#Verification%20and%20saved-output%20status).
 
 The selected scalar-model checks are described in [Scientific scope](./ScientificScope.md#Scalar%20models). For examples 12 and 13, see the [Yang–Mills and fermion scope](./ScientificScope.md#Yang%E2%80%93Mills%20and%20fermions). These model checks and saved notebook results have distinct verification limits.
 
@@ -232,7 +232,7 @@ The [Benchmark notebooks](./Benchmarks/README.md) measure export, FORM execution
 | `Rules` | Interaction-rule construction, structural validation and projector utilities. |
 | `Libs` | Precomputed vertex libraries and the [library generator](./Services/LibraryGeneration/Guide.md), which uses CalcFormConverter. |
 | `Examples` | Calculation notebooks. |
-| [FeynArts/Models](./Models/FeynArts.md) | Five native gravity, scalar and Yang–Mills model bundles and tree-use guides. |
+| [FeynArts/Models](./Models/FeynArts.md) | Six native gravity, scalar and Yang–Mills model bundles and tree-use guides. |
 | [Documentation](./README.md) | Model descriptions, command reference and usage guides. |
 | [Benchmark](./Benchmarks/README.md) | Reproducible converter and library-generation measurements. |
 | `CalcFormConverter` | Converter, FORM runtime, templates, documentation, examples, and tests. |
